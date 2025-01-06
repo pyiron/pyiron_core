@@ -1,0 +1,215 @@
+potential_name,symbol,Z,element_name,n_val_elect,val_elect_config,energy_cutoff_ENMAX,default
+H,H,1,Hydrogen,1.0,1s1,250.0,True
+H.25,H,1,Hydrogen,0.25,1s0.25,250.0,False
+H.33,H,1,Hydrogen,0.33,1s0.33,250.0,False
+H.42,H,1,Hydrogen,0.42,1s0.42,250.0,False
+H.5,H,1,Hydrogen,0.5,1s0.5,250.0,False
+H.58,H,1,Hydrogen,0.58,1s0.58,250.0,False
+H.66,H,1,Hydrogen,0.66,1s0.66,250.0,False
+H.75,H,1,Hydrogen,0.75,1s0.75,250.0,False
+H1.25,H,1,Hydrogen,1.25,1s1.25,250.0,False
+H1.33,H,1,Hydrogen,1.33,1s1.33,250.0,False
+H1.5,H,1,Hydrogen,1.5,1s1.5,250.0,False
+H1.66,H,1,Hydrogen,1.66,1s1.66,250.0,False
+H1.75,H,1,Hydrogen,1.75,1s1.75,250.0,False
+H_AE,H,1,Hydrogen,1.0,1s1,1000.0,False
+H_h,H,1,Hydrogen,1.0,1s1,700.0,False
+H_s,H,1,Hydrogen,1.0,1s1,200.0,False
+He,He,2,Helium,2.0,1s2,478.896,True
+He_AE,He,2,Helium,2.0,1s2,2135.871,False
+Li,Li,3,Lithium,1.0,2s1,140.0,False
+Li_sv,Li,3,Lithium,3.0,1s2 2s1,499.034,True
+Be,Be,4,Beryllium,2.0,2s1.99 2p0.01,247.543,True
+Be_sv,Be,4,Beryllium,4.0,1s2 2s1.99 2p0.01,308.768,False
+B,B,5,Boron,3.0,2s2 2p1,318.614,True
+B_h,B,5,Boron,3.0,2s2 2p1,700.0,False
+B_s,B,5,Boron,3.0,2s2 2p1,269.245,False
+C,C,6,Carbon,4.0,2s2 2p2,400.0,True
+C_h,C,6,Carbon,4.0,2s2 2p2,741.689,False
+C_s,C,6,Carbon,4.0,2s2 2p2,273.911,False
+N,N,7,Nitrogen,5.0,2s2 2p3,400.0,True
+N_h,N,7,Nitrogen,5.0,2s2 2p3,755.582,False
+N_s,N,7,Nitrogen,5.0,2s2 2p3,279.692,False
+O,O,8,Oxygen,6.0,2s2 2p4,400.0,True
+O_h,O,8,Oxygen,6.0,2s2 2p4,765.519,False
+O_s,O,8,Oxygen,6.0,2s2 2p4,282.853,False
+F,F,9,Fluorine,7.0,2s2 2p5,400.0,True
+F_h,F,9,Fluorine,7.0,2s2 2p5,772.626,False
+F_s,F,9,Fluorine,7.0,2s2 2p5,289.837,False
+Ne,Ne,10,Neon,8.0,2s2 2p6,343.606,True
+Na,Na,11,Sodium,1.0,3s1,101.968,False
+Na_pv,Na,11,Sodium,7.0,2p6 3s1,259.561,True
+Na_sv,Na,11,Sodium,9.0,2s2 2p6 3s1,645.64,False
+Mg,Mg,12,Magnesium,2.0,3s2,200.0,True
+Mg_pv,Mg,12,Magnesium,8.0,2p6 3s2,403.929,False
+Mg_sv,Mg,12,Magnesium,10.0,2s2 2p6 3s2,495.223,False
+Al,Al,13,Aluminum,3.0,3s2 3p1,240.3,True
+Si,Si,14,Silicon,4.0,3s2 3p2,245.345,True
+P,P,15,Phosphorus,5.0,3s2 3p3,255.04,True
+P_h,P,15,Phosphorus,5.0,3s2 3p3,390.202,False
+S,S,16,Sulfur,6.0,3s2 3p4,258.689,True
+S_h,S,16,Sulfur,6.0,3s2 3p4,402.436,False
+Cl,Cl,17,Chlorine,7.0,3s2 3p5,262.472,True
+Cl_h,Cl,17,Chlorine,7.0,3s2 3p5,409.136,False
+Ar,Ar,18,Argon,8.0,3s2 3p6,266.408,True
+K_pv,K,19,Potassium,7.0,3p6 4s1,116.731,False
+K_sv,K,19,Potassium,9.0,3s2 3p6 4s1,259.264,True
+Ca_pv,Ca,20,Calcium,8.0,3p6 4s2,119.559,False
+Ca_sv,Ca,20,Calcium,10.0,3s2 3p6 4s2,266.622,True
+Sc,Sc,21,Scandium,3.0,3d2 4s1,154.763,False
+Sc_sv,Sc,21,Scandium,11.0,3s2 3p6 3d2 4s1,222.66,True
+Ti,Ti,22,Titanium,4.0,3d3 4s1,178.33,False
+Ti_pv,Ti,22,Titanium,10.0,3p6 3d3 4s1,222.335,False
+Ti_sv,Ti,22,Titanium,12.0,3s2 3p6 3d3 4s1,274.61,True
+V,V,23,Vanadium,5.0,3d4 4s1,192.543,False
+V_pv,V,23,Vanadium,11.0,3p6 3d4 4s1,263.673,False
+V_sv,V,23,Vanadium,13.0,3s2 3p6 3d4 4s1,263.673,True
+Cr,Cr,24,Chromium,6.0,3d5 4s1,227.08,False
+Cr_pv,Cr,24,Chromium,12.0,3p6 3d5 4s1,265.681,True
+Cr_sv,Cr,24,Chromium,14.0,3s2 3p6 3d5 4s1,395.471,False
+Mn,Mn,25,Manganese,7.0,3d6 4s1,269.864,False
+Mn_pv,Mn,25,Manganese,13.0,3p6 3d6 4s1,269.864,True
+Mn_sv,Mn,25,Manganese,15.0,3s2 3p6 3d6 4s1,387.187,False
+Fe,Fe,26,Iron,8.0,3d7 4s1,267.882,True
+Fe_pv,Fe,26,Iron,14.0,3p6 3d7 4s1,293.238,False
+Fe_sv,Fe,26,Iron,16.0,3s2 3p6 3d7 4s1,390.558,False
+Co,Co,27,Cobalt,9.0,3d8 4s1,267.968,True
+Co_pv,Co,27,Cobalt,15.0,3p6 3d8 4s1,271.042,False
+Co_sv,Co,27,Cobalt,17.0,3s2 3p6 3d8 4s1,390.362,False
+Ni,Ni,28,Nickel,10.0,3d9 4s1,269.532,True
+Ni_pv,Ni,28,Nickel,16.0,3p6 3d9 4s1,367.986,False
+Cu,Cu,29,Copper,11.0,3d10 4s1,295.446,True
+Cu_pv,Cu,29,Copper,17.0,3p6 3d10 4s1,368.648,False
+Zn,Zn,30,Zinc,12.0,3d10 4s2,276.723,True
+Ga,Ga,31,Gallium,3.0,4s2 4p1,134.678,False
+Ga_d,Ga,31,Gallium,13.0,3d10 4s2 4p1,282.691,True
+Ga_h,Ga,31,Gallium,13.0,3d10 4s2 4p1,404.601,False
+Ge,Ge,32,Germanium,4.0,4s2 4p2,173.807,False
+Ge_d,Ge,32,Germanium,14.0,3d10 4s2 4p2,310.294,True
+Ge_h,Ge,32,Germanium,14.0,3d10 4s2 4p2,410.425,False
+As,As,33,Arsenic,5.0,4s2 4p3,208.702,True
+As_d,As,33,Arsenic,15.0,3d10 4s2 4p3,288.651,False
+Se,Se,34,Selenium,6.0,4s2 4p4,211.555,True
+Br,Br,35,Bromine,7.0,4s2 4p5,216.285,True
+Kr,Kr,36,Krypton,8.0,4s2 4p6,185.331,True
+Rb_pv,Rb,37,Rubidium,7.0,4p6 4d0.001 5s0.999,121.882,False
+Rb_sv,Rb,37,Rubidium,9.0,4s2 4p6 4d0.001 5s0.999,220.112,True
+Sr_sv,Sr,38,Strontium,10.0,4s2 4p6 4d0.001 5s1.999,229.353,True
+Y_sv,Y,39,Yttrium,11.0,4s2 4p6 4d2 5s1,202.626,True
+Zr_sv,Zr,40,Zirconium,12.0,4s2 4p6 4d3 5s1,229.898,True
+Nb_pv,Nb,41,Niobium,11.0,4p6 4d4 5s1,208.608,False
+Nb_sv,Nb,41,Niobium,13.0,4s2 4p6 4d4 5s1,293.235,True
+Mo,Mo,42,Molybdenum,6.0,4d5 5s1,224.584,False
+Mo_pv,Mo,42,Molybdenum,12.0,4p6 4d5 5s1,224.584,False
+Mo_sv,Mo,42,Molybdenum,14.0,4s2 4p6 4d5 5s1,242.676,True
+Tc,Tc,43,Technetium,7.0,4d6 5s1,228.694,False
+Tc_pv,Tc,43,Technetium,13.0,4p6 4d6 5s1,263.523,True
+Tc_sv,Tc,43,Technetium,15.0,4s2 4p6 4d6 5s1,318.703,False
+Ru,Ru,44,Ruthenium,8.0,4d7 5s1,213.271,False
+Ru_pv,Ru,44,Ruthenium,14.0,4p6 4d7 5s1,240.049,True
+Ru_sv,Ru,44,Ruthenium,16.0,4s2 4p6 4d7 5s1,318.855,False
+Rh,Rh,45,Rhodium,9.0,4d8 5s1,228.996,False
+Rh_pv,Rh,45,Rhodium,15.0,4p6 4d8 5s1,247.408,True
+Pd,Pd,46,Palladium,10.0,4d9 5s1,250.925,True
+Pd_pv,Pd,46,Palladium,16.0,4p6 4d9 5s1,250.925,False
+Ag,Ag,47,Silver,11.0,4d10 5s1,249.844,True
+Ag_pv,Ag,47,Silver,17.0,4p6 4d10 5s1,297.865,False
+Cd,Cd,48,Cadmium,12.0,4d10 5s2,274.336,True
+In,In,49,Indium,3.0,5s2 5p1,95.934,False
+In_d,In,49,Indium,13.0,4d10 5s2 5p1,239.211,True
+Sn,Sn,50,Tin,4.0,5s2 5p2,103.236,False
+Sn_d,Sn,50,Tin,14.0,4d10 5s2 5p2,241.083,True
+Sb,Sb,51,Antimony,5.0,5s2 5p3,172.069,True
+Te,Te,52,Tellurium,6.0,5s2 5p4,174.982,True
+I,I,53,Iodine,7.0,5s2 5p5,175.647,True
+Xe,Xe,54,Xenon,8.0,5s2 5p6,153.118,True
+Cs_sv,Cs,55,Cesium,9.0,5s2 5p6 6s1,220.318,True
+Ba_sv,Ba,56,Barium,10.0,5s2 5p6 5d0.01 6s1.99,187.181,True
+La,La,57,Lanthanum,11.0,4f0.0001 5s2 5p6 5d0.9999 6s2,219.292,True
+La_s,La,57,Lanthanum,9.0,5p6 5d1 6s2,136.53,False
+Ce,Ce,58,Cerium,12.0,4f1 5s2 5p6 5d1 6s2,273.042,True
+Ce_3,Ce,58,Cerium,11.0,5s2 5p6 5d1 6s2,176.506,True
+Ce_h,Ce,58,Cerium,12.0,4f1 5s2 5p6 5d1 6s2,299.9,False
+Pr,Pr,59,Praseodymium,13.0,4f2.5 5s2 5p6 5d0.5 6s2,337.25,False
+Pr_3,Pr,59,Praseodymium,11.0,5s2 5p6 5d1 6s2,181.719,True
+Pr_h,Pr,59,Praseodymium,13.0,4f2.5 5s2 5p6 5d0.5 6s2,400.742,False
+Nd,Nd,60,Neodymium,14.0,4f3.5 5s2 5p6 5d0.5 6s2,338.34,False
+Nd_3,Nd,60,Neodymium,11.0,5s2 5p6 5d1 6s2,182.619,True
+Nd_h,Nd,60,Neodymium,14.0,4f3.5 5s2 5p6 5d0.5 6s2,402.016,False
+Pm,Pm,61,Promethium,15.0,4f4.5 5s2 5p6 5d0.5 6s2,340.358,False
+Pm_3,Pm,61,Promethium,11.0,5s2 5p6 5d1 6s2,176.959,True
+Pm_h,Pm,61,Promethium,15.0,4f4.5 5s2 5p6 5d0.5 6s2,404.406,False
+Sm,Sm,62,Samarium,16.0,4f5.5 5s2 5p6 5d0.5 6s2,341.177,False
+Sm_3,Sm,62,Samarium,11.0,5s2 5p6 5d1 6s2,177.087,True
+Sm_h,Sm,62,Samarium,16.0,4f5.5 5s2 5p6 5d0.5 6s2,405.382,False
+Eu,Eu,63,Europium,17.0,4f6.5 5s2 5p6 5d0.5 6s2,344.705,False
+Eu_2,Eu,63,Europium,8.0,5p6 6s2,99.328,True
+Eu_3,Eu,63,Europium,9.0,5p6 5d1 6s2,129.057,False
+Eu_h,Eu,63,Europium,17.0,4f6.5 5s2 5p6 5d0.5 6s2,403.212,False
+Gd,Gd,64,Gadolinium,18.0,4f7.5 5s2 5p6 5d0.5 6s2,342.859,False
+Gd_3,Gd,64,Gadolinium,9.0,5p6 5d1 6s2,154.332,True
+Gd_h,Gd,64,Gadolinium,18.0,4f7.5 5s2 5p6 5d0.5 6s2,407.403,False
+Tb,Tb,65,Terbium,19.0,4f8.5 5s2 5p6 5d0.5 6s2,340.855,False
+Tb_3,Tb,65,Terbium,9.0,5p6 5d1 6s2,155.613,True
+Tb_h,Tb,65,Terbium,19.0,4f8.5 5s2 5p6 5d0.5 6s2,405.043,False
+Dy,Dy,66,Dysprosium,20.0,4f9.5 5s2 5p6 5d0.5 6s2,341.547,False
+Dy_3,Dy,66,Dysprosium,9.0,5p6 5d1 6s2,155.713,True
+Dy_h,Dy,66,Dysprosium,20.0,4f9.5 5s2 5p6 5d0.5 6s2,405.886,False
+Ho,Ho,67,Holmium,21.0,4f10.5 5s2 5p6 5d0.5 6s2,343.845,False
+Ho_3,Ho,67,Holmium,9.0,5p6 5d1 6s2,154.137,True
+Ho_h,Ho,67,Holmium,21.0,4f10.5 5s2 5p6 5d0.5 6s2,415.91,False
+Er,Er,68,Erbium,22.0,4f11.5 5s2 5p6 5d0.5 6s2,346.295,False
+Er_2,Er,68,Erbium,8.0,5p6 6s2,119.75,True
+Er_3,Er,68,Erbium,9.0,5p6 5d1 6s2,155.037,True
+Er_h,Er,68,Erbium,22.0,4f11.5 5s2 5p6 5d0.5 6s2,429.583,False
+Tm,Tm,69,Thulium,23.0,4f12.5 5s2 5p6 5d0.5 6s2,344.206,False
+Tm_3,Tm,69,Thulium,9.0,5p6 5d1 6s2,149.221,True
+Tm_h,Tm,69,Thulium,23.0,4f12.5 5s2 5p6 5d0.5 6s2,419.812,False
+Yb,Yb,70,Ytterbium,24.0,4f13.5 5s2 5p6 5d0.5 6s2,344.312,False
+Yb_2,Yb,70,Ytterbium,8.0,5p6 6s2,112.578,True
+Yb_3,Yb,70,Ytterbium,9.0,5p6 5d1 6s2,188.359,False
+Yb_h,Yb,70,Ytterbium,24.0,4f13.5 5s2 5p6 5d0.5 6s2,409.285,False
+Lu,Lu,71,Lutetium,25.0,4f14 5s2 5p6 5d1 6s2,255.695,False
+Lu_3,Lu,71,Lutetium,9.0,5p6 5d1 6s2,154.992,True
+Hf,Hf,72,Hafnium,4.0,5d3 6s1,220.334,False
+Hf_pv,Hf,72,Hafnium,10.0,5p6 5d3 6s1,220.334,True
+Hf_sv,Hf,72,Hafnium,12.0,5s2 5p6 5d4,237.444,False
+Ta,Ta,73,Tantalum,5.0,5d4 6s1,223.667,False
+Ta_pv,Ta,73,Tantalum,11.0,5p6 5d4 6s1,223.667,True
+W,W,74,Tungsten,6.0,5d5 6s1,223.057,False
+W_sv,W,74,Tungsten,14.0,5s2 5p6 5d5 6s1,223.057,True
+Re,Re,75,Rhenium,7.0,5d6 6s1,226.216,True
+Re_pv,Re,75,Rhenium,13.0,5p6 5d6 6s1,226.216,False
+Os,Os,76,Osmium,8.0,5d7 6s1,228.022,True
+Os_pv,Os,76,Osmium,14.0,5p6 5d7 6s1,228.022,False
+Ir,Ir,77,Iridium,9.0,5d8 6s1,210.864,True
+Pt,Pt,78,Platinum,10.0,5d9 6s1,230.283,True
+Pt_pv,Pt,78,Platinum,16.0,5p6 5d9 6s1,294.607,False
+Au,Au,79,Gold,11.0,5d10 6s1,229.943,True
+Hg,Hg,80,Mercury,12.0,5d10 6s2,233.204,True
+Tl,Tl,81,Thallium,3.0,6s2 6p1,90.14,False
+Tl_d,Tl,81,Thallium,13.0,5d10 6s2 6p1,237.053,True
+Pb,Pb,82,Lead,4.0,6s2 6p2,97.973,False
+Pb_d,Pb,82,Lead,14.0,5d10 6s2 6p2,237.835,True
+Bi,Bi,83,Bismuth,5.0,6s2 6p3,105.037,False
+Bi_d,Bi,83,Bismuth,15.0,5d10 6s2 6p3,242.839,True
+Po,Po,84,Polonium,6.0,6s2 6p4,159.707,False
+Po_d,Po,84,Polonium,16.0,5d10 6s2 6p4,264.565,True
+At,At,85,Astatine,7.0,6s2 6p5,161.43,True
+Rn,Rn,86,Radon,8.0,6s2 6p6,151.497,True
+Fr_sv,Fr,87,Francium,9.0,6s2 6p6 7s1,214.54,True
+Ra_sv,Ra,88,Radium,10.0,6s2 6p6 7s2,237.367,True
+Ac,Ac,89,Actinium,11.0,6s2 6p6 6d1 7s2,172.351,True
+Th,Th,90,Thorium,12.0,5f1 6s2 6p6 6d1 7s2,247.306,True
+Th_s,Th,90,Thorium,10.0,5f1 6p6 6d1 7s2,169.363,False
+Pa,Pa,91,Protactinium,13.0,5f1 6s2 6p6 6d2 7s2,252.193,True
+Pa_s,Pa,91,Protactinium,11.0,5f1 6p6 6d2 7s2,193.466,False
+U,U,92,Uranium,14.0,5f2 6s2 6p6 6d2 7s2,252.502,True
+U_s,U,92,Uranium,14.0,5f2 6s2 6p6 6d2 7s2,209.23,False
+Np,Np,93,Neptunium,15.0,5f3 6s2 6p6 6d2 7s2,254.26,True
+Np_s,Np,93,Neptunium,15.0,5f3 6s2 6p6 6d2 7s2,207.713,False
+Pu,Pu,94,Plutonium,16.0,5f4 6s2 6p6 6d2 7s2,254.353,True
+Pu_s,Pu,94,Plutonium,16.0,5f4 6s2 6p6 6d2 7s2,207.83,False
+Am,Am,95,Americium,17.0,5f5 6s2 6p6 6d2 7s2,255.875,True
+Cm,Cm,96,Curium,18.0,5f6 6s2 6p6 6d2 7s2,257.953,True
+Cf,Cf,98,Californium,20.0,5f8 6s2 6p6 6d2 7s2,414.614,False
