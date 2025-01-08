@@ -148,6 +148,9 @@ const render = createRender(() => {
       setNodes((nds) => {
         const new_nodes = applyNodeChanges(changes, nds);
         console.log("onNodesChange: ", changes, new_nodes);
+        // const data = { nodes: new_nodes, edges: edges, graph: {} };
+        // console.log("onNodesChange2: ", data);
+        // model.set("mydata", JSON.stringify(data));
         model.set("nodes", JSON.stringify(new_nodes));
         model.save_changes();
         return new_nodes;
@@ -160,6 +163,8 @@ const render = createRender(() => {
     (changes) => {
       setEdges((eds) => {
         const new_edges = applyEdgeChanges(changes, eds);
+        // data = { nodes: nodes, edges: new_edges, graph: {} };
+        // model.set("mydata", JSON.stringify(data));
         model.set("edges", JSON.stringify(new_edges));
         model.save_changes();
         return new_edges;
@@ -173,6 +178,12 @@ const render = createRender(() => {
       setEdges((eds) => {
         const new_edges = addEdge(params, eds);
         model.set("edges", JSON.stringify(new_edges));
+        model.save_changes();
+        console.log("onConnect: ", params);
+        model.set(
+          "commands",
+          `add_edge: ${params} > ${params} - ${new Date().getTime()}`
+        );
         model.save_changes();
         return new_edges;
       });

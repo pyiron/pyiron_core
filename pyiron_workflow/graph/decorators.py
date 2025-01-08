@@ -1,8 +1,21 @@
+__author__ = "Joerg Neugebauer"
+__copyright__ = (
+    "Copyright 2024, Max-Planck-Institut for Sustainable Materials GmbH - "
+    "Computational Materials Design (CM) Department"
+)
+__version__ = "0.2"
+__maintainer__ = ""
+__email__ = ""
+__status__ = "development"
+__date__ = "Jan 3, 2025"
+
 from dataclasses import dataclass
 from collections import OrderedDict
 
 
-def as_dotdict_dataclass(*args, doc_func=None, _repr_html_=None, __add__=None, **kwargs):
+def as_dotdict_dataclass(
+    *args, doc_func=None, _repr_html_=None, __add__=None, **kwargs
+):
     # def wf_data_class(*args, doc_func=None, keys_to_store=None, **kwargs):
     """
     Extension of the python default dataclass to include methods and functionality needed for pyiron_workflows
@@ -25,8 +38,7 @@ def as_dotdict_dataclass(*args, doc_func=None, _repr_html_=None, __add__=None, *
             setattr(cls, "_repr_html_", _repr_html_)
 
         if __add__ is not None:
-            setattr(cls, "__add__", __add__) 
-
+            setattr(cls, "__add__", __add__)
 
         # Add new methods
         def keys(self):
@@ -88,12 +100,11 @@ class NestedDict(OrderedDict):
     def _index_dict(self):
         return {i: k for i, k in enumerate(self.keys())}
 
-
     def __setitem__(self, key, value):
         super().__setitem__(key, value)
         self.index_dict = self._index_dict
 
-    def __delitem__(self, key):    
+    def __delitem__(self, key):
         super().__delitem__(key)
         self.index_dict = self._index_dict
 
@@ -108,7 +119,7 @@ class NestedDict(OrderedDict):
             # make it a NestedDict
             filtered_dict = NestedDict()
             for i in idx:
-                filtered_dict[self.index_dict[i]] = self[self.index_dict[i]]    
+                filtered_dict[self.index_dict[i]] = self[self.index_dict[i]]
             return filtered_dict
         else:
             return self[self.index_dict[idx]]

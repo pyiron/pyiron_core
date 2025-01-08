@@ -1,3 +1,14 @@
+__author__ = "Joerg Neugebauer"
+__copyright__ = (
+    "Copyright 2024, Max-Planck-Institut for Sustainable Materials GmbH - "
+    "Computational Materials Design (CM) Department"
+)
+__version__ = "0.2"
+__maintainer__ = ""
+__email__ = ""
+__status__ = "development"
+__date__ = "Jan 3, 2025"
+
 from pyiron_workflow import Node, Port, as_function_node
 
 from dataclasses import field
@@ -7,7 +18,7 @@ from pyiron_workflow.graph.decorators import (
     NestedList,
     transpose_list_of_dicts,
 )
-from typing import Union
+from typing import Union, List
 import pandas as pd
 
 
@@ -133,10 +144,39 @@ def add_node(
     elif isinstance(node, Graph):
         graph = _add_graph_instance(graph, node, label)
     elif isinstance(node, GraphNode):
-        graph = graph.nodes[label] = node
+        if node.node is None:
+            # should be done on GraphNode creation
+            if label is None:
+                label = node.id
+            node.node = get_node_from_path(node.import_path)(label=label) 
+            
+        graph.nodes[label] = node
     else:
         raise TypeError(f"Unexpected node type {type(node)}")
     graph = _expand_node(graph, label)  # TODO: validate that it is recursive
+    return graph
+
+
+def remove_node(graph: Graph, label: str) -> Graph:
+    """
+    Remove a node and its associated edges from the graph.
+
+    Args:
+        graph (Graph): The graph from which to remove the node.
+        label (str): The label of the node to be removed.
+
+    Returns:
+        Graph: The updated graph with the node and its edges removed.
+    """
+    if label in graph.nodes.keys():
+        del graph.nodes[label]
+
+    edges_to_remove = [edge for edge in graph.edges if edge.source == label or edge.target == label]
+    for edge in edges_to_remove:
+        graph.edges.remove(edge)
+
+    # TODO: remove node from connected ports?    
+
     return graph
 
 
@@ -214,6 +254,63 @@ def add_edge(
     return graph
 
 
+# tools for expanding and collapsing nodes
+
+
+def _get_inner_edge(graph, edge):
+    inner_source = f"var_{edge.target}__{edge.targetHandle}"
+    df = _edges_to_gui(graph).df
+    matching_edge = df.loc[df["source"] == inner_source].iloc[0].to_dict()
+    new_edge = GraphEdge(
+        edge.source,
+        matching_edge["target"],
+        edge.sourceHandle,
+        matching_edge["targetHandle"],
+    )
+    return new_edge
+
+
+def _get_expanded_nodes(graph: Graph) -> List[str]:
+    expanded_nodes = []
+    for k, v in graph.nodes.items():
+        if v.expanded:
+            expanded_nodes.append(k)
+    return expanded_nodes
+
+
+def _remove_var_input_edges(graph: Graph):
+    edges_to_remove = []
+    for edge in graph.edges:
+        if edge.source.startswith("var_"):
+            print(f"removing edge {edge}")
+            edges_to_remove.append(edge)
+    for edge in edges_to_remove:
+        graph.edges.remove(edge)
+    return graph
+
+
+def _remove_var_input_nodes(graph: Graph):
+    nodes_to_remove = []
+    for node_label in graph.nodes.keys():
+        if node_label.startswith("var_"):
+            nodes_to_remove.append(node_label)
+    for node_label in nodes_to_remove:
+        del graph.nodes[node_label]
+    return graph
+
+
+def _optimize_graph_connections(graph):
+    for node_label in _get_expanded_nodes(graph):
+        for i_edge, edge in enumerate(graph.edges):
+            if edge.target == node_label:
+                new_edge = _get_inner_edge(graph, edge)
+                graph.edges[i_edge] = new_edge
+    graph = _remove_var_input_edges(graph)
+    graph = _remove_var_input_nodes(graph)
+
+    return graph
+
+
 def _expand_node(graph, node_label: str):
     graph_node = graph.nodes[node_label]
     if graph_node.node_type == "graph":
@@ -287,43 +384,6 @@ if TYPE_CHECKING:
     from pyiron_workflow import Workflow
 
 
-def _filter_and_flatten_nested_dict_keys(data, keys_to_keep):
-    def filter_and_flatten_dict(d, keys):
-        result = {}
-        for key in keys:
-            if "/" in key:
-                top_key, nested_key = key.split("/", 1)
-                if top_key in d and isinstance(d[top_key], dict):
-                    result[f"{top_key}__{nested_key}"] = d[top_key].get(nested_key)
-            else:
-                if key in d:
-                    result[key] = d[key]
-        return result
-
-    return [filter_and_flatten_dict(item, keys_to_keep) for item in data]
-
-
-def _rename_keys(dict_list, key_mapping):
-    """
-    Rename keys in a list of dictionaries.
-
-    Args:
-    dict_list (list): A list of dictionaries to modify.
-    key_mapping (dict): A dictionary mapping old keys to new keys.
-
-    Returns:
-    list: A new list of dictionaries with renamed keys.
-    """
-    result = []
-    for d in dict_list:
-        new_dict = {}
-        for old_key, value in d.items():
-            new_key = key_mapping.get(old_key, old_key)
-            new_dict[new_key] = value
-        result.append(new_dict)
-    return result
-
-
 def _different_indices(default, value):
     # TODO: quick fix, use _get_non_default_inputs from simple_workflow.py
     return [
@@ -331,28 +391,6 @@ def _different_indices(default, value):
         for i in range(len(default))
         if (str(default[i]) != str(value[i])) or (str(value[i]) in ("NotData"))
     ]
-
-
-def _nodes_from_dict(nodes_dict):
-    return [(node["label"], node["import_path"]) for node in nodes_dict]
-
-
-def _edges_from_dict(edges_dict):
-    edges = []
-    for edge in edges_dict:
-        source = edge["source"]
-        source_handle = edge["sourceHandle"]
-        if source.startswith("var_"):
-            if isinstance(source_handle, str):
-                source_handle = f"__str_{source_handle}"
-        edges.append(
-            (
-                f'{edge["source"]}/{source_handle}',
-                f'{edge["target"]}/{edge["targetHandle"]}',
-            )
-        )
-
-    return edges
 
 
 def _convert_to_integer_representation(graph: Graph):
@@ -503,6 +541,23 @@ def get_graph_from_wf(wf: "Workflow", wf_label: str = None) -> Graph:
     sorted_graph = topological_sort(graph)
     return sorted_graph
 
+def update_input_values(graph: Graph, node_label: str, values: list):
+    node: Node = graph.nodes[node_label].node
+    for i, value in enumerate(values):
+        handle = node.inputs.data["label"][i]
+        update_input_value(graph, node_label, handle, value)
+
+    return graph
+
+def update_input_value(graph: Graph, node_label: str, handle: str, value: Union[str, int, float, Node, Port]) -> Graph:
+    node = graph.nodes[node_label].node
+    index = node.inputs.data["label"].index(handle)
+    node.inputs.data["value"][index] = value
+    if not node.inputs.data["ready"][index] and str(node.inputs.data["default"][index]) != str(value): # TODO: check if value type is correct
+        node.inputs.data["ready"][index] = True
+
+    return graph
+
 
 def get_code_from_graph(
     graph: Graph,
@@ -530,35 +585,31 @@ wf = Workflow('{graph.label}')
 
 """
 
-    wf = get_wf_from_graph(graph)
     # Add nodes to Workflow
-    for node in graph.nodes:
-        label, import_path = node
+    for key, node in graph.nodes.items():
+        label, import_path = key, node.import_path
         if not label.startswith("var_"):
             code += f"""wf.{label} = {import_path}("""
 
             # Add edges
             first_edge = True
             for edge in graph.edges:
-                edge_source, edge_target = edge
-                target, target_handle = edge_target.split("/")
-                source, source_handle = edge_source.split("/")
-                if target == label:
+                if edge.target == label:
                     if first_edge:
                         first_edge = False
                     else:
                         code += """, """
-                    if source.startswith("var_"):
-                        if source_handle.startswith("__str_"):
-                            code += f"""{target_handle}='{source_handle[6:]}'"""
+                    if edge.source.startswith("var_"):
+                        if edge.sourceHandle.startswith("__str_"):
+                            code += f"""{edge.targetHandle}='{edge.sourceHandle[6:]}'"""
                         else:
-                            code += f"""{target_handle}={source_handle}"""
+                            code += f"""{edge.targetHandle}={edge.sourceHandle}"""
                     else:
-                        source_node = wf._nodes[source]
-                        if source_node.n_out_labels == 1:
-                            code += f"""{target_handle}=wf.{source}"""
+                        source_node = graph.nodes[edge.source]  # wf._nodes[edge.source]
+                        if source_node.node.n_out_labels == 1:
+                            code += f"""{edge.targetHandle}=wf.{edge.source}"""
                         else:
-                            code += f"""{target_handle}=wf.{source}.outputs.{source_handle}"""
+                            code += f"""{edge.targetHandle}=wf.{edge.source}.outputs.{edge.sourceHandle}"""
             code += f""") \n"""
             # code += '\n' + 'print(wf.run()) \n'
 
@@ -848,6 +899,7 @@ def _graph_to_gui(graph: Graph, remove_none=True) -> dict:
     }
     graph_dict = dict(id="root", layoutOptions=layoutOptions)
 
+    graph = _optimize_graph_connections(graph)
     nodes = _nodes_to_gui(graph, remove_none=remove_none)
     edges = _edges_to_gui(graph, remove_none=remove_none)
     children = []
