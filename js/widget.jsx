@@ -8,13 +8,14 @@
  * Date: Aug 1, 2024
  */
 
-import React, { useCallback, useState, useEffect, createContext } from "react";
+import React, { useCallback, useState, createContext } from "react";
 import { createRender, useModel } from "@anywidget/react";
 import { getLayoutedNodes } from "./useElkLayout";
 // import ELK from "elkjs/lib/elk.bundled.js";
 import {
   ReactFlow,
   Controls,
+  ControlButton,
   MiniMap,
   Background,
   applyEdgeChanges,
@@ -22,6 +23,7 @@ import {
   addEdge,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
+import { SymbolIcon } from "@radix-ui/react-icons";
 
 import TextUpdaterNode from "./TextUpdaterNode.jsx";
 import CustomNode from "./CustomNode.jsx";
@@ -35,14 +37,27 @@ const rfStyle = {
 };
 
 export const UpdateDataContext = createContext(null);
-
+let globalStatus = "initial";
 // const nodeTypes = { textUpdater: TextUpdaterNode, customNode: CustomNode };
 
 const render = createRender(() => {
+  console.log("rendering");
   const model = useModel();
-  // console.log("model: ", model);
+
+  //   const new_data = model.get("mydata");
+  //   console.log("load data: ", new_data);
+  //   const data = JSON.parse(new_data);
+
+  //   console.log("load data: ", data);
+
+  //   const new_nodes = model.get("nodes");;  // data.nodes;
+  //   const initialNodes = JSON.parse(new_nodes);
+  //   const initialEdges = data.edges;
+  //   const initialGraph = data.graph;
+
   const initialNodes = JSON.parse(model.get("nodes"));
   const initialEdges = JSON.parse(model.get("edges"));
+  //   console.log('initialData: ', initialNodes, initialEdges);
 
   const [nodes, setNodes] = useState(initialNodes);
   const [edges, setEdges] = useState(initialEdges);
@@ -53,6 +68,11 @@ const render = createRender(() => {
   };
 
   const updateData = (nodeLabel, handleIndex, newValue) => {
+    const var_data = { label: nodeLabel, handle: handleIndex, value: newValue };
+    model.set("commands", `change_node_value: ` + JSON.stringify(var_data));
+    model.save_changes();
+    console.log("updateData: ", nodeLabel, handleIndex, newValue);
+
     setNodes((prevNodes) =>
       prevNodes.map((node, idx) => {
         // console.log('updatedDataNodes: ', nodeLabel, handleIndex, newValue, node.id);
@@ -76,36 +96,39 @@ const render = createRender(() => {
     );
   };
 
-  // for test only, can be later removed
-  useEffect(() => {
-    console.log("nodes_test:", nodes);
-    model.set("nodes", JSON.stringify(nodes)); // TODO: maybe better do it via command changeValue(nodeID, handleID, value)
-    model.save_changes();
-  }, [nodes]);
+  //   // for test only, can be later removed
+  //   useEffect(() => {
+  //     console.log("nodes_test:", nodes);
+  //     model.set("nodes", JSON.stringify(nodes)); // TODO: maybe better do it via command changeValue(nodeID, handleID, value)
+  //     model.save_changes();
+  //   }, [nodes]);
 
   model.on("change:nodes", () => {
     const new_nodes = model.get("nodes");
-    // console.log("load nodes: ", new_nodes);
-
+    console.log("load nodes: ", JSON.parse(new_nodes));
     setNodes(JSON.parse(new_nodes));
   });
 
   model.on("change:edges", () => {
     const new_edges = model.get("edges");
+    console.log("load edges: ", JSON.parse(new_edges));
     setEdges(JSON.parse(new_edges));
   });
 
-  model.on("change:graph", () => {
-    const new_graph = model.get("graph");
-    const graph = JSON.parse(new_graph);
-    console.log("load graph: ", graph);
-
-    getLayoutedNodes(nodes, edges, graph).then((layoutedNodes) => {
-      setNodes(layoutedNodes);
-    });
-  });
-
   model.on("change:mydata", () => {
+    // it appears that there is a bug in the interplay between traitlets and setNodes and setEdges.
+    // Calling setNodes and setEdges triggers a change event, which in turn triggers a new mydata event.
+    // This leads to an increasing number of mydata events, which probably causes a slow down and eventually a crash.
+    // To avoid this partly, we need to check if we are already running and return if this is the case.
+    // This avoids repeating the expensive layouting process, but still triggers the creation of many objects.
+    // This is not a solution, but a workaround. A possible way would be to make the data communication via files.
+    // If this problem becomes a practical issue, we need to consider/switch to a file based communication.
+    if (globalStatus === "running") {
+      console.log("data changed, but we are running");
+      return;
+    }
+    globalStatus = "running";
+
     console.log("data changed");
     const new_data = model.get("mydata");
     // console.log("load data: ", new_data);
@@ -116,20 +139,16 @@ const render = createRender(() => {
     const new_nodes = data.nodes;
     const new_edges = data.edges;
     const new_graph = data.graph;
-    // console.log("new data: ", new_nodes, new_edges, new_graph);
-
-    setEdges(new_edges);
-
-    // console.log("new graph: ", new_graph);
 
     // give start and end time for the layouting
 
     console.log("start: ", new Date().getTime());
     getLayoutedNodes(new_nodes, new_edges, new_graph).then((layoutedNodes) => {
+      console.log("layoutedNodes: ", layoutedNodes);
       setNodes(layoutedNodes);
-      model.set("commands", `finished: ${new Date().getTime()}`);
-      model.save_changes();
+      setEdges(new_edges);
       console.log("finished: ", new Date().getTime());
+      globalStatus = "finished";
     });
     // since this is async, we need to wait for the layouted nodes
     // it appears that we never get here
@@ -138,9 +157,6 @@ const render = createRender(() => {
   model.on("change:commands", () => {
     const new_commands = model.get("commands");
     console.log("load commands: ", new_commands);
-    // getLayoutedNodes(nodes, edges).then((layoutedNodes) => {
-    //   setNodes(layoutedNodes);
-    // });
   });
 
   const onNodesChange = useCallback(
@@ -148,11 +164,8 @@ const render = createRender(() => {
       setNodes((nds) => {
         const new_nodes = applyNodeChanges(changes, nds);
         console.log("onNodesChange: ", changes, new_nodes);
-        // const data = { nodes: new_nodes, edges: edges, graph: {} };
-        // console.log("onNodesChange2: ", data);
-        // model.set("mydata", JSON.stringify(data));
-        model.set("nodes", JSON.stringify(new_nodes));
-        model.save_changes();
+        // model.set("nodes", JSON.stringify(new_nodes));
+        // model.save_changes();
         return new_nodes;
       });
     },
@@ -162,11 +175,10 @@ const render = createRender(() => {
   const onEdgesChange = useCallback(
     (changes) => {
       setEdges((eds) => {
+        console.log("onEdgesChange: ", changes);
         const new_edges = applyEdgeChanges(changes, eds);
-        // data = { nodes: nodes, edges: new_edges, graph: {} };
-        // model.set("mydata", JSON.stringify(data));
-        model.set("edges", JSON.stringify(new_edges));
-        model.save_changes();
+        // model.set("edges", JSON.stringify(new_edges));
+        // model.save_changes();
         return new_edges;
       });
     },
@@ -182,7 +194,9 @@ const render = createRender(() => {
         console.log("onConnect: ", params);
         model.set(
           "commands",
-          `add_edge: ${params} > ${params} - ${new Date().getTime()}`
+          `add_edge: ${params.source}/${params.sourceHandle} > ${
+            params.target
+          }/${params.targetHandle} - ${new Date().getTime()}`
         );
         model.save_changes();
         return new_edges;
@@ -206,6 +220,32 @@ const render = createRender(() => {
     console.log("onNodesDelete: ", deleted);
     deleteNode(deleted[0].id);
   });
+
+  const deleteEdge = (params) => {
+    console.log("delete edge: ", params);
+    model.set(
+      "commands",
+      `delete_edge: ${params.source}/${params.sourceHandle} > ${
+        params.target
+      }/${params.targetHandle} - ${new Date().getTime()}`
+    );
+    model.save_changes();
+  };
+
+  const onEdgesDelete = useCallback((deleted) => {
+    console.log("onEdgesDelete: ", deleted);
+    deleteEdge(deleted[0]);
+  });
+
+  const refreshGraphView = (id) => {
+    // refresh data on python side
+    console.log("refreshGraphView: ", id);
+    model.set(
+      "commands",
+      `refreshGraphView: __global__ - ${new Date().getTime()}`
+    );
+    model.save_changes();
+  };
 
   const setPosition = useCallback(
     (pos) =>
@@ -240,13 +280,18 @@ const render = createRender(() => {
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
           onNodesDelete={onNodesDelete}
+          onEdgesDelete={onEdgesDelete}
           nodeTypes={nodeTypes}
           fitView
           style={rfStyle}
         >
           <Background variant="dots" gap={12} size={1} />
           <MiniMap />
-          <Controls />
+          <Controls orientation="horizontal" position="top-left">
+            <ControlButton onClick={refreshGraphView}>
+              <SymbolIcon />
+            </ControlButton>
+          </Controls>
         </ReactFlow>
       </UpdateDataContext.Provider>
     </div>

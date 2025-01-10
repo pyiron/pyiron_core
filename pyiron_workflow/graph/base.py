@@ -50,12 +50,12 @@ Edges = NestedList[str, GraphEdge]  # TODO: make it a NestedList?
 
 def _add_obj_to_graph(graph, obj):
     if isinstance(obj, (Node, Graph, GraphNode)):
-        graph = add_node(graph, obj)
+        new_graph = add_node(graph, obj)
     elif isinstance(obj, GraphEdge):
-        graph = add_edge(graph, **obj.asdict())
+        new_graph = add_edge(graph, **obj.asdict())
     else:
         raise TypeError(f"Unexpected node type {type(obj)}")
-    return graph
+    return new_graph
 
 
 @as_dotdict_dataclass(__add__=_add_obj_to_graph)
@@ -127,6 +127,28 @@ def create_graph(
     return Graph(nodes=nodes, edges=edges, label=label, id=id, root_node=root_node)
 
 
+def copy_graph(
+    graph: Graph, new_nodes=None, new_edges=None, new_root_node=None
+) -> Graph:
+    if new_nodes is None:
+        new_nodes = NestedDict()
+        for k, v in graph.nodes.items():
+            new_nodes[k] = v
+    if new_edges is None:
+        new_edges = NestedList()
+        for edge in graph.edges:
+            new_edges.append(edge)
+    if new_root_node is None:
+        new_root_node = graph.root_node
+    return Graph(
+        nodes=new_nodes,
+        edges=new_edges,
+        label=graph.label,
+        id=graph.id,
+        root_node=new_root_node,
+    )
+
+
 def add_node(
     graph: "Graph", node: Union["Node", "Graph", "GraphNode"], label=None
 ) -> "Graph":
@@ -140,21 +162,22 @@ def add_node(
     node.label = label
 
     if isinstance(node, Node):
-        graph = _add_node_instance(graph, node, label)
+        new_graph = _add_node_instance(graph, node, label)
     elif isinstance(node, Graph):
-        graph = _add_graph_instance(graph, node, label)
+        new_graph = _add_graph_instance(graph, node, label)
     elif isinstance(node, GraphNode):
         if node.node is None:
             # should be done on GraphNode creation
             if label is None:
                 label = node.id
-            node.node = get_node_from_path(node.import_path)(label=label) 
-            
-        graph.nodes[label] = node
+            node.node = get_node_from_path(node.import_path)(label=label)
+
+        new_graph = copy_graph(graph)
+        new_graph.nodes[label] = node
     else:
         raise TypeError(f"Unexpected node type {type(node)}")
-    graph = _expand_node(graph, label)  # TODO: validate that it is recursive
-    return graph
+    new_graph = _expand_node(new_graph, label)  # TODO: validate that it is recursive
+    return new_graph
 
 
 def remove_node(graph: Graph, label: str) -> Graph:
@@ -168,16 +191,28 @@ def remove_node(graph: Graph, label: str) -> Graph:
     Returns:
         Graph: The updated graph with the node and its edges removed.
     """
+    new_graph = copy_graph(graph)
     if label in graph.nodes.keys():
-        del graph.nodes[label]
+        del new_graph.nodes[label]
 
-    edges_to_remove = [edge for edge in graph.edges if edge.source == label or edge.target == label]
+    edges_to_remove = [
+        edge for edge in graph.edges if edge.source == label or edge.target == label
+    ]
     for edge in edges_to_remove:
-        graph.edges.remove(edge)
+        new_graph.edges.remove(edge)
 
-    # TODO: remove node from connected ports?    
+    # TODO: remove node from connected ports?
 
-    return graph
+    return new_graph
+
+
+def remove_edge(graph: Graph, edge: GraphEdge) -> Graph:
+    new_graph = copy_graph(graph)
+    if edge in graph.edges:
+        new_graph.edges.remove(edge)
+    else:
+        raise ValueError(f"Edge {edge} not found in graph")
+    return new_graph
 
 
 def get_graph_from_macro(macro_node: Node) -> Graph:
@@ -212,19 +247,21 @@ def _check_label_exists(graph: Graph, label):
 
 
 def _add_node_instance(graph: Graph, node, label):
-    graph.nodes[label] = GraphNode(
+    new_graph = copy_graph(graph)
+    new_graph.nodes[label] = GraphNode(
         id=label,
         import_path=get_import_path_from_type(node._func),
         node=node,
         label=label,
         widget_type="customNode",
     )
-    return graph
+    return new_graph
 
 
 def _add_graph_instance(graph: Graph, sub_graph: Graph, label: str = None):
+    new_graph = copy_graph(graph)
     sub_graph.id = label
-    graph.nodes[label] = GraphNode(
+    new_graph.nodes[label] = GraphNode(
         id=label,
         node=sub_graph.root_node,
         graph=sub_graph,
@@ -232,7 +269,7 @@ def _add_graph_instance(graph: Graph, sub_graph: Graph, label: str = None):
         node_type="graph",
         widget_type="customNode",
     )
-    return graph
+    return new_graph
 
 
 def add_edge(
@@ -242,8 +279,8 @@ def add_edge(
     sourceHandle: str = None,
     targetHandle: str = None,
 ):
-
-    graph.edges.append(
+    new_graph = copy_graph(graph)
+    new_graph.edges.append(
         GraphEdge(
             source=source,
             sourceHandle=sourceHandle,
@@ -251,7 +288,10 @@ def add_edge(
             targetHandle=targetHandle,
         )
     )
-    return graph
+    if not (source.startswith("var_") or target.startswith("var_")):
+        source_port = new_graph.nodes[source].node.outputs.__getattr__(sourceHandle)
+        new_graph.nodes[target].node.inputs.__setattr__(targetHandle, source_port)
+    return new_graph
 
 
 # tools for expanding and collapsing nodes
@@ -284,9 +324,10 @@ def _remove_var_input_edges(graph: Graph):
         if edge.source.startswith("var_"):
             print(f"removing edge {edge}")
             edges_to_remove.append(edge)
+    new_graph = copy_graph(graph)
     for edge in edges_to_remove:
-        graph.edges.remove(edge)
-    return graph
+        new_graph.edges.remove(edge)
+    return new_graph
 
 
 def _remove_var_input_nodes(graph: Graph):
@@ -294,25 +335,28 @@ def _remove_var_input_nodes(graph: Graph):
     for node_label in graph.nodes.keys():
         if node_label.startswith("var_"):
             nodes_to_remove.append(node_label)
+    new_graph = copy_graph(graph)
     for node_label in nodes_to_remove:
-        del graph.nodes[node_label]
-    return graph
+        del new_graph.nodes[node_label]
+    return new_graph
 
 
 def _optimize_graph_connections(graph):
-    for node_label in _get_expanded_nodes(graph):
-        for i_edge, edge in enumerate(graph.edges):
+    new_graph = copy_graph(graph)
+    for node_label in _get_expanded_nodes(new_graph):
+        for i_edge, edge in enumerate(new_graph.edges):
             if edge.target == node_label:
                 new_edge = _get_inner_edge(graph, edge)
-                graph.edges[i_edge] = new_edge
-    graph = _remove_var_input_edges(graph)
-    graph = _remove_var_input_nodes(graph)
+                new_graph.edges[i_edge] = new_edge
+    new_graph = _remove_var_input_edges(new_graph)
+    new_graph = _remove_var_input_nodes(new_graph)
 
-    return graph
+    return new_graph
 
 
 def _expand_node(graph, node_label: str):
-    graph_node = graph.nodes[node_label]
+    new_graph = copy_graph(graph)
+    graph_node = new_graph.nodes[node_label]
     if graph_node.node_type == "graph":
         graph_node.expanded = True
         node = graph_node.graph
@@ -322,25 +366,27 @@ def _expand_node(graph, node_label: str):
                 node.label
             )  # set parent id, make assignment more robust (easy to confuse id and label)
             v.level += 1
-            graph.nodes[k] = v
+            new_graph.nodes[k] = v
 
         for edge in node.edges:
-            graph.edges.append(edge)
-    return graph
+            new_graph.edges.append(edge)
+    return new_graph
 
 
 def _mark_node_as_collapsed(graph, node_label: str):
-    graph_node = graph.nodes[node_label]
+    new_graph = copy_graph(graph)
+    graph_node = new_graph.nodes[node_label]
     if graph_node.node_type == "graph":
         graph_node.expanded = False
-    return graph
+    return new_graph
 
 
 def _mark_node_as_expanded(graph, node_label: str):
-    graph_node = graph.nodes[node_label]
+    new_graph = copy_graph(graph)
+    graph_node = new_graph.nodes[node_label]
     if graph_node.node_type == "graph":
         graph_node.expanded = True
-    return graph
+    return new_graph
 
 
 def _get_active_nodes(graph: Graph) -> Nodes:
@@ -512,9 +558,6 @@ def get_graph_from_wf(wf: "Workflow", wf_label: str = None) -> Graph:
     if wf_label is None:
         wf_label = wf.label
 
-    for edge in wf._edges:
-        graph += GraphEdge(**edge)
-
     for label, node in wf._nodes.items():
         graph = add_node(graph, node, label=label)
 
@@ -538,8 +581,12 @@ def get_graph_from_wf(wf: "Workflow", wf_label: str = None) -> Graph:
                     label=inp_node_label
                 )  # GraphNode(id=inp_node_label, import_path=value)
 
+    for edge in wf._edges:
+        graph += GraphEdge(**edge)
+
     sorted_graph = topological_sort(graph)
     return sorted_graph
+
 
 def update_input_values(graph: Graph, node_label: str, values: list):
     node: Node = graph.nodes[node_label].node
@@ -549,11 +596,21 @@ def update_input_values(graph: Graph, node_label: str, values: list):
 
     return graph
 
-def update_input_value(graph: Graph, node_label: str, handle: str, value: Union[str, int, float, Node, Port]) -> Graph:
+
+def update_input_value(
+    graph: Graph,
+    node_label: str,
+    handle: str,
+    value: Union[str, int, float, Node, Port],
+) -> Graph:
     node = graph.nodes[node_label].node
-    index = node.inputs.data["label"].index(handle)
+    index = handle  #  node.inputs.data["label"].index(handle)
     node.inputs.data["value"][index] = value
-    if not node.inputs.data["ready"][index] and str(node.inputs.data["default"][index]) != str(value): # TODO: check if value type is correct
+    if not node.inputs.data["ready"][index] and str(
+        node.inputs.data["default"][index]
+    ) != str(
+        value
+    ):  # TODO: check if value type is correct
         node.inputs.data["ready"][index] = True
 
     return graph
@@ -899,14 +956,14 @@ def _graph_to_gui(graph: Graph, remove_none=True) -> dict:
     }
     graph_dict = dict(id="root", layoutOptions=layoutOptions)
 
-    graph = _optimize_graph_connections(graph)
-    nodes = _nodes_to_gui(graph, remove_none=remove_none)
-    edges = _edges_to_gui(graph, remove_none=remove_none)
+    opt_graph = _optimize_graph_connections(graph)
+    nodes = _nodes_to_gui(opt_graph, remove_none=remove_none)
+    edges = _edges_to_gui(opt_graph, remove_none=remove_none)
     children = []
     for node in nodes:
         if not "parentId" in node.keys():  # TODO: make this recursive
-            child = get_child_dict(graph, node)
-            node_children = _gui_children(graph, node)
+            child = get_child_dict(opt_graph, node)
+            node_children = _gui_children(opt_graph, node)
             if len(node_children) > 0:
                 child["children"] = node_children
             children.append(child)
@@ -969,11 +1026,12 @@ class GuiGraph:
 
         w.observe(self.on_value_change, names="commands")
         self._reactflow_widget_status = "running"
+        opt_graph = _optimize_graph_connections(self.graph)
         data = dict(
             #    label=graph.label,
-            nodes=_nodes_to_gui(self.graph),
-            edges=_edges_to_gui(self.graph),
-            graph=_graph_to_gui(self.graph),
+            nodes=_nodes_to_gui(opt_graph),
+            edges=_edges_to_gui(opt_graph),
+            graph=_graph_to_gui(opt_graph),
         )
         time.sleep(0.2)
 
