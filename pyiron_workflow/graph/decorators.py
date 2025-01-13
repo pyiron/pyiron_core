@@ -11,10 +11,41 @@ __date__ = "Jan 3, 2025"
 
 from dataclasses import dataclass
 from collections import OrderedDict
+import importlib
+
+
+def get_import_path_from_type(obj):
+    module = obj.__module__ if hasattr(obj, "__module__") else obj.__class__.__module__
+    name = obj.__name__ if hasattr(obj, "__name__") else obj.__class__.__name__
+    path = f"{module}.{name}"
+    if path == "numpy.ndarray":
+        path = "numpy.array"
+    return path
+
+
+def get_object_from_path(import_path, log=None):
+    # Split the path into module and object part
+    module_path, _, name = import_path.rpartition(".")
+    # print('module_path: ', module_path)
+    # Import the module
+    try:
+        module = importlib.import_module(module_path)
+    except ModuleNotFoundError as e:
+        log.append_stderr(e)
+        return None
+    # Get the object
+    object_from_path = getattr(module, name)
+    return object_from_path
 
 
 def as_dotdict_dataclass(
-    *args, doc_func=None, _repr_html_=None, __add__=None, **kwargs
+    *args,
+    doc_func=None,
+    _repr_html_=None,
+    __add__=None,
+    __getstate__=None,
+    __setstate__=None,
+    **kwargs,
 ):
     # def wf_data_class(*args, doc_func=None, keys_to_store=None, **kwargs):
     """
@@ -39,6 +70,12 @@ def as_dotdict_dataclass(
 
         if __add__ is not None:
             setattr(cls, "__add__", __add__)
+
+        if __getstate__ is not None:
+            setattr(cls, "__getstate__", __getstate__)
+
+        if __setstate__ is not None:
+            setattr(cls, "__setstate__", __setstate__)
 
         # Add new methods
         def keys(self):
@@ -92,9 +129,10 @@ class NestedDict(OrderedDict):
     to display the data is in its transposed form, which represents a pandas DataFrame.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, obj_type=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.index_dict = self._index_dict
+        self._obj_type = obj_type
 
     @property
     def _index_dict(self):
@@ -129,6 +167,29 @@ class NestedDict(OrderedDict):
 
         return self.df._repr_html_()
 
+    def __getstate__(self):
+        state = {k: v.__getstate__() for k, v in self.items()}
+        if self._obj_type is not None:
+            if "_obj_type" not in state:
+                state.update(
+                    _obj_type=get_import_path_from_type(self._obj_type),
+                )
+            else:
+                raise ValueError("key '_obj_type' is reserved for internal use")
+        return state
+
+    def __setstate__(self, state):
+        # Restore the state of the dictionary
+        self.clear()
+        if "_obj_type" in state:
+            self._obj_type = get_object_from_path(state["_obj_type"])
+            del state["_obj_type"]
+
+            self.update({k: self._obj_type().__setstate__(v) for k, v in state.items()})
+        else:
+            self.update(state)
+        return self    
+
 
 def transpose_list_of_dicts(list_of_dicts: list) -> dict:
     # Initialize an empty dictionary to hold the transposed data
@@ -148,8 +209,9 @@ class NestedList(list):
     """NestedList is a list of dictionaries where each dictionary has the same keys. A convinient way to display
     the data is in its transposed form, which represents a pandas DataFrame."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, obj_type=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self._obj_type = obj_type
 
     @property
     def df(self):
@@ -161,3 +223,43 @@ class NestedList(list):
         import pandas as pd
 
         return self.df._repr_html_()
+
+    def __getstate__(self):
+        state = dict(values=[v.__getstate__() for v in self])
+        if self._obj_type is not None:
+            state.update(
+                obj_type=get_import_path_from_type(self._obj_type),
+            )
+        return state
+
+    def __setstate__(self, state):
+        # Restore the state of the list
+        self.clear()
+
+        if "obj_type" in state:
+            self._obj_type = get_object_from_path(state["obj_type"])
+            self.extend([self._obj_type(**v) for v in state["values"]])
+        else:
+            self.extend(state["values"])
+        return self    
+
+    # we need to overwrite the deepcopy and copy methods to
+    # prevent getting the object twice (list is double with the first part coming
+    # from __setstate__)
+    def __deepcopy__(self, memo):
+        import copy
+
+        # Create a new list instance
+        new_list = NestedList()
+        # Ensure each element is deeply copied
+        for item in self:
+            new_list.append(copy.deepcopy(item, memo))
+        # print("deepcopy: ", memo)
+        return new_list
+
+    def __copy__(self):
+        # Create a new list instance
+        new_list = NestedList(obj_type=self._obj_type) 
+        for item in self:
+            new_list.append(item)
+        return new_list

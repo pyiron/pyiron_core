@@ -1,8 +1,8 @@
 from pyiron_workflow import as_function_node
 
 from ase import Atoms as _Atoms
-import numpy as _np
-from typing import Optional
+import numpy as np
+from typing import Optional, Union
 
 
 @as_function_node("plot")
@@ -10,12 +10,15 @@ def Plot3d(
     structure: _Atoms,
     camera: str = "orthographic",
     particle_size: Optional[int | float] = 1.0,
-    select_atoms: Optional[_np.ndarray] = None,
-    view_plane: _np.ndarray = _np.array([0, 0, 1]),
+    select_atoms: Union[np.ndarray, list, None] = None,
+    view_plane: list = None,
     distance_from_camera: Optional[int | float] = 1.0,
 ):
     """Display atomistic structure (ase.Atoms) using nglview"""
     from structuretoolkit import plot3d
+
+    if view_plane is None:
+        view_plane = [1, 1, 1]
 
     return structure.plot3d(
         # structure=structure,

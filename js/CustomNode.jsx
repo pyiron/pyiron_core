@@ -49,21 +49,21 @@ export default memo(({ data }) => {
   const outputFunction = () => {
     // direct output of node to output widget
     console.log("output: ", data.label);
-    model.set("commands", `output: ${data.label}`);
+    model.set("commands", `output: ${data.label} - ${new Date().getTime()}`);
     model.save_changes();
   };
 
   const sourceFunction = () => {
     // show source code of node
     console.log("source: ", data.label);
-    model.set("commands", `source: ${data.label}`);
+    model.set("commands", `source: ${data.label} - ${new Date().getTime()}`);
     model.save_changes();
   };
 
   const expandFunction = () => {
     // expand or collapse the node
-    console.log("expand: ", data.label);
-    model.set("commands", `expand: ${data.label}`);
+    console.log("expand: ", data.label, data.expanded);
+    model.set("commands", `expand: ${data.label} - ${new Date().getTime()}`);
     model.save_changes();
   };
 
@@ -227,7 +227,7 @@ export default memo(({ data }) => {
       </>
     );
   };
-
+  console.log("data (expanded)", data.label, data.expanded);
   return (
     <div>
       {renderLabel(data.label)}

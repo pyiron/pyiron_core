@@ -175,6 +175,8 @@ def type_hint_to_string(type_hint: Any) -> str:
         return "bool"
     elif type_hint is None:
         return "None"
+    elif type_hint is Node:
+        return "Node"
 
     # Handling Optional and Union types (e.g. Optional[int], Union[int, float])
     if hasattr(type_hint, "__origin__") and (type_hint.__origin__ is Union):
@@ -188,7 +190,7 @@ def type_hint_to_string(type_hint: Any) -> str:
     return "NonPrimitive"
 
 
-def extract_input_parameters_from_function(function: callable):
+def extract_input_parameters_from_function(function: callable) -> dict:
     # Extracting function signature
     signature = inspect.signature(function)
 
@@ -360,9 +362,12 @@ class Data:
 class Node:
     def __init__(
         self,
-        func,
-        inputs,
-        outputs,
+        func=None,
+        inputs=Data(
+            {PORT_LABEL: [], PORT_TYPE: [], PORT_DEFAULT: [], PORT_VALUE: []},
+            attribute=Port,
+        ),
+        outputs=Data({PORT_LABEL: [], PORT_TYPE: [], PORT_VALUE: []}, attribute=Port),
         label=None,
         output_labels=None,
         node_type=None,
@@ -371,14 +376,22 @@ class Node:
 
         self.node_type = node_type
 
+        self.inputs = inputs
+        self.outputs = outputs
+
         self._func = func
+        self._workflow = None
+
+        if func is None:
+            return
+        
         if orig_func is None:
             self.function = get_function_data(func)
         else:
             self.function = get_function_data(orig_func)
             self.dataclass = orig_func  # TODO: rather specific to dataclass nodes, needs to be generalized
-        self.inputs = inputs
-        self.outputs = outputs
+
+
         # TODO: improve (add len to data)
         self.inputs.data["node"] = len(self.inputs.data[PORT_LABEL]) * [self]
         self.outputs.data["node"] = len(self.outputs.data[PORT_LABEL]) * [self]
@@ -405,7 +418,7 @@ class Node:
         # print("node_output_labels: ", output_labels)
         # print("node_outputs_labels: ", self.outputs.data[PORT_LABEL], self.label)
 
-        self._workflow = None
+        
 
     @property
     def kwargs(self):
@@ -417,21 +430,27 @@ class Node:
     @property
     def n_out_labels(self):
         return len(self.outputs.data[PORT_LABEL])
-    
+
     @property
     def n_inp_labels(self):
-        return len(self.inputs.data[PORT_LABEL])    
+        return len(self.inputs.data[PORT_LABEL])
 
     def _get_value(self, inp_port, inp_type):
-        node_type_as_str = get_import_path_from_type(Node)
+        # node_type_as_str = get_import_path_from_type(Node)
         if isinstance(inp_port, Node):
-            if inp_type == node_type_as_str:
+            # check whether input type is a node (provide node rather than node output value)
+            if inp_type == "Node":  # node_type_as_str:
                 val = inp_port
             else:
                 val = inp_port.outputs.data["value"][0]
         elif isinstance(inp_port, Port):
-            # print("port")
-            val = inp_port.value
+            if (
+                inp_type == "Node"
+            ):  # should be used only as quick fix (node rather than port should be provided)
+                val = inp_port.node
+            else:
+                val = inp_port.value
+
         else:
             val = inp_port
 
@@ -447,9 +466,19 @@ class Node:
                 new_values.append(args[len(new_values)])
             else:
                 new_values.append(self.inputs.data[PORT_VALUE][labels.index(key)])
-            print("new_values: ", new_values)
+            # print("new_values: ", new_values)
         self.inputs.data[PORT_VALUE] = new_values
         return self.run()
+
+    def __getstate__(self):
+        state = dict(
+            label=self.label,
+            import_path=self.function.import_path,
+        )
+        return state
+
+    def _set_state(self, state):
+        pass
 
     def run(self):
         self._validate_input()
@@ -460,7 +489,9 @@ class Node:
 
     def _validate_input(self):
         if not all(self.inputs.data["ready"]):
-            raise ValueError("Input data missing")
+            raise ValueError(
+                "Input data missing", self.label, self.inputs.data["ready"]
+            )
 
     def _run_set_values(self, out):
         for i in range(self.n_out_labels):
@@ -492,15 +523,21 @@ class Node:
                 self.inputs.data[PORT_VALUE],
                 self.inputs.data[PORT_DEFAULT],
             )
-            if default == NotData
+            if default == NotData and not isinstance(v, (Node, Port))
         }
 
-    def to_dict(self):
-        return {
-            "label": self.label,
-            "function": self.function["import_path"],
-            "inputs": self._get_non_default_input(),
-        }
+    def __getstate__(self):
+        return dict(
+            label=self.label,
+            function=self.function["import_path"],
+            inputs=self._get_non_default_input(),
+        )
+
+    # @classmethod
+    def __setstate__(self, state):
+        self = get_node_from_path(state["function"])(**state["inputs"])
+        self.label = state["label"]
+        return self
 
     @classmethod
     def from_dict(cls, node_dict):
@@ -622,8 +659,8 @@ def make_node_decorator(
                 import copy
 
                 # print('inner: ', f_args, f_kwargs, inspect.getsource(func))
-                if hasattr(func, "__wrapped__"):        
-                    print('wrapped: ', func.__wrapped__)
+                if hasattr(func, "__wrapped__"):
+                    print("wrapped: ", func.__wrapped__)
 
                 cf_kwargs = copy.copy(f_kwargs)
                 # print("inner_wrapper: ", inner_wrap_return_func)
@@ -636,7 +673,7 @@ def make_node_decorator(
                     func, label, output_labels, node_type, *f_args, **cf_kwargs
                 )
 
-            # if hasattr(func, "__wrapped__"):        
+            # if hasattr(func, "__wrapped__"):
             #     print('wrapped: ', func.__wrapped__)
             inner_wrapper.__name__ += name_postfix
 

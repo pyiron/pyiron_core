@@ -63,10 +63,10 @@ def CalcMD(calculator_input: Optional[InputCalcMD] = None):
     from dataclasses import asdict
 
     if calculator_input is None:
-        calculator_input = InputCalcMD()
+        calculator_input = InputCalcMD().run()
 
     # print('calculator_input: ', calculator_input.run())
-    calculator_kwargs = asdict(calculator_input.run())
+    calculator_kwargs = asdict(calculator_input)
     # print('kwargs: ', calculator_kwargs)
     # calculator_kwargs = parse_input_kwargs(calculator_input, InputCalcMD)
     calculator = LammpsControl()
@@ -87,7 +87,7 @@ def InitLammps(
     import os
     from pyiron_atomistics.lammps.potential import LammpsPotential, LammpsPotentialFile
 
-    print('structure: ', structure)
+    # print('structure: ', structure)
 
     if create_dir:
         os.makedirs(working_directory, exist_ok=True)
@@ -280,7 +280,7 @@ def Code(
 
     from pyiron_workflow import Workflow
 
-    print("structure: ", structure)
+    # print("structure: ", structure)
 
     wf = Workflow("LammpsMacro")
 
@@ -288,11 +288,12 @@ def Code(
 
     # wf.ListPotentials = ListPotentials(structure=structure)
 
-   #  wf.calc = Calc(calculator)
+    # wf.calc = CalcMD(calculator)
 
     wf.InitLammps = InitLammps(
         structure=structure,
         potential=potential, # wf.Potential,
+        # calculator=wf.calc,
         calculator=calculator,
         working_directory=working_dir,
     )

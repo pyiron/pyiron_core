@@ -17,14 +17,36 @@ from pyiron_workflow.graph.decorators import (
     NestedDict,
     NestedList,
     transpose_list_of_dicts,
+    get_import_path_from_type,
 )
 from typing import Union, List
 import pandas as pd
 
 
-@as_dotdict_dataclass()
+def _getstate__graph_node(self):
+    node_dict = {k: self[k] for k in self.keys() if k != "node"}
+    if self.node is not None:
+        node_dict["node"] = self.node.__getstate__()
+    # node_dict["node"] = self.node.__getstate__()
+    if self.graph is not None:
+        node_dict["graph"] = self.graph.__getstate__()
+    return node_dict
+
+
+def _setstate__graph_node(self, state):
+    for k, v in state.items():
+        if k == "node":
+            self.node = Node().__setstate__(v)
+        else:
+            self[k] = v
+    return self
+
+
+@as_dotdict_dataclass(
+    __getstate__=_getstate__graph_node, __setstate__=_setstate__graph_node
+)
 class GraphNode:
-    id: str  # unique identifier for the node (no two nodes can have the same id)
+    id: str = None  # unique identifier for the node (no two nodes can have the same id)
     import_path: str = None  # import path to the node
     label: str = None  # label/name of the node
     parent_id: str = None  # parent node id
@@ -36,7 +58,19 @@ class GraphNode:
     expanded: bool = False  # expanded or collapsed state
 
 
-@as_dotdict_dataclass()
+def _getstate_GraphEdge(self):
+    return self.asdict(remove_none=True)
+
+
+def _setstate_GraphEdge(self, state):
+    for k, v in state.items():
+        self.__setattr__(k, v)
+    return self
+
+
+@as_dotdict_dataclass(
+    __getstate__=_getstate_GraphEdge, __setstate__=_setstate_GraphEdge
+)
 class GraphEdge:
     source: str
     target: str
@@ -45,7 +79,7 @@ class GraphEdge:
 
 
 Nodes = NestedDict[str, GraphNode]
-Edges = NestedList[str, GraphEdge]  # TODO: make it a NestedList?
+Edges = NestedList[str, GraphEdge]
 
 
 def _add_obj_to_graph(graph, obj):
@@ -58,7 +92,34 @@ def _add_obj_to_graph(graph, obj):
     return new_graph
 
 
-@as_dotdict_dataclass(__add__=_add_obj_to_graph)
+def _getstate__graph(self):
+    state = dict(
+        label=self.label,
+        nodes=self.nodes.__getstate__(),
+        edges=self.edges.__getstate__(),
+    )
+    if self.root_node is not None:
+        state["root_node"] = self.root_node.__getstate__()
+    return state
+
+
+def _setstate__graph(self, state):
+    self.label = state["label"]
+    self.nodes = Nodes().__setstate__(state["nodes"])
+    edges = Edges().__setstate__(state["edges"])
+    for edge in edges:
+        self += edge
+    # self.edges = Edges().__setstate__(state["edges"])
+    if "root_node" in state:
+        self.root_node = GraphNode().__setstate__(state["root_node"])
+    return self
+
+
+@as_dotdict_dataclass(
+    __add__=_add_obj_to_graph,
+    __getstate__=_getstate__graph,
+    __setstate__=_setstate__graph,
+)
 class Graph:
     # (TODO: check whether we need both id and label)
     id: str = None  # to make it behave like a node
@@ -66,8 +127,8 @@ class Graph:
     root_node: Node = (
         None  # root node of the graph (if the graph represents a macro node)
     )
-    nodes: Nodes = field(default_factory=lambda: NestedDict())
-    edges: Edges = field(default_factory=lambda: NestedList())
+    nodes: Nodes = field(default_factory=lambda: NestedDict(obj_type=GraphNode))
+    edges: Edges = field(default_factory=lambda: NestedList(obj_type=GraphEdge))
     graph: dict = field(default_factory=lambda: {})
 
 
@@ -95,6 +156,7 @@ class GuiData:
     target_types: list = field(default_factory=lambda: [])
     source_values: list = field(default_factory=lambda: [])
     source_types: list = field(default_factory=lambda: [])
+    expanded: bool = False
 
 
 @as_dotdict_dataclass()
@@ -107,46 +169,10 @@ class GuiStyle:
     borderRadius: str = "10px"
 
 
-def get_import_path_from_type(obj):
-    module = obj.__module__ if hasattr(obj, "__module__") else obj.__class__.__module__
-    name = obj.__name__ if hasattr(obj, "__name__") else obj.__class__.__name__
-    path = f"{module}.{name}"
-    if path == "numpy.ndarray":
-        path = "numpy.array"
-    return path
+def copy_graph(graph: Graph) -> Graph:
+    from copy import copy
 
-
-def create_graph(
-    nodes: Nodes = None, edges: Edges = None, label=None, id="graph", root_node=None
-) -> Graph:
-    nodes = nodes if nodes is not None else NestedDict()
-    edges = edges if edges is not None else NestedList()
-    if label is None:
-        label = id
-
-    return Graph(nodes=nodes, edges=edges, label=label, id=id, root_node=root_node)
-
-
-def copy_graph(
-    graph: Graph, new_nodes=None, new_edges=None, new_root_node=None
-) -> Graph:
-    if new_nodes is None:
-        new_nodes = NestedDict()
-        for k, v in graph.nodes.items():
-            new_nodes[k] = v
-    if new_edges is None:
-        new_edges = NestedList()
-        for edge in graph.edges:
-            new_edges.append(edge)
-    if new_root_node is None:
-        new_root_node = graph.root_node
-    return Graph(
-        nodes=new_nodes,
-        edges=new_edges,
-        label=graph.label,
-        id=graph.id,
-        root_node=new_root_node,
-    )
+    return Graph(label=graph.label, nodes=copy(graph.nodes), edges=copy(graph.edges))
 
 
 def add_node(
@@ -289,9 +315,15 @@ def add_edge(
         )
     )
     if not (source.startswith("var_") or target.startswith("var_")):
-        source_port = new_graph.nodes[source].node.outputs.__getattr__(sourceHandle)
-        new_graph.nodes[target].node.inputs.__setattr__(targetHandle, source_port)
+        new_graph = _update_target_port(new_graph, new_graph.edges[-1])
     return new_graph
+
+
+def _update_target_port(graph: Graph, edge: GraphEdge):
+    source_port = graph.nodes[edge.source].node.outputs.__getattr__(edge.sourceHandle)
+    graph.nodes[edge.target].node.inputs.__setattr__(edge.targetHandle, source_port)
+    # print(f"updated target port {edge.targetHandle} in node {edge.target}, {source_port}")
+    return graph
 
 
 # tools for expanding and collapsing nodes
@@ -322,7 +354,7 @@ def _remove_var_input_edges(graph: Graph):
     edges_to_remove = []
     for edge in graph.edges:
         if edge.source.startswith("var_"):
-            print(f"removing edge {edge}")
+            # print(f"removing edge {edge}")
             edges_to_remove.append(edge)
     new_graph = copy_graph(graph)
     for edge in edges_to_remove:
@@ -348,6 +380,8 @@ def _optimize_graph_connections(graph):
             if edge.target == node_label:
                 new_edge = _get_inner_edge(graph, edge)
                 new_graph.edges[i_edge] = new_edge
+                # update edge port in target node
+                new_graph = _update_target_port(new_graph, new_edge)
     new_graph = _remove_var_input_edges(new_graph)
     new_graph = _remove_var_input_nodes(new_graph)
 
@@ -403,7 +437,7 @@ def _get_active_nodes(graph: Graph) -> Nodes:
 
 
 def _get_active_edges(graph: Graph) -> Edges:
-    active_edges = NestedList()
+    active_edges = NestedList(obj_type=GraphEdge)
     active_nodes = _get_active_nodes(graph)
     # get all edges that are not inside a collapsed node
     for edge in graph.edges:
@@ -495,7 +529,7 @@ def _find_input_nodes(graph: Graph, last_node_id):
 def _get_subgraph(graph: Graph, node_indices):
     edges = graph.edges
     subgraph_nodes = graph.nodes.iloc(node_indices)
-    subgraph_edges = NestedList()
+    subgraph_edges = NestedList(obj_type=GraphEdge)
     integer_edges = _convert_to_integer_representation(graph)
     for i, (id_source, id_target) in enumerate(integer_edges):
         if id_source in node_indices and id_target in node_indices:
@@ -710,30 +744,26 @@ def _get_node_labels(graph: Graph):
     return [node_label for node_label in graph.nodes.keys()]
 
 
-def pull_node(wf: "Workflow", node_label: str):
+def pull_node(graph: Graph, node_label: str):
     """
     Pull a node from the workflow graph and run it. Execute only nodes that
     are required as input to run the node.
 
     Args:
-        wf (Workflow): The workflow containing the node.
+        graph (Graph): The graph containing the node.
         node_label (str): The label of the node to pull.
     """
-    graph = get_graph_from_wf(wf)
-    node_labels = _get_node_labels(graph)
+    opt_graph = _optimize_graph_connections(graph)
+    node_labels = _get_node_labels(opt_graph)
     if node_label not in node_labels:
         raise ValueError(f"Node label '{node_label}' not found in the workflow graph.")
     node_index = node_labels.index(node_label)
-    input_nodes = _find_input_nodes(graph, node_index)
+    input_nodes = _find_input_nodes(opt_graph, node_index)
     input_nodes_labels = [node_labels[i] for i in input_nodes]
 
-    # try:
     for input_node_label in input_nodes_labels:
-        out = wf._nodes[input_node_label].run()
+        out = opt_graph.nodes[input_node_label].node.run()
     return out
-    # except Exception as e:
-    #     print(f"Error running node '{input_node_label}': {e}")
-    #     return False
 
 
 def graph_edges_to_wf_edges(graph_edges: List[Tuple[str, str]]):
@@ -787,22 +817,25 @@ def get_wf_from_graph(graph: Graph) -> "Workflow":
 
 def _save_graph(
     graph: Graph,
-    filename: str | pathlib.Path,
+    filename: str | pathlib.Path = None,
     workflow_dir: str = ".",
-    overwrite=False,
+    overwrite: bool = False,
 ):
+    if filename is None:
+        filename = f"{graph.label}.json"
+
     if isinstance(filename, str):
         filename = pathlib.Path(filename)
 
-    file = workflow_dir / filename
-    # check that file does not exist
+    file = pathlib.Path(workflow_dir) / filename
     if file.exists() and not overwrite:
         raise FileExistsError(
             f"File '{filename}' already exists in dir {workflow_dir}."
         )
 
     with open(file, "w") as f:
-        f.write(json.dumps((graph.label, graph.nodes, graph.edges)))
+        f.write(json.dumps((graph.__getstate__()), indent=4))
+        
     return True
 
 
@@ -810,15 +843,14 @@ def _load_graph(filename: str | pathlib.Path, workflow_dir: str = "."):
     if isinstance(filename, str):
         filename = pathlib.Path(filename)
 
-    file = workflow_dir / filename
-    # check that file exists
-    if not file.exists():
+    wf_file = workflow_dir / filename
+    if not wf_file.exists():
         raise FileNotFoundError(f"File '{filename}' not found in dir {workflow_dir}.")
 
-    with open(file, "r") as f:
-        label, nodes, edges = json.load(f)
+    with open(wf_file, "r") as f:
+        graph = Graph().__setstate__(json.load(f))
 
-    return Graph(label=label, nodes=nodes, edges=edges)
+    return graph
 
 
 ####################################################################################################
@@ -826,7 +858,7 @@ def _load_graph(filename: str | pathlib.Path, workflow_dir: str = "."):
 ####################################################################################################
 
 
-def gui_data(node: Node, key=None):
+def gui_data(node: Node, key: str = None, expanded: bool = False) -> GuiData:
     from pyironflow.wf_extensions import NotData, _to_jsonifyable, _is_connected
 
     label = key  # node.label
@@ -858,6 +890,7 @@ def gui_data(node: Node, key=None):
         target_types=target_types,
         source_values=[NotData for _ in node.outputs.data["value"]],
         source_types=node.outputs.data["type"],
+        expanded=expanded,
     )
 
 
@@ -876,10 +909,13 @@ def _nodes_to_gui(graph: Graph, remove_none=True) -> NestedList:
     nodes = NestedList()
     active_nodes = _get_active_nodes(graph)
     for i, (k, v) in enumerate(active_nodes.items()):
+        # print("gui node: ", k, v.label, v.expanded)
         # print('node: ', k, v.label, v.node.label)
         node_dict = GuiNode(
             id=k,
-            data=gui_data(v.node, key=k).asdict(remove_none=remove_none),
+            data=gui_data(v.node, key=k, expanded=v.expanded).asdict(
+                remove_none=remove_none
+            ),
             position=dict(x=i * (node_width + 20), y=0),
             style=GuiStyle(width=node_width, height=_get_node_height(v.node)).asdict(
                 remove_none=remove_none
@@ -891,7 +927,9 @@ def _nodes_to_gui(graph: Graph, remove_none=True) -> NestedList:
         )
         if v.expanded:
             node_dict["type"] = "customNode"
-            node_dict["data"] = GuiData(label=v.label).asdict(remove_none=remove_none)
+            node_dict["data"] = GuiData(label=v.label, expanded=True).asdict(
+                remove_none=remove_none
+            )
         if v.parent_id is not None:
             node_dict.parentId = v.parent_id
             node_dict.extent = "parent"

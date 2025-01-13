@@ -14,6 +14,7 @@ import { getLayoutedNodes } from "./useElkLayout";
 // import ELK from "elkjs/lib/elk.bundled.js";
 import {
   ReactFlow,
+  ReactFlowProvider,
   Controls,
   ControlButton,
   MiniMap,
@@ -21,9 +22,16 @@ import {
   applyEdgeChanges,
   applyNodeChanges,
   addEdge,
+  Panel,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { SymbolIcon } from "@radix-ui/react-icons";
+import {
+  SymbolIcon,
+  UploadIcon,
+  DownloadIcon,
+  Cross1Icon,
+  Pencil1Icon,
+} from "@radix-ui/react-icons";
 
 import TextUpdaterNode from "./TextUpdaterNode.jsx";
 import CustomNode from "./CustomNode.jsx";
@@ -44,20 +52,11 @@ const render = createRender(() => {
   console.log("rendering");
   const model = useModel();
 
-  //   const new_data = model.get("mydata");
-  //   console.log("load data: ", new_data);
-  //   const data = JSON.parse(new_data);
-
-  //   console.log("load data: ", data);
-
-  //   const new_nodes = model.get("nodes");;  // data.nodes;
-  //   const initialNodes = JSON.parse(new_nodes);
-  //   const initialEdges = data.edges;
-  //   const initialGraph = data.graph;
-
-  const initialNodes = JSON.parse(model.get("nodes"));
-  const initialEdges = JSON.parse(model.get("edges"));
-  //   console.log('initialData: ', initialNodes, initialEdges);
+  //   const initialNodes = JSON.parse(model.get("nodes"));
+  //   const initialEdges = JSON.parse(model.get("edges"));
+  const initialNodes = [];
+  const initialEdges = [];
+  console.log("initialData: ", initialNodes, initialEdges);
 
   const [nodes, setNodes] = useState(initialNodes);
   const [edges, setEdges] = useState(initialEdges);
@@ -164,8 +163,8 @@ const render = createRender(() => {
       setNodes((nds) => {
         const new_nodes = applyNodeChanges(changes, nds);
         console.log("onNodesChange: ", changes, new_nodes);
-        // model.set("nodes", JSON.stringify(new_nodes));
-        // model.save_changes();
+        model.set("nodes", JSON.stringify(new_nodes));
+        model.save_changes();
         return new_nodes;
       });
     },
@@ -177,8 +176,8 @@ const render = createRender(() => {
       setEdges((eds) => {
         console.log("onEdgesChange: ", changes);
         const new_edges = applyEdgeChanges(changes, eds);
-        // model.set("edges", JSON.stringify(new_edges));
-        // model.save_changes();
+        model.set("edges", JSON.stringify(new_edges));
+        model.save_changes();
         return new_edges;
       });
     },
@@ -247,6 +246,50 @@ const render = createRender(() => {
     model.save_changes();
   };
 
+  const saveFlow = (id) => {
+    // save data on python side
+    console.log("saveFlow: ", id);
+    model.set("commands", `saveFlow: __global__ - ${new Date().getTime()}`);
+    model.save_changes();
+  };
+
+  const restoreFlow = (id) => {
+    // restore data on python side
+    console.log("restoreFlow: ", id);
+    model.set("commands", `restoreFlow: __global__ - ${new Date().getTime()}`);
+    model.save_changes();
+  };
+
+  const clearFlow = (id) => {
+    // delete data on python side
+    console.log("clearFlow: ", id);
+    model.set(
+      "commands",
+      `clearFlow: __global__ - ${new Date().getTime()}`
+    );
+    model.save_changes();
+  };
+
+  const renameWorkflow = (id) => {
+    // rename data on python side
+    console.log("renameWorkflow: ", id);
+    model.set(
+      "commands",
+      `renameWorkflow: __global__ - ${new Date().getTime()}`
+    );
+    model.save_changes();
+  };
+
+  const saveWorkflowName = (name) => {
+    // rename data on python side
+    console.log("saveWorkflowName: ", name);
+    model.set(
+      "commands",
+      `saveWorkflowName: ${name} - ${new Date().getTime()}`
+    );
+    model.save_changes();
+  };
+
   const setPosition = useCallback(
     (pos) =>
       setNodes((nodes) =>
@@ -288,10 +331,36 @@ const render = createRender(() => {
           <Background variant="dots" gap={12} size={1} />
           <MiniMap />
           <Controls orientation="horizontal" position="top-left">
-            <ControlButton onClick={refreshGraphView}>
+            <ControlButton
+              onClick={refreshGraphView}
+              title="Refresh Graph View"
+            >
               <SymbolIcon />
             </ControlButton>
+            <ControlButton onClick={saveFlow} title="Save Flow">
+              <UploadIcon />
+            </ControlButton>
+            <ControlButton onClick={restoreFlow} title="Restore Flow">
+              <DownloadIcon />
+            </ControlButton>
+            <ControlButton onClick={clearFlow} title="Delete Workflow">
+              <Cross1Icon />
+            </ControlButton>
+            {/* <ControlButton onClick={renameWorkflow} title="Rename Workflow">
+              <Pencil1Icon />
+            </ControlButton> */}
           </Controls>
+          <Panel position="top-right">
+            <input
+              type="text"
+              placeholder="Enter workflow name"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  saveWorkflowName(e.target.value);
+                }
+              }}
+            />
+          </Panel>
         </ReactFlow>
       </UpdateDataContext.Provider>
     </div>
