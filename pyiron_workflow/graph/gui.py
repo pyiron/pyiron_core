@@ -210,7 +210,7 @@ class PyironFlowWidget:
     def update_gui(self):
         import time
 
-        print("update_gui")
+        # print("update_gui")
 
         opt_graph = base._optimize_graph_connections(self.graph)
         data = dict(
@@ -311,7 +311,7 @@ class PyironFlow:
         self.view_flows.observe(self.on_tab_change, names="selected_index")
 
     def update_accordion(self, tab_index, old_index=None):
-        print("update_accordion", tab_index)
+        # print("update_accordion", tab_index)
         if old_index is not None:
             self.wf_widgets[old_index]._accordion_index = old_index
         self._tab_index = tab_index
@@ -338,7 +338,7 @@ class PyironFlow:
         return tab
 
     def display_workflow(self, index: int, out_flow=None):
-        print("display_workflow", index)
+        # print("display_workflow", index)
         w = self.wf_widgets[index]
         w.update_gui()
 
