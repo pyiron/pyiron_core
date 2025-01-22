@@ -45,7 +45,7 @@ def get_rel_path_for_last_occurrence(path: Path, relpath_start: str) -> int:
 
 
 class TreeView:
-    def __init__(self, root_path=None, flow_widget=None, log=None):
+    def __init__(self, root_path=None, flow_widget=None, log=None, layout=None):
         """
         This function generates and returns a tree view of nodes starting from the
         root_path directory.
@@ -75,7 +75,9 @@ class TreeView:
         self.flow_widget = flow_widget
         self.log = log  # logging widget
 
-        self.gui = Tree(stripes=True)
+        if layout is None:
+            layout = {'width': '400px'}
+        self.gui = Tree(stripes=True, layout=layout)
         self.add_nodes(self.gui, parent_node=self.path)
         # the following flag is needed since handle click sends two signals, the first repeats the last one from the
         # previous click

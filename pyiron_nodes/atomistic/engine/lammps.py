@@ -273,7 +273,7 @@ def GetEnergyPot(generic, i_start: int = 0, i_end: int = -1):
 @as_macro_node("generic")
 def Code(
     structure: Atoms,
-    calculator, # =InputCalcStatic(),  # TODO: Don't use mutable defaults
+    calculator,  # =InputCalcStatic(),  # TODO: Don't use mutable defaults
     potential: Optional[str] = None,
     working_dir: str = "test2",
 ):
@@ -292,7 +292,7 @@ def Code(
 
     wf.InitLammps = InitLammps(
         structure=structure,
-        potential=potential, # wf.Potential,
+        potential=potential,  # wf.Potential,
         # calculator=wf.calc,
         calculator=calculator,
         working_directory=working_dir,
@@ -312,3 +312,49 @@ def Code(
     )
 
     return wf.Collect
+
+@as_function_node
+def DummyNode(structure1: Atoms, structure2: Atoms):
+    return structure1
+
+@as_macro_node(labels=["generic", "path"])
+def Code1(
+    structure: Atoms,
+    calculator,  # =InputCalcStatic(),  # TODO: Don't use mutable defaults
+    potential: Optional[str] = None,
+    working_dir: str = "test2",
+):
+
+    from pyiron_workflow import Workflow
+
+    wf = Workflow("LammpsMacro")
+
+    wf.Potential = Potential(structure=structure, name=potential)
+    wf.DummyNode = DummyNode(structure1=structure, structure2=structure)    
+
+    wf.ListPotentials = ListPotentials(structure=structure)
+
+    # wf.calc = CalcMD(calculator)
+
+    wf.InitLammps = InitLammps(
+        structure=structure,
+        potential=wf.Potential,
+        # calculator=wf.calc,
+        calculator=calculator,
+        working_directory=working_dir,
+    )
+
+    wf.Shell = Shell(
+        # command=ExecutablePathResolver(module="lammps", code="lammps").path(),
+        working_directory=wf.InitLammps,
+    )
+
+    wf.ParseLogFile = ParseLogFile(log_file=wf.Shell.outputs.log)
+    wf.ParseDumpFile = ParseDumpFile(dump_file=wf.Shell.outputs.dump)
+    wf.Collect = Collect(
+        out_dump=wf.ParseDumpFile.outputs.dump,
+        out_log=wf.ParseLogFile.outputs.log,
+        calc_mode="md",  # wf.calc,
+    )
+
+    return wf.Collect, wf.InitLammps.outputs.path

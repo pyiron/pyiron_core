@@ -250,7 +250,7 @@ class NestedList(list):
         import copy
 
         # Create a new list instance
-        new_list = NestedList()
+        new_list = NestedList(obj_type=self._obj_type)
         # Ensure each element is deeply copied
         for item in self:
             new_list.append(copy.deepcopy(item, memo))

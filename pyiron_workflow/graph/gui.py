@@ -8,27 +8,28 @@ import pyiron_workflow.graph.base as base
 from pyironflow.treeview import TreeView
 from dataclasses import dataclass
 import ipywidgets as widgets
+from IPython.display import display
+import threading
+import time
+
+
+class GUILayout:
+    flow_widget_width = 1200
+    flow_widget_height = 800
+    output_widget_width = 400
+
 
 """
 Connect graph with ReactflowWidget and other GUI elements for interactive graph/workflow visualization
 """
 
 
-@dataclass
-class GuiWidgets:
-    output: widgets = None
-    tree: widgets = None
-    log: widgets = None
-    flow: ReactFlowWidget = None  # ReactFlowWidget()
-    accordion: widgets = None
-    gui: widgets = None  # central widget containing all other widgets
-
-
 class PyironFlowWidget:
     def __init__(
         self,
         wf: Optional[Union["Workflow", "Graph"]] = None,
-        widgets: GuiWidgets = GuiWidgets(),
+        gui_layout: GUILayout = GUILayout(),
+        main_widget=None,
         hash_nodes=False,
     ):
 
@@ -42,32 +43,53 @@ class PyironFlowWidget:
         else:
             raise ValueError("wf must be a Workflow or Graph object")
 
-        self.widgets = widgets
-        if self.widgets.flow is None:
-            self.widgets.flow = ReactFlowWidget()
-        # self.gui = self.widgets.flow
-
         self.graph = graph
+        self.main_widget = main_widget
 
         # if hash_nodes:
         #     self.db = hs.create_nodes_table(echo=False)
         # else:
         self.db = None
+        self.hash_nodes = hash_nodes
 
-        self.widgets.flow.observe(self.on_value_change, names="commands")
+        self.flow_widget = ReactFlowWidget(
+            layout={
+                "width": f"{gui_layout.flow_widget_width}px",
+                "height": f"{gui_layout.flow_widget_height}px",
+            }
+        )
+        self.flow_widget.observe(self.on_value_change, names="commands")
+
+        layout_accordion_widgets = {
+            "border": "1px solid black",
+            "width": f"{gui_layout.output_widget_width}px",
+            "max_height": f"{gui_layout.flow_widget_height}px",
+            "overflow": "auto",
+        }
+
+        self.log_widget = widgets.Output(layout=layout_accordion_widgets)
+
+        self.out_widget = widgets.Output(layout=layout_accordion_widgets)
+        self.tree_widget = TreeView(
+            log=self.log_widget, layout=layout_accordion_widgets
+        )
+        self.tree_widget.flow_widget = self
+
+        self.accordion_widget = widgets.Accordion(
+            layout={  # 'border': '1px solid black',
+                "min_width": f"{gui_layout.output_widget_width + 50}px",
+                "height": f"{gui_layout.flow_widget_height}px",
+                "overflow": "auto",
+            },
+        )
+        self.accordion_widget.children = [
+            self.tree_widget.gui,
+            self.out_widget,
+            self.log_widget,
+        ]
+        self.accordion_widget.titles = ["Node Library", "Output", "Logging Info"]
         self._counter = 0
-        self._accordion_index = 1
-
-        # self.update_gui()
-
-    def _renew_gui(self):
-        self.widgets.flow = ReactFlowWidget()
-        self.widgets.flow.observe(self.on_value_change, names="commands")
-        self._counter = 0
-
-    @property
-    def gui(self):
-        return self.widgets.flow
+        self.update_graph_view()
 
     def _parse_edge_string(self, edge_str):
         """
@@ -86,19 +108,15 @@ class PyironFlowWidget:
             source.strip(), target.strip(), source_handle.strip(), target_handle.strip()
         )
 
+    # handle the commands from the ReactFlowWidget
     def on_value_change(self, change):
         from IPython.display import display
 
         print("on_value_change: ", change["new"], change["old"], change["name"])
 
-        self.widgets.output.clear_output()
-        # self.graph = self.update_graph_nodes()
-        # self.graph = self.update_graph_edges()
+        self.out_widget.clear_output()
 
-        # if "done" in change["new"]:
-        #     return
-
-        with self.widgets.output:
+        with self.out_widget:
             import warnings
 
             with warnings.catch_warnings():
@@ -124,16 +142,14 @@ class PyironFlowWidget:
                     print("clearFlow")
                     label = self.graph.label
                     self.graph = Graph(label=label)
-                    self.widgets.gui.view_flows.set_title(
-                        self.widgets.gui._tab_index, self.graph.label
-                    )
+                    tab = self.main_widget.tab_widget
+                    tab.set_title(tab.selected_index, self.graph.label)
                     self.update_gui()
                 elif command == "saveWorkflowName":
                     print("saveWorkflowName: ", node_name)
                     self.graph.label = node_name
-                    self.widgets.gui.view_flows.set_title(
-                        self.widgets.gui._tab_index, self.graph.label
-                    )
+                    tab = self.main_widget.tab_widget
+                    tab.set_title(tab.selected_index, self.graph.label)
                     self.update_gui()  # ???
                 elif command == "add_node":
                     print("add_node: ", node_name)
@@ -169,15 +185,15 @@ class PyironFlowWidget:
                         from pygments.lexers import Python2Lexer
                         from pygments.formatters import TerminalFormatter
 
-                        self.widgets.accordion.selected_index = 1
+                        self.accordion_widget.selected_index = 1
                         node = self.graph.nodes[node_name].node
                         code = inspect.getsource(node._func)
 
                         print(highlight(code, Python2Lexer(), TerminalFormatter()))
 
                     elif command == "run":
-                        self.widgets.accordion.selected_index = 1
-                        self.widgets.output.clear_output()
+                        self.accordion_widget.selected_index = 1
+                        self.out_widget.clear_output()
                         if self.db is None:
                             out = base.pull_node(self.graph, node.label)
                             # out = node.pull()
@@ -200,18 +216,20 @@ class PyironFlowWidget:
                                 self.graph, node_name
                             )
                             print("expanded")
-                        self.update_gui()
+                        print(
+                            "expanded: ",
+                            node_name,
+                            self.graph.nodes[node_name].expanded,
+                        )
+                        self.main_widget.redraw()
+
                     else:
                         print("node command not recognized")
 
                 else:
                     print("graph command not recognized")
 
-    def update_gui(self):
-        import time
-
-        # print("update_gui")
-
+    def update_gui(self, export_data=True, sleep_time=0.2):
         opt_graph = base._optimize_graph_connections(self.graph)
         data = dict(
             #    label=graph.label,
@@ -222,25 +240,29 @@ class PyironFlowWidget:
         )
         self._counter += 1
 
-        self.widgets.flow.mydata = json.dumps(data)
+        time.sleep(sleep_time)
+        if export_data:
+            self.flow_widget.mydata = json.dumps(data)
+
+        return data
+
+    def update_graph_view(self, sleep_time=0.2):
+        if not hasattr(self, "_thread") or not self._thread.is_alive():
+            self._thread = threading.Thread(
+                target=self.update_gui,
+                kwargs={"export_data": True, "sleep_time": sleep_time},
+            )
+            self._thread.start()
 
     def add_node(self, node_path, label):
-        # self.update_graph_nodes()
-        self.graph += base.GraphNode(
-            id=label, import_path=node_path, widget_type="customNode", label=label
-        )
+        node = base.get_node_from_path(node_path)(label=label) 
+        self.graph += node
         self.update_gui()
 
 
 ############################################################################################################
 # pyironflow_widget
 ############################################################################################################
-
-
-class GUILayout:
-    flow_widget_width = 1200
-    flow_widget_height = 800
-    output_widget_width = 400
 
 
 class PyironFlow:
@@ -251,121 +273,113 @@ class PyironFlow:
         if wf_list is None:
             wf_list = [Graph(label="Workflow")]
 
-        self._gui_layout = gui_layout
-        self.accordion = widgets.Accordion(
-            layout={  # 'border': '1px solid black',
-                "min_width": f"{gui_layout.output_widget_width}px",
-                "max_height": f"{self._gui_layout.flow_widget_height}px",
-                "overflow": "auto",
-            },
-        )
+        # self._gui_layout = gui_layout
+        self.hash_nodes = hash_nodes
+        self.gui_layout = gui_layout
 
-        self.workflows = wf_list
-
-        self.wf_widgets = list()
-        for wf in self.workflows:
-            # create widgets for each workflow
-            out_log = widgets.Output(
-                layout={
-                    "border": "1px solid black",
-                    "width": f"{gui_layout.output_widget_width}px",
-                    "max_height": f"{self._gui_layout.flow_widget_height}px",
-                    "overflow": "auto",
-                }
+        self.wf_widgets = list()  # list of PyironFlowWidget objects
+        for wf in wf_list:
+            if isinstance(wf, str):
+                wf = base._load_graph(wf)
+            self.wf_widgets.append(
+                PyironFlowWidget(wf, gui_layout=gui_layout, main_widget=self)
             )
-            out_widget = widgets.Output(
-                layout={
-                    "border": "1px solid black",
-                    "min_width": f"{gui_layout.output_widget_width}px",
-                    "overflow": "auto",
-                }
-            )
-            tree_widget = TreeView(log=out_log)
-            gui_widgets = GuiWidgets(
-                output=out_widget, log=out_log, tree=tree_widget, gui=self
-            )
-            flow_widget = PyironFlowWidget(
-                wf, widgets=gui_widgets, hash_nodes=hash_nodes
-            )
-            flow_widget.widgets.tree.flow_widget = flow_widget
 
-            self.wf_widgets.append(flow_widget)
+        self.set_tab_widget()
+        # Observe the selected_index attribute of the tab widget
+        self.tab_widget.observe(self.on_tab_change, names="selected_index")
 
-        self.view_flows = self.view_flows()
-        self._tab_index = 0
-        self.update_accordion(self._tab_index)
-
-        for flow_widget in self.wf_widgets:
-            flow_widget.widgets.accordion = self.accordion
+        selected_index = self.tab_widget.selected_index
+        wf = self.wf_widgets[selected_index]
+        self.accordion_widget = widgets.Output()
+        with self.accordion_widget:
+            display(wf.accordion_widget)
 
         self.gui = widgets.HBox(
             [
-                self.accordion,
-                self.view_flows,
-                # self.out_widget
+                self.accordion_widget,
+                self.tab_widget,
             ],
             layout={"border": "1px solid black"},
         )
 
-        # Observe the selected_index attribute of the tab widget
-        self.view_flows.observe(self.on_tab_change, names="selected_index")
+    def set_tab_widget(self):
+        self.tab_widget = widgets.Tab()
+        self.tab_widget.children = [
+            widget.flow_widget for widget in self.wf_widgets
+        ] + [widgets.Output()]
 
-    def update_accordion(self, tab_index, old_index=None):
-        # print("update_accordion", tab_index)
-        if old_index is not None:
-            self.wf_widgets[old_index]._accordion_index = old_index
-        self._tab_index = tab_index
-        current_widgets = self.wf_widgets[tab_index].widgets
-        self.wf_widgets[tab_index].update_gui()
-        self.accordion.children = [
-            current_widgets.tree.gui,
-            current_widgets.output,
-            current_widgets.log,
-        ]
-        self.accordion.titles = ["Node Library", "Output", "Logging Info"]
-        self.accordion.selected_index = self.wf_widgets[tab_index]._accordion_index
+        self.tab_widget.titles = [wf.graph.label for wf in self.wf_widgets] + ["+"]
+        return self.tab_widget
 
-    def get_workflow(self, tab_index=0):
-        wf_widget = self.wf_widgets[tab_index]
-        return wf_widget.get_workflow()
-
-    def view_flows(self):
-        tab = widgets.Tab()
-        tab.children = [
-            self.display_workflow(index) for index, _ in enumerate(self.workflows)
-        ]
-        tab.titles = [wf.label for wf in self.workflows]
-        return tab
-
-    def display_workflow(self, index: int, out_flow=None):
-        # print("display_workflow", index)
-        w = self.wf_widgets[index]
-        w.update_gui()
-
-        if out_flow is None:
-            out_flow = widgets.Output(
-                layout={
-                    "border": "1px solid black",
-                    "width": f"{self._gui_layout.flow_widget_width}px",
-                    "max_height": f"{self._gui_layout.flow_widget_height}px",
-                }
-            )
-
-        with out_flow:
-            from IPython.display import display
-
-            display(w.gui)
-
-        self._tab_index = index
-        self.update_accordion(index)
-
-        return out_flow
+    def delete_tab(self, index):
+        print(f"Deleting tab {index}")
+        self.tab_widget.children = (
+            self.tab_widget.children[:index] + self.tab_widget.children[index + 2 :]
+        )
+        self.tab_widget.titles = (
+            self.tab_widget.titles[:index] + self.tab_widget.titles[index + 2 :]
+        )
+        self.wf_widgets = self.wf_widgets[:index] + self.wf_widgets[index + 1 :]
+        self.update_accordion(0)
 
     def on_tab_change(self, change):
+        new_index = change["new"]
         if change["name"] == "selected_index":
-            new_index = change["new"]
-            old_index = change["old"]
-            print(f"Tab changed to {new_index}")
-            # Perform any additional actions needed when the tab changes
-            self.update_accordion(new_index, old_index)
-        
+            if self.tab_widget.titles[new_index] == "+":
+                # Create a new tab
+                new_index = len(self.tab_widget.children) - 1
+                new_wf = Graph(label="Workflow_" + str(new_index))
+                print(
+                    f"Creating new tab for {new_wf.label}",
+                    len(self.wf_widgets),
+                    new_index,
+                )
+                self.wf_widgets.append(
+                    PyironFlowWidget(
+                        new_wf, gui_layout=self.gui_layout, main_widget=self
+                    )
+                )
+
+                # Add the new tab to the list of children of an ipywidgets.Tab widget
+                self.tab_widget.children = self.tab_widget.children[:-1] + (
+                    self.wf_widgets[-1].flow_widget,
+                    widgets.Output(),
+                )
+
+                for i, title in enumerate(
+                    list(self.tab_widget.titles[:-2])
+                    + [self.wf_widgets[-1].graph.label, "+"]
+                ):
+                    # print(f"Setting title {i} to {title}")
+                    self.tab_widget.set_title(i, title)
+
+            selected_index = self.tab_widget.selected_index
+            wf_widget = self.wf_widgets[selected_index]
+            wf_widget.update_gui()
+            self.graph = wf_widget.graph  # make it accessible to the pyiron_flow object
+            with self.accordion_widget:
+                self.accordion_widget.clear_output()
+                display(wf_widget.accordion_widget)
+
+    def redraw(self):
+        # from copy import copy
+
+        print("redraw", self.tab_widget.selected_index)
+        wf_widget = self.wf_widgets[self.tab_widget.selected_index]
+
+        graph = base.copy_graph(wf_widget.graph)
+        wf_widget.graph = Graph(label=graph.label)
+        wf_widget.update_graph_view(sleep_time=0.1)
+        time.sleep(0.2)
+        print("redraw_reset: ", wf_widget.graph.label)
+        wf_widget.graph = graph
+        wf_widget.update_graph_view()
+
+    def update_tab_children(self):
+        tab_children = list(self.tab_widget.children)
+        for i, wf_widget in enumerate(self.wf_widgets):
+            if i == self.tab_widget.selected_index:
+                print("Updating tab ", i)
+                tab_children[i] = wf_widget.flow_widget
+        self.tab_widget.children = tab_children

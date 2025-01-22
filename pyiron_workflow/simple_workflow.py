@@ -364,7 +364,12 @@ class Node:
         self,
         func=None,
         inputs=Data(
-            {PORT_LABEL: [], PORT_TYPE: [], PORT_DEFAULT: [], PORT_VALUE: []},
+            {
+                PORT_LABEL: [],
+                PORT_TYPE: [],
+                PORT_DEFAULT: [],
+                PORT_VALUE: [],
+            },
             attribute=Port,
         ),
         outputs=Data({PORT_LABEL: [], PORT_TYPE: [], PORT_VALUE: []}, attribute=Port),
@@ -384,13 +389,12 @@ class Node:
 
         if func is None:
             return
-        
+
         if orig_func is None:
             self.function = get_function_data(func)
         else:
             self.function = get_function_data(orig_func)
             self.dataclass = orig_func  # TODO: rather specific to dataclass nodes, needs to be generalized
-
 
         # TODO: improve (add len to data)
         self.inputs.data["node"] = len(self.inputs.data[PORT_LABEL]) * [self]
@@ -417,8 +421,6 @@ class Node:
 
         # print("node_output_labels: ", output_labels)
         # print("node_outputs_labels: ", self.outputs.data[PORT_LABEL], self.label)
-
-        
 
     @property
     def kwargs(self):
@@ -470,12 +472,12 @@ class Node:
         self.inputs.data[PORT_VALUE] = new_values
         return self.run()
 
-    def __getstate__(self):
-        state = dict(
-            label=self.label,
-            import_path=self.function.import_path,
-        )
-        return state
+    # def __getstate__(self):
+    #     state = dict(
+    #         label=self.label,
+    #         import_path=self.function.import_path,
+    #     )
+    #     return state
 
     def _set_state(self, state):
         pass
@@ -805,6 +807,8 @@ def _return_as_macro_node(func, label, output_labels, node_type, *f_args, **f_kw
         func, label, output_labels, node_type, *f_args, **f_kwargs
     )
     out = node._run()  # initialize the workflow (do not run it)
+    if isinstance(out, tuple):
+        out = out[0]
     wf_macro = out._workflow
 
     # Replace the 'run' method with a fixed argument
@@ -895,6 +899,7 @@ class Workflow:
         values = node.inputs.data[PORT_VALUE]
         labels = node.inputs.data[PORT_LABEL]
         for l, v in zip(labels, values):
+            # print('ports: ', l, type(v))
             if isinstance(v, Port):
                 source = v.node.label
                 sourceHandle = v.label
@@ -903,13 +908,16 @@ class Workflow:
             elif isinstance(v, Node):
                 source_node = v
                 source = source_node.label
+                # print('source_node: ', source_node, source_node.outputs.data[PORT_LABEL], node.label)
                 if source_node.n_out_labels == 1:
                     sourceHandle = source_node.outputs.data["label"][0]
+                else:
+                    raise ValueError("Node {node.label} has multiple output ports. Please specify the port to connect.")
 
                 target = node.label
                 targetHandle = l
             else:
-                return None
+                continue
 
             edge = dict(
                 source=source,
@@ -918,6 +926,7 @@ class Workflow:
                 targetHandle=targetHandle,
             )
             self._edges.append(edge)
+            # print(f"{source}/{sourceHandle} -> {target}/{targetHandle}")
             logging.info(f"{source}/{sourceHandle} -> {target}/{targetHandle}")
 
     def _set_edges(self, value):
