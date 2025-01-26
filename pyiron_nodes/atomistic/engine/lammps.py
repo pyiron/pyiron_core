@@ -330,7 +330,7 @@ def Code1(
     wf = Workflow("LammpsMacro")
 
     wf.Potential = Potential(structure=structure, name=potential)
-    wf.DummyNode = DummyNode(structure1=structure, structure2=structure)    
+    # wf.DummyNode = DummyNode(structure1=structure, structure2=structure)    
 
     wf.ListPotentials = ListPotentials(structure=structure)
 

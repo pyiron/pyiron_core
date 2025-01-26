@@ -24,7 +24,6 @@ import pandas as pd
 import numpy as np
 import importlib
 
-from copy import deepcopy
 
 NotData = "NotData"
 
@@ -205,10 +204,26 @@ class GuiStyle:
     borderRadius: str = "10px"
 
 
-def copy_graph(graph: Graph) -> Graph:
+def copy_nodes(nodes: Nodes) -> Nodes:
     from copy import copy
 
-    return Graph(label=graph.label, nodes=copy(graph.nodes), edges=copy(graph.edges))
+    new_nodes = Nodes(obj_type=GraphNode)
+    for k, node in nodes.items():
+        new_nodes[k] = GraphNode(
+            **{
+                kk: node[kk] if kk in ("node", "graph") else copy(node[kk])
+                for kk in node.keys()
+            }
+        )
+    return new_nodes
+
+
+def copy_graph(graph: Graph) -> Graph:
+    from copy import copy, deepcopy
+
+    return Graph(
+        label=graph.label, nodes=copy_nodes(graph.nodes), edges=deepcopy(graph.edges)
+    )
 
 
 def add_node(
@@ -218,14 +233,19 @@ def add_node(
     label = get_unique_label(graph, label)
     _check_label_exists(graph, label)
 
-    if isinstance(node, Node):
-        if node.node_type == "macro_node":
-            node = get_graph_from_macro_node(node)
-
     node.label = label
 
     if isinstance(node, Node):
-        new_graph = _add_node_instance(graph, node, label)
+        if node.node_type == "macro_node":
+            macro_graph = get_graph_from_macro_node(node)
+            new_graph = _add_graph_instance(
+                graph,
+                macro_graph,
+                label,
+                node,
+            )
+        else:
+            new_graph = _add_node_instance(graph, node, label)
     elif isinstance(node, Graph):
         new_graph = _add_graph_instance(graph, node, label)
     elif isinstance(node, GraphNode):
@@ -270,27 +290,13 @@ def remove_node(graph: Graph, label: str) -> Graph:
 
 
 def remove_edge(graph: Graph, edge: GraphEdge) -> Graph:
+    edge = _rewire_edge(graph, edge)
     new_graph = copy_graph(graph)
     if edge in graph.edges:
         new_graph.edges.remove(edge)
     else:
         raise ValueError(f"Edge {edge} not found in graph")
     return new_graph
-
-
-# def get_graph_from_macro(macro_node: Node) -> Graph:
-
-#     kwargs = {}
-#     for inp in macro_node.inputs.data["label"]:
-#         inp_port_label = f"inp_port__{inp}"
-#         kwargs[inp] = inp_port_label
-#         # kwargs[inp] = identity(inp_port_label, label=inp_port_label)
-
-#     out = macro_node._func(**kwargs)
-
-#     graph = get_graph_from_wf(out._workflow, wf_label=macro_node.label)
-#     graph.root_node = macro_node
-#     return graph
 
 
 def _get_label(node, label):
@@ -326,18 +332,44 @@ def _add_node_instance(graph: Graph, node, label):
     return new_graph
 
 
-def _add_graph_instance(graph: Graph, sub_graph: Graph, label: str = None):
+def _add_graph_instance(graph: Graph, sub_graph: Graph, label: str = None, node=None):
     new_graph = copy_graph(graph)
     sub_graph.id = label
+
+    if node is None:
+        node = sub_graph.root_node
+        import_path = None
+    else:
+        import_path = get_import_path_from_type(node._func)
     new_graph.nodes[label] = GraphNode(
         id=label,
-        node=sub_graph.root_node,
+        import_path=import_path,
+        node=node,
         graph=sub_graph,
         label=label,
         node_type="graph",
         widget_type="customNode",
     )
     return new_graph
+
+
+def _rewire_edge(graph: Graph, input_edge: GraphEdge) -> GraphEdge:
+    from copy import copy
+
+    edge = copy(input_edge)
+    source_node = graph.nodes[edge.source]
+    target_node = graph.nodes[edge.target]
+    if target_node.node_type == "graph":
+        if source_node.parent_id == target_node.parent_id:
+            edge.target = f"va_i_{edge.target}__{edge.targetHandle}"
+            edge.targetHandle = "x"
+            print(f"Rewiring edge to {edge.target}__{edge.targetHandle}")
+    if source_node.node_type == "graph":
+        if source_node.parent_id == target_node.parent_id:
+            edge.source = f"va_o_{edge.source}__{edge.sourceHandle}"
+            edge.sourceHandle = "x"
+            print(f"Rewiring edge to {edge.source}__{edge.sourceHandle}")
+    return edge
 
 
 def add_edge(
@@ -347,15 +379,9 @@ def add_edge(
     sourceHandle: str = None,
     targetHandle: str = None,
 ):
+    edge = _rewire_edge(graph, GraphEdge(source, target, sourceHandle, targetHandle))
     new_graph = copy_graph(graph)
-    new_graph.edges.append(
-        GraphEdge(
-            source=source,
-            sourceHandle=sourceHandle,
-            target=target,
-            targetHandle=targetHandle,
-        )
-    )
+    new_graph.edges.append(edge)
     if not (source.startswith("va_") or target.startswith("va_")):
         new_graph = _update_target_port(new_graph, new_graph.edges[-1])
     return new_graph
@@ -366,109 +392,6 @@ def _update_target_port(graph: Graph, edge: GraphEdge):
     graph.nodes[edge.target].node.inputs.__setattr__(edge.targetHandle, source_port)
     # print(f"updated target port {edge.targetHandle} in node {edge.target}, {source_port}")
     return graph
-
-
-# tools for expanding and collapsing nodes
-
-
-# def _get_inner_edge_input(graph, edge):
-#     inner_source = f"var_i_{edge.target}__{edge.targetHandle}"
-#     df = _edges_to_gui(graph).df
-#     matching_edge = df.loc[df["source"] == inner_source].iloc[0].to_dict()
-#     new_edge = GraphEdge(
-#         edge.source,
-#         matching_edge["target"],
-#         edge.sourceHandle,
-#         matching_edge["targetHandle"],
-#     )
-#     return new_edge
-
-
-# def _get_inner_edge_output(graph, edge):
-#     inner_source = f"var_o_{edge.source}__{edge.sourceHandle}"
-#     df = _edges_to_gui(graph).df
-#     matching_edge = df.loc[df["target"] == inner_source].iloc[0].to_dict()
-#     new_edge = GraphEdge(
-#         matching_edge["source"],
-#         edge.target,
-#         matching_edge["sourceHandle"],
-#         edge.targetHandle,
-#     )
-#     return new_edge
-
-
-# def _get_expanded_nodes(graph: Graph) -> List[str]:
-#     expanded_nodes = []
-#     for k, v in graph.nodes.items():
-#         if v.expanded:
-#             expanded_nodes.append(k)
-#     return expanded_nodes
-
-
-# def _remove_var_input_edges(graph: Graph):
-#     edges_to_remove = []
-#     for edge in graph.edges:
-#         if edge.source.startswith("var_i_"):
-#             # print(f"removing edge {edge}")
-#             edges_to_remove.append(edge)
-#     new_graph = copy_graph(graph)
-#     for edge in edges_to_remove:
-#         new_graph.edges.remove(edge)
-#     return new_graph
-
-
-# def _remove_var_input_nodes(graph: Graph):
-#     nodes_to_remove = []
-#     for node_label in graph.nodes.keys():
-#         if node_label.startswith("var_i_"):
-#             nodes_to_remove.append(node_label)
-#     new_graph = copy_graph(graph)
-#     for node_label in nodes_to_remove:
-#         del new_graph.nodes[node_label]
-#     return new_graph
-
-
-# def _remove_var_output_edges(graph: Graph):
-#     edges_to_remove = []
-#     for edge in graph.edges:
-#         if edge.target.startswith("var_o_"):
-#             # print(f"removing edge {edge}")
-#             edges_to_remove.append(edge)
-#     new_graph = copy_graph(graph)
-#     for edge in edges_to_remove:
-#         new_graph.edges.remove(edge)
-#     return new_graph
-
-
-# def _remove_var_output_nodes(graph: Graph):
-#     nodes_to_remove = []
-#     for node_label in graph.nodes.keys():
-#         if node_label.startswith("var_o_"):
-#             nodes_to_remove.append(node_label)
-#     new_graph = copy_graph(graph)
-#     for node_label in nodes_to_remove:
-#         del new_graph.nodes[node_label]
-#     return new_graph
-
-
-# def _optimize_graph_connections(graph):
-#     new_graph = copy_graph(graph)
-#     for node_label in _get_expanded_nodes(new_graph):
-#         for i_edge, edge in enumerate(new_graph.edges):
-#             if edge.target == node_label:
-#                 print(
-#                     f"updating edge {edge.targetHandle} in node {edge.target}, {edge.source} {edge.sourceHandle}"
-#                 )
-#                 new_edge = _get_inner_edge_input(graph, edge)
-#                 new_graph.edges[i_edge] = new_edge
-#                 # update edge port in target node
-#                 new_graph = _update_target_port(new_graph, new_edge)
-#     new_graph = _remove_var_input_edges(new_graph)
-#     new_graph = _remove_var_input_nodes(new_graph)
-#     new_graph = _remove_var_output_edges(new_graph)
-#     new_graph = _remove_var_output_nodes(new_graph)
-
-#     return new_graph
 
 
 def _expand_node(graph, node_label: str):
@@ -533,7 +456,7 @@ def _get_active_edges(graph: Graph) -> Edges:
 # Utility functions
 ####################################################################################################
 def remove_node_with_reconnected_edges(graph: Graph, node_label: str) -> Graph:
-    new_graph = deepcopy(graph)
+    new_graph = copy_graph(graph)
     # node = new_graph.nodes[node_label]
     # find single target edge to node
     source_nodes = []
@@ -569,8 +492,8 @@ def remove_node_with_reconnected_edges(graph: Graph, node_label: str) -> Graph:
                 new_graph.edges.append(new_edge)
 
         remove_edge(new_graph, inner_edge)
-    else:
-        print(f"Node {node_label} has no source nodes")
+    # else:
+    #     print(f"Node {node_label} has no source nodes")
 
     del new_graph.nodes[node_label]
     return new_graph
@@ -584,9 +507,7 @@ def remove_node_with_reconnected_edges(graph: Graph, node_label: str) -> Graph:
 def graph_edges_to_wf_edges(edges: Edges) -> List[dict]:
     wf_edges = []
     for edge in edges:
-        if not edge.source.startswith("va_i_") and not edge.target.startswith(
-            "va_o_"
-        ):
+        if not edge.source.startswith("va_i_") and not edge.target.startswith("va_o_"):
             wf_edges.append(edge.asdict())
     return wf_edges
 
@@ -799,8 +720,87 @@ def get_graph_from_macro_node(macro_node: Node) -> Graph:
 ####################################################################################################
 
 
-def expand_node(graph: Graph, node_label: str) -> Graph:
-    new_graph = deepcopy(graph)
+def _is_parent_in_node_label(label: str, parent_label: str) -> bool:
+    if parent_label is None:
+        return False
+
+    n = len("va_i_")
+    if label.startswith("va_"):
+        # print(
+        #     f"Checking if {parent_label} is parent of {label}", label.split("__")[0][n:]
+        # )
+        return parent_label == label.split("__")[0][n:]
+
+    return False
+
+
+def _remove_virtual_nodes(
+    graph: Graph, reconnect_edges=False, parent_label: str = None
+) -> Graph:
+    # first collect all va_nodes in a list, then remove it from the graph
+    new_graph = copy_graph(graph)
+    va_list = [
+        node_label
+        for node_label in graph.nodes.keys()
+        if _is_parent_in_node_label(node_label, parent_label)
+    ]
+
+    for node_label in va_list:
+        if reconnect_edges:
+            new_graph = remove_node_with_reconnected_edges(new_graph, node_label)
+        else:
+            del new_graph.nodes[node_label]
+
+    return new_graph
+
+
+def _remove_virtual_edges(graph: Graph) -> Graph:
+    new_graph = copy_graph(graph)
+    edges_to_remove = [
+        edge
+        for edge in graph.edges
+        if edge.source.startswith("va_") or edge.target.startswith("va_")
+    ]
+    for edge in edges_to_remove:
+        new_graph.edges.remove(edge)
+    return new_graph
+
+
+def _remove_edges_to_hidden_nodes(graph: Graph) -> Graph:
+    new_graph = copy_graph(graph)
+    edges_to_remove = []
+    for edge in graph.edges:
+        if not (edge.source in graph.nodes and edge.target in graph.nodes):
+            edges_to_remove.append(edge)
+
+    for edge in edges_to_remove:
+        new_graph.edges.remove(edge)
+
+    return new_graph
+
+
+def get_updated_graph(full_graph: Graph, level: int = 0) -> Graph:
+    """
+    Get the updated graph after marking nodes as expanded or collapsed.
+    """
+    graph = copy_graph(full_graph)
+    for node in full_graph.nodes.values():
+        if node.level == 0 and node.graph is not None:
+            if node.expanded:
+                graph = expand_node(full_graph, node.label)
+            else:
+                graph = collapse_node(full_graph, node.label)
+
+    graph = _remove_virtual_edges(graph)
+    graph = _remove_edges_to_hidden_nodes(graph)
+    graph = update_execution_graph(graph)
+    return graph
+
+
+def expand_node(
+    full_graph: Graph, node_label: str, remove_virtual_nodes: bool = True
+) -> Graph:
+    new_graph = copy_graph(full_graph)
     graph_node = new_graph.nodes[node_label]
 
     if graph_node.node_type == "graph":
@@ -825,22 +825,18 @@ def expand_node(graph: Graph, node_label: str) -> Graph:
             new_edges.append(edge)
 
         new_graph.edges = new_edges
-
-        var_nodes = []
-        for k, nodes in new_graph.nodes.items():
-            if k.startswith("va_"):
-                var_nodes.append(k)
-
-        print(f"Removing nodes {set(var_nodes)}")
-
-        for k in set(var_nodes):
-            new_graph = remove_node_with_reconnected_edges(new_graph, k)
+        if remove_virtual_nodes:
+            new_graph = _remove_virtual_nodes(
+                new_graph, reconnect_edges=True, parent_label=node_label
+            )
 
     return new_graph
 
 
-def collapse_node(graph: Graph, node_label: str) -> Graph:
-    new_graph = deepcopy(graph)
+def collapse_node(
+    graph: Graph, node_label: str, remove_virtual_nodes: bool = True
+) -> Graph:
+    new_graph = copy_graph(graph)
     graph_node = new_graph.nodes[node_label]
 
     if graph_node.node_type == "graph":
@@ -857,12 +853,17 @@ def collapse_node(graph: Graph, node_label: str) -> Graph:
                 edge.target = target
                 edge.targetHandle = target_handle
 
-        nodes_to_remove = []
-        for node in new_graph.nodes.values():
-            if node.label.startswith("va_"):
-                nodes_to_remove.append(node.label)
-            elif node.parent_id == node_label:
-                nodes_to_remove.append(node.label)
+        if remove_virtual_nodes:
+            new_graph = _remove_virtual_nodes(
+                new_graph, reconnect_edges=False, parent_label=node_label
+            )
+
+        # TODO: make the following recursive, i.e., also remove children of nodes in the collapsed graph
+        nodes_to_remove = [
+            node.label
+            for node in new_graph.nodes.values()
+            if node.parent_id == node_label
+        ]
 
         for node_label in nodes_to_remove:
             del new_graph.nodes[node_label]
@@ -993,7 +994,7 @@ def _get_subgraph(graph: Graph, node_indices):
     return sorted_subgraph
 
 
-def topological_sort(graph: Graph):
+def topological_sort(graph: Graph) -> Graph:
     # Kahn's algorithm for topological sorting
     # Create a graph and in-degree count for each node
 
@@ -1051,65 +1052,6 @@ def _find_source_edge(graph: Graph, source, sourceHandle):
     return edges
 
 
-# def _is_connected(graph: Graph, port: Port) -> bool:
-#     connected = len(_is_connected(graph, port.node.label, port.label)) > 0
-#     return connected
-
-
-# def get_graph_from_wf(wf: "Workflow", wf_label: str = None) -> Graph:
-#     graph = Graph()
-
-#     if wf_label is None:
-#         wf_label = wf.label
-
-#     for label, node in wf._nodes.items():
-#         graph = add_node(graph, node, label=label)
-
-#         data = node.inputs.data
-#         changed_args = _different_indices(data["default"], data["value"])
-
-#         # construct the input nodes for the non-default arguments
-#         for i in changed_args:
-#             value = data["value"][i]
-#             handle = data["label"][i]
-#             if not isinstance(value, (Node, Port)):
-#                 inp_node_label = f"var_i_{wf_label}__{handle}"
-#                 edge = GraphEdge(
-#                     target=label,
-#                     targetHandle=handle,
-#                     source=inp_node_label,
-#                     sourceHandle="x",  # input label of identity node
-#                 )
-
-#                 graph += edge
-#                 graph += identity(
-#                     label=inp_node_label
-#                 )  # GraphNode(id=inp_node_label, import_path=value)
-
-#     for edge in wf._edges:
-#         graph += GraphEdge(**edge)
-
-#     for label, node in wf._nodes.items():
-#         # construct the output nodes for all output ports
-#         data = node.outputs.data
-#         for i, handle in enumerate(data["label"]):
-#             if len(_find_source_edge(graph, label, handle)) > 0:
-#                 continue
-#             out_node_label = f"var_o_{wf_label}__{handle}"
-#             edge = GraphEdge(
-#                 source=label,
-#                 sourceHandle=handle,
-#                 target=out_node_label,
-#                 targetHandle="x",  # input label of identity node
-#             )
-
-#             graph += edge
-#             graph += identity(label=out_node_label)
-
-#     sorted_graph = topological_sort(graph)
-#     return sorted_graph
-
-
 def update_input_values(graph: Graph, node_label: str, values: list):
     node: Node = graph.nodes[node_label].node
     for i, value in enumerate(values):
@@ -1122,11 +1064,14 @@ def update_input_values(graph: Graph, node_label: str, values: list):
 def update_input_value(
     graph: Graph,
     node_label: str,
-    handle: str,
+    handle: str | int,
     value: Union[str, int, float, Node, Port],
 ) -> Graph:
     node = graph.nodes[node_label].node
-    index = handle  #  node.inputs.data["label"].index(handle)
+    if isinstance(handle, int):
+        index = handle
+    else:
+        index = node.inputs.data["label"].index(handle)
     node.inputs.data["value"][index] = value
     if not node.inputs.data["ready"][index] and str(
         node.inputs.data["default"][index]
@@ -1138,63 +1083,22 @@ def update_input_value(
     return graph
 
 
-# def get_code_from_graph(
-#     graph: Graph,
-#     workflow_lib="pyiron_workflow",
-#     pyiron_nodes_lib="pyiron_nodes",
-# ):
-#     """
-#     Generate Python source code from workflow graph.
+def update_execution_graph(graph: Graph) -> Graph:
+    """
+    Update the execution graph after changing node expansions or collapses
+    """
+    # graph = copy_graph(graph)
+    for edge in graph.edges:
+        source_node = graph.nodes[edge.source]
+        graph = update_input_value(
+            graph,
+            edge.target,
+            edge.targetHandle,
+            source_node.node.outputs.__getattr__(edge.sourceHandle),
+        )
+        # print(f"Updated input {graph.nodes[edge.target].label} in node {edge.target}", graph.nodes[edge.target].node.inputs)
 
-#     Args:
-#         label (str): The label to use in the generated code.
-#         module_a (str): The name of the module to import from.
-#         module_b (str): The name of the module to import.
-
-#     Returns:
-#         str: The generated Python source code.
-#     """
-#     import black
-
-#     code = f"""
-# from {workflow_lib} import Workflow
-# import {pyiron_nodes_lib}
-
-# wf = Workflow('{graph.label}')
-
-# """
-
-#     # Add nodes to Workflow
-#     for key, node in graph.nodes.items():
-#         label, import_path = key, node.import_path
-#         if not label.startswith("var_i_"):
-#             code += f"""wf.{label} = {import_path}("""
-
-#             # Add edges
-#             first_edge = True
-#             for edge in graph.edges:
-#                 if edge.target == label:
-#                     if first_edge:
-#                         first_edge = False
-#                     else:
-#                         code += """, """
-#                     if edge.source.startswith("var_i_"):
-#                         if edge.sourceHandle.startswith("__str_"):
-#                             code += f"""{edge.targetHandle}='{edge.sourceHandle[6:]}'"""
-#                         else:
-#                             code += f"""{edge.targetHandle}={edge.sourceHandle}"""
-#                     else:
-#                         source_node = graph.nodes[edge.source]  # wf._nodes[edge.source]
-#                         if source_node.node.n_out_labels == 1:
-#                             code += f"""{edge.targetHandle}=wf.{edge.source}"""
-#                         else:
-#                             code += f"""{edge.targetHandle}=wf.{edge.source}.outputs.{edge.sourceHandle}"""
-#             code += f""") \n"""
-#             # code += '\n' + 'print(wf.run()) \n'
-
-#     formatted_code = black.format_str(code, mode=black.FileMode())
-
-#     return formatted_code
+    return graph
 
 
 def get_code_from_wf(wf: "Workflow"):
@@ -1243,7 +1147,7 @@ def pull_node(graph: Graph, node_label: str):
     """
     # TODO: implement
     # opt_graph = _optimize_graph_connections(graph)
-    opt_graph = deepcopy(graph)
+    opt_graph = copy_graph(graph)
     node_labels = _get_node_labels(opt_graph)
     if node_label not in node_labels:
         raise ValueError(f"Node label '{node_label}' not found in the workflow graph.")
@@ -1254,55 +1158,6 @@ def pull_node(graph: Graph, node_label: str):
     for input_node_label in input_nodes_labels:
         out = opt_graph.nodes[input_node_label].node.run()
     return out
-
-
-# def graph_edges_to_wf_edges(graph_edges: List[Tuple[str, str]]):
-#     wf_edges = []
-#     for edge in graph_edges:
-#         edge_source, edge_target = edge
-#         target, target_handle = edge_target.split("/")
-#         source, source_handle = edge_source.split("/")
-#         if not source.startswith("var_i_"):
-#             edge_dict = dict(
-#                 source=source,
-#                 sourceHandle=source_handle,
-#                 target=target,
-#                 targetHandle=target_handle,
-#             )
-#             wf_edges.append(edge_dict)
-#     return wf_edges
-
-
-# def get_wf_from_graph(graph: Graph) -> "Workflow":
-#     from pyiron_workflow import Workflow
-
-#     wf = Workflow(graph.label)
-#     # Add nodes to Workflow
-#     for node in graph.nodes:
-#         label, import_path = node
-
-#         if not label.startswith("var_i_"):
-#             kwargs = dict()
-
-#             # Add non-default arguments to node
-#             for edge in graph.edges:
-#                 edge_source, edge_target = edge
-#                 target, target_handle = edge_target.split("/")
-#                 source, source_handle = edge_source.split("/")
-#                 if target == label:
-#                     # TODO: get value from source node (is there not converted to string)
-#                     if source.startswith("var_i_"):
-#                         if source_handle.startswith("__str_"):
-#                             kwargs[target_handle] = source_handle[6:]
-#                         else:
-#                             kwargs[target_handle] = eval(source_handle)
-#                     # kwargs[target_handle] = source_handle
-
-#             new_node = get_node_from_path(import_path)(**kwargs)
-#             wf.add_node(label, new_node)
-#     wf._set_edges(graph_edges_to_wf_edges(graph.edges))
-
-#     return wf
 
 
 def _save_graph(
@@ -1453,15 +1308,19 @@ def _nodes_to_gui(graph: Graph, remove_none=True) -> NestedList:
         if v.parent_id is not None:
             node_dict.parentId = v.parent_id
             node_dict.extent = "parent"
+
         if v.node_type == "graph":
             node_dict.type = "customNode"  # None
             node_dict.style["backgroundColor"] = "rgba(255, 165, 0, 0.3)"
-        if v.label.startswith("var_"):
+        elif v.label.startswith("va_"):
             node_dict.style["border"] = "1px black dashed"
             node_dict.style["backgroundColor"] = "rgba(50, 50, 50, 0.1)"
-        if v.label.startswith("va_"):
-            node_dict.style["border"] = "1px black dashed"
-            node_dict.style["backgroundColor"] = "rgba(50, 50, 50, 0.1)"
+        elif v.node.node_type == "out_dataclass_node":
+            # light purple
+            node_dict.style["backgroundColor"] = "rgba(200, 200, 255, 0.3)"
+        elif v.node.node_type == "inp_dataclass_node":
+            # light blue
+            node_dict.style["backgroundColor"] = "rgba(100, 100, 255, 0.3)"
 
         # if not v.expanded:  # for testing automated layout
         nodes.append(node_dict.asdict(remove_none=remove_none))

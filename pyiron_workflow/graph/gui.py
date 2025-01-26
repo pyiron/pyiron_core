@@ -37,7 +37,7 @@ class PyironFlowWidget:
             # from pyiron_workflow import Workflow
             graph = Graph("Workflow")
         elif isinstance(wf, Workflow):
-            graph = base.get_graph_from_wf(wf)
+            graph = base.get_full_graph_from_wf(wf)
         elif isinstance(wf, Graph):
             graph = base.copy_graph(wf)
         else:
@@ -195,8 +195,9 @@ class PyironFlowWidget:
                         self.accordion_widget.selected_index = 1
                         self.out_widget.clear_output()
                         if self.db is None:
-                            out = base.pull_node(self.graph, node.label)
-                            # out = node.pull()
+                            out = base.pull_node(
+                                base.get_updated_graph(self.graph), node.label
+                            )
                         else:
                             pass
                             # out = hs.run_node(node, self.db).outputs.to_value_dict()
@@ -230,7 +231,8 @@ class PyironFlowWidget:
                     print("graph command not recognized")
 
     def update_gui(self, export_data=True, sleep_time=0.2):
-        opt_graph = base._optimize_graph_connections(self.graph)
+        # opt_graph = base._optimize_graph_connections(self.graph)
+        opt_graph = base.get_updated_graph(self.graph)
         data = dict(
             #    label=graph.label,
             nodes=base._nodes_to_gui(opt_graph),
@@ -255,7 +257,7 @@ class PyironFlowWidget:
             self._thread.start()
 
     def add_node(self, node_path, label):
-        node = base.get_node_from_path(node_path)(label=label) 
+        node = base.get_node_from_path(node_path)(label=label)
         self.graph += node
         self.update_gui()
 
@@ -373,6 +375,7 @@ class PyironFlow:
         wf_widget.update_graph_view(sleep_time=0.1)
         time.sleep(0.2)
         print("redraw_reset: ", wf_widget.graph.label)
+        # wf_widget.graph = base.get_updated_graph(graph)
         wf_widget.graph = graph
         wf_widget.update_graph_view()
 

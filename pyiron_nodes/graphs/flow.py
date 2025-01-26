@@ -180,3 +180,19 @@ def ConvertMacroToWorkflow(macro_node):
 
     workflow = out._workflow
     return workflow
+
+
+@as_function_node
+def GetUpdatedGraph(full_graph, level: Optional[int] = 0):
+    from pyiron_workflow.graph import base
+
+    graph = base.get_updated_graph(full_graph, level=level)
+    return graph
+
+
+@as_function_node
+def TopologicalSort(graph):
+    from pyiron_workflow.graph import base
+
+    graph = base.topological_sort(graph)
+    return graph
