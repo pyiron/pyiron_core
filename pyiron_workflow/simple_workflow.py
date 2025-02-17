@@ -525,7 +525,8 @@ class Node:
                 self.inputs.data[PORT_VALUE],
                 self.inputs.data[PORT_DEFAULT],
             )
-            if default == NotData and not isinstance(v, (Node, Port))
+            if ((default == NotData) or (str(default) != str(v))) and not isinstance(v, (Node, Port))
+            
         }
 
     def __getstate__(self):
@@ -912,7 +913,9 @@ class Workflow:
                 if source_node.n_out_labels == 1:
                     sourceHandle = source_node.outputs.data["label"][0]
                 else:
-                    raise ValueError("Node {node.label} has multiple output ports. Please specify the port to connect.")
+                    raise ValueError(
+                        "Node {node.label} has multiple output ports. Please specify the port to connect."
+                    )
 
                 target = node.label
                 targetHandle = l

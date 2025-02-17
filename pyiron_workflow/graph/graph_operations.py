@@ -40,6 +40,37 @@ def get_unconnected_ports(graph: Graph, port_type: str) -> List[Tuple[str, str]]
     return not_connected_ports
 
 
+def get_externally_connected_input_ports(graph):
+    external_ports = []
+    for node in graph.nodes.values():
+        ports = node.node.inputs.data["label"]
+        values = node.node.inputs.data["value"]
+        for port_label, value in zip(ports, values):
+            if is_port_external_to_graph(value, graph):
+                external_ports.append((node.label, port_label))
+
+    return external_ports
+
+
+def is_port_external_to_graph(value: any, graph: Graph) -> bool:
+    """
+    Check if a port is external to the graph.
+
+    Args:
+        value: The value of the port.
+        graph: The graph to check against.
+
+    Returns:
+        bool: True if the port is external, False otherwise.
+    """
+    has_value_attr = hasattr(value, "value")
+    is_external_node = isinstance(value, base.Node) and value.label not in graph.nodes
+    is_external_port = (
+        isinstance(value, base.Port) and value.node.label not in graph.nodes
+    )
+    return has_value_attr and (is_external_node or is_external_port)
+
+
 def get_unconnected_input_ports(graph: Graph) -> List[Tuple[str, str]]:
     return get_unconnected_ports(graph, "input")
 
@@ -62,7 +93,7 @@ def get_node_output_port(node: Node, port_label: str) -> Port:
     return None
 
 
-def get_inputs_of_graph(graph: Graph) -> Data:
+def get_inputs_of_graph(graph: Graph, exclude_unconnected_default_ports=False) -> Data:
     labels, values, types, default, ready = [], [], [], [], []
     for node_label, port_label in get_unconnected_input_ports(graph):
         node = graph.nodes[node_label]
@@ -83,7 +114,7 @@ def get_inputs_of_graph(graph: Graph) -> Data:
 
 
 def get_outputs_of_graph(graph: Graph) -> Data:
-    labels, values, types = [], [], []
+    labels, values, types, ready = [], [], [], []
     for node_label, port_label in get_unconnected_output_ports(graph):
         node = graph.nodes[node_label]
         port = get_node_output_port(node, port_label)
@@ -93,8 +124,12 @@ def get_outputs_of_graph(graph: Graph) -> Data:
         labels.append(port_label)
         values.append(port.value)
         types.append(port.type)
+        ready.append(port.ready)
+        print("ready: ", port.ready)
 
-    return Data(dict(label=labels, value=values, type=types), attribute=Port)
+    return Data(
+        dict(label=labels, value=values, type=types, ready=ready), attribute=Port
+    )
 
 
 def remove_node_with_reconnected_edges(graph: Graph, node_label: str) -> Graph:

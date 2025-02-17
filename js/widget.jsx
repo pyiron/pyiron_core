@@ -8,7 +8,12 @@
  * Date: Aug 1, 2024
  */
 
-import React, { useCallback, useState, createContext } from "react";
+import React, {
+  useCallback,
+  useState,
+  createContext,
+  useSelection,
+} from "react";
 import { createRender, useModel } from "@anywidget/react";
 import { getLayoutedNodes } from "./useElkLayout";
 // import ELK from "elkjs/lib/elk.bundled.js";
@@ -23,6 +28,7 @@ import {
   applyNodeChanges,
   addEdge,
   Panel,
+  useOnSelectionChange,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import {
@@ -31,6 +37,7 @@ import {
   DownloadIcon,
   Cross1Icon,
   Pencil1Icon,
+  GroupIcon
 } from "@radix-ui/react-icons";
 
 import TextUpdaterNode from "./TextUpdaterNode.jsx";
@@ -60,6 +67,8 @@ const render = createRender(() => {
 
   const [nodes, setNodes] = useState(initialNodes);
   const [edges, setEdges] = useState(initialEdges);
+
+  const [selectedNodes, setSelectedNodes] = useState([]);
 
   const nodeTypes = {
     textUpdater: TextUpdaterNode,
@@ -158,11 +167,31 @@ const render = createRender(() => {
     console.log("load commands: ", new_commands);
   });
 
+
   const onNodesChange = useCallback(
     (changes) => {
       setNodes((nds) => {
         const new_nodes = applyNodeChanges(changes, nds);
+        for (const i in changes) {
+          if (Object.hasOwn(changes[i], 'selected')) {
+            if (changes[i].selected){
+              for (const k in new_nodes){
+                if (new_nodes[k].id == changes[i].id) {
+                  selectedNodes.push(new_nodes[k]);
+                }  
+              }
+            }
+            else{
+              for (const j in selectedNodes){
+                if (selectedNodes[j].id == changes[i].id) {
+                  selectedNodes.splice(j, 1); 
+                }  
+              }
+            }
+          }
+        }
         console.log("onNodesChange: ", changes, new_nodes);
+        console.log("selectedNodes: ", selectedNodes);
         model.set("nodes", JSON.stringify(new_nodes));
         model.save_changes();
         return new_nodes;
@@ -263,10 +292,16 @@ const render = createRender(() => {
   const clearFlow = (id) => {
     // delete data on python side
     console.log("clearFlow: ", id);
-    model.set(
-      "commands",
-      `clearFlow: __global__ - ${new Date().getTime()}`
-    );
+    model.set("commands", `clearFlow: __global__ - ${new Date().getTime()}`);
+    model.save_changes();
+  };
+
+  const groupNodes = (id) => {
+    // group nodes
+    console.log("groupNodes: ", id);
+    // convert list of selectedNodes to a string of comma separated node ids
+    let selectedNodesStr = selectedNodes.map((node) => node.id).join(",");
+    model.set("commands", `group_nodes: ${selectedNodesStr} - ${new Date().getTime()}`);
     model.save_changes();
   };
 
@@ -345,6 +380,9 @@ const render = createRender(() => {
             </ControlButton>
             <ControlButton onClick={clearFlow} title="Delete Workflow">
               <Cross1Icon />
+            </ControlButton>
+            <ControlButton onClick={groupNodes} title="Group Nodes">
+              <GroupIcon />
             </ControlButton>
             {/* <ControlButton onClick={renameWorkflow} title="Rename Workflow">
               <Pencil1Icon />

@@ -151,6 +151,14 @@ class PyironFlowWidget:
                     tab = self.main_widget.tab_widget
                     tab.set_title(tab.selected_index, self.graph.label)
                     self.update_gui()  # ???
+                elif command =="group_nodes":
+                    selected_nodes = node_name.split(",")
+                    print("group_nodes: ", selected_nodes)
+                    node_ids = base._node_labels_to_node_ids(self.graph, selected_nodes)    
+                    print("group_nodes: ", node_ids)
+                    self.graph = base.create_group(self.graph, node_ids)
+                    # self.graph = base.get_updated_graph(self.graph)
+                    self.update_gui()
                 elif command == "add_node":
                     print("add_node: ", node_name)
                     self.add_node(node_name, node_name)
@@ -231,7 +239,6 @@ class PyironFlowWidget:
                     print("graph command not recognized")
 
     def update_gui(self, export_data=True, sleep_time=0.2):
-        # opt_graph = base._optimize_graph_connections(self.graph)
         opt_graph = base.get_updated_graph(self.graph)
         data = dict(
             #    label=graph.label,
