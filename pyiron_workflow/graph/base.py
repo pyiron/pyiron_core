@@ -762,6 +762,7 @@ def get_graph_from_wf(
 
 
 def get_graph_from_macro_node(macro_node: Node) -> Graph:
+    orig_kwargs = macro_node.kwargs # save original kwargs
     kwargs = {}
     for inp in macro_node.inputs.data["label"]:
         inp_port_label = f"va_i_{macro_node.label}__{inp}"
@@ -781,6 +782,8 @@ def get_graph_from_macro_node(macro_node: Node) -> Graph:
     new_graph = get_graph_from_wf(
         wf, wf_outputs=out, out_labels=out_labels, wf_label=macro_node.label
     )
+    # restore original kwargs
+    
     # print("new_graph: ", new_graph.label)
     return new_graph
 

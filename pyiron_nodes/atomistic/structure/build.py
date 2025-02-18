@@ -110,7 +110,7 @@ def CubicBulkCell(
     wf = Workflow('macro')
 
     wf.bulk = Bulk(name=element, cubic=True)
-    wf.cell = Repeat(structure=wf.bulk, repeat_scalar=cell_size)
+    wf.repeat = Repeat(structure=wf.bulk, repeat_scalar=cell_size)
 
-    wf.structure = CreateVacancy(structure=wf.cell, index=vacancy_index)
-    return wf.structure
+    wf.vacancy = CreateVacancy(structure=wf.repeat, index=vacancy_index)
+    return wf.vacancy

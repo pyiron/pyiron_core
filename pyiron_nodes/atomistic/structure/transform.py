@@ -21,7 +21,7 @@ def ApplyStrain(
 
 
 @as_function_node
-def CreateVacancy(structure, index: int | None = 0):
+def CreateVacancy(structure, index: Optional[int] = None):
     structure = structure.copy()
     if index is not None:
         del structure[index]
