@@ -762,11 +762,12 @@ def get_graph_from_wf(
 
 
 def get_graph_from_macro_node(macro_node: Node) -> Graph:
-    orig_kwargs = macro_node.kwargs # save original kwargs
+    orig_values = dict()
     kwargs = {}
     for inp in macro_node.inputs.data["label"]:
         inp_port_label = f"va_i_{macro_node.label}__{inp}"
         kwargs[inp] = inp_port_label
+        orig_values[inp_port_label] = macro_node.inputs.__getattr__(inp)
 
     out = macro_node._func(**kwargs)
     if not isinstance(out, tuple):
@@ -774,7 +775,7 @@ def get_graph_from_macro_node(macro_node: Node) -> Graph:
 
     # each output instance contains link to workflow, check that it works for multiple outputs
     wf = out[0]._workflow
-    print("label: ", wf.label, macro_node.label)
+    # print("label: ", wf.label, macro_node.label)
     wf.label = macro_node.label
 
     out_labels = macro_node.outputs.data["label"]
@@ -785,6 +786,14 @@ def get_graph_from_macro_node(macro_node: Node) -> Graph:
     # restore original kwargs
     
     # print("new_graph: ", new_graph.label)
+    for node in new_graph.nodes.values():
+        # iterate over all non-virtual nodes
+        if not is_virtual_node(node.label):
+            for i, value in enumerate(node.node.inputs.data["value"]):
+                if value in orig_values:
+                    # print(f"Setting value {value} to {orig_values[value]}")
+                    node.node.inputs.data["value"][i] = orig_values[value]
+
     return new_graph
 
 
