@@ -10,7 +10,7 @@ import numpy as np
 from pyiron_workflow import as_inp_dataclass_node, as_out_dataclass_node
 
 
-# only coceptual, not truly implemented
+# only conceptual, not truly implemented
 def wfMetaData(log_level=0, doc=""):
     return {"log_level": log_level, "doc": doc}
 

@@ -172,6 +172,8 @@ const render = createRender(() => {
     (changes) => {
       setNodes((nds) => {
         const new_nodes = applyNodeChanges(changes, nds);
+        // clear selectedNodes
+        setSelectedNodes([]);
         for (const i in changes) {
           if (Object.hasOwn(changes[i], 'selected')) {
             if (changes[i].selected){

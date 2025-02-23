@@ -693,7 +693,7 @@ def get_graph_from_wf(
     if wf_label is None:
         wf_label = wf.label
 
-    print("wf_label: ", wf_label)
+    # print("wf_label: ", wf_label)
     graph = Graph(label=wf_label)
 
     for label, node in wf._nodes.items():
@@ -754,11 +754,56 @@ def get_graph_from_wf(
             targetHandle="x",  # input label of identity node
         )
 
-        print("target: ", target, target_handle)
+        # print("target: ", target, target_handle)
         graph += edge
 
     sorted_graph = topological_sort(graph)
     return sorted_graph
+
+
+def run_macro_node(macro_node):
+    macro_graph = get_graph_from_macro_node(macro_node)
+
+    output_nodes = list()
+    output_labels = dict()
+    for edge in macro_graph.edges:
+        if f"va_o_{macro_node.label}__" in edge.target:
+            output_nodes.append(edge.source)
+            o_label = edge.target.split("__")[-1]
+            output_labels[o_label] = (edge.source, edge.sourceHandle)
+
+    # connect inner node input directly with outer node, eliminate in execution macro input port
+    for graph_node in macro_graph.nodes.values():
+        values = graph_node.node.inputs.data['value']
+        labels = graph_node.node.inputs.data['label']
+        for port_label, port_value in zip(labels, values):
+            # print('label: ', port_label)
+            if isinstance(port_value, (Port)):
+                # print(port_label, type(port_value.value))
+                if isinstance(port_value.value, (Port)):
+                    # print('double: ', port_value.value.label, port_value.value.node.label)
+                    graph_node.node.inputs.__setattr__(port_label, port_value.value) 
+
+    outputs = list()
+    # output_labels = macro_node.outputs.data["label"]
+    for out_label in set(output_nodes):
+        # print(f"output node {out_label} of macro {macro_node.label}")
+        outputs.append(
+            pull_node(macro_graph, out_label)
+        )  # use graph theory to avoid recalculating nodes (or use ready)
+
+    if len(outputs) == 1:
+        return outputs[0] # works only for nodes with single output
+    else:
+        outputs = list()
+        for label in macro_node.outputs.data["label"]:
+            # print(f"output label {label}")
+            o_source, o_handle = output_labels[label]
+            out = macro_graph.nodes[o_source].node.outputs.__getattr__(o_handle)
+            outputs.append(out.value)
+ 
+        # raise NotImplementedError("Multiple outputs not yet implemented. Sort sequence by macro output labels.")
+        return outputs
 
 
 def get_graph_from_macro_node(macro_node: Node) -> Graph:
@@ -784,7 +829,7 @@ def get_graph_from_macro_node(macro_node: Node) -> Graph:
         wf, wf_outputs=out, out_labels=out_labels, wf_label=macro_node.label
     )
     # restore original kwargs
-    
+
     # print("new_graph: ", new_graph.label)
     for node in new_graph.nodes.values():
         # iterate over all non-virtual nodes
@@ -863,8 +908,9 @@ def _node_labels_to_node_ids(graph: Graph, node_labels: List[str]) -> List[str]:
     ind_dict = dict()
     for ind, label in enumerate(graph.nodes.keys()):
         ind_dict[label] = ind
-    
+
     return [ind_dict[label] for label in node_labels]
+
 
 def create_group(full_graph, node_ids=[], label=None):
     from copy import copy
@@ -941,7 +987,7 @@ def create_group(full_graph, node_ids=[], label=None):
     for edge in add_edges:
         full_graph.edges.append(edge)
 
-    full_graph = move_parent_nodes_to_top(full_graph)    
+    full_graph = move_parent_nodes_to_top(full_graph)
 
     return full_graph
 
@@ -1051,7 +1097,7 @@ def remove_hidden_nodes(graph: Graph, node_label: str) -> Graph:
     for node in new_graph.nodes.values():
         if node.parent_id == node_label:
             if not new_graph.nodes[node.parent_id].expanded:
-                nodes_to_remove.append(node.label) 
+                nodes_to_remove.append(node.label)
 
     for node_label in nodes_to_remove:
         del new_graph.nodes[node_label]

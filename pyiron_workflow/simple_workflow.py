@@ -483,8 +483,12 @@ class Node:
         pass
 
     def run(self):
+        import pyiron_workflow.graph.base as base
         self._validate_input()
-        out = self._run()
+        if self.node_type == "macro_node":
+            out = base.run_macro_node(self)
+        else:
+            out = self._run()
         self._run_set_values(out)
 
         return out

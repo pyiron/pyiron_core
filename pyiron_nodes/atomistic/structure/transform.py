@@ -8,7 +8,7 @@ from typing import Optional, Union
 @as_function_node("structure")
 def Repeat(structure: Atoms, repeat_scalar: int = 1) -> Atoms:
     # print("Repeat: ", type(repeat_scalar), repeat_scalar)
-    return structure.repeat(repeat_scalar)
+    return structure.repeat(int(repeat_scalar))
 
 
 @as_function_node("structure")
