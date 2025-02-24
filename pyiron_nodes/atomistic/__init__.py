@@ -3,4 +3,5 @@ from pyiron_nodes.atomistic import (
     engine,
     property,
     structure,
+    assyst,
 )

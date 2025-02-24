@@ -136,7 +136,7 @@ def AddEnergies(
     for structure in structure_container.structure:
         engine.inputs.structure = structure
         out = engine.run()
-        structure_container.energy.append(out.energies_pot)
+        structure_container.energy.append(out.energies_pot[-1])
 
     return structure_container
 

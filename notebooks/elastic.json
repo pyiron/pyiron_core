@@ -10,128 +10,13 @@
             "graph": {
                 "label": "CubicBulkCell",
                 "nodes": {
-                    "va_i_CubicBulkCell__element": {
-                        "id": "va_i_CubicBulkCell__element",
-                        "import_path": "pyiron_workflow.graph.base.identity",
-                        "label": "va_i_CubicBulkCell__element",
-                        "parent_id": "CubicBulkCell",
-                        "level": 1,
-                        "graph": null,
-                        "node_type": "node",
-                        "widget_type": "customNode",
-                        "expanded": false,
-                        "node": {
-                            "label": "va_i_CubicBulkCell__element",
-                            "function": "pyiron_workflow.graph.base.identity",
-                            "inputs": {
-                                "x": "NotData"
-                            }
-                        }
-                    },
-                    "va_i_CubicBulkCell__cell_size": {
-                        "id": "va_i_CubicBulkCell__cell_size",
-                        "import_path": "pyiron_workflow.graph.base.identity",
-                        "label": "va_i_CubicBulkCell__cell_size",
-                        "parent_id": "CubicBulkCell",
-                        "level": 1,
-                        "graph": null,
-                        "node_type": "node",
-                        "widget_type": "customNode",
-                        "expanded": false,
-                        "node": {
-                            "label": "va_i_CubicBulkCell__cell_size",
-                            "function": "pyiron_workflow.graph.base.identity",
-                            "inputs": {
-                                "x": "NotData"
-                            }
-                        }
-                    },
-                    "va_i_CubicBulkCell__vacancy_index": {
-                        "id": "va_i_CubicBulkCell__vacancy_index",
-                        "import_path": "pyiron_workflow.graph.base.identity",
-                        "label": "va_i_CubicBulkCell__vacancy_index",
-                        "parent_id": "CubicBulkCell",
-                        "level": 1,
-                        "graph": null,
-                        "node_type": "node",
-                        "widget_type": "customNode",
-                        "expanded": false,
-                        "node": {
-                            "label": "va_i_CubicBulkCell__vacancy_index",
-                            "function": "pyiron_workflow.graph.base.identity",
-                            "inputs": {
-                                "x": "NotData"
-                            }
-                        }
-                    },
-                    "bulk": {
-                        "id": "bulk",
-                        "import_path": "pyiron_nodes.atomistic.structure.build.Bulk",
-                        "label": "bulk",
-                        "parent_id": "CubicBulkCell",
-                        "level": 1,
-                        "graph": null,
-                        "node_type": "node",
-                        "widget_type": "customNode",
-                        "expanded": false,
-                        "node": {
-                            "label": "bulk",
-                            "function": "pyiron_nodes.atomistic.structure.build.Bulk",
-                            "inputs": {
-                                "cubic": true
-                            }
-                        }
-                    },
-                    "repeat": {
-                        "id": "repeat",
-                        "import_path": "pyiron_nodes.atomistic.structure.transform.Repeat",
-                        "label": "repeat",
-                        "parent_id": "CubicBulkCell",
-                        "level": 1,
-                        "graph": null,
-                        "node_type": "node",
-                        "widget_type": "customNode",
-                        "expanded": false,
-                        "node": {
-                            "label": "repeat",
-                            "function": "pyiron_nodes.atomistic.structure.transform.Repeat",
-                            "inputs": {}
-                        }
-                    },
-                    "vacancy": {
-                        "id": "vacancy",
-                        "import_path": "pyiron_nodes.atomistic.structure.transform.CreateVacancy",
-                        "label": "vacancy",
-                        "parent_id": "CubicBulkCell",
-                        "level": 1,
-                        "graph": null,
-                        "node_type": "node",
-                        "widget_type": "customNode",
-                        "expanded": false,
-                        "node": {
-                            "label": "vacancy",
-                            "function": "pyiron_nodes.atomistic.structure.transform.CreateVacancy",
-                            "inputs": {}
-                        }
-                    },
-                    "va_o_CubicBulkCell__structure": {
-                        "id": "va_o_CubicBulkCell__structure",
-                        "import_path": "pyiron_workflow.graph.base.identity",
-                        "label": "va_o_CubicBulkCell__structure",
-                        "parent_id": "CubicBulkCell",
-                        "level": 1,
-                        "graph": null,
-                        "node_type": "node",
-                        "widget_type": "customNode",
-                        "expanded": false,
-                        "node": {
-                            "label": "va_o_CubicBulkCell__structure",
-                            "function": "pyiron_workflow.graph.base.identity",
-                            "inputs": {
-                                "x": "NotData"
-                            }
-                        }
-                    }
+                    "va_i_CubicBulkCell__element": null,
+                    "va_i_CubicBulkCell__cell_size": null,
+                    "va_i_CubicBulkCell__vacancy_index": null,
+                    "bulk": null,
+                    "repeat": null,
+                    "vacancy": null,
+                    "va_o_CubicBulkCell__structure": null
                 },
                 "edges": {
                     "values": [
@@ -254,6 +139,7 @@
                 "label": "bulk",
                 "function": "pyiron_nodes.atomistic.structure.build.Bulk",
                 "inputs": {
+                    "name": "NotData",
                     "cubic": true
                 }
             }
@@ -271,7 +157,9 @@
             "node": {
                 "label": "repeat",
                 "function": "pyiron_nodes.atomistic.structure.transform.Repeat",
-                "inputs": {}
+                "inputs": {
+                    "structure": "NotData"
+                }
             }
         },
         "vacancy": {
@@ -287,7 +175,9 @@
             "node": {
                 "label": "vacancy",
                 "function": "pyiron_nodes.atomistic.structure.transform.CreateVacancy",
-                "inputs": {}
+                "inputs": {
+                    "structure": "NotData"
+                }
             }
         },
         "va_o_CubicBulkCell__structure": {
@@ -397,210 +287,18 @@
             "graph": {
                 "label": "Lammps",
                 "nodes": {
-                    "va_i_Lammps__structure": {
-                        "id": "va_i_Lammps__structure",
-                        "import_path": "pyiron_workflow.graph.base.identity",
-                        "label": "va_i_Lammps__structure",
-                        "parent_id": "Lammps",
-                        "level": 1,
-                        "graph": null,
-                        "node_type": "node",
-                        "widget_type": "customNode",
-                        "expanded": false,
-                        "node": {
-                            "label": "va_i_Lammps__structure",
-                            "function": "pyiron_workflow.graph.base.identity",
-                            "inputs": {
-                                "x": "NotData"
-                            }
-                        }
-                    },
-                    "va_i_Lammps__potential": {
-                        "id": "va_i_Lammps__potential",
-                        "import_path": "pyiron_workflow.graph.base.identity",
-                        "label": "va_i_Lammps__potential",
-                        "parent_id": "Lammps",
-                        "level": 1,
-                        "graph": null,
-                        "node_type": "node",
-                        "widget_type": "customNode",
-                        "expanded": false,
-                        "node": {
-                            "label": "va_i_Lammps__potential",
-                            "function": "pyiron_workflow.graph.base.identity",
-                            "inputs": {
-                                "x": "NotData"
-                            }
-                        }
-                    },
-                    "va_i_Lammps__calculator": {
-                        "id": "va_i_Lammps__calculator",
-                        "import_path": "pyiron_workflow.graph.base.identity",
-                        "label": "va_i_Lammps__calculator",
-                        "parent_id": "Lammps",
-                        "level": 1,
-                        "graph": null,
-                        "node_type": "node",
-                        "widget_type": "customNode",
-                        "expanded": false,
-                        "node": {
-                            "label": "va_i_Lammps__calculator",
-                            "function": "pyiron_workflow.graph.base.identity",
-                            "inputs": {
-                                "x": "NotData"
-                            }
-                        }
-                    },
-                    "va_i_Lammps__working_dir": {
-                        "id": "va_i_Lammps__working_dir",
-                        "import_path": "pyiron_workflow.graph.base.identity",
-                        "label": "va_i_Lammps__working_dir",
-                        "parent_id": "Lammps",
-                        "level": 1,
-                        "graph": null,
-                        "node_type": "node",
-                        "widget_type": "customNode",
-                        "expanded": false,
-                        "node": {
-                            "label": "va_i_Lammps__working_dir",
-                            "function": "pyiron_workflow.graph.base.identity",
-                            "inputs": {
-                                "x": "NotData"
-                            }
-                        }
-                    },
-                    "ListPotentials": {
-                        "id": "ListPotentials",
-                        "import_path": "pyiron_nodes.atomistic.engine.lammps.ListPotentials",
-                        "label": "ListPotentials",
-                        "parent_id": "Lammps",
-                        "level": 1,
-                        "graph": null,
-                        "node_type": "node",
-                        "widget_type": "customNode",
-                        "expanded": false,
-                        "node": {
-                            "label": "ListPotentials",
-                            "function": "pyiron_nodes.atomistic.engine.lammps.ListPotentials",
-                            "inputs": {}
-                        }
-                    },
-                    "Potential": {
-                        "id": "Potential",
-                        "import_path": "pyiron_nodes.atomistic.engine.lammps.Potential",
-                        "label": "Potential",
-                        "parent_id": "Lammps",
-                        "level": 1,
-                        "graph": null,
-                        "node_type": "node",
-                        "widget_type": "customNode",
-                        "expanded": false,
-                        "node": {
-                            "label": "Potential",
-                            "function": "pyiron_nodes.atomistic.engine.lammps.Potential",
-                            "inputs": {}
-                        }
-                    },
-                    "InitLammps": {
-                        "id": "InitLammps",
-                        "import_path": "pyiron_nodes.atomistic.engine.lammps.InitLammps",
-                        "label": "InitLammps",
-                        "parent_id": "Lammps",
-                        "level": 1,
-                        "graph": null,
-                        "node_type": "node",
-                        "widget_type": "customNode",
-                        "expanded": false,
-                        "node": {
-                            "label": "InitLammps",
-                            "function": "pyiron_nodes.atomistic.engine.lammps.InitLammps",
-                            "inputs": {}
-                        }
-                    },
-                    "Shell": {
-                        "id": "Shell",
-                        "import_path": "pyiron_nodes.atomistic.engine.lammps.Shell",
-                        "label": "Shell",
-                        "parent_id": "Lammps",
-                        "level": 1,
-                        "graph": null,
-                        "node_type": "node",
-                        "widget_type": "customNode",
-                        "expanded": false,
-                        "node": {
-                            "label": "Shell",
-                            "function": "pyiron_nodes.atomistic.engine.lammps.Shell",
-                            "inputs": {}
-                        }
-                    },
-                    "ParseLogFile": {
-                        "id": "ParseLogFile",
-                        "import_path": "pyiron_nodes.atomistic.engine.lammps.ParseLogFile",
-                        "label": "ParseLogFile",
-                        "parent_id": "Lammps",
-                        "level": 1,
-                        "graph": null,
-                        "node_type": "node",
-                        "widget_type": "customNode",
-                        "expanded": false,
-                        "node": {
-                            "label": "ParseLogFile",
-                            "function": "pyiron_nodes.atomistic.engine.lammps.ParseLogFile",
-                            "inputs": {}
-                        }
-                    },
-                    "ParseDumpFile": {
-                        "id": "ParseDumpFile",
-                        "import_path": "pyiron_nodes.atomistic.engine.lammps.ParseDumpFile",
-                        "label": "ParseDumpFile",
-                        "parent_id": "Lammps",
-                        "level": 1,
-                        "graph": null,
-                        "node_type": "node",
-                        "widget_type": "customNode",
-                        "expanded": false,
-                        "node": {
-                            "label": "ParseDumpFile",
-                            "function": "pyiron_nodes.atomistic.engine.lammps.ParseDumpFile",
-                            "inputs": {}
-                        }
-                    },
-                    "Collect": {
-                        "id": "Collect",
-                        "import_path": "pyiron_nodes.atomistic.engine.lammps.Collect",
-                        "label": "Collect",
-                        "parent_id": "Lammps",
-                        "level": 1,
-                        "graph": null,
-                        "node_type": "node",
-                        "widget_type": "customNode",
-                        "expanded": false,
-                        "node": {
-                            "label": "Collect",
-                            "function": "pyiron_nodes.atomistic.engine.lammps.Collect",
-                            "inputs": {
-                                "calc_mode": "md"
-                            }
-                        }
-                    },
-                    "va_o_Lammps__generic": {
-                        "id": "va_o_Lammps__generic",
-                        "import_path": "pyiron_workflow.graph.base.identity",
-                        "label": "va_o_Lammps__generic",
-                        "parent_id": "Lammps",
-                        "level": 1,
-                        "graph": null,
-                        "node_type": "node",
-                        "widget_type": "customNode",
-                        "expanded": false,
-                        "node": {
-                            "label": "va_o_Lammps__generic",
-                            "function": "pyiron_workflow.graph.base.identity",
-                            "inputs": {
-                                "x": "NotData"
-                            }
-                        }
-                    }
+                    "va_i_Lammps__structure": null,
+                    "va_i_Lammps__potential": null,
+                    "va_i_Lammps__calculator": null,
+                    "va_i_Lammps__working_dir": null,
+                    "ListPotentials": null,
+                    "Potential": null,
+                    "InitLammps": null,
+                    "Shell": null,
+                    "ParseLogFile": null,
+                    "ParseDumpFile": null,
+                    "Collect": null,
+                    "va_o_Lammps__generic": null
                 },
                 "edges": {
                     "values": [
@@ -692,10 +390,7 @@
             "node": {
                 "label": "Lammps",
                 "function": "pyiron_nodes.atomistic.engine.lammps.Lammps",
-                "inputs": {
-                    "structure": "NotData",
-                    "calculator": "NotData"
-                }
+                "inputs": {}
             }
         },
         "va_i_Lammps__structure": {
@@ -711,9 +406,7 @@
             "node": {
                 "label": "va_i_Lammps__structure",
                 "function": "pyiron_workflow.graph.base.identity",
-                "inputs": {
-                    "x": "NotData"
-                }
+                "inputs": {}
             }
         },
         "va_i_Lammps__potential": {
@@ -747,9 +440,7 @@
             "node": {
                 "label": "va_i_Lammps__calculator",
                 "function": "pyiron_workflow.graph.base.identity",
-                "inputs": {
-                    "x": "NotData"
-                }
+                "inputs": {}
             }
         },
         "va_i_Lammps__working_dir": {
@@ -815,7 +506,9 @@
             "node": {
                 "label": "InitLammps",
                 "function": "pyiron_nodes.atomistic.engine.lammps.InitLammps",
-                "inputs": {}
+                "inputs": {
+                    "working_directory": "NotData"
+                }
             }
         },
         "ParseLogFile": {
@@ -884,6 +577,86 @@
                 "inputs": {
                     "x": "NotData"
                 }
+            }
+        },
+        "CalcStatic": {
+            "id": "CalcStatic",
+            "import_path": "pyiron_nodes.atomistic.engine.lammps.CalcStatic",
+            "label": "CalcStatic",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "CalcStatic",
+                "function": "pyiron_nodes.atomistic.engine.lammps.CalcStatic",
+                "inputs": {}
+            }
+        },
+        "DataStructureContainer": {
+            "id": "DataStructureContainer",
+            "import_path": "pyiron_workflow.simple_workflow.func_dataclass",
+            "label": "DataStructureContainer",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "DataStructureContainer",
+                "function": "pyiron_nodes.atomistic.property.elastic.DataStructureContainer",
+                "inputs": {}
+            }
+        },
+        "Plot": {
+            "id": "Plot",
+            "import_path": "pyiron_nodes.plotting.Plot",
+            "label": "Plot",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "Plot",
+                "function": "pyiron_nodes.plotting.Plot",
+                "inputs": {}
+            }
+        },
+        "AnalyseStructures": {
+            "id": "AnalyseStructures",
+            "import_path": "pyiron_nodes.atomistic.property.elastic.AnalyseStructures",
+            "label": "AnalyseStructures",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "AnalyseStructures",
+                "function": "pyiron_nodes.atomistic.property.elastic.AnalyseStructures",
+                "inputs": {}
+            }
+        },
+        "OutputElasticAnalysis": {
+            "id": "OutputElasticAnalysis",
+            "import_path": "pyiron_workflow.simple_workflow.func_dataclass",
+            "label": "OutputElasticAnalysis",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "OutputElasticAnalysis",
+                "function": "pyiron_nodes.atomistic.property.elastic.OutputElasticAnalysis",
+                "inputs": {}
             }
         },
         "_obj_type": "pyiron_workflow.graph.base.GraphNode"
@@ -1045,6 +818,54 @@
                 "target": "AddEnergies",
                 "sourceHandle": "x",
                 "targetHandle": "engine"
+            },
+            {
+                "source": "CalcStatic",
+                "target": "va_i_Lammps__calculator",
+                "sourceHandle": "calculator",
+                "targetHandle": "x"
+            },
+            {
+                "source": "va_o_CubicBulkCell__structure",
+                "target": "va_i_Lammps__structure",
+                "sourceHandle": "x",
+                "targetHandle": "x"
+            },
+            {
+                "source": "AddEnergies",
+                "target": "DataStructureContainer",
+                "sourceHandle": "structure_container",
+                "targetHandle": "dataclass"
+            },
+            {
+                "source": "DataStructureContainer",
+                "target": "Plot",
+                "sourceHandle": "energy",
+                "targetHandle": "y"
+            },
+            {
+                "source": "AddEnergies",
+                "target": "AnalyseStructures",
+                "sourceHandle": "structure_container",
+                "targetHandle": "data_df"
+            },
+            {
+                "source": "SymmetryAnalysis",
+                "target": "AnalyseStructures",
+                "sourceHandle": "out",
+                "targetHandle": "analysis"
+            },
+            {
+                "source": "InputElasticTensor",
+                "target": "AnalyseStructures",
+                "sourceHandle": "dataclass",
+                "targetHandle": "parameters"
+            },
+            {
+                "source": "AnalyseStructures",
+                "target": "OutputElasticAnalysis",
+                "sourceHandle": "out",
+                "targetHandle": "dataclass"
             }
         ],
         "obj_type": "pyiron_workflow.graph.base.GraphEdge"
