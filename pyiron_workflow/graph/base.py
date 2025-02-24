@@ -774,15 +774,15 @@ def run_macro_node(macro_node):
 
     # connect inner node input directly with outer node, eliminate in execution macro input port
     for graph_node in macro_graph.nodes.values():
-        values = graph_node.node.inputs.data['value']
-        labels = graph_node.node.inputs.data['label']
+        values = graph_node.node.inputs.data["value"]
+        labels = graph_node.node.inputs.data["label"]
         for port_label, port_value in zip(labels, values):
             # print('label: ', port_label)
             if isinstance(port_value, (Port)):
                 # print(port_label, type(port_value.value))
                 if isinstance(port_value.value, (Port)):
                     # print('double: ', port_value.value.label, port_value.value.node.label)
-                    graph_node.node.inputs.__setattr__(port_label, port_value.value) 
+                    graph_node.node.inputs.__setattr__(port_label, port_value.value)
 
     outputs = list()
     # output_labels = macro_node.outputs.data["label"]
@@ -793,7 +793,7 @@ def run_macro_node(macro_node):
         )  # use graph theory to avoid recalculating nodes (or use ready)
 
     if len(outputs) == 1:
-        return outputs[0] # works only for nodes with single output
+        return outputs[0]  # works only for nodes with single output
     else:
         outputs = list()
         for label in macro_node.outputs.data["label"]:
@@ -801,7 +801,7 @@ def run_macro_node(macro_node):
             o_source, o_handle = output_labels[label]
             out = macro_graph.nodes[o_source].node.outputs.__getattr__(o_handle)
             outputs.append(out.value)
- 
+
         # raise NotImplementedError("Multiple outputs not yet implemented. Sort sequence by macro output labels.")
         return outputs
 
@@ -1182,6 +1182,15 @@ from typing import TYPE_CHECKING, List, Tuple
 
 if TYPE_CHECKING:
     from pyiron_workflow import Workflow
+
+
+def get_ports_of_node_type(graph: Graph) -> List[Port]:
+    ports = []
+    for node in graph.nodes.values():
+        inds = node.inputs.data["type"].select("Node")
+        for ind in inds:
+            ports += node.inputs.data["value"][ind]
+    return ports
 
 
 def _different_indices(default, value):

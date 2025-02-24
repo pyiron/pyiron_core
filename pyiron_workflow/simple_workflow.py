@@ -438,18 +438,20 @@ class Node:
         return len(self.inputs.data[PORT_LABEL])
 
     def _get_value(self, inp_port, inp_type):
+        # this is the function that realizes nodes as inputs
+        # -> analogous to higher order functions in functional programming"
         # node_type_as_str = get_import_path_from_type(Node)
         if isinstance(inp_port, Node):
             # check whether input type is a node (provide node rather than node output value)
             if inp_type == "Node":  # node_type_as_str:
-                val = inp_port
+                val = inp_port.copy()
             else:
                 val = inp_port.outputs.data["value"][0]
         elif isinstance(inp_port, Port):
             if (
                 inp_type == "Node"
             ):  # should be used only as quick fix (node rather than port should be provided)
-                val = inp_port.node
+                val = inp_port.node.copy()
             else:
                 val = inp_port.value
 
@@ -484,6 +486,7 @@ class Node:
 
     def run(self):
         import pyiron_workflow.graph.base as base
+
         self._validate_input()
         if self.node_type == "macro_node":
             out = base.run_macro_node(self)
@@ -529,8 +532,8 @@ class Node:
                 self.inputs.data[PORT_VALUE],
                 self.inputs.data[PORT_DEFAULT],
             )
-            if ((default == NotData) or (str(default) != str(v))) and not isinstance(v, (Node, Port))
-            
+            if ((default == NotData) or (str(default) != str(v)))
+            and not isinstance(v, (Node, Port))
         }
 
     def __getstate__(self):
@@ -551,6 +554,30 @@ class Node:
         node = get_node_from_path(node_dict["function"])(**node_dict["inputs"])
         # print("inputs: ", node_dict["inputs"], node.inputs)
         return node
+
+    def copy(self):
+        # make a deep copy of the inputs
+        # only values need to be copied, all other node input attributes are immutable
+        inp_val_copy = [v for v in self.inputs.data[PORT_VALUE]]
+        inp_copy = Data(
+            {
+                PORT_LABEL: self.inputs.data[PORT_LABEL],
+                PORT_TYPE: self.inputs.data[PORT_TYPE],
+                PORT_DEFAULT: self.inputs.data[PORT_DEFAULT],
+                PORT_VALUE: inp_val_copy,
+                "ready": self.inputs.data["ready"],
+            },
+            attribute=Port,
+        )
+        return Node(
+            func=self._func,
+            inputs=inp_copy,
+            outputs=self.outputs,
+            label=self.label,
+            output_labels=None,
+            node_type=self.node_type,
+            orig_func=self._func,
+        )
 
 
 def get_node_from_path(import_path):
