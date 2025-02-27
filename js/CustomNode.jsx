@@ -241,8 +241,13 @@ export default memo(({ data }) => {
               alignItems: "center",
             }}
           >
-            {index < data.target_labels.length &&
-              renderInputHandle(data, index, true)}
+            {
+              index < data.target_labels.length ? (
+                renderInputHandle(data, index, true)
+              ) : (
+                <div> </div>
+              ) // Replace with your desired fallback element
+            }
 
             {index < data.source_labels.length &&
               renderOutputHandle(data, index)}

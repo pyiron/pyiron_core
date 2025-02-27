@@ -315,6 +315,52 @@ class Port(Attribute):
     #     return f"<Port id={self.labels} value={self.value} ready={self.ready}>"
 
 
+@dataclass
+class Connection:
+    owner: "Node"
+    label: str
+
+
+@dataclass
+class DataElement:
+    label: str
+    type: str
+    default: Any = NotData
+    value: Any = NotData
+    ready: bool = False
+    _data: dict = None
+
+    # add function to update value
+    @property
+    def connected(self):
+        return isinstance(self.value, (Port, Node))
+
+    @property
+    def _value(self):
+        return self.value
+
+    @_value.setter
+    def _value(self, value):
+        self._data[PORT_VALUE][self._data[PORT_LABEL].index(self.label)] = value
+        self.value = value
+
+    @property
+    def connections(self):
+        return [Connection(self.value.node, self.value.label)]
+
+    def type_hint(self, v):
+        import numpy
+        import ase 
+
+        if isinstance(self.type, str):
+            # print('type: ', self.type, v)
+            if self.type == 'builtins.NoneType':
+                # let the deserializer handle NoneType
+                return v
+            return eval(self.type)(v)
+        return self.type(v)
+
+
 class Data:
     # TODO: make it a pure function (copy)
     def __init__(self, data, attribute=Attribute):
@@ -356,6 +402,29 @@ class Data:
 
     def _repr_html_(self):
         return pd.DataFrame(self.data)._repr_html_()
+
+    def __getitem__(self, key):
+        index = self.data[PORT_LABEL].index(key)
+        element = DataElement(
+            label=key,
+            type=self.data[PORT_TYPE][index],
+            # value=self.data[PORT_VALUE][index],
+            ready=self.data["ready"][index],
+            _data=self.data,
+        )
+        element.value = self.data[PORT_VALUE][index]
+        if PORT_DEFAULT in self.data:
+            element.default = self.data[PORT_DEFAULT][index]
+        return element
+
+    def __iter__(self):
+        for label in self.data[PORT_LABEL]:
+            yield self[label]
+
+    # define items() method
+    def items(self):
+        for label in self.data[PORT_LABEL]:
+            yield label, self[label]
 
 
 # Node definition
@@ -486,6 +555,22 @@ class Node:
 
     def run(self):
         import pyiron_workflow.graph.base as base
+        import pyiron_database.instance_database as idb
+
+        if "store" in self.inputs.keys():
+            restored = False
+            try:
+                restored = idb.restore_node_outputs(self)
+                print('restored: ', restored)
+            except FileNotFoundError as e:
+                print("No stored data found for node: ", self.label)
+            except Exception as e:
+                print("Error restoring node outputs: ", e)
+                restored = idb.restore_node_outputs(self)
+
+
+            if restored:
+                return self.outputs.data[PORT_VALUE]
 
         self._validate_input()
         if self.node_type == "macro_node":
@@ -493,6 +578,11 @@ class Node:
         else:
             out = self._run()
         self._run_set_values(out)
+        if "store" in self.inputs.keys():
+            if self.inputs.store.value:
+                path = idb.store_node_outputs(self)
+                print('stored: ', path)
+            
 
         return out
 

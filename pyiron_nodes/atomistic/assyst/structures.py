@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from collections.abc import Generator
 from numbers import Integral
 from itertools import product
@@ -15,45 +15,38 @@ from pyiron_workflow import (
 
 
 @as_inp_dataclass_node
+class ElementInput:
+    element: str = "Al"
+    num: int = 1
+
+
+@as_inp_dataclass_node
 class SpaceGroupInput:
-    # def __post_init__(self):
-    #     if self.stoichiometry is None or len(self.stoichiometry) == 0:
-    #         self.stoichiometry = list(range(1, self.max_atoms + 1))
-    #     if self.spacegroups is None:
-    #         self.spacegroups = list(range(1,231))
-
-    elements: list[str] = "Al"
+    spacegroups: list[int] = field(default_factory=lambda: list(range(1, 231)))
+    element1: ElementInput = None
+    element2: ElementInput = None
     max_atoms: int = 10
-    stoichiometry: list[int] | list[tuple[int, ...]] | None = 1
-    spacegroups: list[int] | None = None
-
-    # can be either a single cutoff distance or a dictionary mapping chemical
-    # symbols to min *radii*; you need to half the value if you go from using a
-    # float to a dict
-    min_dist: float | dict[str, float] | None = None
-
-    # FIXME: just to restrict number of structures during testing
-    max_structures: int = 20
+    max_structures: int = 10
 
 
-@as_function_node
-def get_stoichiometry(
-    self: SpaceGroupInput,
-) -> list[tuple[tuple[str, ...], tuple[int, ...]]]:
-    """Yield pairs of str and int tuples."""
-    if isinstance(self.stoichiometry[0], Integral):
-        ions = filter(
-            lambda x: 0 < sum(x) <= self.max_atoms,
-            product(self.stoichiometry, repeat=len(self.elements)),
-        )
-    else:
-        ions = iter(self.stoichiometry)
+# @as_function_node
+# def get_stoichiometry(
+#     self: SpaceGroupInputUnary,
+# ) -> list[tuple[tuple[str, ...], tuple[int, ...]]]:
+#     """Yield pairs of str and int tuples."""
+#     if isinstance(self.stoichiometry[0], Integral):
+#         ions = filter(
+#             lambda x: 0 < sum(x) <= self.max_atoms,
+#             product(self.stoichiometry, repeat=len(self.elements)),
+#         )
+#     else:
+#         ions = iter(self.stoichiometry)
 
-    stoichiometry = [
-        zip(*((el, ni) for el, ni in zip(self.elements, num_ions) if ni > 0))
-        for num_ions in ions
-    ]
-    return stoichiometry
+#     stoichiometry = [
+#         zip(*((el, ni) for el, ni in zip(self.elements, num_ions) if ni > 0))
+#         for num_ions in ions
+#     ]
+#     return stoichiometry
 
 
 # @as_function_node
@@ -70,30 +63,49 @@ def get_stoichiometry(
 
 
 @as_function_node
-def SpaceGroupSampling(input: SpaceGroupInput) -> list[Atoms]:
+def SpaceGroupSampling(input: SpaceGroupInput, store: bool = True): # -> list[Atoms]:
     from warnings import catch_warnings
     from structuretoolkit.build.random import pyxtal
+    from pyiron_nodes.atomistic.calculator.data import OutputSEFS
 
     structures = []
-    with catch_warnings(category=UserWarning, action="ignore"):
-        if isinstance(input.stoichiometry[0], Integral):
-            ions = filter(
-                lambda x: 0 < sum(x) <= input.max_atoms,
-                product(input.stoichiometry, repeat=len(input.elements)),
-            )
-        else:
-            ions = iter(input.stoichiometry)
+    elements = []
+    stoichiometry = []
+    for inp in [input.element1, input.element2]:
+        if inp is None:
+            continue
+        if inp.element is None:
+            continue
+        elements.append(inp.element)
+        stoichiometry.append(inp.num)
+        # el_num.append((elements, num_ions))
+    print("elements: ", elements, stoichiometry)
 
-        stoichiometry = [
-            zip(*((el, ni) for el, ni in zip(input.elements, num_ions) if ni > 0))
-            for num_ions in ions
-    ]            
+    ions = filter(
+        lambda x: 0 < sum(x) <= input.max_atoms,
+        product(stoichiometry, repeat=len(elements)),
+    )
 
-        for elements, num_ions in stoichiometry:
+    # print(list(ions))
+
+    el_list, n_list = [], []
+    for n_ions in ions:
+        elements, num_ions = zip(
+            *((el, ni) for el, ni in zip(elements, n_ions) if ni > 0)
+        )
+        el_list.append(elements)
+        n_list.append(num_ions)
+
+    with catch_warnings():
+        for elements, num_ions in zip(el_list, n_list):
+            print("crystal elements: ", elements, num_ions)
             structures += [
                 s["atoms"] for s in pyxtal(input.spacegroups, elements, num_ions)
             ]
             if len(structures) > input.max_structures:
                 structures = structures[: input.max_structures]
                 break
-    return structures
+
+    out_sefs = OutputSEFS().dataclass()
+    out_sefs.structures = structures
+    return out_sefs

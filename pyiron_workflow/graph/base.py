@@ -278,6 +278,11 @@ def remove_node(graph: Graph, label: str) -> Graph:
     """
     new_graph = copy_graph(graph)
     if label in graph.nodes.keys():
+        if graph.nodes[label].node_type == "graph":
+            # remove all child nodes of this macro node 
+            for node_label in graph.nodes.keys():
+                if graph.nodes[node_label].parent_id == label:
+                    new_graph = remove_node(new_graph, node_label)
         del new_graph.nodes[label]
 
     edges_to_remove = [

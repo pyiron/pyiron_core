@@ -9,6 +9,7 @@ from pyiron_nodes.atomistic.calculator.data import (
     InputCalcMinimize,
     InputCalcMD,
     InputCalcStatic,
+    OutputCalcMD,
 )
 from pyiron_nodes.dev_tools import FileObject, parse_input_kwargs
 from dataclasses import asdict
@@ -370,12 +371,13 @@ def Code1(
     return wf.Collect, wf.InitLammps.outputs.path
 
 
-@as_macro_node(labels=["generic", "path"])
+@as_macro_node("generic")
 def Lammps(
     structure: Atoms,
     calculator,  # =InputCalcStatic(),  # TODO: Don't use mutable defaults
     potential: Optional[str] = None,
     working_dir: str = "test2",
+    store: bool = False,
 ):
 
     from pyiron_workflow import Workflow
@@ -407,7 +409,7 @@ def Lammps(
     wf.Collect = Collect(
         out_dump=wf.ParseDumpFile.outputs.dump,
         out_log=wf.ParseLogFile.outputs.log,
-        calc_mode="md", # calculator,
+        calc_mode="md",  # calculator,
     )
 
     return wf.Collect

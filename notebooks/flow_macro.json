@@ -15,7 +15,7 @@
                 "label": "LoadGraph",
                 "function": "pyiron_nodes.graphs.flow.LoadGraph",
                 "inputs": {
-                    "path": "flow_macro"
+                    "path": "elastic"
                 }
             }
         },
@@ -117,25 +117,6 @@
                 "inputs": {}
             }
         },
-        "Code1": {
-            "id": "Code1",
-            "import_path": "pyiron_nodes.atomistic.engine.lammps.Code1",
-            "label": "Code1",
-            "parent_id": null,
-            "level": 0,
-            "graph": null,
-            "node_type": "node",
-            "widget_type": "customNode",
-            "expanded": false,
-            "node": {
-                "label": "Code1",
-                "function": "pyiron_nodes.atomistic.engine.lammps.Code1",
-                "inputs": {
-                    "structure": "NotData",
-                    "calculator": "NotData"
-                }
-            }
-        },
         "DisplayEdges": {
             "id": "DisplayEdges",
             "import_path": "pyiron_nodes.graphs.flow.DisplayEdges",
@@ -149,6 +130,22 @@
             "node": {
                 "label": "DisplayEdges",
                 "function": "pyiron_nodes.graphs.flow.DisplayEdges",
+                "inputs": {}
+            }
+        },
+        "DisplayNodes": {
+            "id": "DisplayNodes",
+            "import_path": "pyiron_nodes.graphs.flow.DisplayNodes",
+            "label": "DisplayNodes",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "DisplayNodes",
+                "function": "pyiron_nodes.graphs.flow.DisplayNodes",
                 "inputs": {}
             }
         },
@@ -195,6 +192,12 @@
             {
                 "source": "LoadGraph",
                 "target": "DisplayEdges",
+                "sourceHandle": "graph",
+                "targetHandle": "graph"
+            },
+            {
+                "source": "LoadGraph",
+                "target": "DisplayNodes",
                 "sourceHandle": "graph",
                 "targetHandle": "graph"
             }

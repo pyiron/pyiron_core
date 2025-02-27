@@ -16,6 +16,20 @@ def wfMetaData(log_level=0, doc=""):
 
 
 @as_out_dataclass_node
+class OutputSEFS:
+    import numpy as np
+
+    structures: Optional[np.ndarray] = field(
+        default=None, metadata=wfMetaData(log_level=10)
+    )
+    energies: Optional[float] = field(default=None, metadata=wfMetaData(log_level=0))
+    forces: Optional[np.ndarray] = field(default=None, metadata=wfMetaData(log_level=0))
+    stresses: Optional[np.ndarray] = field(
+        default=None, metadata=wfMetaData(log_level=10)
+    )
+
+
+@as_out_dataclass_node
 class OutputCalcStatic:
     from ase import Atoms
     import numpy as np
@@ -40,7 +54,7 @@ class OutputCalcStaticList:
     # from ase import Atoms
     import numpy as np
 
-    energies: Optional[np.ndarray] = field(
+    energies_pot: Optional[np.ndarray] = field(
         default=None, metadata=wfMetaData(log_level=0)
     )
     forces: Optional[np.ndarray] = field(default=None, metadata=wfMetaData(log_level=0))
@@ -50,17 +64,19 @@ class OutputCalcStaticList:
     structures: Optional[np.ndarray] = field(
         default=None, metadata=wfMetaData(log_level=10)
     )
+    is_converged: bool = False
+    iter_steps: int = 0
 
 
 @as_out_dataclass_node
 class OutputCalcMinimize:
     # energies: Optional[np.ndarray] = field(default=None, metadata=wfMetaData(log_level=0))
     initial: Optional[OutputCalcStatic] = field(
-        default_factory=lambda: OutputCalcStatic.dataclass(),
+        default_factory=lambda: OutputCalcStatic().dataclass(),
         metadata=wfMetaData(log_level=0),
     )
     final: Optional[OutputCalcStatic] = field(
-        default_factory=lambda: OutputCalcStatic.dataclass(),
+        default_factory=lambda: OutputCalcStatic().dataclass(),
         metadata=wfMetaData(log_level=0),
     )
     is_converged: bool = False
@@ -82,6 +98,10 @@ class OutputCalcMD:
     )
 
     positions: list | np.ndarray = field(
+        default_factory=lambda: np.array([]), metadata=wfMetaData(log_level=0)
+    )
+
+    stresses: list | np.ndarray = field(
         default_factory=lambda: np.array([]), metadata=wfMetaData(log_level=0)
     )
 

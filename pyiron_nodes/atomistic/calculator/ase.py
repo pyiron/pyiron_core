@@ -8,7 +8,7 @@ def Static(
     engine=None,
 ):
     import numpy as np
-    from pyiron_nodes.atomistic.calculator.data import OutputCalcStatic
+    from pyiron_nodes.atomistic.calculator.data import OutputCalcStaticList
 
     if engine is None:
         from ase.calculators.emt import EMT
@@ -18,8 +18,8 @@ def Static(
 
     structure.calc = engine.calculator
 
-    out = OutputCalcStatic.dataclass()
-    out.energy = np.array(
+    out = OutputCalcStaticList().dataclass()
+    out.energies_pot = np.array(
         [float(structure.get_potential_energy())]
     )  # TODO: originally of type np.float32 -> why??
     out.force = np.array([structure.get_forces()])
@@ -28,10 +28,12 @@ def Static(
 
 
 @as_function_node("out")
-def Minimize(structure=None, engine=None, fmax=0.005, log_file="tmp.log"):
+def Minimize(
+    structure: Atoms = None, engine=None, fmax: float = 0.005, log_file: str = "tmp.log"
+):
     from ase.optimize import BFGS
     from ase.io.trajectory import Trajectory
-    from pyiron_nodes.atomistic.calculator.data import OutputCalcMinimize
+    from pyiron_nodes.atomistic.calculator.data import OutputCalcStaticList
 
     # import numpy as np
 
@@ -41,12 +43,16 @@ def Minimize(structure=None, engine=None, fmax=0.005, log_file="tmp.log"):
 
         engine = OutputEngine(calculator=EMT())
 
-    out = OutputCalcMinimize()
-
+    out = OutputCalcStaticList().dataclass()
+    out.energies_pot = []
+    out.forces = []
+    out.structures = []
+    
+    out.structures.append(structure)
     initial_structure = structure.copy()
     initial_structure.calc = engine.calculator
-    out.initial.energy = float(initial_structure.get_potential_energy())
-    out.initial.forces = initial_structure.get_forces()
+    out.energies_pot.append(float(initial_structure.get_potential_energy()))
+    out.forces.append(initial_structure.get_forces())
 
     if log_file is None:  # write to standard io
         log_file = "-"
@@ -58,10 +64,10 @@ def Minimize(structure=None, engine=None, fmax=0.005, log_file="tmp.log"):
     atoms_relaxed = traj[-1]
     atoms_relaxed.calc = engine.calculator
 
-    out.final.forces = atoms_relaxed.get_forces()
-    out.final.energy = float(atoms_relaxed.get_potential_energy())
+    out.forces.append(atoms_relaxed.get_forces())
+    out.energies_pot.append(float(atoms_relaxed.get_potential_energy()))
     atoms_relaxed.calc = None  # ase calculator is not pickable!!
-    out.final.structure = atoms_relaxed
+    out.structures.append(atoms_relaxed)
 
     out.is_converged = dyn.converged()
     out.iter_steps = dyn.nsteps
