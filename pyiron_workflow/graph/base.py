@@ -57,7 +57,13 @@ def _getstate__graph_node(self):
 def _setstate__graph_node(self, state):
     for k, v in state.items():
         if k == "node":
-            self.node = Node().__setstate__(v)
+            # print("setting node: ", k, v)
+            # check if virtual node (import not possible) # TODO: make more robust test
+            if v["function"].startswith("pyiron_workflow.graph.base"):
+                # graph = Graph().__setstate__(state["graph"])
+                self.node = None  # graph_to_node(graph)
+            else:
+                self.node = Node().__setstate__(v)
         elif k == "graph":
             if v is not None:
                 self.graph = Graph().__setstate__(v)
@@ -65,6 +71,17 @@ def _setstate__graph_node(self, state):
             # self.graph = Graph().__setstate__(v)
         else:
             self[k] = v
+
+    if self.node is None:
+        # print(f"node is None: {self}")
+        if self.graph is not None and not self.graph.label.startswith("va_"):
+            self.label = self.graph.label
+            self.node = graph_to_node(self.graph)
+
+    if self.node is not None:
+        # print(f"node is not None: set NodeGraph {self.node.label}, {self.label}")
+        self.node._graph_node = self
+
     return self
 
 
@@ -104,8 +121,11 @@ class GraphEdge:
     targetHandle: str = None
 
 
-Nodes = NestedDict[str, GraphNode]
+# Nodes = NestedDict[str, GraphNode]
 # Edges = NestedList[str, GraphEdge]
+class Nodes(NestedDict):
+    def __init__(self, obj_type=GraphNode):
+        super().__init__(obj_type=obj_type)
 
 
 class Edges(NestedList):
@@ -136,18 +156,24 @@ def _getstate__graph(self):
 
 def _setstate__graph(self, state):
     self.label = state["label"]
-    self.nodes = Nodes().__setstate__(state["nodes"])
-    # make update to the nodes without copying the object
-    # edges = Edges().__setstate__(state["edges"])
-    # for edge in edges:
-    #     self += edge
     self.edges = Edges().__setstate__(state["edges"])
+
     if "graph" in state:
         self.graph = Graph().__setstate__(state["graph"])
     else:
         self.graph = dict()
     if "root_node" in state:
         self.root_node = GraphNode().__setstate__(state["root_node"])
+    self.nodes = Nodes().__setstate__(state["nodes"])
+    # update node inputs according to edges
+    get_updated_graph(self)
+
+    # instantiate virtual macros in node.node using node.graph
+    for key, node in self.nodes.items():
+        if node is not None and node["node"] is None and not key.startswith("va_"):
+            # print(f"key: {key}, node: {node}")
+            graph = node.graph
+            node.node = graph_to_node(graph)
     return self
 
 
@@ -279,7 +305,7 @@ def remove_node(graph: Graph, label: str) -> Graph:
     new_graph = copy_graph(graph)
     if label in graph.nodes.keys():
         if graph.nodes[label].node_type == "graph":
-            # remove all child nodes of this macro node 
+            # remove all child nodes of this macro node
             for node_label in graph.nodes.keys():
                 if graph.nodes[node_label].parent_id == label:
                     new_graph = remove_node(new_graph, node_label)
@@ -445,7 +471,7 @@ def _mark_node_as_expanded(graph, node_label: str):
 
 
 def _get_active_nodes(graph: Graph) -> Nodes:
-    active_nodes = NestedDict()
+    active_nodes = NestedDict(obj_type=GraphNode)
     # get all nodes that are not inside a collapsed node
     for k, v in graph.nodes.items():
         if v.parent_id is None:
@@ -702,7 +728,7 @@ def get_graph_from_wf(
     graph = Graph(label=wf_label)
 
     for label, node in wf._nodes.items():
-        # TODO: node input changes due o rewiring edges!
+        # TODO: node input changes due to rewiring edges!
         # Should be copied but in the present implementation deepcopy does not work
         # print(f"Adding node {label}")
         graph = add_node(graph, node, label=label)
@@ -811,6 +837,43 @@ def run_macro_node(macro_node):
         return outputs
 
 
+def run_node(node: Node | GraphNode, **kwargs):
+    """
+    Executes a given node and returns its output.
+    Parameters:
+        node (Node | GraphNode): The node to be executed. It can either be an instance of `Node`
+                                 or `GraphNode`. If it is a `GraphNode`, its underlying `node`
+                                 attribute is used for execution. If it is a `Node`, a copy of
+                                 the node is created for execution.
+        **kwargs: Additional keyword arguments to be passed as inputs to the node. These are
+                  added to the node's inputs before execution.
+    Returns:
+        Any: The result of the node's execution. If an error occurs during execution, `None`
+             is returned.
+    Raises:
+        TypeError: If the provided `node` is neither a `Node` nor a `GraphNode`.
+    Notes:
+        - If an exception occurs during the execution of the node, it is caught, and an error
+          message is printed. The function then returns `None`.
+    """
+    if isinstance(node, GraphNode):
+        node_to_run = node.node
+    elif isinstance(node, Node):
+        node_to_run = node.copy()
+    else:
+        raise TypeError(f"Unexpected node type {type(node)}")
+
+    for key, value in kwargs.items():
+        node_to_run.inputs[key] = value
+    try:
+        result = node_to_run.run()
+    except Exception as e:
+        print(f"An error occurred while running the node: {e}")
+        result = None
+
+    return result
+
+
 def get_graph_from_macro_node(macro_node: Node) -> Graph:
     orig_values = dict()
     kwargs = {}
@@ -901,7 +964,8 @@ def move_parent_nodes_to_top(graph):
             node_labels.append(node.label)
 
     print(reordered_nodes)
-    new_nodes = Nodes()
+    new_nodes = Nodes(obj_type=GraphNode)
+    # print("sub_graph22: ", "_obj_type" in new_nodes.__getstate__())
     for label in node_labels:
         new_nodes[label] = graph.nodes[label]
     new_graph = copy_graph(graph)
@@ -924,6 +988,7 @@ def create_group(full_graph, node_ids=[], label=None):
     sub_graph = _get_subgraph(full_graph, node_ids, label)
     sub_graph_node = graph_to_node(sub_graph)
 
+    # print("sub_graph: ", sub_graph.label, "_obj_type" in full_graph.nodes.__getstate__())
     full_graph.nodes[sub_graph.label] = GraphNode(
         id=sub_graph.label,
         label=sub_graph.label,
@@ -932,8 +997,10 @@ def create_group(full_graph, node_ids=[], label=None):
         node_type="graph",
         node=sub_graph_node,
         widget_type="customNode",
-        expanded=True,
+        expanded=False,
     )
+    # print("sub_graph1: ", sub_graph.label, "_obj_type" in full_graph.nodes.__getstate__())
+    # print("sub_graph_node: ", full_graph.nodes[sub_graph.label])
 
     for node in sub_graph.nodes.values():
         full_graph.nodes[node.label].parent_id = sub_graph.label
@@ -946,11 +1013,12 @@ def create_group(full_graph, node_ids=[], label=None):
         print("labels", labels)
         for handle, value in zip(labels, values):
             handle = f"va_{io_type[0]}_{sub_graph.label}__{handle}"
+            # handle = f"va_{io_type[0]}_{handle}"
             full_graph += identity(label=handle)
             full_graph.nodes[handle].parent_id = sub_graph.label
             if io_type[0] == "i":
                 target_node, target_handle = handle.split("__")[1:]
-                # print("inp: ", target_node, target_handle)
+                print("inp: ", target_node, target_handle)
                 edge = GraphEdge(
                     source=handle,
                     target=target_node,
@@ -971,8 +1039,11 @@ def create_group(full_graph, node_ids=[], label=None):
                 new_edge.targetHandle = "x"
                 add_edges.append(new_edge)
 
+    # print("sub_graph1b: ", sub_graph.label, "_obj_type" in full_graph.nodes.__getstate__())
+    # print("Sub_Graph_node: ", full_graph.nodes[sub_graph.label])
     # rewire connections to external input nodes
-    for node in full_graph.nodes.values():
+    for key, node in full_graph.nodes.items():
+        print("node: ", key, node)
         marker = f"va_o_{sub_graph.label}__"
         if marker in node.label:
             # print("virtual output node", node.label)
@@ -992,8 +1063,9 @@ def create_group(full_graph, node_ids=[], label=None):
     for edge in add_edges:
         full_graph.edges.append(edge)
 
+    # print("sub_graph1c: ", sub_graph.label, "_obj_type" in full_graph.nodes.__getstate__())
     full_graph = move_parent_nodes_to_top(full_graph)
-
+    # print("sub_graph2: ", sub_graph.label, "_obj_type" in full_graph.nodes.__getstate__())
     return full_graph
 
 
@@ -1421,16 +1493,27 @@ def graph_to_code(graph):
     return graph
 
 
+# function_string in graph_to_node my contain the type hint "NonPrimitive"
+class NonPrimitive:
+    pass
+
+
 def graph_to_node(graph: Graph, exclude_unconnected_default_ports=True) -> Node:
     import types
     from functools import partial
+    from pyiron_workflow.graph.to_code import (
+        get_code_from_graph,
+        _build_function_parameters,
+    )
 
-    function_string = graph_to_code(graph)
+    # print("graph_to_node: ", _build_function_parameters(graph, use_node_default=False))
+    function_string = get_code_from_graph(graph, use_node_default=False)
 
     # Create a dictionary to serve as the local namespace
     virtual_namespace = {}
 
     # Execute the function string in the local namespace
+    # print("function_string: ", function_string)
     exec(function_string, globals(), virtual_namespace)
 
     # Retrieve the function from the local namespace
@@ -1670,6 +1753,7 @@ def pull_node(graph: Graph, node_label: str):
     input_nodes_labels = [node_labels[i] for i in input_nodes]
 
     for input_node_label in input_nodes_labels:
+        print(f"Running node {input_node_label}")
         out = opt_graph.nodes[input_node_label].node.run()
     return out
 

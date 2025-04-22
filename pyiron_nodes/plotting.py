@@ -53,6 +53,23 @@ def Scatter(
     plt.scatter(x, y)
     return plt.show()
 
+@as_function_node("fig")
+def LinearFittingCurve(
+        x: Optional[list | np.ndarray] = None, y: Optional[list | np.ndarray] = None
+):
+    from matplotlib import pyplot as plt
+    import numpy as np
+
+    rms = np.var(x-y)
+    print(f"RMS: {rms}")
+    x_ideal = np.linspace(min(x), max(x), 100)
+    y_ideal = np.poly1d(np.polyfit(x, y, 1))(x_ideal)
+    plt.plot(x_ideal, x_ideal, '--', label='Ideal')
+    plt.plot(x_ideal, y_ideal, label='Fitted')
+    plt.scatter(x, y)
+    plt.legend
+    return plt.show()
+
 
 @as_function_node("fig")
 def ShowArray(mat: Optional[np.ndarray]):

@@ -46,10 +46,19 @@ def pick_element(lst: list, index: int) -> any:
 
 
 @as_function_node
-def ExtractList(out_list: list, label: str, flatten: bool=True):
+def ExtractList(out_list: list, label: str, flatten: bool = True):
     import numpy as np
-    
+
     collect = np.array([out.__getattribute__(label) for out in out_list])
     if flatten:
         collect = collect.flatten()
     return collect
+
+
+@as_function_node
+def ExtractColumnFromDataFrame(df, column_name: str, n_max: int = -1):
+    if n_max == -1:
+        column = df[column_name]
+    else:
+        column = df[column_name][:n_max]
+    return column

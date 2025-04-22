@@ -54,7 +54,7 @@ class PyironFlowWidget:
 
         self.flow_widget = ReactFlowWidget(
             layout={
-                "width": f"{gui_layout.flow_widget_width}px",
+                "width": f"100%",
                 "height": f"{gui_layout.flow_widget_height}px",
             }
         )
@@ -62,7 +62,7 @@ class PyironFlowWidget:
 
         layout_accordion_widgets = {
             "border": "1px solid black",
-            "width": f"{gui_layout.output_widget_width}px",
+            "width": f"100%",
             "max_height": f"{gui_layout.flow_widget_height}px",
             "overflow": "auto",
         }
@@ -77,7 +77,6 @@ class PyironFlowWidget:
 
         self.accordion_widget = widgets.Accordion(
             layout={  # 'border': '1px solid black',
-                "min_width": f"{gui_layout.output_widget_width + 50}px",
                 "height": f"{gui_layout.flow_widget_height}px",
                 "overflow": "auto",
             },
@@ -90,6 +89,7 @@ class PyironFlowWidget:
         self.accordion_widget.titles = ["Node Library", "Output", "Logging Info"]
         self._counter = 0
         self.update_graph_view()
+        self._selected_nodes = None
 
     def _parse_edge_string(self, edge_str):
         """
@@ -151,14 +151,20 @@ class PyironFlowWidget:
                     tab = self.main_widget.tab_widget
                     tab.set_title(tab.selected_index, self.graph.label)
                     self.update_gui()  # ???
-                elif command =="group_nodes":
-                    selected_nodes = node_name.split(",")
-                    print("group_nodes: ", selected_nodes)
-                    node_ids = base._node_labels_to_node_ids(self.graph, selected_nodes)    
+                elif command == "selected_nodes":
+                    self._selected_nodes = node_name.split(",")
+                    print("selected_nodes: ", self._selected_nodes)
+                elif command == "groupSelectedNodes":
+                    print("group_nodes: ", self._selected_nodes)
+                    node_ids = base._node_labels_to_node_ids(
+                        self.graph, self._selected_nodes
+                    )
                     print("group_nodes: ", node_ids)
                     self.graph = base.create_group(self.graph, node_ids)
+                    # self.graph = base.create_group(self.graph, node_ids)
                     # self.graph = base.get_updated_graph(self.graph)
                     self.update_gui()
+
                 elif command == "add_node":
                     print("add_node: ", node_name)
                     self.add_node(node_name, node_name)
@@ -195,6 +201,12 @@ class PyironFlowWidget:
 
                         self.accordion_widget.selected_index = 1
                         node = self.graph.nodes[node_name].node
+
+                        # get node hash
+                        from pyiron_database.instance_database.node import get_hash
+
+                        print("node hash: ", get_hash(node))
+
                         code = inspect.getsource(node._func)
 
                         print(highlight(code, Python2Lexer(), TerminalFormatter()))
@@ -304,13 +316,46 @@ class PyironFlow:
         with self.accordion_widget:
             display(wf.accordion_widget)
 
-        self.gui = widgets.HBox(
-            [
-                self.accordion_widget,
-                self.tab_widget,
-            ],
-            layout={"border": "1px solid black"},
+        self.h_scroll = widgets.IntSlider(
+            value=10,  # gui_layout.output_widget_width,
+            min=0,
+            max=gui_layout.flow_widget_width + gui_layout.output_widget_width,
+            readout=False
         )
+        self.h_scroll.layout.width = (
+            f"{gui_layout.flow_widget_width+ gui_layout.output_widget_width+15}px"
+        )
+        self.h_scroll.layout.margin = "0px 0px 0px 0px"
+        self.h_scroll.layout.border = "1px solid black"
+        self.h_scroll.layout.height = "5px"
+
+        
+        self.h_scroll.observe(self.update_width, names="value")
+
+        self.gui = widgets.VBox(
+            [
+                widgets.HBox(
+                    [
+                        self.accordion_widget,
+                        self.tab_widget,
+                    ],
+                    layout={"border": "1px solid black"},
+                ),
+                self.h_scroll,
+            ]
+        )
+        # call h_scroll event to set the initial width
+        self.h_scroll.value = gui_layout.output_widget_width
+
+    def update_width(self, change):
+        new_width = f'{change["new"]}px'
+        self.accordion_widget.layout.width = new_width
+        flow_width = (
+            self.gui_layout.flow_widget_width
+            + self.gui_layout.output_widget_width
+            - change["new"]
+        )
+        self.tab_widget.layout.width = f"{flow_width}px"
 
     def set_tab_widget(self):
         self.tab_widget = widgets.Tab()

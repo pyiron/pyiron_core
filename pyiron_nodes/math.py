@@ -78,11 +78,6 @@ def Divide(x: list | np.ndarray | float | int, y: list | np.ndarray | float | in
     return np.divide(x, y)
 
 
-@as_function_node("multiply")
-def Multiply(x: list | np.ndarray | float | int, y: list | np.ndarray | float | int):
-    return np.multiply(x, y)
-
-
 @as_function_node("add")
 def Add(x: list | np.ndarray | float | int, y: list | np.ndarray | float | int):
     return np.add(x, y)
@@ -91,3 +86,13 @@ def Add(x: list | np.ndarray | float | int, y: list | np.ndarray | float | int):
 @as_function_node("subtract")
 def Subtract(x: list | np.ndarray | float | int, y: list | np.ndarray | float | int):
     return np.subtract(x, y)
+
+
+@as_function_node("multiply")
+def npMultiply(x: list | np.ndarray | float | int, y: list | np.ndarray | float | int):
+    return np.multiply(x, y)
+
+
+@as_function_node("multiply")
+def Multiply(x: any, y: any):
+    return x * y

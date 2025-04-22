@@ -155,7 +155,7 @@ class NestedDict(OrderedDict):
     def iloc(self, idx: int | list):
         if isinstance(idx, list):
             # make it a NestedDict
-            filtered_dict = NestedDict()
+            filtered_dict = NestedDict(obj_type=self._obj_type)
             for i in idx:
                 filtered_dict[self.index_dict[i]] = self[self.index_dict[i]]
             return filtered_dict
@@ -181,14 +181,20 @@ class NestedDict(OrderedDict):
     def __setstate__(self, state):
         # Restore the state of the dictionary
         self.clear()
-        if "_obj_type" in state:
-            self._obj_type = get_object_from_path(state["_obj_type"])
-            del state["_obj_type"]
+        if self._obj_type is None:
+            if "_obj_type" in state:
+                self._obj_type = get_object_from_path(state["_obj_type"])
+                # del state["_obj_type"]
 
-            self.update({k: self._obj_type().__setstate__(v) for k, v in state.items()})
+            # convert the state to a dictionary of objects
+
+        if self._obj_type is not None:   
+            # print('convert obj: ', self._obj_type, state.keys()) 
+            self.update({k: self._obj_type().__setstate__(v) for k, v in state.items() if k != "_obj_type"})
         else:
             self.update(state)
-        return self    
+
+        return self
 
 
 def transpose_list_of_dicts(list_of_dicts: list) -> dict:
@@ -241,7 +247,7 @@ class NestedList(list):
             self.extend([self._obj_type(**v) for v in state["values"]])
         else:
             self.extend(state["values"])
-        return self    
+        return self
 
     # we need to overwrite the deepcopy and copy methods to
     # prevent getting the object twice (list is double with the first part coming
@@ -259,7 +265,7 @@ class NestedList(list):
 
     def __copy__(self):
         # Create a new list instance
-        new_list = NestedList(obj_type=self._obj_type) 
+        new_list = NestedList(obj_type=self._obj_type)
         for item in self:
             new_list.append(item)
         return new_list

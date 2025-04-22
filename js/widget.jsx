@@ -37,7 +37,7 @@ import {
   DownloadIcon,
   Cross1Icon,
   Pencil1Icon,
-  GroupIcon
+  GroupIcon,
 } from "@radix-ui/react-icons";
 
 import TextUpdaterNode from "./TextUpdaterNode.jsx";
@@ -167,7 +167,6 @@ const render = createRender(() => {
     console.log("load commands: ", new_commands);
   });
 
-
   const onNodesChange = useCallback(
     (changes) => {
       setNodes((nds) => {
@@ -175,25 +174,33 @@ const render = createRender(() => {
         // clear selectedNodes
         setSelectedNodes([]);
         for (const i in changes) {
-          if (Object.hasOwn(changes[i], 'selected')) {
-            if (changes[i].selected){
-              for (const k in new_nodes){
+          if (Object.hasOwn(changes[i], "selected")) {
+            if (changes[i].selected) {
+              for (const k in new_nodes) {
                 if (new_nodes[k].id == changes[i].id) {
                   selectedNodes.push(new_nodes[k]);
-                }  
+                }
               }
-            }
-            else{
-              for (const j in selectedNodes){
+            } else {
+              for (const j in selectedNodes) {
                 if (selectedNodes[j].id == changes[i].id) {
-                  selectedNodes.splice(j, 1); 
-                }  
+                  selectedNodes.splice(j, 1);
+                }
               }
             }
           }
         }
         console.log("onNodesChange: ", changes, new_nodes);
         console.log("selectedNodes: ", selectedNodes);
+        // convert list of selectedNodes to a string of comma separated node ids
+        // and submit it to GUI
+        let selectedNodesStr = selectedNodes.map((node) => node.id).join(",");
+        model.set(
+          "commands",
+          `selected_nodes: ${selectedNodesStr} - ${new Date().getTime()}`
+        );
+        model.save_changes();
+
         model.set("nodes", JSON.stringify(new_nodes));
         model.save_changes();
         return new_nodes;
@@ -302,8 +309,17 @@ const render = createRender(() => {
     // group nodes
     console.log("groupNodes: ", id);
     // convert list of selectedNodes to a string of comma separated node ids
-    let selectedNodesStr = selectedNodes.map((node) => node.id).join(",");
-    model.set("commands", `group_nodes: ${selectedNodesStr} - ${new Date().getTime()}`);
+    // let selectedNodesStr = selectedNodes.map((node) => node.id).join(",");
+    // console.log("selectedNodesStr: ", selectedNodesStr, selectedNodes);
+    // model.set(
+    //   "commands",
+    //   `group_nodes: ${selectedNodesStr} - ${new Date().getTime()}`
+    // );
+    // model.save_changes();
+    model.set(
+      "commands",
+      `groupSelectedNodes: __global__ - ${new Date().getTime()}`
+    );
     model.save_changes();
   };
 

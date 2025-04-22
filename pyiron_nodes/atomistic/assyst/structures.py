@@ -29,37 +29,7 @@ class SpaceGroupInput:
     max_structures: int = 10
 
 
-# @as_function_node
-# def get_stoichiometry(
-#     self: SpaceGroupInputUnary,
-# ) -> list[tuple[tuple[str, ...], tuple[int, ...]]]:
-#     """Yield pairs of str and int tuples."""
-#     if isinstance(self.stoichiometry[0], Integral):
-#         ions = filter(
-#             lambda x: 0 < sum(x) <= self.max_atoms,
-#             product(self.stoichiometry, repeat=len(self.elements)),
-#         )
-#     else:
-#         ions = iter(self.stoichiometry)
 
-#     stoichiometry = [
-#         zip(*((el, ni) for el, ni in zip(self.elements, num_ions) if ni > 0))
-#         for num_ions in ions
-#     ]
-#     return stoichiometry
-
-
-# @as_function_node
-# def get_distance_filter(self: SpaceGroupInput):
-#     match self.min_dist:
-#         case float():
-#             return DistanceFilter({el: self.min_dist / 2 for el in self.elements})
-#         case dict():
-#             return DistanceFilter(self.min_dist)
-#         case _:
-#             assert (
-#                 False
-#             ), f"min_dist cannot by of type {type(self.min_dist)}: {self.min_dist}!"
 
 
 @as_function_node

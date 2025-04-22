@@ -1,5 +1,5 @@
 """
-workflow manager following the specs from pyiron_workflow but more oriented on functional 
+workflow manager following the specs from pyiron_workflow but more oriented on functional
 programming, i.e., supports higher order functions (nodes and data as function arguments)
 and implemented in a more functional (less abstract) approach.
 """
@@ -350,13 +350,18 @@ class DataElement:
 
     def type_hint(self, v):
         import numpy
-        import ase 
+        import ase
+        import pyiron_nodes
 
         if isinstance(self.type, str):
             # print('type: ', self.type, v)
-            if self.type == 'builtins.NoneType':
+            if self.type == "builtins.NoneType":
                 # let the deserializer handle NoneType
                 return v
+            if self.type.endswith("_postfix"):
+                my_type = self.type.replace("_postfix", "")
+                # print('type: ', my_type, v)
+                return eval(my_type)().dataclass(**v["__getstate__"])
             return eval(self.type)(v)
         return self.type(v)
 
@@ -446,6 +451,7 @@ class Node:
         output_labels=None,
         node_type=None,
         orig_func=None,
+        _graph_node=None,
     ):
 
         self.node_type = node_type
@@ -455,6 +461,7 @@ class Node:
 
         self._func = func
         self._workflow = None
+        self._graph_node = _graph_node  # link to parent graph node
 
         if func is None:
             return
@@ -514,6 +521,7 @@ class Node:
             # check whether input type is a node (provide node rather than node output value)
             if inp_type == "Node":  # node_type_as_str:
                 val = inp_port.copy()
+                # print("copy node: ", val.label)
             else:
                 val = inp_port.outputs.data["value"][0]
         elif isinstance(inp_port, Port):
@@ -521,6 +529,7 @@ class Node:
                 inp_type == "Node"
             ):  # should be used only as quick fix (node rather than port should be provided)
                 val = inp_port.node.copy()
+                # print("copy port: ", val.label, val.inputs)
             else:
                 val = inp_port.value
 
@@ -530,18 +539,17 @@ class Node:
         return val
 
     def __call__(self, *args: Any, **kwargs: Any) -> Any:
-        new_values = []
+        i_args = 0
         labels = self.inputs.data[PORT_LABEL]
         for key in labels:
             if key in kwargs:
-                new_values.append(kwargs[key])
-            elif len(new_values) < len(args):
-                new_values.append(args[len(new_values)])
-            else:
-                new_values.append(self.inputs.data[PORT_VALUE][labels.index(key)])
-            # print("new_values: ", new_values)
-        self.inputs.data[PORT_VALUE] = new_values
-        return self.run()
+                self.inputs[key] = kwargs[key]
+            elif i_args < len(args):
+                self.inputs[key] = args[i_args]
+                i_args += 1
+
+        out = self.run()
+        return out  # self.run()
 
     # def __getstate__(self):
     #     state = dict(
@@ -558,31 +566,44 @@ class Node:
         import pyiron_database.instance_database as idb
 
         if "store" in self.inputs.keys():
-            restored = False
-            try:
-                restored = idb.restore_node_outputs(self)
-                print('restored: ', restored)
-            except FileNotFoundError as e:
-                print("No stored data found for node: ", self.label)
-            except Exception as e:
-                print("Error restoring node outputs: ", e)
-                restored = idb.restore_node_outputs(self)
+            if self.inputs.store.value:
+                restored = False
+                try:
+                    restored = idb.restore_node_outputs(self)
+                    print("restored: ", restored)
+                except FileNotFoundError as e:
+                    print("No stored data found for node: ", self.label)
+                except Exception as e:
+                    print("Error restoring node outputs: ", e)
+                    restored = idb.restore_node_outputs(self)
 
-
-            if restored:
-                return self.outputs.data[PORT_VALUE]
+                if restored:
+                    return self.outputs.data[PORT_VALUE]
+            # print("node_0: ", self.inputs.node.value.node.inputs)
+    
 
         self._validate_input()
-        if self.node_type == "macro_node":
+        if self.node_type in ["macro_node", "graph"]:
             out = base.run_macro_node(self)
         else:
             out = self._run()
         self._run_set_values(out)
-        if "store" in self.inputs.keys():
+
+        if "_db" in self.inputs.keys():
+            # print("node: ", self.inputs.node.value.node.inputs)
+            db = self.inputs._db.value
+            if db is not None:
+                if isinstance(db, Port):
+                    db = db.value
+                print("store in db: ", self.label, type(db), db)
+                idb.store_node_in_database(db, self, store_outputs=False, store_input_nodes_recursively=True)
+                path = idb.store_node_outputs(self)
+                print("stored: ", self.label, path)
+
+        elif "store" in self.inputs.keys():
             if self.inputs.store.value:
                 path = idb.store_node_outputs(self)
-                print('stored: ', path)
-            
+                print("stored: ", self.label, path)
 
         return out
 
@@ -635,9 +656,10 @@ class Node:
 
     # @classmethod
     def __setstate__(self, state):
-        self = get_node_from_path(state["function"])(**state["inputs"])
-        self.label = state["label"]
-        return self
+        new_instance = get_node_from_path(state["function"])(**state["inputs"])
+        new_instance.label = state["label"]
+        self.__dict__.update(new_instance.__dict__)
+        return new_instance
 
     @classmethod
     def from_dict(cls, node_dict):
@@ -667,6 +689,7 @@ class Node:
             output_labels=None,
             node_type=self.node_type,
             orig_func=self._func,
+            _graph_node=self._graph_node,
         )
 
 
