@@ -601,6 +601,8 @@ def get_code_from_graph(
     graph: Graph,
     workflow_lib: str = "pyiron_workflow",
     pyiron_nodes_lib: str = "pyiron_nodes",
+    sort_graph: bool = True,
+    include_non_default_inputs: bool = True,
 ):
     """
     Generate Python source code from graph.
@@ -614,6 +616,10 @@ def get_code_from_graph(
         str: The generated Python source code.
     """
     import black
+
+    if sort_graph:
+        graph = get_updated_graph(graph)
+        graph = topological_sort(graph)
 
     # get input kwargs from graph
     kwargs = str()
@@ -883,11 +889,16 @@ def get_graph_from_macro_node(macro_node: Node) -> Graph:
         orig_values[inp_port_label] = macro_node.inputs.__getattr__(inp)
 
     out = macro_node._func(**kwargs)
-    if not isinstance(out, tuple):
+    if isinstance(out, tuple):
+        out_0 = out[0]
+    else:
+        out_0 = out
         out = (out,)
 
     # each output instance contains link to workflow, check that it works for multiple outputs
-    wf = out[0]._workflow
+    if isinstance(out[0], Port):
+        out_0 = out_0.node
+    wf = out_0._workflow
     # print("label: ", wf.label, macro_node.label)
     wf.label = macro_node.label
 
@@ -1431,6 +1442,32 @@ def get_outputs_of_graph(graph: Graph) -> Data:
     )
 
 
+def _find_node_inputs(graph: Graph) -> List[Port]:
+    node_inputs = []
+    for graph_node in graph.nodes.values():
+        node_inp_types = graph_node.node.inputs.data["type"]
+        if "Node" in node_inp_types:
+            indices = [i for i, x in enumerate(node_inp_types) if x == "Node"]
+            target = graph_node.node.label
+            for i in indices:
+                target_handle = graph_node.node.inputs.data["label"][i]
+                node_inputs.append((target, target_handle))
+                # print(target, target_handle, i)
+
+    return node_inputs
+
+
+def _remove_node_inputs(graph: Graph) -> Graph:
+    new_graph = copy_graph(graph)
+    node_inputs = _find_node_inputs(graph)
+    for node, handle in node_inputs:
+        for edge in new_graph.edges:
+            if edge.target == node and edge.targetHandle == handle:
+                new_graph.edges.remove(edge)
+
+    return new_graph
+
+
 def _convert_to_integer_representation(graph: Graph):
     # Create a dictionary mapping node labels to indices
     node_to_index = {
@@ -1681,12 +1718,20 @@ def update_execution_graph(graph: Graph, debug=False) -> Graph:
     # graph = copy_graph(graph)
     for edge in graph.edges:
         source_node = graph.nodes[edge.source]
+
+        # update source output ports
+        data = source_node.node.outputs.data
+        data["node"] = [source_node.node for _ in data["label"]]
+
         if debug:
             print(
                 f"Updating input {source_node.label} in node {edge.source}",
                 edge.sourceHandle,
                 edge.targetHandle,
+                id(source_node.node),
+                id(source_node.node.outputs.data["node"][0])
             )
+
         graph = update_input_value(
             graph,
             edge.target,
@@ -1745,6 +1790,9 @@ def pull_node(graph: Graph, node_label: str):
     # TODO: implement
     # opt_graph = _optimize_graph_connections(graph)
     opt_graph = copy_graph(graph)
+
+    # closures are not part of the execution pipeline (called inside the function!)
+    opt_graph = _remove_node_inputs(opt_graph)
     node_labels = _get_node_labels(opt_graph)
     if node_label not in node_labels:
         raise ValueError(f"Node label '{node_label}' not found in the workflow graph.")

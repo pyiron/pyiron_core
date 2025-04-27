@@ -206,8 +206,12 @@ class PyironFlowWidget:
                         from pyiron_database.instance_database.node import get_hash
 
                         print("node hash: ", get_hash(node))
-
-                        code = inspect.getsource(node._func)
+                        if node.node_type == "graph":
+                            if hasattr(node, "graph"):
+                                code = base.get_code_from_graph(node.graph)
+                            base.get_code_from_graph(node.graph)
+                        else:
+                            code = inspect.getsource(node._func)
 
                         print(highlight(code, Python2Lexer(), TerminalFormatter()))
 

@@ -491,7 +491,7 @@ class Node:
         if len(set(self.outputs.data[PORT_LABEL])) != len(
             self.outputs.data[PORT_LABEL]
         ):
-            raise ValueError("Node creator: Output labels must be unique")
+            raise ValueError(f"Node creator: Output labels must be unique: {self.outputs.data[PORT_LABEL]}")
         if None in self.outputs.data[PORT_LABEL]:
             raise ValueError("Node creator: Output labels must be given")
 
@@ -514,6 +514,7 @@ class Node:
         return len(self.inputs.data[PORT_LABEL])
 
     def _get_value(self, inp_port, inp_type):
+        # print("get_value: ", inp_type, type(inp_port))
         # this is the function that realizes nodes as inputs
         # -> analogous to higher order functions in functional programming"
         # node_type_as_str = get_import_path_from_type(Node)
@@ -521,6 +522,11 @@ class Node:
             # check whether input type is a node (provide node rather than node output value)
             if inp_type == "Node":  # node_type_as_str:
                 val = inp_port.copy()
+                # add hash to closure node
+                import pyiron_database.instance_database as idb
+                hash = idb.get_hash(inp_port)
+                inp_port._hash_parent = hash
+                print("copy node: ", val.label, inp_port._hash_parent)
                 # print("copy node: ", val.label)
             else:
                 val = inp_port.outputs.data["value"][0]
@@ -529,6 +535,11 @@ class Node:
                 inp_type == "Node"
             ):  # should be used only as quick fix (node rather than port should be provided)
                 val = inp_port.node.copy()
+                # add hash to closure node
+                import pyiron_database.instance_database as idb
+                hash = idb.get_hash(val)
+                val._hash_parent = hash
+                print("copy node (port): ", val.label, val._hash_parent)                
                 # print("copy port: ", val.label, val.inputs)
             else:
                 val = inp_port.value
@@ -564,6 +575,8 @@ class Node:
     def run(self):
         import pyiron_workflow.graph.base as base
         import pyiron_database.instance_database as idb
+        from datetime import datetime
+        import getpass
 
         if "store" in self.inputs.keys():
             if self.inputs.store.value:
@@ -578,24 +591,33 @@ class Node:
                     restored = idb.restore_node_outputs(self)
 
                 if restored:
+                    if len(self.outputs.data[PORT_VALUE]) == 1:
+                        return self.outputs.data[PORT_VALUE][0]
+                    # TODO: check if tuple rather than list is needed
                     return self.outputs.data[PORT_VALUE]
             # print("node_0: ", self.inputs.node.value.node.inputs)
     
-
+        self._start_time = datetime.now()
         self._validate_input()
         if self.node_type in ["macro_node", "graph"]:
             out = base.run_macro_node(self)
         else:
             out = self._run()
         self._run_set_values(out)
+        end_time = datetime.now()
+        # get execution time as float
 
+        self._execution_time = (end_time - self._start_time).total_seconds()
+        # get user name
+        self._user = getpass.getuser()
+        
         if "_db" in self.inputs.keys():
             # print("node: ", self.inputs.node.value.node.inputs)
             db = self.inputs._db.value
             if db is not None:
                 if isinstance(db, Port):
                     db = db.value
-                print("store in db: ", self.label, type(db), db)
+                # print("store in db: ", self.label, type(db), db)
                 idb.store_node_in_database(db, self, store_outputs=False, store_input_nodes_recursively=True)
                 path = idb.store_node_outputs(self)
                 print("stored: ", self.label, path)
@@ -789,6 +811,8 @@ def make_node_decorator(
                 # print("args", args, isinstance(args[0], str))
                 if isinstance(args[0], str):
                     output_labels = list(args)
+                elif isinstance(args[0], list):
+                    output_labels = args[0]
                 else:
                     output_labels = None
             else:
@@ -797,6 +821,7 @@ def make_node_decorator(
 
             if isinstance(output_labels, str):
                 output_labels = [output_labels]
+            # print("output_labels: ", output_labels)
 
             # print('output_labels',  output_labels)
             # print('all: ', args, type(args), len(args), kwargs, output_labels, func)
@@ -954,6 +979,9 @@ def _return_as_macro_node(func, label, output_labels, node_type, *f_args, **f_kw
     out = node._run()  # initialize the workflow (do not run it)
     if isinstance(out, tuple):
         out = out[0]
+    if isinstance(out, Port):
+        out = out.node
+    
     wf_macro = out._workflow
 
     # Replace the 'run' method with a fixed argument

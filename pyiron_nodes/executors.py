@@ -32,6 +32,7 @@ def IterNode(
     _db = None,
 ):
 
+    # TODO: add to node ._hash_parent (with hash of this node)
     from concurrent.futures import as_completed
     from pyiron_workflow.graph import base
     from copy import copy
@@ -45,7 +46,10 @@ def IterNode(
     out_dict = dict()
     if Executor is None:
         for el in kwarg_list:
+            # print('iter kwargs: ', node.kwargs)
             out_dict[el] = node(**{kwarg_name: el})
+            # if hasattr(node, "_hash_parent"):
+            #     print("node._hash_parent", el, node._hash_parent)
             # print("iter_node: ", node.inputs, node_run.inputs)
     else:
         with Executor as executor:

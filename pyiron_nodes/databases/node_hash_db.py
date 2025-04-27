@@ -1,4 +1,4 @@
-from pyiron_workflow import as_function_node
+from pyiron_workflow import as_function_node, Node
 from typing import Optional
 
 
@@ -64,3 +64,39 @@ def ShowTable(db):
     session.close()
 
     return df
+
+
+@as_function_node
+def GetGraph(db, node_id: int):
+    """
+    Get the graph of a node with id *node_id from the database.
+    """
+    import pyiron_database.instance_database as idb
+    from pyiron_workflow.graph.base import GuiGraph
+    from sqlalchemy.orm import sessionmaker
+    import pandas as pd
+
+    Session = sessionmaker(bind=db.engine)
+    session = Session()
+
+    df = pd.read_sql(session.query(db.table).statement, session.bind)
+
+    session.close()
+
+    _, graph = idb.restore_node_from_database(db=db, node_hash=df.hash.iloc[node_id])
+
+    gui_graph = GuiGraph(graph)
+
+    return gui_graph
+
+
+@as_function_node
+def GetHash(node: Node):
+    """
+    Get the hash of a node
+    """
+    import pyiron_database.instance_database as idb
+
+    print("inputs: ", node.inputs)
+    hash = idb.get_hash(node)
+    return hash
