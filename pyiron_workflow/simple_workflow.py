@@ -4,18 +4,18 @@ programming, i.e., supports higher order functions (nodes and data as function a
 and implemented in a more functional (less abstract) approach.
 """
 
-from collections import OrderedDict
+import ast
+import collections
+import dataclasses
+import functools
+import importlib
+import inspect
+import logging
+import types
+from typing import Any, Union, get_type_hints
 
 import pandas as pd
-import logging
-from functools import wraps
-import inspect
-import ast
-import types
-from functools import partial
-from typing import Any, Union
-import numpy as np
-import pyiron_workflow.wf_graph_tools as wf_graph_tools
+from pyiron_workflow import wf_graph_tools
 
 PORT_LABEL = "label"
 PORT_VALUE = "value"
@@ -28,7 +28,7 @@ PORT_TYPE = "type"
 NotData = "NotData"  # __empty"
 
 
-class DotDict(OrderedDict):
+class DotDict(collections.OrderedDict):
     """Implementing a dot notation dictionary"""
 
     def __init__(self, item_type=None, *args, **kwargs):
@@ -73,7 +73,6 @@ class DotDict(OrderedDict):
 
 
 # store and retrive types as str paths
-import importlib
 
 
 def get_import_path_from_type(obj):
@@ -101,9 +100,6 @@ def get_type_from_path(import_path, log=None):
 
 # extract information from function
 
-import inspect
-import ast
-from typing import get_type_hints
 
 
 def extract_output_parameters_from_function(func):
@@ -223,12 +219,9 @@ def extract_input_parameters_from_function(function: callable) -> dict:
     return output_dict
 
 
-from dataclasses import dataclass, fields, asdict
-
-
-def extract_dataclass_parameters(dataclass_instance: dataclass):
-    labels = [field.name for field in fields(type(dataclass_instance))]
-    types = [field.type for field in fields(type(dataclass_instance))]
+def extract_dataclass_parameters(dataclass_instance: dataclasses.dataclass):
+    labels = [field.name for field in dataclasses.fields(type(dataclass_instance))]
+    types = [field.type for field in dataclasses.fields(type(dataclass_instance))]
     defaults = [getattr(dataclass_instance, name) for name in labels]
 
     output_dict = dict()
@@ -315,13 +308,13 @@ class Port(Attribute):
     #     return f"<Port id={self.labels} value={self.value} ready={self.ready}>"
 
 
-@dataclass
+@dataclasses.dataclass
 class Connection:
     owner: "Node"
     label: str
 
 
-@dataclass
+@dataclasses.dataclass
 class DataElement:
     label: str
     type: str
@@ -782,8 +775,6 @@ def get_outputs_data(func, extract_output_parameters):
 # None.
 NULL = object()
 
-from functools import wraps
-
 
 def make_node_decorator(
     inner_wrap_return_func, name_postfix, node_type="function_node"
@@ -826,7 +817,7 @@ def make_node_decorator(
             # print('output_labels',  output_labels)
             # print('all: ', args, type(args), len(args), kwargs, output_labels, func)
 
-            @wraps(func)
+            @functools.wraps(func)
             def inner_wrapper(*f_args, **f_kwargs):
                 import copy
 
@@ -888,9 +879,9 @@ def _return_as_inp_dataclass_node(
 ):
 
     return Node(
-        func=dataclass(func),
+        func=dataclasses.dataclass(func),
         inputs=get_inputs_data(
-            dataclass(func)(), extract_dataclass_parameters, *f_args, **f_kwargs
+            dataclasses.dataclass(func)(), extract_dataclass_parameters, *f_args, **f_kwargs
         ),
         outputs=Data(
             {
@@ -911,9 +902,6 @@ as_inp_dataclass_node = make_node_decorator(
     _return_as_inp_dataclass_node, "_postfix", "inp_dataclass_node"
 )
 
-from dataclasses import is_dataclass
-
-
 # as_out_dataclass_node decorator
 def _return_as_out_dataclass_node(
     func, label, output_labels, node_type, *f_args, **f_kwargs
@@ -930,7 +918,7 @@ def _return_as_out_dataclass_node(
             raise ValueError(
                 "dataclass output node should contain a non-None input variable"
             )
-        return tuple(asdict(value).values())
+        return tuple(dataclasses.asdict(value).values())
 
     def find_single_element(func, *args, **kwargs):
         if args and len(args) == 1:
@@ -938,7 +926,7 @@ def _return_as_out_dataclass_node(
         elif kwargs and len(kwargs) == 1:
             return next(iter(kwargs.values()))
         else:
-            return dataclass(func)()
+            return dataclasses.dataclass(func)()
 
     # print("func: ", func(), is_dataclass(func()))
     return Node(
@@ -949,11 +937,11 @@ def _return_as_out_dataclass_node(
                 "type": ["dataclass"],
                 "ready": [True],
                 "value": [find_single_element(func, *f_args, **f_kwargs)],
-                "default": [dataclass(func)()],
+                "default": [dataclasses.dataclass(func)()],
             },
             attribute=Port,
         ),
-        outputs=get_outputs_data(dataclass(func)(), extract_dataclass_parameters),
+        outputs=get_outputs_data(dataclasses.dataclass(func)(), extract_dataclass_parameters),
         label=label,
         output_labels=output_labels,
         node_type=node_type,
@@ -986,7 +974,7 @@ def _return_as_macro_node(func, label, output_labels, node_type, *f_args, **f_kw
 
     # Replace the 'run' method with a fixed argument
     node._wf_macro = wf_macro
-    node._run = types.MethodType(partial(run_macro, wf_macro=wf_macro), node)
+    node._run = types.MethodType(functools.partial(run_macro, wf_macro=wf_macro), node)
     node._orig_func = node._func  # get undecorated function
 
     return node
@@ -1000,7 +988,7 @@ WORKFLOW_DIR = "../pyiron_nodes/local_workflows"
 
 class Workflow:
     def __init__(self, label, workflow_dir=WORKFLOW_DIR):
-        super().__setattr__("_nodes", OrderedDict())
+        super().__setattr__("_nodes", collections.OrderedDict())
         super().__setattr__("_edges", [])
         super().__setattr__("label", label)
         # super().__setattr__("workflow_dir", workflow_dir)
