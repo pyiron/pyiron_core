@@ -30,6 +30,7 @@ import getpass
 username = getpass.getuser()
 # username = 'joerg'
 
+
 def compute_hash_value(input_dict, length=256):
     """
     Converts a dictionary into a hash.

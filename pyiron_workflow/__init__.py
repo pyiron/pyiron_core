@@ -3,7 +3,7 @@
 # __version__ = get_versions()["version"]
 
 from pyiron_workflow import simple_workflow
-from pyiron_workflow.simple_workflow import NotData as NOT_DATA 
+from pyiron_workflow.simple_workflow import NotData as NOT_DATA
 
 # User entry point
 from pyiron_workflow.simple_workflow import Workflow

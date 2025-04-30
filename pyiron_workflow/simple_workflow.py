@@ -101,7 +101,6 @@ def get_type_from_path(import_path, log=None):
 # extract information from function
 
 
-
 def extract_output_parameters_from_function(func):
     # Get AST of the function's source
     func_ast = ast.parse(inspect.getsource(func))
@@ -484,7 +483,9 @@ class Node:
         if len(set(self.outputs.data[PORT_LABEL])) != len(
             self.outputs.data[PORT_LABEL]
         ):
-            raise ValueError(f"Node creator: Output labels must be unique: {self.outputs.data[PORT_LABEL]}")
+            raise ValueError(
+                f"Node creator: Output labels must be unique: {self.outputs.data[PORT_LABEL]}"
+            )
         if None in self.outputs.data[PORT_LABEL]:
             raise ValueError("Node creator: Output labels must be given")
 
@@ -517,6 +518,7 @@ class Node:
                 val = inp_port.copy()
                 # add hash to closure node
                 import pyiron_database.instance_database as idb
+
                 hash = idb.get_hash(inp_port)
                 inp_port._hash_parent = hash
                 print("copy node: ", val.label, inp_port._hash_parent)
@@ -530,9 +532,10 @@ class Node:
                 val = inp_port.node.copy()
                 # add hash to closure node
                 import pyiron_database.instance_database as idb
+
                 hash = idb.get_hash(val)
                 val._hash_parent = hash
-                print("copy node (port): ", val.label, val._hash_parent)                
+                print("copy node (port): ", val.label, val._hash_parent)
                 # print("copy port: ", val.label, val.inputs)
             else:
                 val = inp_port.value
@@ -589,7 +592,7 @@ class Node:
                     # TODO: check if tuple rather than list is needed
                     return self.outputs.data[PORT_VALUE]
             # print("node_0: ", self.inputs.node.value.node.inputs)
-    
+
         self._start_time = datetime.now()
         self._validate_input()
         if self.node_type in ["macro_node", "graph"]:
@@ -603,7 +606,7 @@ class Node:
         self._execution_time = (end_time - self._start_time).total_seconds()
         # get user name
         self._user = getpass.getuser()
-        
+
         if "_db" in self.inputs.keys():
             # print("node: ", self.inputs.node.value.node.inputs)
             db = self.inputs._db.value
@@ -611,7 +614,9 @@ class Node:
                 if isinstance(db, Port):
                     db = db.value
                 # print("store in db: ", self.label, type(db), db)
-                idb.store_node_in_database(db, self, store_outputs=False, store_input_nodes_recursively=True)
+                idb.store_node_in_database(
+                    db, self, store_outputs=False, store_input_nodes_recursively=True
+                )
                 path = idb.store_node_outputs(self)
                 print("stored: ", self.label, path)
 
@@ -881,7 +886,10 @@ def _return_as_inp_dataclass_node(
     return Node(
         func=dataclasses.dataclass(func),
         inputs=get_inputs_data(
-            dataclasses.dataclass(func)(), extract_dataclass_parameters, *f_args, **f_kwargs
+            dataclasses.dataclass(func)(),
+            extract_dataclass_parameters,
+            *f_args,
+            **f_kwargs,
         ),
         outputs=Data(
             {
@@ -901,6 +909,7 @@ def _return_as_inp_dataclass_node(
 as_inp_dataclass_node = make_node_decorator(
     _return_as_inp_dataclass_node, "_postfix", "inp_dataclass_node"
 )
+
 
 # as_out_dataclass_node decorator
 def _return_as_out_dataclass_node(
@@ -941,7 +950,9 @@ def _return_as_out_dataclass_node(
             },
             attribute=Port,
         ),
-        outputs=get_outputs_data(dataclasses.dataclass(func)(), extract_dataclass_parameters),
+        outputs=get_outputs_data(
+            dataclasses.dataclass(func)(), extract_dataclass_parameters
+        ),
         label=label,
         output_labels=output_labels,
         node_type=node_type,
@@ -969,7 +980,7 @@ def _return_as_macro_node(func, label, output_labels, node_type, *f_args, **f_kw
         out = out[0]
     if isinstance(out, Port):
         out = out.node
-    
+
     wf_macro = out._workflow
 
     # Replace the 'run' method with a fixed argument

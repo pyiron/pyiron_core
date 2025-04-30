@@ -324,7 +324,7 @@ class PyironFlow:
             value=10,  # gui_layout.output_widget_width,
             min=0,
             max=gui_layout.flow_widget_width + gui_layout.output_widget_width,
-            readout=False
+            readout=False,
         )
         self.h_scroll.layout.width = (
             f"{gui_layout.flow_widget_width+ gui_layout.output_widget_width+15}px"
@@ -333,7 +333,6 @@ class PyironFlow:
         self.h_scroll.layout.border = "1px solid black"
         self.h_scroll.layout.height = "5px"
 
-        
         self.h_scroll.observe(self.update_width, names="value")
 
         self.gui = widgets.VBox(

@@ -149,7 +149,7 @@ def _process_nodes_and_edges(graph: Graph, base_code: str) -> List[str]:
                         kwargs[key] = f"{label}__{key}"
                         # if isinstance(value, str):
                         #     kwargs[key] = f'"{value}"'
-                        # else: 
+                        # else:
                         #     kwargs[key] = value
 
         line = f"    wf.{label} = {import_path}("

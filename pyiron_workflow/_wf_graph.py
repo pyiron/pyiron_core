@@ -8,7 +8,6 @@ from collections import OrderedDict
 from typing import Union
 
 
-
 # TODO: Move to another module
 def as_dotdict_dataclass(*args, doc_func=None, **kwargs):
     # def wf_data_class(*args, doc_func=None, keys_to_store=None, **kwargs):
