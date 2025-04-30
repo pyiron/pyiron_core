@@ -967,10 +967,6 @@ as_out_dataclass_node = make_node_decorator(
 
 # macro node decorator
 def _return_as_macro_node(func, label, output_labels, node_type, *f_args, **f_kwargs):
-    def run_macro(self, wf_macro):
-        wf_out = wf_macro.run()  # run the workflow
-        return wf_out
-
     # print("macro: ", inspect.getsource(func))
     node = _return_as_function_node(
         func, label, output_labels, node_type, *f_args, **f_kwargs
@@ -981,12 +977,7 @@ def _return_as_macro_node(func, label, output_labels, node_type, *f_args, **f_kw
     if isinstance(out, Port):
         out = out.node
 
-    wf_macro = out._workflow
-
-    # Replace the 'run' method with a fixed argument
-    node._wf_macro = wf_macro
-    node._run = types.MethodType(functools.partial(run_macro, wf_macro=wf_macro), node)
-    node._orig_func = node._func  # get undecorated function
+    node._wf_macro = out._workflow
 
     return node
 
