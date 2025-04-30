@@ -251,7 +251,9 @@ def SavePotential(basis, filename: str = ""):
 
 
 @as_function_node
-def PredictEnergiesAndForces(basis, df_train: pd.DataFrame, df_test: pd.DataFrame, store: bool = True):
+def PredictEnergiesAndForces(
+    basis, df_train: pd.DataFrame, df_test: pd.DataFrame, store: bool = True
+):
 
     from pyace import PyACECalculator
 

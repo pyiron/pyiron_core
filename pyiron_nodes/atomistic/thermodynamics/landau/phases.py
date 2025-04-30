@@ -19,7 +19,7 @@ def TemperatureLinePhase(
     concentration: float,
     temperatures: np.ndarray | list[float],
     free_energies: np.ndarray | list[float],
-    num_parameters: int  = 3,
+    num_parameters: int = 3,
 ):
     return landau.phases.TemperatureDependentLinePhase(
         name,

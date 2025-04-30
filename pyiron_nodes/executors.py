@@ -29,7 +29,7 @@ def IterNode(
     kwarg_list: list,
     Executor: type = None,
     store: bool = True,
-    _db = None,
+    _db=None,
 ):
 
     # TODO: add to node ._hash_parent (with hash of this node)
