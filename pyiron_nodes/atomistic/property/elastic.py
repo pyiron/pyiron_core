@@ -127,8 +127,7 @@ def ElasticConstants(
     return self.elastic
 
 
-
-@as_function_node # ("structure_container")
+@as_function_node  # ("structure_container")
 def AddEnergies(
     structure_container: DataStructureContainer,
     engine: Node,

@@ -3,7 +3,9 @@ from typing import TYPE_CHECKING, Iterable
 from pyiron_workflow import Workflow, as_function_node
 
 from ase import Atoms
+
 # from matplotlib.axis import Axis
+
 
 @as_function_node("plot", use_cache=False)
 # def PlotSPG(structures: list[Atoms]) -> tuple[Axis, list[int]]:
@@ -11,11 +13,13 @@ def PlotSPG(structures: list[Atoms]):
     """Plot a histogram of space groups in input list."""
     from structuretoolkit.analyse import get_symmetry
     import matplotlib.pyplot as plt
+
     spacegroups = []
     for structure in structures:
-        spacegroups.append(get_symmetry(structure).info['number'])
+        spacegroups.append(get_symmetry(structure).info["number"])
     plt.hist(spacegroups)
     return plt.show()
+
 
 @as_function_node("plot", use_cache=False)
 def PlotAtomsHistogram(structures: list[Atoms]):
@@ -24,6 +28,7 @@ def PlotAtomsHistogram(structures: list[Atoms]):
     """
     import matplotlib.pyplot as plt
     import numpy as np
+
     length = np.array([len(s) for s in structures])
     lo = length.min()
     hi = length.max()
@@ -32,6 +37,7 @@ def PlotAtomsHistogram(structures: list[Atoms]):
     plt.xlabel("#Atoms")
     plt.ylabel("Count")
     return plt.show()
+
 
 @as_function_node("plot", use_cache=False)
 def PlotAtomsCells(structures: list[Atoms], angle_in_degrees: bool = True):
@@ -65,20 +71,20 @@ def PlotAtomsCells(structures: list[Atoms], angle_in_degrees: bool = True):
 
     # def get_angle(cell, idx=0):
     get_angle = lambda cell, idx=0: np.arccos(
-            np.dot(cell[idx], cell[(idx + 1) % 3])
-            / np.linalg.norm(cell[idx])
-            / np.linalg.norm(cell[(idx + 1) % 3])
-        )
+        np.dot(cell[idx], cell[(idx + 1) % 3])
+        / np.linalg.norm(cell[idx])
+        / np.linalg.norm(cell[(idx + 1) % 3])
+    )
 
     # def extract(n, c):
     extract = lambda n, c: {
-            "a": np.linalg.norm(c[0]),
-            "b": np.linalg.norm(c[1]),
-            "c": np.linalg.norm(c[2]),
-            "alpha": get_angle(c, 0),
-            "beta": get_angle(c, 1),
-            "gamma": get_angle(c, 2),
-        }
+        "a": np.linalg.norm(c[0]),
+        "b": np.linalg.norm(c[1]),
+        "c": np.linalg.norm(c[2]),
+        "alpha": get_angle(c, 0),
+        "beta": get_angle(c, 1),
+        "gamma": get_angle(c, 2),
+    }
 
     df = pd.DataFrame([extract(n, c) for n, c in zip(N, C)])
     df["V"] = np.linalg.det(C)
@@ -113,8 +119,14 @@ def PlotAtomsCells(structures: list[Atoms], angle_in_degrees: bool = True):
     plt.xlabel(label)
     return plt.show()
 
+
 @as_function_node("plot", use_cache=False)
-def PlotDistances(structures: list[Atoms], bins: int | Iterable[float] = 50, num_neighbors: int = 50, normalize: bool = True):
+def PlotDistances(
+    structures: list[Atoms],
+    bins: int | Iterable[float] = 50,
+    num_neighbors: int = 50,
+    normalize: bool = True,
+):
     """Plot radial distribution of a list of structures.
 
     Args:
@@ -124,9 +136,12 @@ def PlotDistances(structures: list[Atoms], bins: int | Iterable[float] = 50, num
     from structuretoolkit import get_neighbors
     import matplotlib.pyplot as plt
     import numpy as np
+
     distances = []
     for structure in structures:
-        distances.append(get_neighbors(structure, num_neighbors=num_neighbors).distances.ravel())
+        distances.append(
+            get_neighbors(structure, num_neighbors=num_neighbors).distances.ravel()
+        )
     distances = np.concatenate(distances)
 
     if normalize:
@@ -142,6 +157,7 @@ def PlotDistances(structures: list[Atoms], bins: int | Iterable[float] = 50, num
     plt.xlabel(r"Distance [$\mathrm{\AA}$]")
     return plt.show()
 
+
 @as_function_node("plot", use_cache=False)
 def PlotConcentration(structures: list[Atoms]):
     """
@@ -154,10 +170,11 @@ def PlotConcentration(structures: list[Atoms]):
     import matplotlib.pyplot as plt
     import seaborn as sns
     import pandas as pd
+
     symbols = [Counter(s.symbols) for s in structures]
     elements = sorted(set.union(*(set(s) for s in symbols)))
 
-    df = pd.DataFrame([{e: c[e]/sum(c.values()) for e in elements} for c in symbols])
+    df = pd.DataFrame([{e: c[e] / sum(c.values()) for e in elements} for c in symbols])
 
     sns.histplot(
         data=df.melt(var_name="element", value_name="concentration"),

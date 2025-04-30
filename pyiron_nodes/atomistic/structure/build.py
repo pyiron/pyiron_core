@@ -107,7 +107,7 @@ def CubicBulkCell(
     )
     from pyiron_workflow import Workflow
 
-    wf = Workflow('macro')
+    wf = Workflow("macro")
 
     wf.bulk = Bulk(name=element, cubic=True)
     wf.repeat = Repeat(structure=wf.bulk, repeat_scalar=cell_size)

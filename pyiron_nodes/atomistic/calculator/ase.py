@@ -47,7 +47,7 @@ def Minimize(
     out.energies_pot = []
     out.forces = []
     out.structures = []
-    
+
     out.structures.append(structure)
     initial_structure = structure.copy()
     initial_structure.calc = engine.calculator

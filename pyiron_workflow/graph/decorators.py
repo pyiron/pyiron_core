@@ -188,9 +188,15 @@ class NestedDict(OrderedDict):
 
             # convert the state to a dictionary of objects
 
-        if self._obj_type is not None:   
-            # print('convert obj: ', self._obj_type, state.keys()) 
-            self.update({k: self._obj_type().__setstate__(v) for k, v in state.items() if k != "_obj_type"})
+        if self._obj_type is not None:
+            # print('convert obj: ', self._obj_type, state.keys())
+            self.update(
+                {
+                    k: self._obj_type().__setstate__(v)
+                    for k, v in state.items()
+                    if k != "_obj_type"
+                }
+            )
         else:
             self.update(state)
 

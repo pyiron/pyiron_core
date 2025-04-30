@@ -29,11 +29,8 @@ class SpaceGroupInput:
     max_structures: int = 10
 
 
-
-
-
 @as_function_node
-def SpaceGroupSampling(input: SpaceGroupInput, store: bool = True): # -> list[Atoms]:
+def SpaceGroupSampling(input: SpaceGroupInput, store: bool = True):  # -> list[Atoms]:
     from warnings import catch_warnings
     from structuretoolkit.build.random import pyxtal
     from pyiron_nodes.atomistic.calculator.data import OutputSEFS

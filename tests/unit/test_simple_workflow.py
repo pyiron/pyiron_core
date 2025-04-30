@@ -1,5 +1,5 @@
 import unittest
-from simple_workflow import (
+from pyiron_workflow.simple_workflow import (
     Workflow,
     Node,
     make_node_decorator,

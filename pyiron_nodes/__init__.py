@@ -2,4 +2,11 @@
 
 # __version__ = get_versions()["version"]
 
-from pyiron_nodes import atomistic, databases, plotting, graphs, math, executors # , continuum_fem, large_scale_atomistic
+from pyiron_nodes import (
+    atomistic,
+    databases,
+    plotting,
+    graphs,
+    math,
+    executors,
+)  # , continuum_fem, large_scale_atomistic

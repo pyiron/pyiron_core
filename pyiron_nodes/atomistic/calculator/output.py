@@ -4,7 +4,10 @@ from typing import Optional
 
 from pyiron_workflow import as_function_node
 
-from pyiron_nodes.atomistic.calculator.data import OutputCalcMinimize, OutputCalcStaticList
+from pyiron_nodes.atomistic.calculator.data import (
+    OutputCalcMinimize,
+    OutputCalcStaticList,
+)
 
 
 @as_function_node("energy_last")

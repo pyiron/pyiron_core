@@ -1729,7 +1729,7 @@ def update_execution_graph(graph: Graph, debug=False) -> Graph:
                 edge.sourceHandle,
                 edge.targetHandle,
                 id(source_node.node),
-                id(source_node.node.outputs.data["node"][0])
+                id(source_node.node.outputs.data["node"][0]),
             )
 
         graph = update_input_value(
