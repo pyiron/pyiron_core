@@ -595,8 +595,15 @@ class Node:
         self._start_time = datetime.now()
         self._validate_input()
         if self.node_type in ["macro_node", "graph"]:
-            import pyiron_workflow.graph.base as base
-            out = base.run_macro_node(self)
+            subgraph_return = self._run()  # initialize the workflow (do not run it)
+            returned_ports = (
+                subgraph_return
+                if isinstance(subgraph_return, tuple)
+                else (subgraph_return,)
+            )
+            self._wf_macro = returned_ports[0].node._workflow
+            self._wf_macro.run()  # Now run it
+            out = tuple(p.value for p in returned_ports)
         else:
             out = self._run()
         self._run_set_values(out)
