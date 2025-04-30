@@ -569,7 +569,6 @@ class Node:
         pass
 
     def run(self):
-        import pyiron_workflow.graph.base as base
         import pyiron_database.instance_database as idb
         from datetime import datetime
         import getpass
@@ -596,6 +595,7 @@ class Node:
         self._start_time = datetime.now()
         self._validate_input()
         if self.node_type in ["macro_node", "graph"]:
+            import pyiron_workflow.graph.base as base
             out = base.run_macro_node(self)
         else:
             out = self._run()
