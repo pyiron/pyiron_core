@@ -1,5 +1,9 @@
+import os
+import time
 import unittest
 from collections import OrderedDict
+
+import pyiron_database.instance_database as idb
 
 from pyiron_workflow.simple_workflow import (
     Workflow,
@@ -13,6 +17,11 @@ from pyiron_workflow.simple_workflow import (
 def test_func(a: int, b: int = 1):
     result = a + b
     return result
+
+
+@as_function_node("t")
+def Time(store=False):
+    return time.time()
 
 
 class TestSimpleWorkflow(unittest.TestCase):
@@ -54,6 +63,33 @@ class TestSimpleWorkflow(unittest.TestCase):
 
     #     node = Node(func=test_func, libpath="test/path")
     #     self.assertEqual(node.libpath, "test/path")
+
+    def test_storage(self):
+        with self.subTest("Off"):
+            n = Time(store=False)
+            t1 = n.run()
+            t2 = n.run()
+            self.assertNotEqual(
+                t1, t2, msg="Without storage, we expect independent runs"
+            )
+
+        with self.subTest("On"):
+            n = Time(store=True)
+            try:
+                t1 = n.run()
+                t_sleep = 0.1
+                time.sleep(t_sleep)  # To make _sure_ they would otherwise be different
+                t2 = n.run()
+                self.assertAlmostEqual(
+                    t1,
+                    t2,
+                    msg="With storage, we expect to reload the old time",
+                    delta=t_sleep / 10.0,
+                )
+            finally:
+                storage_location = idb.store_node_outputs(n)
+                os.unlink(storage_location)
+                os.rmdir(storage_location.split(os.sep)[0])
 
 
 if __name__ == "__main__":
