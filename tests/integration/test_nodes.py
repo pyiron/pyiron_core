@@ -4,9 +4,11 @@ import pyiron_workflow as pwf
 from pyiron_nodes.controls import loop_until
 from pyiron_nodes.executors import IterNode
 
+
 @pwf.as_function_node("sum")
 def Add(x, y):
     return x + y
+
 
 @pwf.as_function_node
 def AddUntilLimit(x, y, limit):
@@ -38,7 +40,4 @@ class TestNodes(unittest.TestCase):
         wf.n = Add(1, 2)
         wf.iter = IterNode(wf.n, "y", [1, 2, 3], store=False)
         out = wf.run()
-        self.assertListEqual(
-            [2, 3, 4],
-            out["result"].tolist()
-        )
+        self.assertListEqual([2, 3, 4], out["result"].tolist())
