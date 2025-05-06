@@ -1,14 +1,12 @@
 import unittest
+from collections import OrderedDict
+
 from pyiron_workflow.simple_workflow import (
     Workflow,
     Node,
     make_node_decorator,
     as_function_node,
-    as_inp_dataclass_node,
 )
-from dataclasses import dataclass, field
-import numpy as np
-from collections import OrderedDict
 
 
 @as_function_node
