@@ -338,7 +338,21 @@ class DataElement:
 
     @property
     def connections(self):
-        return [Connection(self.value.node, self.value.label)]
+        if not self.connected:
+            return []
+        upstream_node: Node
+        upstream_port_lable: str
+        if isinstance(self.value, Port):
+            upstream_node = self.value.node
+            upstream_port_label = self.value.label
+        elif isinstance(self.value, Node):
+            if self.type == "Node":
+                raise NotImplementedError(
+                    "Cf. https://github.com/JNmpi/pyiron_core/issues/19"
+                )
+            upstream_node = self.value
+            upstream_port_label = self.value.inputs.data[PORT_LABEL][0]
+        return [Connection(upstream_node, upstream_port_label)]
 
     def type_hint(self, v):
         import numpy
