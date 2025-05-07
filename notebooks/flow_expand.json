@@ -1,0 +1,161 @@
+{
+    "label": "flow_expand",
+    "nodes": {
+        "LoadGraph": {
+            "id": "LoadGraph",
+            "import_path": "pyiron_nodes.graphs.flow.LoadGraph",
+            "label": "LoadGraph",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "LoadGraph",
+                "function": "pyiron_nodes.graphs.flow.LoadGraph",
+                "inputs": {
+                    "path": "Workflow_3"
+                }
+            }
+        },
+        "DisplayNodes": {
+            "id": "DisplayNodes",
+            "import_path": "pyiron_nodes.graphs.flow.DisplayNodes",
+            "label": "DisplayNodes",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "DisplayNodes",
+                "function": "pyiron_nodes.graphs.flow.DisplayNodes",
+                "inputs": {}
+            }
+        },
+        "DisplayEdges": {
+            "id": "DisplayEdges",
+            "import_path": "pyiron_nodes.graphs.flow.DisplayEdges",
+            "label": "DisplayEdges",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "DisplayEdges",
+                "function": "pyiron_nodes.graphs.flow.DisplayEdges",
+                "inputs": {}
+            }
+        },
+        "GetUpdatedGraph": {
+            "id": "GetUpdatedGraph",
+            "import_path": "pyiron_nodes.graphs.flow.GetUpdatedGraph",
+            "label": "GetUpdatedGraph",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "GetUpdatedGraph",
+                "function": "pyiron_nodes.graphs.flow.GetUpdatedGraph",
+                "inputs": {}
+            }
+        },
+        "GetCodeFromGraph": {
+            "id": "GetCodeFromGraph",
+            "import_path": "pyiron_nodes.graphs.flow.GetCodeFromGraph",
+            "label": "GetCodeFromGraph",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "GetCodeFromGraph",
+                "function": "pyiron_nodes.graphs.flow.GetCodeFromGraph",
+                "inputs": {}
+            }
+        },
+        "DisplayCode": {
+            "id": "DisplayCode",
+            "import_path": "pyiron_nodes.graphs.flow.DisplayCode",
+            "label": "DisplayCode",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "DisplayCode",
+                "function": "pyiron_nodes.graphs.flow.DisplayCode",
+                "inputs": {}
+            }
+        },
+        "TopologicalSort": {
+            "id": "TopologicalSort",
+            "import_path": "pyiron_nodes.graphs.flow.TopologicalSort",
+            "label": "TopologicalSort",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "TopologicalSort",
+                "function": "pyiron_nodes.graphs.flow.TopologicalSort",
+                "inputs": {}
+            }
+        },
+        "_obj_type": "pyiron_workflow.graph.base.GraphNode"
+    },
+    "edges": {
+        "values": [
+            {
+                "source": "LoadGraph",
+                "target": "DisplayNodes",
+                "sourceHandle": "graph",
+                "targetHandle": "graph"
+            },
+            {
+                "source": "LoadGraph",
+                "target": "DisplayEdges",
+                "sourceHandle": "graph",
+                "targetHandle": "graph"
+            },
+            {
+                "source": "LoadGraph",
+                "target": "GetUpdatedGraph",
+                "sourceHandle": "graph",
+                "targetHandle": "full_graph"
+            },
+            {
+                "source": "GetCodeFromGraph",
+                "target": "DisplayCode",
+                "sourceHandle": "code",
+                "targetHandle": "code"
+            },
+            {
+                "source": "GetUpdatedGraph",
+                "target": "TopologicalSort",
+                "sourceHandle": "graph",
+                "targetHandle": "graph"
+            },
+            {
+                "source": "TopologicalSort",
+                "target": "GetCodeFromGraph",
+                "sourceHandle": "graph",
+                "targetHandle": "graph"
+            }
+        ],
+        "obj_type": "pyiron_workflow.graph.base.GraphEdge"
+    }
+}

@@ -1,0 +1,125 @@
+{
+    "label": "landau",
+    "nodes": {
+        "ReadDataFrame": {
+            "id": "ReadDataFrame",
+            "import_path": "pyiron_nodes.utilities.ReadDataFrame",
+            "label": "ReadDataFrame",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "ReadDataFrame",
+                "function": "pyiron_nodes.utilities.ReadDataFrame",
+                "inputs": {
+                    "filename": "MgCaFreeEnergies.pckl.gz",
+                    "compression": "gzip"
+                }
+            }
+        },
+        "PhasesFromDataFrame": {
+            "id": "PhasesFromDataFrame",
+            "import_path": "pyiron_nodes.atomistic.thermodynamics.landau.phases.PhasesFromDataFrame",
+            "label": "PhasesFromDataFrame",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "PhasesFromDataFrame",
+                "function": "pyiron_nodes.atomistic.thermodynamics.landau.phases.PhasesFromDataFrame",
+                "inputs": {}
+            }
+        },
+        "CalcPhaseDiagram": {
+            "id": "CalcPhaseDiagram",
+            "import_path": "pyiron_nodes.atomistic.thermodynamics.landau.plot.CalcPhaseDiagram",
+            "label": "CalcPhaseDiagram",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "CalcPhaseDiagram",
+                "function": "pyiron_nodes.atomistic.thermodynamics.landau.plot.CalcPhaseDiagram",
+                "inputs": {}
+            }
+        },
+        "Linspace": {
+            "id": "Linspace",
+            "import_path": "pyiron_nodes.math.Linspace",
+            "label": "Linspace",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "Linspace",
+                "function": "pyiron_nodes.math.Linspace",
+                "inputs": {
+                    "x_min": 300,
+                    "x_max": 1100,
+                    "num_points": 20
+                }
+            }
+        },
+        "PlotConcPhaseDiagram_1": {
+            "id": "PlotConcPhaseDiagram_1",
+            "import_path": "pyiron_nodes.atomistic.thermodynamics.landau.plot.PlotConcPhaseDiagram",
+            "label": "PlotConcPhaseDiagram_1",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "PlotConcPhaseDiagram_1",
+                "function": "pyiron_nodes.atomistic.thermodynamics.landau.plot.PlotConcPhaseDiagram",
+                "inputs": {
+                    "plot_samples": true,
+                    "plot_isolines": true
+                }
+            }
+        },
+        "_obj_type": "pyiron_workflow.graph.base.GraphNode"
+    },
+    "edges": {
+        "values": [
+            {
+                "source": "ReadDataFrame",
+                "target": "PhasesFromDataFrame",
+                "sourceHandle": "df",
+                "targetHandle": "dataframe"
+            },
+            {
+                "source": "PhasesFromDataFrame",
+                "target": "CalcPhaseDiagram",
+                "sourceHandle": "phase_list",
+                "targetHandle": "phases"
+            },
+            {
+                "source": "Linspace",
+                "target": "CalcPhaseDiagram",
+                "sourceHandle": "linspace",
+                "targetHandle": "temperatures"
+            },
+            {
+                "source": "CalcPhaseDiagram",
+                "target": "PlotConcPhaseDiagram_1",
+                "sourceHandle": "df",
+                "targetHandle": "phase_data"
+            }
+        ],
+        "obj_type": "pyiron_workflow.graph.base.GraphEdge"
+    }
+}

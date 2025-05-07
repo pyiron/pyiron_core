@@ -1,0 +1,361 @@
+{
+    "label": "Gibbs_macro",
+    "nodes": {
+        "LoadGibbsData": {
+            "id": "LoadGibbsData",
+            "import_path": "pyiron_nodes.thermodynamics.cp_models.LoadGibbsData",
+            "label": "LoadGibbsData",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "LoadGibbsData",
+                "function": "pyiron_nodes.thermodynamics.cp_models.LoadGibbsData",
+                "inputs": {
+                    "file_name": "cp_data/Al_sol_G"
+                }
+            }
+        },
+        "compute_cp_from_G": {
+            "id": "compute_cp_from_G",
+            "import_path": "pyiron_nodes.thermodynamics.cp_models.compute_cp_from_G",
+            "label": "compute_cp_from_G",
+            "parent_id": null,
+            "level": 0,
+            "graph": {
+                "label": "compute_cp_from_G",
+                "nodes": {
+                    "va_i_compute_cp_from_G__data": null,
+                    "va_i_compute_cp_from_G__degree": null,
+                    "fit": null,
+                    "entropy": null,
+                    "enthalpy": null,
+                    "cp": null,
+                    "va_o_compute_cp_from_G__cp": null
+                },
+                "edges": {
+                    "values": [
+                        {
+                            "source": "va_i_compute_cp_from_G__data",
+                            "target": "fit",
+                            "sourceHandle": "x",
+                            "targetHandle": "data"
+                        },
+                        {
+                            "source": "va_i_compute_cp_from_G__degree",
+                            "target": "fit",
+                            "sourceHandle": "x",
+                            "targetHandle": "degree"
+                        },
+                        {
+                            "source": "fit",
+                            "target": "entropy",
+                            "sourceHandle": "fit",
+                            "targetHandle": "gibbs_energy"
+                        },
+                        {
+                            "source": "fit",
+                            "target": "entropy",
+                            "sourceHandle": "temperatures",
+                            "targetHandle": "temperature"
+                        },
+                        {
+                            "source": "fit",
+                            "target": "enthalpy",
+                            "sourceHandle": "fit",
+                            "targetHandle": "gibbs_energy"
+                        },
+                        {
+                            "source": "fit",
+                            "target": "enthalpy",
+                            "sourceHandle": "temperatures",
+                            "targetHandle": "temperature"
+                        },
+                        {
+                            "source": "entropy",
+                            "target": "enthalpy",
+                            "sourceHandle": "entropy",
+                            "targetHandle": "entropy"
+                        },
+                        {
+                            "source": "enthalpy",
+                            "target": "cp",
+                            "sourceHandle": "enthalpy",
+                            "targetHandle": "enthalpy"
+                        },
+                        {
+                            "source": "fit",
+                            "target": "cp",
+                            "sourceHandle": "temperatures",
+                            "targetHandle": "temperature"
+                        },
+                        {
+                            "source": "cp",
+                            "target": "va_o_compute_cp_from_G__cp",
+                            "sourceHandle": "out",
+                            "targetHandle": "x"
+                        }
+                    ],
+                    "obj_type": "pyiron_workflow.graph.base.GraphEdge"
+                }
+            },
+            "node_type": "graph",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "compute_cp_from_G",
+                "function": "pyiron_nodes.thermodynamics.cp_models.compute_cp_from_G",
+                "inputs": {}
+            }
+        },
+        "va_i_compute_cp_from_G__data": {
+            "id": "va_i_compute_cp_from_G__data",
+            "import_path": "pyiron_workflow.graph.base.identity",
+            "label": "va_i_compute_cp_from_G__data",
+            "parent_id": "compute_cp_from_G",
+            "level": 1,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "va_i_compute_cp_from_G__data",
+                "function": "pyiron_workflow.graph.base.identity",
+                "inputs": {
+                    "x": "NotData"
+                }
+            }
+        },
+        "va_i_compute_cp_from_G__degree": {
+            "id": "va_i_compute_cp_from_G__degree",
+            "import_path": "pyiron_workflow.graph.base.identity",
+            "label": "va_i_compute_cp_from_G__degree",
+            "parent_id": "compute_cp_from_G",
+            "level": 1,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "va_i_compute_cp_from_G__degree",
+                "function": "pyiron_workflow.graph.base.identity",
+                "inputs": {
+                    "x": "NotData"
+                }
+            }
+        },
+        "fit": {
+            "id": "fit",
+            "import_path": "pyiron_nodes.thermodynamics.cp_models.fit_G",
+            "label": "fit",
+            "parent_id": "compute_cp_from_G",
+            "level": 1,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "fit",
+                "function": "pyiron_nodes.thermodynamics.cp_models.fit_G",
+                "inputs": {
+                    "data": "NotData"
+                }
+            }
+        },
+        "entropy": {
+            "id": "entropy",
+            "import_path": "pyiron_nodes.thermodynamics.cp_models.compute_entropy",
+            "label": "entropy",
+            "parent_id": "compute_cp_from_G",
+            "level": 1,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "entropy",
+                "function": "pyiron_nodes.thermodynamics.cp_models.compute_entropy",
+                "inputs": {
+                    "gibbs_energy": "NotData",
+                    "temperature": "NotData"
+                }
+            }
+        },
+        "enthalpy": {
+            "id": "enthalpy",
+            "import_path": "pyiron_nodes.thermodynamics.cp_models.compute_enthalpy",
+            "label": "enthalpy",
+            "parent_id": "compute_cp_from_G",
+            "level": 1,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "enthalpy",
+                "function": "pyiron_nodes.thermodynamics.cp_models.compute_enthalpy",
+                "inputs": {
+                    "gibbs_energy": "NotData",
+                    "temperature": "NotData",
+                    "entropy": "NotData"
+                }
+            }
+        },
+        "cp": {
+            "id": "cp",
+            "import_path": "pyiron_nodes.thermodynamics.cp_models.compute_cp",
+            "label": "cp",
+            "parent_id": "compute_cp_from_G",
+            "level": 1,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "cp",
+                "function": "pyiron_nodes.thermodynamics.cp_models.compute_cp",
+                "inputs": {
+                    "enthalpy": "NotData",
+                    "temperature": "NotData"
+                }
+            }
+        },
+        "va_o_compute_cp_from_G__cp": {
+            "id": "va_o_compute_cp_from_G__cp",
+            "import_path": "pyiron_workflow.graph.base.identity",
+            "label": "va_o_compute_cp_from_G__cp",
+            "parent_id": "compute_cp_from_G",
+            "level": 1,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "va_o_compute_cp_from_G__cp",
+                "function": "pyiron_workflow.graph.base.identity",
+                "inputs": {
+                    "x": "NotData"
+                }
+            }
+        },
+        "DataPlot": {
+            "id": "DataPlot",
+            "import_path": "pyiron_nodes.thermodynamics.cp_models.DataPlot",
+            "label": "DataPlot",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "DataPlot",
+                "function": "pyiron_nodes.thermodynamics.cp_models.DataPlot",
+                "inputs": {}
+            }
+        },
+        "DataPlotCp": {
+            "id": "DataPlotCp",
+            "import_path": "pyiron_nodes.thermodynamics.cp_models.DataPlotCp",
+            "label": "DataPlotCp",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "DataPlotCp",
+                "function": "pyiron_nodes.thermodynamics.cp_models.DataPlotCp",
+                "inputs": {}
+            }
+        },
+        "_obj_type": "pyiron_workflow.graph.base.GraphNode"
+    },
+    "edges": {
+        "values": [
+            {
+                "source": "va_i_compute_cp_from_G__data",
+                "target": "fit",
+                "sourceHandle": "x",
+                "targetHandle": "data"
+            },
+            {
+                "source": "va_i_compute_cp_from_G__degree",
+                "target": "fit",
+                "sourceHandle": "x",
+                "targetHandle": "degree"
+            },
+            {
+                "source": "fit",
+                "target": "entropy",
+                "sourceHandle": "fit",
+                "targetHandle": "gibbs_energy"
+            },
+            {
+                "source": "fit",
+                "target": "entropy",
+                "sourceHandle": "temperatures",
+                "targetHandle": "temperature"
+            },
+            {
+                "source": "fit",
+                "target": "enthalpy",
+                "sourceHandle": "fit",
+                "targetHandle": "gibbs_energy"
+            },
+            {
+                "source": "fit",
+                "target": "enthalpy",
+                "sourceHandle": "temperatures",
+                "targetHandle": "temperature"
+            },
+            {
+                "source": "entropy",
+                "target": "enthalpy",
+                "sourceHandle": "entropy",
+                "targetHandle": "entropy"
+            },
+            {
+                "source": "enthalpy",
+                "target": "cp",
+                "sourceHandle": "enthalpy",
+                "targetHandle": "enthalpy"
+            },
+            {
+                "source": "fit",
+                "target": "cp",
+                "sourceHandle": "temperatures",
+                "targetHandle": "temperature"
+            },
+            {
+                "source": "cp",
+                "target": "va_o_compute_cp_from_G__cp",
+                "sourceHandle": "out",
+                "targetHandle": "x"
+            },
+            {
+                "source": "LoadGibbsData",
+                "target": "va_i_compute_cp_from_G__data",
+                "sourceHandle": "out",
+                "targetHandle": "x"
+            },
+            {
+                "source": "LoadGibbsData",
+                "target": "DataPlot",
+                "sourceHandle": "out",
+                "targetHandle": "data_1"
+            },
+            {
+                "source": "va_o_compute_cp_from_G__cp",
+                "target": "DataPlotCp",
+                "sourceHandle": "x",
+                "targetHandle": "data_1"
+            }
+        ],
+        "obj_type": "pyiron_workflow.graph.base.GraphEdge"
+    }
+}

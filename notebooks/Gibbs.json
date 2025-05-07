@@ -1,0 +1,251 @@
+{
+    "label": "Gibbs",
+    "nodes": {
+        "LoadGibbsData": {
+            "id": "LoadGibbsData",
+            "import_path": "pyiron_nodes.thermodynamics.cp_models.LoadGibbsData",
+            "label": "LoadGibbsData",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "LoadGibbsData",
+                "function": "pyiron_nodes.thermodynamics.cp_models.LoadGibbsData",
+                "inputs": {
+                    "file_name": "cp_data/Al_sol_G"
+                }
+            }
+        },
+        "DataPlot": {
+            "id": "DataPlot",
+            "import_path": "pyiron_nodes.thermodynamics.cp_models.DataPlot",
+            "label": "DataPlot",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "DataPlot",
+                "function": "pyiron_nodes.thermodynamics.cp_models.DataPlot",
+                "inputs": {
+                    "title": "Gibbs Energies"
+                }
+            }
+        },
+        "fit_G": {
+            "id": "fit_G",
+            "import_path": "pyiron_nodes.thermodynamics.cp_models.fit_G",
+            "label": "fit_G",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "fit_G",
+                "function": "pyiron_nodes.thermodynamics.cp_models.fit_G",
+                "inputs": {}
+            }
+        },
+        "Plot": {
+            "id": "Plot",
+            "import_path": "pyiron_nodes.plotting.Plot",
+            "label": "Plot",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "Plot",
+                "function": "pyiron_nodes.plotting.Plot",
+                "inputs": {}
+            }
+        },
+        "compute_enthalpy": {
+            "id": "compute_enthalpy",
+            "import_path": "pyiron_nodes.thermodynamics.cp_models.compute_enthalpy",
+            "label": "compute_enthalpy",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "compute_enthalpy",
+                "function": "pyiron_nodes.thermodynamics.cp_models.compute_enthalpy",
+                "inputs": {}
+            }
+        },
+        "compute_entropy": {
+            "id": "compute_entropy",
+            "import_path": "pyiron_nodes.thermodynamics.cp_models.compute_entropy",
+            "label": "compute_entropy",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "compute_entropy",
+                "function": "pyiron_nodes.thermodynamics.cp_models.compute_entropy",
+                "inputs": {}
+            }
+        },
+        "Plot_1": {
+            "id": "Plot_1",
+            "import_path": "pyiron_nodes.plotting.Plot",
+            "label": "Plot_1",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "Plot_1",
+                "function": "pyiron_nodes.plotting.Plot",
+                "inputs": {
+                    "title": "Enthalpy"
+                }
+            }
+        },
+        "compute_cp": {
+            "id": "compute_cp",
+            "import_path": "pyiron_nodes.thermodynamics.cp_models.compute_cp",
+            "label": "compute_cp",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "compute_cp",
+                "function": "pyiron_nodes.thermodynamics.cp_models.compute_cp",
+                "inputs": {}
+            }
+        },
+        "Plot_2": {
+            "id": "Plot_2",
+            "import_path": "pyiron_nodes.plotting.Plot",
+            "label": "Plot_2",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "Plot_2",
+                "function": "pyiron_nodes.plotting.Plot",
+                "inputs": {}
+            }
+        },
+        "_obj_type": "pyiron_workflow.graph.base.GraphNode"
+    },
+    "edges": {
+        "values": [
+            {
+                "source": "LoadGibbsData",
+                "target": "DataPlot",
+                "sourceHandle": "out",
+                "targetHandle": "data_1"
+            },
+            {
+                "source": "LoadGibbsData",
+                "target": "fit_G",
+                "sourceHandle": "out",
+                "targetHandle": "data"
+            },
+            {
+                "source": "fit_G",
+                "target": "Plot",
+                "sourceHandle": "fit",
+                "targetHandle": "y"
+            },
+            {
+                "source": "fit_G",
+                "target": "Plot",
+                "sourceHandle": "temperatures",
+                "targetHandle": "x"
+            },
+            {
+                "source": "fit_G",
+                "target": "compute_enthalpy",
+                "sourceHandle": "fit",
+                "targetHandle": "gibbs_energy"
+            },
+            {
+                "source": "fit_G",
+                "target": "compute_enthalpy",
+                "sourceHandle": "temperatures",
+                "targetHandle": "temperature"
+            },
+            {
+                "source": "fit_G",
+                "target": "compute_entropy",
+                "sourceHandle": "temperatures",
+                "targetHandle": "temperature"
+            },
+            {
+                "source": "fit_G",
+                "target": "compute_entropy",
+                "sourceHandle": "fit",
+                "targetHandle": "gibbs_energy"
+            },
+            {
+                "source": "compute_entropy",
+                "target": "compute_enthalpy",
+                "sourceHandle": "entropy",
+                "targetHandle": "entropy"
+            },
+            {
+                "source": "compute_enthalpy",
+                "target": "Plot_1",
+                "sourceHandle": "enthalpy",
+                "targetHandle": "y"
+            },
+            {
+                "source": "fit_G",
+                "target": "Plot_1",
+                "sourceHandle": "temperatures",
+                "targetHandle": "x"
+            },
+            {
+                "source": "compute_enthalpy",
+                "target": "compute_cp",
+                "sourceHandle": "enthalpy",
+                "targetHandle": "enthalpy"
+            },
+            {
+                "source": "fit_G",
+                "target": "compute_cp",
+                "sourceHandle": "temperatures",
+                "targetHandle": "temperature"
+            },
+            {
+                "source": "compute_cp",
+                "target": "Plot_2",
+                "sourceHandle": "cp",
+                "targetHandle": "y"
+            },
+            {
+                "source": "fit_G",
+                "target": "Plot_2",
+                "sourceHandle": "temperatures",
+                "targetHandle": "x"
+            }
+        ],
+        "obj_type": "pyiron_workflow.graph.base.GraphEdge"
+    }
+}
