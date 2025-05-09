@@ -5,6 +5,7 @@ from pyiron_workflow.simple_workflow import (
     make_node_decorator,
     as_function_node,
     as_inp_dataclass_node,
+    as_macro_node,
     PORT_LABEL,
 )
 from dataclasses import dataclass, field
@@ -21,6 +22,14 @@ def test_func(a: int, b: int = 1):
 @as_function_node
 def PassThrough(x):
     return x
+
+
+@as_macro_node(["by_channel", "by_node"])
+def PassThroughMacro(x):
+    wf = Workflow("subgraph")
+    wf.p1 = PassThrough(x)
+    wf.p2 = PassThrough(wf.p1)
+    return wf.p1.outputs.x, wf.p2
 
 
 class TestSimpleWorkflow(unittest.TestCase):
@@ -86,6 +95,16 @@ class TestSimpleWorkflow(unittest.TestCase):
             [],
             wf.upstream.inputs["x"].connections,
             msg="Not-connected ports should have an empty list of connections",
+        )
+
+    def test_simple_macro(self):
+        m = PassThroughMacro(x=42)
+        out = m.run()
+        self.assertTupleEqual(
+            (42, 42),
+            out,
+            msg="the macro should be runnable and should allow channel-based and "
+                "node-based (with single-returns) output formats"
         )
 
     # def test_node_with_libpath(self):

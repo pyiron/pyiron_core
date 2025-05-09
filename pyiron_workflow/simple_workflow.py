@@ -610,10 +610,15 @@ class Node:
         self._validate_input()
         if self.node_type in ["macro_node", "graph"]:
             subgraph_return = self._run()  # initialize the workflow (do not run it)
-            returned_ports = (
+            return_tuple = (
                 subgraph_return
                 if isinstance(subgraph_return, tuple)
                 else (subgraph_return,)
+            )
+            returned_ports = tuple(
+                p if isinstance(p, Port)
+                else p.outputs.__getattr__(p.outputs.data["label"][0])
+                for p in return_tuple
             )
             self._wf_macro = returned_ports[0].node._workflow
             self._wf_macro.run()  # Now run it
