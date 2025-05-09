@@ -1,0 +1,357 @@
+{
+    "label": "murnaghan2",
+    "nodes": {
+        "subgraph": {
+            "id": "subgraph",
+            "import_path": null,
+            "label": "subgraph",
+            "parent_id": null,
+            "level": 0,
+            "graph": {
+                "label": "subgraph",
+                "nodes": {
+                    "Bulk": {
+                        "id": "Bulk",
+                        "import_path": "pyiron_nodes.atomistic.structure.build.Bulk",
+                        "label": "Bulk",
+                        "parent_id": null,
+                        "level": 0,
+                        "graph": null,
+                        "node_type": "node",
+                        "widget_type": "customNode",
+                        "expanded": false,
+                        "node": {
+                            "label": "Bulk",
+                            "function": "pyiron_nodes.atomistic.structure.build.Bulk",
+                            "inputs": {
+                                "name": "Al",
+                                "a": 2
+                            }
+                        }
+                    },
+                    "M3GNet": {
+                        "id": "M3GNet",
+                        "import_path": "pyiron_nodes.atomistic.engine.ase.M3GNet",
+                        "label": "M3GNet",
+                        "parent_id": null,
+                        "level": 0,
+                        "graph": null,
+                        "node_type": "node",
+                        "widget_type": "customNode",
+                        "expanded": false,
+                        "node": {
+                            "label": "M3GNet",
+                            "function": "pyiron_nodes.atomistic.engine.ase.M3GNet",
+                            "inputs": {}
+                        }
+                    },
+                    "Static": {
+                        "id": "Static",
+                        "import_path": "pyiron_nodes.atomistic.calculator.ase.Static",
+                        "label": "Static",
+                        "parent_id": null,
+                        "level": 0,
+                        "graph": null,
+                        "node_type": "node",
+                        "widget_type": "customNode",
+                        "expanded": false,
+                        "node": {
+                            "label": "Static",
+                            "function": "pyiron_nodes.atomistic.calculator.ase.Static",
+                            "inputs": {}
+                        }
+                    },
+                    "GetEnergyLast": {
+                        "id": "GetEnergyLast",
+                        "import_path": "pyiron_nodes.atomistic.calculator.output.GetEnergyLast",
+                        "label": "GetEnergyLast",
+                        "parent_id": null,
+                        "level": 0,
+                        "graph": null,
+                        "node_type": "node",
+                        "widget_type": "customNode",
+                        "expanded": false,
+                        "node": {
+                            "label": "GetEnergyLast",
+                            "function": "pyiron_nodes.atomistic.calculator.output.GetEnergyLast",
+                            "inputs": {}
+                        }
+                    },
+                    "_obj_type": "pyiron_workflow.graph.base.GraphNode"
+                },
+                "edges": {
+                    "values": [
+                        {
+                            "source": "Static",
+                            "target": "GetEnergyLast",
+                            "sourceHandle": "out",
+                            "targetHandle": "calculator"
+                        },
+                        {
+                            "source": "Bulk",
+                            "target": "Static",
+                            "sourceHandle": "structure",
+                            "targetHandle": "structure"
+                        },
+                        {
+                            "source": "M3GNet",
+                            "target": "Static",
+                            "sourceHandle": "out",
+                            "targetHandle": "engine"
+                        }
+                    ],
+                    "obj_type": "pyiron_workflow.graph.base.GraphEdge"
+                }
+            },
+            "node_type": "graph",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "subgraph",
+                "function": "pyiron_workflow.graph.base.subgraph",
+                "inputs": {
+                    "Bulk__name": "Al",
+                    "Bulk__a": 2.2
+                }
+            }
+        },
+        "Bulk": {
+            "id": "Bulk",
+            "import_path": "pyiron_nodes.atomistic.structure.build.Bulk",
+            "label": "Bulk",
+            "parent_id": "subgraph",
+            "level": 1,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "Bulk",
+                "function": "pyiron_nodes.atomistic.structure.build.Bulk",
+                "inputs": {
+                    "name": "Al",
+                    "a": 2
+                }
+            }
+        },
+        "GetEnergyLast": {
+            "id": "GetEnergyLast",
+            "import_path": "pyiron_nodes.atomistic.calculator.output.GetEnergyLast",
+            "label": "GetEnergyLast",
+            "parent_id": "subgraph",
+            "level": 1,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "GetEnergyLast",
+                "function": "pyiron_nodes.atomistic.calculator.output.GetEnergyLast",
+                "inputs": {}
+            }
+        },
+        "Static": {
+            "id": "Static",
+            "import_path": "pyiron_nodes.atomistic.calculator.ase.Static",
+            "label": "Static",
+            "parent_id": "subgraph",
+            "level": 1,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "Static",
+                "function": "pyiron_nodes.atomistic.calculator.ase.Static",
+                "inputs": {
+                    "structure": "NotData"
+                }
+            }
+        },
+        "M3GNet": {
+            "id": "M3GNet",
+            "import_path": "pyiron_nodes.atomistic.engine.ase.M3GNet",
+            "label": "M3GNet",
+            "parent_id": "subgraph",
+            "level": 1,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "M3GNet",
+                "function": "pyiron_nodes.atomistic.engine.ase.M3GNet",
+                "inputs": {}
+            }
+        },
+        "IterNode": {
+            "id": "IterNode",
+            "import_path": "pyiron_nodes.executors.IterNode",
+            "label": "IterNode",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "IterNode",
+                "function": "pyiron_nodes.executors.IterNode",
+                "inputs": {
+                    "kwarg_name": "Bulk__a"
+                }
+            }
+        },
+        "va_i_subgraph__Bulk__name": {
+            "id": "va_i_subgraph__Bulk__name",
+            "import_path": "pyiron_workflow.graph.base.identity",
+            "label": "va_i_subgraph__Bulk__name",
+            "parent_id": "subgraph",
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false
+        },
+        "va_i_subgraph__Bulk__a": {
+            "id": "va_i_subgraph__Bulk__a",
+            "import_path": "pyiron_workflow.graph.base.identity",
+            "label": "va_i_subgraph__Bulk__a",
+            "parent_id": "subgraph",
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false
+        },
+        "va_o_subgraph__GetEnergyLast__energy_last": {
+            "id": "va_o_subgraph__GetEnergyLast__energy_last",
+            "import_path": "pyiron_workflow.graph.base.identity",
+            "label": "va_o_subgraph__GetEnergyLast__energy_last",
+            "parent_id": "subgraph",
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false
+        },
+        "Linspace": {
+            "id": "Linspace",
+            "import_path": "pyiron_nodes.math.Linspace",
+            "label": "Linspace",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "Linspace",
+                "function": "pyiron_nodes.math.Linspace",
+                "inputs": {
+                    "x_min": 1.8,
+                    "x_max": 2.2,
+                    "num_points": 7
+                }
+            }
+        },
+        "CreateDB": {
+            "id": "CreateDB",
+            "import_path": "pyiron_nodes.databases.node_hash_db.CreateDB",
+            "label": "CreateDB",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "CreateDB",
+                "function": "pyiron_nodes.databases.node_hash_db.CreateDB",
+                "inputs": {}
+            }
+        },
+        "ShowTable": {
+            "id": "ShowTable",
+            "import_path": "pyiron_nodes.databases.node_hash_db.ShowTable",
+            "label": "ShowTable",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "ShowTable",
+                "function": "pyiron_nodes.databases.node_hash_db.ShowTable",
+                "inputs": {}
+            }
+        },
+        "_obj_type": "pyiron_workflow.graph.base.GraphNode"
+    },
+    "edges": {
+        "values": [
+            {
+                "source": "Static",
+                "target": "GetEnergyLast",
+                "sourceHandle": "out",
+                "targetHandle": "calculator"
+            },
+            {
+                "source": "Bulk",
+                "target": "Static",
+                "sourceHandle": "structure",
+                "targetHandle": "structure"
+            },
+            {
+                "source": "M3GNet",
+                "target": "Static",
+                "sourceHandle": "out",
+                "targetHandle": "engine"
+            },
+            {
+                "source": "va_o_subgraph__GetEnergyLast__energy_last",
+                "target": "IterNode",
+                "sourceHandle": "x",
+                "targetHandle": "node"
+            },
+            {
+                "source": "va_i_subgraph__Bulk__name",
+                "target": "Bulk",
+                "sourceHandle": "x",
+                "targetHandle": "name"
+            },
+            {
+                "source": "va_i_subgraph__Bulk__a",
+                "target": "Bulk",
+                "sourceHandle": "x",
+                "targetHandle": "a"
+            },
+            {
+                "source": "GetEnergyLast",
+                "target": "va_o_subgraph__GetEnergyLast__energy_last",
+                "sourceHandle": "energy_last",
+                "targetHandle": "x"
+            },
+            {
+                "source": "Linspace",
+                "target": "IterNode",
+                "sourceHandle": "linspace",
+                "targetHandle": "kwarg_list"
+            },
+            {
+                "source": "CreateDB",
+                "target": "IterNode",
+                "sourceHandle": "db",
+                "targetHandle": "_db"
+            },
+            {
+                "source": "CreateDB",
+                "target": "ShowTable",
+                "sourceHandle": "db",
+                "targetHandle": "db"
+            }
+        ],
+        "obj_type": "pyiron_workflow.graph.base.GraphEdge"
+    }
+}
