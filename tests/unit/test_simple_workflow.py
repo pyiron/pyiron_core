@@ -5,6 +5,7 @@ from pyiron_workflow.simple_workflow import (
     make_node_decorator,
     as_function_node,
     as_inp_dataclass_node,
+    PORT_LABEL,
 )
 from dataclasses import dataclass, field
 import numpy as np
@@ -15,6 +16,11 @@ from collections import OrderedDict
 def test_func(a: int, b: int = 1):
     result = a + b
     return result
+
+
+@as_function_node
+def PassThrough(x):
+    return x
 
 
 class TestSimpleWorkflow(unittest.TestCase):
@@ -45,6 +51,42 @@ class TestSimpleWorkflow(unittest.TestCase):
 
         decorator = make_node_decorator(dummy_func, "_postfix", "dummy_node")
         self.assertTrue(callable(decorator))
+
+    def test_connections(self):
+        wf = Workflow("single_value")
+        wf.upstream = PassThrough(0)
+        wf.downstream_by_port = PassThrough(wf.upstream.outputs.x)
+        wf.downstream_by_node = PassThrough(wf.upstream)
+
+        con_by_port = wf.downstream_by_port.inputs["x"].connections[0]
+        con_by_node = wf.downstream_by_node.inputs["x"].connections[0]
+
+        self.assertEqual(
+            wf.upstream,
+            con_by_port.owner,
+            msg="The connection expects to capture the parent",
+        )
+        self.assertEqual(
+            wf.upstream.outputs.data[PORT_LABEL][0],
+            con_by_port.label,
+            msg="The connection expects to capture the port label",
+        )
+        self.assertEqual(
+            con_by_port.owner,
+            con_by_node.owner,
+            msg="Result should not differ using the single-output shortcut",
+        )
+        self.assertEqual(
+            con_by_port.label,
+            con_by_node.label,
+            msg="Result should not differ using the single-output shortcut",
+        )
+
+        self.assertListEqual(
+            [],
+            wf.upstream.inputs["x"].connections,
+            msg="Not-connected ports should have an empty list of connections",
+        )
 
     # def test_node_with_libpath(self):
     #     @dataclass
