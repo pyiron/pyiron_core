@@ -1,4 +1,5 @@
 .idea/
+.pycor/
 .ipynb_checkpoints/
 .vscode/
 node_modules/

@@ -14,7 +14,10 @@
             "node": {
                 "label": "CreateDB",
                 "function": "pyiron_nodes.databases.node_hash_db.CreateDB",
-                "inputs": {}
+                "inputs": {
+                    "user": "localuser",
+                    "database": "localdb"
+                }
             }
         },
         "ShowTable": {
