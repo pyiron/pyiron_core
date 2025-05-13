@@ -1567,30 +1567,6 @@ def graph_to_node(graph: Graph, exclude_unconnected_default_ports=True) -> Node:
     node._code = function_string  # TODO: add macro decorator with output labels
     node.graph = graph
 
-    def _run(node):
-        # TODO: generalize this to tuples and node as output
-        port = func(**node.kwargs)
-
-        outs = []
-        if isinstance(port, tuple):
-            for p in port:
-                if isinstance(p, Node):
-                    outs.append(p._workflow.run())
-                elif isinstance(p, Port):
-                    outs.append(p.node._workflow.run())
-                else:
-                    raise ValueError(
-                        "Output is not a Node or Port or tuple of Nodes and Ports"
-                    )
-            return tuple(outs)
-
-        if isinstance(port, Node):
-            return port._workflow.run()
-
-        return port.node._workflow.run()
-
-    node._run = types.MethodType(_run, node)
-
     return node
 
 
