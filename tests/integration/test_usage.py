@@ -68,3 +68,17 @@ class TestUsage(unittest.TestCase):
             base.pull_node(g, "n_subgraph"),
             msg="Both groups should be pullable",
         )
+
+    def test_group_output_propagation(self):
+
+        wf = pwf.Workflow("group_returns")
+        wf.n1 = nodes.AddOne(0)
+        wf.n2 = nodes.AddOne(wf.n1)
+        wf.n3 = nodes.AddOne(wf.n2)
+        g = base.get_full_graph_from_wf(wf)
+        g = base.create_group(g, [0, 1], label="upstream_group")
+        self.assertEqual(
+            3,
+            base.pull_node(g, "n3"),
+            "Output from groups should propagate to downstream nodes"
+        )
