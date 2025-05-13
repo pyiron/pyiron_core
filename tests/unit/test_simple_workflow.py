@@ -12,24 +12,12 @@ from dataclasses import dataclass, field
 import numpy as np
 from collections import OrderedDict
 
+from static.nodes import PassThrough, PassThroughMacro
 
 @as_function_node
 def test_func(a: int, b: int = 1):
     result = a + b
     return result
-
-
-@as_function_node
-def PassThrough(x):
-    return x
-
-
-@as_macro_node(["by_channel", "by_node"])
-def PassThroughMacro(x):
-    wf = Workflow("subgraph")
-    wf.p1 = PassThrough(x)
-    wf.p2 = PassThrough(wf.p1)
-    return wf.p1.outputs.x, wf.p2
 
 
 class TestSimpleWorkflow(unittest.TestCase):

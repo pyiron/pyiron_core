@@ -2,7 +2,7 @@
 .ipynb_checkpoints/
 .vscode/
 node_modules/
-static/
+./static/
 .coverage
 .DS_Store
 *.pyc
