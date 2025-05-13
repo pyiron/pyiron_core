@@ -16,7 +16,6 @@ from typing import Dict, List
 def get_code_from_graph(
     graph: Graph,
     workflow_lib: str = "pyiron_workflow",
-    pyiron_nodes_lib: str = "pyiron_nodes",
     use_node_default: bool = False,
 ) -> str:
     """
@@ -25,7 +24,6 @@ def get_code_from_graph(
     Args:
         graph (Graph): The graph object containing nodes and edges.
         workflow_lib (str, optional): Name of the workflow library. Defaults to "pyiron_workflow".
-        pyiron_nodes_lib (str, optional): Name of the PyIron nodes library. Defaults to "pyiron_nodes".
         use_node_default (bool, optional): Whether to use node default values or actual node value as
         default value for macro. Defaults to False.
 
@@ -39,7 +37,6 @@ def get_code_from_graph(
     # Generate the function signature and initial code
     code = f"def {graph.label}({kwargs}):\n\n"
     code += f"    from {workflow_lib} import Workflow\n"
-    code += f"    import {pyiron_nodes_lib}\n\n"
     code += f"    wf = Workflow('{graph.label}')\n\n"
 
     # Process nodes and edges to build the workflow
@@ -50,7 +47,6 @@ def get_code_from_graph(
         return_args = _get_default_return_args(graph)
 
     code += f"\n    return {', '.join(return_args)}\n"
-
     return code
 
 
@@ -152,7 +148,9 @@ def _process_nodes_and_edges(graph: Graph, base_code: str) -> List[str]:
                         # else:
                         #     kwargs[key] = value
 
-        line = f"    wf.{label} = {import_path}("
+        module_path, class_name = import_path.rsplit(".", 1)
+        code += f"    from {module_path} import {class_name}\n"
+        line = f"    wf.{label} = {class_name}("
         line += _dict_to_kwargs(kwargs) + ")\n"
         code += line
 
