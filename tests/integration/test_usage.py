@@ -42,3 +42,29 @@ class TestUsage(unittest.TestCase):
                 msg="Just verifying the group is also operational"
             )
             print(g.nodes["subgraph"].node._code)
+
+    def test_multiple_groups(self):
+        wf = pwf.Workflow("multiple_groups")
+        wf.m1 = nodes.PassThrough(0)
+        wf.m2 = nodes.PassThrough(wf.m1)
+        wf.n1 = nodes.PassThrough(1)
+        wf.n2 = nodes.PassThrough(wf.n1)
+
+        g = base.get_full_graph_from_wf(wf)
+
+        m_ids = base._node_labels_to_node_ids(g, ["m1", "m2"])
+        g = base.create_group(g, m_ids, label="m_subgraph")
+
+        n_ids = base._node_labels_to_node_ids(g, ["n1", "n2"])
+        g = base.create_group(g, n_ids, label="n_subgraph")
+
+        self.assertEqual(
+            0,
+            base.pull_node(g, "m_subgraph"),
+            msg="Both groups should be pullable",
+        )
+        self.assertEqual(
+            1,
+            base.pull_node(g, "n_subgraph"),
+            msg="Both groups should be pullable",
+        )
