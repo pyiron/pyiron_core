@@ -616,13 +616,20 @@ class Node:
                 else (subgraph_return,)
             )
             returned_ports = tuple(
-                p if isinstance(p, Port)
-                else p.outputs.__getattr__(p.outputs.data["label"][0])
+                (
+                    p
+                    if isinstance(p, Port)
+                    else p.outputs.__getattr__(p.outputs.data["label"][0])
+                )
                 for p in return_tuple
             )
             self._wf_macro = returned_ports[0].node._workflow
             self._wf_macro.run()  # Now run it
-            out = tuple(p.value for p in returned_ports) if len(return_tuple) > 1 else returned_ports[0].value
+            out = (
+                tuple(p.value for p in returned_ports)
+                if len(return_tuple) > 1
+                else returned_ports[0].value
+            )
         else:
             out = self._run()
         self._run_set_values(out)
