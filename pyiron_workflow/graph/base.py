@@ -1577,7 +1577,6 @@ def _get_subgraph(graph: Graph, node_indices, label=None) -> Graph:
     for subgraph_node in graph.nodes.iloc(node_indices):
         # print(f"Collapsing node {subgraph_node}", type(subgraph_node))
         graph.nodes[subgraph_node].expanded = False
-    graph = get_updated_graph(graph)
 
     edges = graph.edges
     subgraph_nodes = graph.nodes.iloc(node_indices)
