@@ -622,7 +622,7 @@ class Node:
             )
             self._wf_macro = returned_ports[0].node._workflow
             self._wf_macro.run()  # Now run it
-            out = tuple(p.value for p in returned_ports)
+            out = tuple(p.value for p in returned_ports) if len(return_tuple) > 1 else returned_ports[0].value
         else:
             out = self._run()
         self._run_set_values(out)
