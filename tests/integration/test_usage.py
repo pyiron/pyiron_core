@@ -75,10 +75,16 @@ class TestUsage(unittest.TestCase):
             wf = pwf.Workflow("group_returns")
             wf.n1 = nodes.AddOne(0)
             wf.n2 = nodes.AddOne(wf.n1)
-            wf.n3 = nodes.AddOne(wf.n2)
+            # DO NOT CONNECT n2 to n3
+            # https://github.com/JNmpi/pyiron_core/issues/44
+            wf.n3 = nodes.AddOne()
             wf.n4 = nodes.AddOne(wf.n3)
-            expected_terminal_result = wf.run()
             g = base.get_full_graph_from_wf(wf)
+            # I found no convenient way to remove edges at the workflow level
+            # So instead of running the workflow, we add the connection to the graph,
+            # and then pull the graph
+            g_connected = base.add_edge(g, "n2", "n3", "y", "x")
+            expected_terminal_result = base.pull_node(g_connected, "n4")
             ordered_node_labels = list(g.nodes.keys())
             return (
                 expected_terminal_result,
