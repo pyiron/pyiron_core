@@ -68,3 +68,67 @@ class TestUsage(unittest.TestCase):
             base.pull_node(g, "n_subgraph"),
             msg="Both groups should be pullable",
         )
+
+    def test_group_output_propagation(self):
+
+        def make_graph() -> tuple[int, base.Graph, list[str]]:
+            # DO NOT REUSE WORKFLOWS
+            # https://github.com/JNmpi/pyiron_core/issues/45
+            def make_workflow():
+                wf = pwf.Workflow("group_returns")
+                wf.n1 = nodes.AddOne(0)
+                wf.n2 = nodes.AddOne(wf.n1)
+                # DO NOT CONNECT n2 TO n3
+                # https://github.com/JNmpi/pyiron_core/issues/44
+                wf.n3 = nodes.AddOne()
+                wf.n4 = nodes.AddOne(wf.n3)
+                return wf
+
+            wf = make_workflow()
+            wf.n3.inputs.x = wf.n2
+            g_connected = base.get_full_graph_from_wf(make_workflow())
+            g_connected = base.add_edge(g_connected, "n2", "n3", "y", "x")
+            expected_terminal_result = base.pull_node(g_connected, "n4")
+
+            g =  base.get_full_graph_from_wf(make_workflow())
+            ordered_node_labels = list(g.nodes.keys())
+            return (
+                expected_terminal_result,
+                g,
+                ordered_node_labels,
+            )
+
+        with self.subTest("Upstream group"):
+            expected_out, g, labels = make_graph()
+            ids = base._node_labels_to_node_ids(g, labels[:2])
+            g = base.create_group(g, ids, label="upstream_group")
+            g = base.add_edge(g, "upstream_group", "n3", "n2__y", "x")
+            self.assertEqual(
+                expected_out,
+                base.pull_node(base.get_updated_graph(g), labels[-1]),
+                "Output from groups should propagate to downstream nodes"
+            )
+
+        with self.subTest("Downstream group"):
+            expected_out, g, labels = make_graph()
+            ids = base._node_labels_to_node_ids(g, labels[2:])
+            g = base.create_group(g, ids, label="downstream_group")
+            g = base.add_edge(g, "n2", "downstream_group", "y", "n3__x")
+            self.assertEqual(
+                expected_out,
+                base.pull_node(base.get_updated_graph(g), "downstream_group"),
+                "Output from groups should propagate to downstream nodes"
+            )
+
+        with self.subTest("Two groups"):
+            expected_out, g, labels = make_graph()
+            upstream_ids = base._node_labels_to_node_ids(g, labels[:2])
+            g = base.create_group(g, upstream_ids, label="upstream_group")
+            downstream_ids = base._node_labels_to_node_ids(g, labels[2:])
+            g = base.create_group(g, downstream_ids, label="downstream_group")
+            g = base.add_edge(g, "upstream_group", "downstream_group", "n2__y", "n3__x")
+            self.assertEqual(
+                expected_out,
+                base.pull_node(base.get_updated_graph(g), "downstream_group"),
+                "Output from groups should propagate to downstream nodes"
+            )
