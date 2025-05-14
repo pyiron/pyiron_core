@@ -72,19 +72,25 @@ class TestUsage(unittest.TestCase):
     def test_group_output_propagation(self):
 
         def make_graph() -> tuple[int, base.Graph, list[str]]:
-            wf = pwf.Workflow("group_returns")
-            wf.n1 = nodes.AddOne(0)
-            wf.n2 = nodes.AddOne(wf.n1)
-            # DO NOT CONNECT n2 to n3
-            # https://github.com/JNmpi/pyiron_core/issues/44
-            wf.n3 = nodes.AddOne()
-            wf.n4 = nodes.AddOne(wf.n3)
-            g = base.get_full_graph_from_wf(wf)
-            # I found no convenient way to remove edges at the workflow level
-            # So instead of running the workflow, we add the connection to the graph,
-            # and then pull the graph
-            g_connected = base.add_edge(g, "n2", "n3", "y", "x")
+            # DO NOT REUSE WORKFLOWS
+            # https://github.com/JNmpi/pyiron_core/issues/45
+            def make_workflow():
+                wf = pwf.Workflow("group_returns")
+                wf.n1 = nodes.AddOne(0)
+                wf.n2 = nodes.AddOne(wf.n1)
+                # DO NOT CONNECT n2 TO n3
+                # https://github.com/JNmpi/pyiron_core/issues/44
+                wf.n3 = nodes.AddOne()
+                wf.n4 = nodes.AddOne(wf.n3)
+                return wf
+
+            wf = make_workflow()
+            wf.n3.inputs.x = wf.n2
+            g_connected = base.get_full_graph_from_wf(make_workflow())
+            g_connected = base.add_edge(g_connected, "n2", "n3", "y", "x")
             expected_terminal_result = base.pull_node(g_connected, "n4")
+
+            g =  base.get_full_graph_from_wf(make_workflow())
             ordered_node_labels = list(g.nodes.keys())
             return (
                 expected_terminal_result,
@@ -96,9 +102,10 @@ class TestUsage(unittest.TestCase):
             expected_out, g, labels = make_graph()
             ids = base._node_labels_to_node_ids(g, labels[:2])
             g = base.create_group(g, ids, label="upstream_group")
+            g = base.add_edge(g, "upstream_group", "n3", "n2__y", "x")
             self.assertEqual(
                 expected_out,
-                base.pull_node(g, labels[-1]),
+                base.pull_node(base.get_updated_graph(g), labels[-1]),
                 "Output from groups should propagate to downstream nodes"
             )
 
@@ -106,9 +113,10 @@ class TestUsage(unittest.TestCase):
             expected_out, g, labels = make_graph()
             ids = base._node_labels_to_node_ids(g, labels[2:])
             g = base.create_group(g, ids, label="downstream_group")
+            g = base.add_edge(g, "n2", "downstream_group", "y", "n3__x")
             self.assertEqual(
                 expected_out,
-                base.pull_node(g, "downstream_group"),
+                base.pull_node(base.get_updated_graph(g), "downstream_group"),
                 "Output from groups should propagate to downstream nodes"
             )
 
@@ -117,9 +125,10 @@ class TestUsage(unittest.TestCase):
             upstream_ids = base._node_labels_to_node_ids(g, labels[:2])
             g = base.create_group(g, upstream_ids, label="upstream_group")
             downstream_ids = base._node_labels_to_node_ids(g, labels[2:])
-            g = base.create_group(g, downstream_ids, label="upstream_group")
+            g = base.create_group(g, downstream_ids, label="downstream_group")
+            g = base.add_edge(g, "upstream_group", "downstream_group", "n2__y", "n3__x")
             self.assertEqual(
                 expected_out,
-                base.pull_node(g, "downstream_group"),
+                base.pull_node(base.get_updated_graph(g), "downstream_group"),
                 "Output from groups should propagate to downstream nodes"
             )
