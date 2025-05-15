@@ -14,6 +14,7 @@ from collections import OrderedDict
 
 from static.nodes import PassThrough, PassThroughMacro
 
+
 @as_function_node
 def test_func(a: int, b: int = 1):
     result = a + b
@@ -32,14 +33,14 @@ class TestSimpleWorkflow(unittest.TestCase):
 
     def test_function_node_creation(self):
         node = test_func()
-        inp_labels = node.inputs.data['label']
-        out_labels = node.outputs.data['label']
-        ready = node.inputs.data['ready']
+        inp_labels = node.inputs.data["label"]
+        out_labels = node.outputs.data["label"]
+        ready = node.inputs.data["ready"]
         self.assertIsInstance(node, Node)
         self.assertEqual(node.n_out_labels, 1)
-        self.assertEqual(inp_labels, ['a', 'b'])
+        self.assertEqual(inp_labels, ["a", "b"])
         self.assertEqual(ready, [False, True])
-        self.assertEqual(out_labels, ['result'])
+        self.assertEqual(out_labels, ["result"])
         # self.assertEqual(node._func, test_func)
 
     def test_make_node_decorator(self):
@@ -92,7 +93,7 @@ class TestSimpleWorkflow(unittest.TestCase):
             (42, 42),
             out,
             msg="the macro should be runnable and should allow channel-based and "
-                "node-based (with single-returns) output formats"
+            "node-based (with single-returns) output formats",
         )
 
     # def test_node_with_libpath(self):
