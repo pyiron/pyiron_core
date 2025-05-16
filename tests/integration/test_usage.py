@@ -17,7 +17,7 @@ class TestUsage(unittest.TestCase):
         wf.n = nodes.Identity(data)
         g = base.get_full_graph_from_wf(wf)
         g = base.create_group(g, [0], label="subgraph")
-        out = base.pull_node(g, "subgraph")
+        out = base.pull_node(base.get_updated_graph(g), "subgraph")
         self.assertEqual(
             out,
             data,
@@ -43,7 +43,7 @@ class TestUsage(unittest.TestCase):
             data,
             base.pull_node(base.get_updated_graph(g), "n1"),
             msg="Two nodes with the same source name should be able to co-exist in the "
-            "same workflow/graph"
+            "same workflow/graph",
         )
 
         with self.subTest(
@@ -51,7 +51,7 @@ class TestUsage(unittest.TestCase):
             "same group"
         ):
             g = base.create_group(g, [0, 1], label="subgraph")
-            out = base.pull_node(g, "subgraph")
+            out = base.pull_node(base.get_updated_graph(g), "subgraph")
             self.assertEqual(
                 out, data, msg="Just verifying the group is also operational"
             )
@@ -76,12 +76,12 @@ class TestUsage(unittest.TestCase):
 
         self.assertEqual(
             m_data,
-            base.pull_node(g, "m_subgraph"),
+            base.pull_node(base.get_updated_graph(g), "m_subgraph"),
             msg="Both groups should be pullable",
         )
         self.assertEqual(
             n_data,
-            base.pull_node(g, "n_subgraph"),
+            base.pull_node(base.get_updated_graph(g), "n_subgraph"),
             msg="Both groups should be pullable",
         )
 
@@ -104,7 +104,9 @@ class TestUsage(unittest.TestCase):
             wf.n3.inputs.x = wf.n2
             g_connected = base.get_full_graph_from_wf(make_workflow())
             g_connected = base.add_edge(g_connected, "n2", "n3", "y", "x")
-            expected_terminal_result = base.pull_node(g_connected, "n4")
+            expected_terminal_result = base.pull_node(
+                base.get_updated_graph(g_connected), "n4"
+            )
 
             g = base.get_full_graph_from_wf(make_workflow())
             ordered_node_labels = list(g.nodes.keys())
@@ -159,7 +161,7 @@ class TestUsage(unittest.TestCase):
 
             run_group = base.get_full_graph_from_wf(make_workflow())
             run_group = base.add_edge(run_group, "n1", "n2", "y", "x")
-            expected_result = base.pull_node(run_group, "n2")
+            expected_result = base.pull_node(base.get_updated_graph(run_group), "n2")
 
             g = base.get_full_graph_from_wf(make_workflow())
             g = base.create_group(g, [0], label="subgraph")
