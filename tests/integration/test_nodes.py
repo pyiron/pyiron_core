@@ -5,13 +5,9 @@ Tests for specific nodes in `pyiron_nodes`
 import unittest
 
 import pyiron_workflow as pwf
-from pyiron_nodes.controls import loop_until
-from pyiron_nodes.executors import IterNode
 
-
-@pwf.as_function_node("sum")
-def Add(x, y):
-    return x + y
+import pyiron_nodes as pn
+from pyiron_nodes import controls
 
 
 @pwf.as_function_node
@@ -35,13 +31,13 @@ class TestNodes(unittest.TestCase):
 
         wf = pwf.Workflow("my_recusrion")
         wf.body = AddUntilLimit(1, 2, 10)
-        wf.n = loop_until(recursive_function=wf.body, max_steps=100)
+        wf.n = controls.loop_until(recursive_function=wf.body, max_steps=100)
         result = wf.run()
         self.assertEqual(11, result)
 
     def test_iter_node(self):
         wf = pwf.Workflow("iter_wf")
-        wf.n = Add(1, 2)
-        wf.iter = IterNode(wf.n, "y", [1, 2, 3], store=False)
+        wf.n = pn.math.Add(1, 2)
+        wf.iter = pn.executors.IterNode(wf.n, "y", [1, 2, 3], store=False)
         out = wf.run()
         self.assertListEqual([2, 3, 4], out["result"].tolist())
