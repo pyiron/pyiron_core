@@ -12,22 +12,24 @@ class TestUsage(unittest.TestCase):
     """
 
     def test_local_nodes_in_groups(self):
+        data = 42
         wf = pwf.Workflow("custom_nodes_in_a_group")
-        wf.n = nodes.Identity(42)
+        wf.n = nodes.Identity(data)
         g = base.get_full_graph_from_wf(wf)
         g = base.create_group(g, [0], label="subgraph")
         out = base.pull_node(g, "subgraph")
         self.assertEqual(
             out,
-            42,
+            data,
             msg="It should be possible to put nodes into a group and pull them, even "
             "if those nodes do not belong to a special privileged node package"
             "(i.e. `pyiron_nodes`).",
         )
 
     def test_group_node_name_conflicts(self):
+        data = 42
         wf = pwf.Workflow("custom_nodes_in_a_group")
-        wf.n1 = nodes.Identity(42)
+        wf.n1 = nodes.Identity(data)
         wf.n2 = other_nodes.Identity(wf.n1)
         g = base.get_full_graph_from_wf(wf)
 
@@ -38,7 +40,7 @@ class TestUsage(unittest.TestCase):
         )
 
         self.assertEqual(
-            42,
+            data,
             base.pull_node(base.get_updated_graph(g), "n1"),
             msg="Two nodes with the same source name should be able to co-exist in the "
             "same workflow/graph"
@@ -51,15 +53,17 @@ class TestUsage(unittest.TestCase):
             g = base.create_group(g, [0, 1], label="subgraph")
             out = base.pull_node(g, "subgraph")
             self.assertEqual(
-                out, 42, msg="Just verifying the group is also operational"
+                out, data, msg="Just verifying the group is also operational"
             )
             print(g.nodes["subgraph"].node._code)
 
     def test_multiple_groups(self):
+        m_data = 0
+        n_data = 1
         wf = pwf.Workflow("multiple_groups")
-        wf.m1 = nodes.Identity(0)
+        wf.m1 = nodes.Identity(m_data)
         wf.m2 = nodes.Identity(wf.m1)
-        wf.n1 = nodes.Identity(1)
+        wf.n1 = nodes.Identity(n_data)
         wf.n2 = nodes.Identity(wf.n1)
 
         g = base.get_full_graph_from_wf(wf)
@@ -71,12 +75,12 @@ class TestUsage(unittest.TestCase):
         g = base.create_group(g, n_ids, label="n_subgraph")
 
         self.assertEqual(
-            0,
+            m_data,
             base.pull_node(g, "m_subgraph"),
             msg="Both groups should be pullable",
         )
         self.assertEqual(
-            1,
+            n_data,
             base.pull_node(g, "n_subgraph"),
             msg="Both groups should be pullable",
         )
