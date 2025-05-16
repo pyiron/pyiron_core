@@ -21,8 +21,8 @@ class TestUsage(unittest.TestCase):
             out,
             42,
             msg="It should be possible to put nodes into a group and pull them, even "
-                "if those nodes do not belong to a special privileged node package"
-                "(i.e. `pyiron_nodes`)."
+            "if those nodes do not belong to a special privileged node package"
+            "(i.e. `pyiron_nodes`).",
         )
 
     def test_group_node_name_conflicts(self):
@@ -37,9 +37,7 @@ class TestUsage(unittest.TestCase):
             g = base.create_group(g, [0, 1], label="subgraph")
             out = base.pull_node(g, "subgraph")
             self.assertEqual(
-                out,
-                42,
-                msg="Just verifying the group is also operational"
+                out, 42, msg="Just verifying the group is also operational"
             )
             print(g.nodes["subgraph"].node._code)
 
@@ -90,7 +88,7 @@ class TestUsage(unittest.TestCase):
             g_connected = base.add_edge(g_connected, "n2", "n3", "y", "x")
             expected_terminal_result = base.pull_node(g_connected, "n4")
 
-            g =  base.get_full_graph_from_wf(make_workflow())
+            g = base.get_full_graph_from_wf(make_workflow())
             ordered_node_labels = list(g.nodes.keys())
             return (
                 expected_terminal_result,
@@ -106,7 +104,7 @@ class TestUsage(unittest.TestCase):
             self.assertEqual(
                 expected_out,
                 base.pull_node(base.get_updated_graph(g), labels[-1]),
-                "Output from groups should propagate to downstream nodes"
+                "Output from groups should propagate to downstream nodes",
             )
 
         with self.subTest("Downstream group"):
@@ -117,7 +115,7 @@ class TestUsage(unittest.TestCase):
             self.assertEqual(
                 expected_out,
                 base.pull_node(base.get_updated_graph(g), "downstream_group"),
-                "Output from groups should propagate to downstream nodes"
+                "Output from groups should propagate to downstream nodes",
             )
 
         with self.subTest("Two groups"):
@@ -130,7 +128,7 @@ class TestUsage(unittest.TestCase):
             self.assertEqual(
                 expected_out,
                 base.pull_node(base.get_updated_graph(g), "downstream_group"),
-                "Output from groups should propagate to downstream nodes"
+                "Output from groups should propagate to downstream nodes",
             )
 
     def test_edge_shorthand(self):
@@ -150,10 +148,14 @@ class TestUsage(unittest.TestCase):
             return expected_result, g
 
         expected_result, explicit_graph = make_graph()
-        explicit_graph = base.add_edge(explicit_graph, "va_o_subgraph__n1__y", "n2", "y", "x")
+        explicit_graph = base.add_edge(
+            explicit_graph, "va_o_subgraph__n1__y", "n2", "y", "x"
+        )
         explicit_result = base.pull_node(base.get_updated_graph(explicit_graph), "n2")
         self.assertEqual(
-            expected_result, explicit_result, msg="If a virtual node exists, we should be allowed to reference it"
+            expected_result,
+            explicit_result,
+            msg="If a virtual node exists, we should be allowed to reference it",
         )
 
         _, implicit_graph = make_graph()
@@ -162,5 +164,5 @@ class TestUsage(unittest.TestCase):
         self.assertEqual(
             expected_result,
             implicit_result,
-            msg="If the user has created a group, we should allow them to reference its IO directly"
+            msg="If the user has created a group, we should allow them to reference its IO directly",
         )
