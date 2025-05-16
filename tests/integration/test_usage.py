@@ -30,8 +30,22 @@ class TestUsage(unittest.TestCase):
         wf.n1 = nodes.Identity(42)
         wf.n2 = other_nodes.Identity(wf.n1)
         g = base.get_full_graph_from_wf(wf)
+
+        self.assertEqual(
+            wf.n1._func.__name__,
+            wf.n2._func.__name__,
+            msg="Sanity check: The two nodes should have the same source name",
+        )
+
+        self.assertEqual(
+            42,
+            base.pull_node(base.get_updated_graph(g), "n1"),
+            msg="Two nodes with the same source name should be able to co-exist in the "
+            "same workflow/graph"
+        )
+
         with self.subTest(
-            msg="Two nodes with the same class name should be able to co-exist in the "
+            msg="Two nodes with the same source name should be able to co-exist in the "
             "same group"
         ):
             g = base.create_group(g, [0, 1], label="subgraph")
