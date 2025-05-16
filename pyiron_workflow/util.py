@@ -5,13 +5,12 @@ import subprocess
 import time
 
 class LocalPostgres:
-    def __init__(self, dbdir="./.pycor/pgdata", logfile=None, port=5432, user="localuser", db="localdb"):
-        self.dbdir = str(pathlib.Path(dbdir))
-        print(self.dbdir)
-        self.logfile = logfile or os.path.join(self.dbdir, "logfile")
-        self.port = str(port)
-        self.user = user
-        self.db = db
+    def __init__(self):
+        self.dbdir = str((pathlib.Path(__file__).parent.parent / ".pycor" / "pgdata").absolute())
+        self.logfile = os.path.join(self.dbdir, "logfile")
+        self.port = str(5432)
+        self.user = "localuser"
+        self.db = "localdb"
 
     def _run(self, *args, check=True, capture_output=False):
         if pathlib.Path(self.dbdir).exists():
