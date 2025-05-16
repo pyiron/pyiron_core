@@ -1,4 +1,10 @@
+import os
+import time
 import unittest
+from collections import OrderedDict
+
+import pyiron_database.instance_database as idb
+
 from pyiron_workflow.simple_workflow import (
     Workflow,
     Node,
@@ -8,17 +14,19 @@ from pyiron_workflow.simple_workflow import (
     as_macro_node,
     PORT_LABEL,
 )
-from dataclasses import dataclass, field
-import numpy as np
-from collections import OrderedDict
 
-from static.nodes import PassThrough, PassThroughMacro
+from static.nodes import Identity, IdentityMacro
 
 
 @as_function_node
 def test_func(a: int, b: int = 1):
     result = a + b
     return result
+
+
+@as_function_node("t")
+def Time(store=False):
+    return time.time()
 
 
 class TestSimpleWorkflow(unittest.TestCase):
@@ -52,9 +60,9 @@ class TestSimpleWorkflow(unittest.TestCase):
 
     def test_connections(self):
         wf = Workflow("single_value")
-        wf.upstream = PassThrough(0)
-        wf.downstream_by_port = PassThrough(wf.upstream.outputs.x)
-        wf.downstream_by_node = PassThrough(wf.upstream)
+        wf.upstream = Identity(0)
+        wf.downstream_by_port = Identity(wf.upstream.outputs.x)
+        wf.downstream_by_node = Identity(wf.upstream)
 
         con_by_port = wf.downstream_by_port.inputs["x"].connections[0]
         con_by_node = wf.downstream_by_node.inputs["x"].connections[0]
@@ -87,7 +95,7 @@ class TestSimpleWorkflow(unittest.TestCase):
         )
 
     def test_simple_macro(self):
-        m = PassThroughMacro(x=42)
+        m = IdentityMacro(x=42)
         out = m.run()
         self.assertTupleEqual(
             (42, 42),
@@ -106,6 +114,33 @@ class TestSimpleWorkflow(unittest.TestCase):
 
     #     node = Node(func=test_func, libpath="test/path")
     #     self.assertEqual(node.libpath, "test/path")
+
+    def test_storage(self):
+        with self.subTest("Off"):
+            n = Time(store=False)
+            t1 = n.run()
+            t2 = n.run()
+            self.assertNotEqual(
+                t1, t2, msg="Without storage, we expect independent runs"
+            )
+
+        with self.subTest("On"):
+            n = Time(store=True)
+            try:
+                t1 = n.run()
+                t_sleep = 0.1
+                time.sleep(t_sleep)  # To make _sure_ they would otherwise be different
+                t2 = n.run()
+                self.assertAlmostEqual(
+                    t1,
+                    t2,
+                    msg="With storage, we expect to reload the old time",
+                    delta=t_sleep / 10.0,
+                )
+            finally:
+                storage_location = idb.store_node_outputs(n)
+                os.unlink(storage_location)
+                os.rmdir(storage_location.split(os.sep)[0])
 
 
 if __name__ == "__main__":

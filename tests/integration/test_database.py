@@ -1,25 +1,26 @@
+"""
+Tests for tools in the local version of `pyiron_database`
+"""
+
 import unittest
 
 import pyiron_database.instance_database as idb
 import pyiron_workflow as pwf
 
-
-@pwf.as_function_node
-def PassThrough(x):
-    return x
+from static import nodes
 
 
-class TestHashing(unittest.TestCase):
+class TestDatabase(unittest.TestCase):
 
     def test_node_connections(self):
         wf_port = pwf.Workflow("hash_wf_steps")
-        wf_port.n1 = PassThrough(0)
-        wf_port.n2 = PassThrough(wf_port.n1.outputs.x)
+        wf_port.n1 = nodes.Identity(0)
+        wf_port.n2 = nodes.Identity(wf_port.n1.outputs.x)
         wf_port.run()
 
         wf_node = pwf.Workflow("hash_wf_steps")
-        wf_node.n1 = PassThrough(0)
-        wf_node.n2 = PassThrough(wf_node.n1)
+        wf_node.n1 = nodes.Identity(0)
+        wf_node.n2 = nodes.Identity(wf_node.n1)
         wf_node.run()
 
         self.assertEqual(
