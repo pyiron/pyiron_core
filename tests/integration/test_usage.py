@@ -132,3 +132,35 @@ class TestUsage(unittest.TestCase):
                 base.pull_node(base.get_updated_graph(g), "downstream_group"),
                 "Output from groups should propagate to downstream nodes"
             )
+
+    def test_edge_shorthand(self):
+        def make_graph() -> tuple[int, base.Graph]:
+            def make_workflow():
+                wf = pwf.Workflow("mywf")
+                wf.n1 = nodes.AddOne(0)
+                wf.n2 = nodes.AddOne()
+                return wf
+
+            run_group = base.get_full_graph_from_wf(make_workflow())
+            run_group = base.add_edge(run_group, "n1", "n2", "y", "x")
+            expected_result = base.pull_node(run_group, "n2")
+
+            g = base.get_full_graph_from_wf(make_workflow())
+            g = base.create_group(g, [0], label="subgraph")
+            return expected_result, g
+
+        expected_result, explicit_graph = make_graph()
+        explicit_graph = base.add_edge(explicit_graph, "va_o_subgraph__n1__y", "n2", "y", "x")
+        explicit_result = base.pull_node(base.get_updated_graph(explicit_graph), "n2")
+        self.assertEqual(
+            expected_result, explicit_result, msg="If a virtual node exists, we should be allowed to reference it"
+        )
+
+        _, implicit_graph = make_graph()
+        implicit_graph = base.add_edge(implicit_graph, "subgraph", "n2", "n1__y", "x")
+        implicit_result = base.pull_node(base.get_updated_graph(implicit_graph), "n2")
+        self.assertEqual(
+            expected_result,
+            implicit_result,
+            msg="If the user has created a group, we should allow them to reference its IO directly"
+        )
