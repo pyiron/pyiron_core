@@ -45,4 +45,3 @@ class LocalPostgres:
         except subprocess.CalledProcessError:
             pass
         shutil.rmtree(self.dbdir, ignore_errors=True)
-        print(f"Removed {self.dbdir}")
