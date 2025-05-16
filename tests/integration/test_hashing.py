@@ -1,3 +1,7 @@
+"""
+Tests for tools in the local version of `pyiron_database`
+"""
+
 import unittest
 
 import pyiron_database.instance_database as idb
