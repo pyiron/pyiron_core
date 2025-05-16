@@ -13,7 +13,7 @@ def PassThrough(x):
     return x
 
 
-class TestHashing(unittest.TestCase):
+class TestDatabase(unittest.TestCase):
 
     def test_node_connections(self):
         wf_port = pwf.Workflow("hash_wf_steps")
