@@ -1,0 +1,114 @@
+{
+    "label": "executor",
+    "nodes": {
+        "Bulk": {
+            "id": "Bulk",
+            "import_path": "pyiron_nodes.atomistic.structure.build.Bulk",
+            "label": "Bulk",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "Bulk",
+                "function": "pyiron_nodes.atomistic.structure.build.Bulk",
+                "inputs": {
+                    "name": "Ni"
+                }
+            }
+        },
+        "fcc_metals": {
+            "id": "fcc_metals",
+            "import_path": "pyiron_nodes.executors.fcc_metals",
+            "label": "fcc_metals",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "fcc_metals",
+                "function": "pyiron_nodes.executors.fcc_metals",
+                "inputs": {}
+            }
+        },
+        "IterNode": {
+            "id": "IterNode",
+            "import_path": "pyiron_nodes.executors.IterNode",
+            "label": "IterNode",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "IterNode",
+                "function": "pyiron_nodes.executors.IterNode",
+                "inputs": {
+                    "kwarg_name": "name",
+                    "max_workers": 2
+                }
+            }
+        },
+        "ThreadPoolExecutor": {
+            "id": "ThreadPoolExecutor",
+            "import_path": "pyiron_nodes.executors.ThreadPoolExecutor",
+            "label": "ThreadPoolExecutor",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "ThreadPoolExecutor",
+                "function": "pyiron_nodes.executors.ThreadPoolExecutor",
+                "inputs": {}
+            }
+        },
+        "SingleNodeExecutor": {
+            "id": "SingleNodeExecutor",
+            "import_path": "pyiron_nodes.executors.SingleNodeExecutor",
+            "label": "SingleNodeExecutor",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "SingleNodeExecutor",
+                "function": "pyiron_nodes.executors.SingleNodeExecutor",
+                "inputs": {}
+            }
+        },
+        "_obj_type": "pyiron_workflow.graph.base.GraphNode"
+    },
+    "edges": {
+        "values": [
+            {
+                "source": "Bulk",
+                "target": "IterNode",
+                "sourceHandle": "structure",
+                "targetHandle": "node"
+            },
+            {
+                "source": "fcc_metals",
+                "target": "IterNode",
+                "sourceHandle": "list_of_metals",
+                "targetHandle": "kwarg_list"
+            },
+            {
+                "source": "ThreadPoolExecutor",
+                "target": "IterNode",
+                "sourceHandle": "Executor",
+                "targetHandle": "Executor"
+            }
+        ],
+        "obj_type": "pyiron_workflow.graph.base.GraphEdge"
+    }
+}

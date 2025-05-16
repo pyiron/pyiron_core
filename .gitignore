@@ -1,8 +1,10 @@
 .idea/
+.pycor/
 .ipynb_checkpoints/
+.storage/
 .vscode/
 node_modules/
-static/
+./static/
 .coverage
 .DS_Store
 *.pyc

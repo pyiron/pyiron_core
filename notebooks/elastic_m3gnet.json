@@ -1,0 +1,494 @@
+{
+    "label": "elastic_m3gnet",
+    "nodes": {
+        "CubicBulkCell": {
+            "id": "CubicBulkCell",
+            "import_path": "pyiron_nodes.atomistic.structure.build.CubicBulkCell",
+            "label": "CubicBulkCell",
+            "parent_id": null,
+            "level": 0,
+            "graph": {
+                "label": "CubicBulkCell",
+                "nodes": {
+                    "va_i_CubicBulkCell__element": null,
+                    "va_i_CubicBulkCell__cell_size": null,
+                    "va_i_CubicBulkCell__vacancy_index": null,
+                    "bulk": null,
+                    "repeat": null,
+                    "vacancy": null,
+                    "va_o_CubicBulkCell__structure": null
+                },
+                "edges": {
+                    "values": [
+                        {
+                            "source": "va_i_CubicBulkCell__element",
+                            "target": "bulk",
+                            "sourceHandle": "x",
+                            "targetHandle": "name"
+                        },
+                        {
+                            "source": "va_i_CubicBulkCell__cell_size",
+                            "target": "repeat",
+                            "sourceHandle": "x",
+                            "targetHandle": "repeat_scalar"
+                        },
+                        {
+                            "source": "va_i_CubicBulkCell__vacancy_index",
+                            "target": "vacancy",
+                            "sourceHandle": "x",
+                            "targetHandle": "index"
+                        },
+                        {
+                            "source": "bulk",
+                            "target": "repeat",
+                            "sourceHandle": "structure",
+                            "targetHandle": "structure"
+                        },
+                        {
+                            "source": "repeat",
+                            "target": "vacancy",
+                            "sourceHandle": "structure",
+                            "targetHandle": "structure"
+                        },
+                        {
+                            "source": "vacancy",
+                            "target": "va_o_CubicBulkCell__structure",
+                            "sourceHandle": "structure",
+                            "targetHandle": "x"
+                        }
+                    ],
+                    "obj_type": "pyiron_workflow.graph.base.GraphEdge"
+                }
+            },
+            "node_type": "graph",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "CubicBulkCell",
+                "function": "pyiron_nodes.atomistic.structure.build.CubicBulkCell",
+                "inputs": {
+                    "element": "Al"
+                }
+            }
+        },
+        "va_i_CubicBulkCell__element": {
+            "id": "va_i_CubicBulkCell__element",
+            "import_path": "pyiron_workflow.graph.base.identity",
+            "label": "va_i_CubicBulkCell__element",
+            "parent_id": "CubicBulkCell",
+            "level": 1,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "va_i_CubicBulkCell__element",
+                "function": "pyiron_workflow.graph.base.identity",
+                "inputs": {
+                    "x": "NotData"
+                }
+            }
+        },
+        "va_i_CubicBulkCell__cell_size": {
+            "id": "va_i_CubicBulkCell__cell_size",
+            "import_path": "pyiron_workflow.graph.base.identity",
+            "label": "va_i_CubicBulkCell__cell_size",
+            "parent_id": "CubicBulkCell",
+            "level": 1,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "va_i_CubicBulkCell__cell_size",
+                "function": "pyiron_workflow.graph.base.identity",
+                "inputs": {
+                    "x": "NotData"
+                }
+            }
+        },
+        "va_i_CubicBulkCell__vacancy_index": {
+            "id": "va_i_CubicBulkCell__vacancy_index",
+            "import_path": "pyiron_workflow.graph.base.identity",
+            "label": "va_i_CubicBulkCell__vacancy_index",
+            "parent_id": "CubicBulkCell",
+            "level": 1,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "va_i_CubicBulkCell__vacancy_index",
+                "function": "pyiron_workflow.graph.base.identity",
+                "inputs": {
+                    "x": "NotData"
+                }
+            }
+        },
+        "bulk": {
+            "id": "bulk",
+            "import_path": "pyiron_nodes.atomistic.structure.build.Bulk",
+            "label": "bulk",
+            "parent_id": "CubicBulkCell",
+            "level": 1,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "bulk",
+                "function": "pyiron_nodes.atomistic.structure.build.Bulk",
+                "inputs": {
+                    "name": "NotData",
+                    "cubic": true
+                }
+            }
+        },
+        "repeat": {
+            "id": "repeat",
+            "import_path": "pyiron_nodes.atomistic.structure.transform.Repeat",
+            "label": "repeat",
+            "parent_id": "CubicBulkCell",
+            "level": 1,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "repeat",
+                "function": "pyiron_nodes.atomistic.structure.transform.Repeat",
+                "inputs": {
+                    "structure": "NotData"
+                }
+            }
+        },
+        "vacancy": {
+            "id": "vacancy",
+            "import_path": "pyiron_nodes.atomistic.structure.transform.CreateVacancy",
+            "label": "vacancy",
+            "parent_id": "CubicBulkCell",
+            "level": 1,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "vacancy",
+                "function": "pyiron_nodes.atomistic.structure.transform.CreateVacancy",
+                "inputs": {
+                    "structure": "NotData"
+                }
+            }
+        },
+        "va_o_CubicBulkCell__structure": {
+            "id": "va_o_CubicBulkCell__structure",
+            "import_path": "pyiron_workflow.graph.base.identity",
+            "label": "va_o_CubicBulkCell__structure",
+            "parent_id": "CubicBulkCell",
+            "level": 1,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "va_o_CubicBulkCell__structure",
+                "function": "pyiron_workflow.graph.base.identity",
+                "inputs": {
+                    "x": "NotData"
+                }
+            }
+        },
+        "SymmetryAnalysis": {
+            "id": "SymmetryAnalysis",
+            "import_path": "pyiron_nodes.atomistic.property.elastic.SymmetryAnalysis",
+            "label": "SymmetryAnalysis",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "SymmetryAnalysis",
+                "function": "pyiron_nodes.atomistic.property.elastic.SymmetryAnalysis",
+                "inputs": {}
+            }
+        },
+        "InputElasticTensor": {
+            "id": "InputElasticTensor",
+            "import_path": "pyiron_nodes.atomistic.property.elastic.InputElasticTensor",
+            "label": "InputElasticTensor",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "InputElasticTensor",
+                "function": "pyiron_nodes.atomistic.property.elastic.InputElasticTensor",
+                "inputs": {}
+            }
+        },
+        "GenerateStructures": {
+            "id": "GenerateStructures",
+            "import_path": "pyiron_nodes.atomistic.property.elastic.GenerateStructures",
+            "label": "GenerateStructures",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "GenerateStructures",
+                "function": "pyiron_nodes.atomistic.property.elastic.GenerateStructures",
+                "inputs": {}
+            }
+        },
+        "AddEnergies": {
+            "id": "AddEnergies",
+            "import_path": "pyiron_nodes.atomistic.property.elastic.AddEnergies",
+            "label": "AddEnergies",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "AddEnergies",
+                "function": "pyiron_nodes.atomistic.property.elastic.AddEnergies",
+                "inputs": {}
+            }
+        },
+        "DataStructureContainer": {
+            "id": "DataStructureContainer",
+            "import_path": "pyiron_workflow.simple_workflow.func_dataclass",
+            "label": "DataStructureContainer",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "DataStructureContainer",
+                "function": "pyiron_nodes.atomistic.property.elastic.DataStructureContainer",
+                "inputs": {}
+            }
+        },
+        "Plot": {
+            "id": "Plot",
+            "import_path": "pyiron_nodes.plotting.Plot",
+            "label": "Plot",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "Plot",
+                "function": "pyiron_nodes.plotting.Plot",
+                "inputs": {}
+            }
+        },
+        "AnalyseStructures": {
+            "id": "AnalyseStructures",
+            "import_path": "pyiron_nodes.atomistic.property.elastic.AnalyseStructures",
+            "label": "AnalyseStructures",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "AnalyseStructures",
+                "function": "pyiron_nodes.atomistic.property.elastic.AnalyseStructures",
+                "inputs": {}
+            }
+        },
+        "OutputElasticAnalysis": {
+            "id": "OutputElasticAnalysis",
+            "import_path": "pyiron_workflow.simple_workflow.func_dataclass",
+            "label": "OutputElasticAnalysis",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "OutputElasticAnalysis",
+                "function": "pyiron_nodes.atomistic.property.elastic.OutputElasticAnalysis",
+                "inputs": {}
+            }
+        },
+        "M3GNet": {
+            "id": "M3GNet",
+            "import_path": "pyiron_nodes.atomistic.engine.ase.M3GNet",
+            "label": "M3GNet",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "M3GNet",
+                "function": "pyiron_nodes.atomistic.engine.ase.M3GNet",
+                "inputs": {}
+            }
+        },
+        "Static": {
+            "id": "Static",
+            "import_path": "pyiron_nodes.atomistic.calculator.ase.Static",
+            "label": "Static",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "Static",
+                "function": "pyiron_nodes.atomistic.calculator.ase.Static",
+                "inputs": {}
+            }
+        },
+        "_obj_type": "pyiron_workflow.graph.base.GraphNode"
+    },
+    "edges": {
+        "values": [
+            {
+                "source": "va_i_CubicBulkCell__element",
+                "target": "bulk",
+                "sourceHandle": "x",
+                "targetHandle": "name"
+            },
+            {
+                "source": "va_i_CubicBulkCell__cell_size",
+                "target": "repeat",
+                "sourceHandle": "x",
+                "targetHandle": "repeat_scalar"
+            },
+            {
+                "source": "va_i_CubicBulkCell__vacancy_index",
+                "target": "vacancy",
+                "sourceHandle": "x",
+                "targetHandle": "index"
+            },
+            {
+                "source": "bulk",
+                "target": "repeat",
+                "sourceHandle": "structure",
+                "targetHandle": "structure"
+            },
+            {
+                "source": "repeat",
+                "target": "vacancy",
+                "sourceHandle": "structure",
+                "targetHandle": "structure"
+            },
+            {
+                "source": "vacancy",
+                "target": "va_o_CubicBulkCell__structure",
+                "sourceHandle": "structure",
+                "targetHandle": "x"
+            },
+            {
+                "source": "InputElasticTensor",
+                "target": "SymmetryAnalysis",
+                "sourceHandle": "dataclass",
+                "targetHandle": "parameters"
+            },
+            {
+                "source": "va_o_CubicBulkCell__structure",
+                "target": "SymmetryAnalysis",
+                "sourceHandle": "x",
+                "targetHandle": "structure"
+            },
+            {
+                "source": "SymmetryAnalysis",
+                "target": "GenerateStructures",
+                "sourceHandle": "out",
+                "targetHandle": "analysis"
+            },
+            {
+                "source": "va_o_CubicBulkCell__structure",
+                "target": "GenerateStructures",
+                "sourceHandle": "x",
+                "targetHandle": "structure"
+            },
+            {
+                "source": "InputElasticTensor",
+                "target": "GenerateStructures",
+                "sourceHandle": "dataclass",
+                "targetHandle": "parameters"
+            },
+            {
+                "source": "GenerateStructures",
+                "target": "AddEnergies",
+                "sourceHandle": "structure_container",
+                "targetHandle": "structure_container"
+            },
+            {
+                "source": "AddEnergies",
+                "target": "DataStructureContainer",
+                "sourceHandle": "structure_container",
+                "targetHandle": "dataclass"
+            },
+            {
+                "source": "DataStructureContainer",
+                "target": "Plot",
+                "sourceHandle": "energy",
+                "targetHandle": "y"
+            },
+            {
+                "source": "AddEnergies",
+                "target": "AnalyseStructures",
+                "sourceHandle": "structure_container",
+                "targetHandle": "data_df"
+            },
+            {
+                "source": "SymmetryAnalysis",
+                "target": "AnalyseStructures",
+                "sourceHandle": "out",
+                "targetHandle": "analysis"
+            },
+            {
+                "source": "InputElasticTensor",
+                "target": "AnalyseStructures",
+                "sourceHandle": "dataclass",
+                "targetHandle": "parameters"
+            },
+            {
+                "source": "AnalyseStructures",
+                "target": "OutputElasticAnalysis",
+                "sourceHandle": "out",
+                "targetHandle": "dataclass"
+            },
+            {
+                "source": "M3GNet",
+                "target": "Static",
+                "sourceHandle": "out",
+                "targetHandle": "engine"
+            },
+            {
+                "source": "Static",
+                "target": "AddEnergies",
+                "sourceHandle": "out",
+                "targetHandle": "engine"
+            },
+            {
+                "source": "va_o_CubicBulkCell__structure",
+                "target": "Static",
+                "sourceHandle": "x",
+                "targetHandle": "structure"
+            }
+        ],
+        "obj_type": "pyiron_workflow.graph.base.GraphEdge"
+    }
+}

@@ -1,0 +1,579 @@
+{
+    "label": "ase_fit",
+    "nodes": {
+        "ReadPickledDatasetAsDataframe": {
+            "id": "ReadPickledDatasetAsDataframe",
+            "import_path": "pyiron_nodes.atomistic.ml_potentials.fitting.linear_ace.ReadPickledDatasetAsDataframe",
+            "label": "ReadPickledDatasetAsDataframe",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "ReadPickledDatasetAsDataframe",
+                "function": "pyiron_nodes.atomistic.ml_potentials.fitting.linear_ace.ReadPickledDatasetAsDataframe",
+                "inputs": {
+                    "file_path": "dataset.pckl.gzip"
+                }
+            }
+        },
+        "SplitTrainingAndTesting": {
+            "id": "SplitTrainingAndTesting",
+            "import_path": "pyiron_nodes.atomistic.ml_potentials.fitting.linear_ace.SplitTrainingAndTesting",
+            "label": "SplitTrainingAndTesting",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "SplitTrainingAndTesting",
+                "function": "pyiron_nodes.atomistic.ml_potentials.fitting.linear_ace.SplitTrainingAndTesting",
+                "inputs": {}
+            }
+        },
+        "PrepareLinearACEdataset": {
+            "id": "PrepareLinearACEdataset",
+            "import_path": "pyiron_nodes.atomistic.ml_potentials.fitting.linear_ace.PrepareLinearACEdataset",
+            "label": "PrepareLinearACEdataset",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "PrepareLinearACEdataset",
+                "function": "pyiron_nodes.atomistic.ml_potentials.fitting.linear_ace.PrepareLinearACEdataset",
+                "inputs": {}
+            }
+        },
+        "CreateEmptyBasisFunctions": {
+            "id": "CreateEmptyBasisFunctions",
+            "import_path": "pyiron_nodes.atomistic.ml_potentials.fitting.linear_ace.CreateEmptyBasisFunctions",
+            "label": "CreateEmptyBasisFunctions",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "CreateEmptyBasisFunctions",
+                "function": "pyiron_nodes.atomistic.ml_potentials.fitting.linear_ace.CreateEmptyBasisFunctions",
+                "inputs": {}
+            }
+        },
+        "Elements": {
+            "id": "Elements",
+            "import_path": "pyiron_nodes.atomistic.ml_potentials.fitting.linear_ace.Elements",
+            "label": "Elements",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "Elements",
+                "function": "pyiron_nodes.atomistic.ml_potentials.fitting.linear_ace.Elements",
+                "inputs": {
+                    "element1": "Al"
+                }
+            }
+        },
+        "PotentialConfig": {
+            "id": "PotentialConfig",
+            "import_path": "pyiron_nodes.atomistic.ml_potentials.fitting.linear_ace.PotentialConfig",
+            "label": "PotentialConfig",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "PotentialConfig",
+                "function": "pyiron_nodes.atomistic.ml_potentials.fitting.linear_ace.PotentialConfig",
+                "inputs": {}
+            }
+        },
+        "BondsALL": {
+            "id": "BondsALL",
+            "import_path": "pyiron_nodes.atomistic.ml_potentials.fitting.linear_ace.BondsALL",
+            "label": "BondsALL",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "BondsALL",
+                "function": "pyiron_nodes.atomistic.ml_potentials.fitting.linear_ace.BondsALL",
+                "inputs": {}
+            }
+        },
+        "Bonds": {
+            "id": "Bonds",
+            "import_path": "pyiron_nodes.atomistic.ml_potentials.fitting.linear_ace.Bonds",
+            "label": "Bonds",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "Bonds",
+                "function": "pyiron_nodes.atomistic.ml_potentials.fitting.linear_ace.Bonds",
+                "inputs": {}
+            }
+        },
+        "EmbeddingsALL": {
+            "id": "EmbeddingsALL",
+            "import_path": "pyiron_nodes.atomistic.ml_potentials.fitting.linear_ace.EmbeddingsALL",
+            "label": "EmbeddingsALL",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "EmbeddingsALL",
+                "function": "pyiron_nodes.atomistic.ml_potentials.fitting.linear_ace.EmbeddingsALL",
+                "inputs": {}
+            }
+        },
+        "Embeddings": {
+            "id": "Embeddings",
+            "import_path": "pyiron_nodes.atomistic.ml_potentials.fitting.linear_ace.Embeddings",
+            "label": "Embeddings",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "Embeddings",
+                "function": "pyiron_nodes.atomistic.ml_potentials.fitting.linear_ace.Embeddings",
+                "inputs": {}
+            }
+        },
+        "FunctionsALL": {
+            "id": "FunctionsALL",
+            "import_path": "pyiron_nodes.atomistic.ml_potentials.fitting.linear_ace.FunctionsALL",
+            "label": "FunctionsALL",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "FunctionsALL",
+                "function": "pyiron_nodes.atomistic.ml_potentials.fitting.linear_ace.FunctionsALL",
+                "inputs": {}
+            }
+        },
+        "Functions": {
+            "id": "Functions",
+            "import_path": "pyiron_nodes.atomistic.ml_potentials.fitting.linear_ace.Functions",
+            "label": "Functions",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "Functions",
+                "function": "pyiron_nodes.atomistic.ml_potentials.fitting.linear_ace.Functions",
+                "inputs": {}
+            }
+        },
+        "ComputeErrors": {
+            "id": "ComputeErrors",
+            "import_path": "pyiron_nodes.atomistic.ml_potentials.fitting.linear_ace.ComputeErrors",
+            "label": "ComputeErrors",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "ComputeErrors",
+                "function": "pyiron_nodes.atomistic.ml_potentials.fitting.linear_ace.ComputeErrors",
+                "inputs": {}
+            }
+        },
+        "LinearACEFit": {
+            "id": "LinearACEFit",
+            "import_path": "pyiron_nodes.atomistic.ml_potentials.fitting.linear_ace.LinearACEFit",
+            "label": "LinearACEFit",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "LinearACEFit",
+                "function": "pyiron_nodes.atomistic.ml_potentials.fitting.linear_ace.LinearACEFit",
+                "inputs": {}
+            }
+        },
+        "ComputeErrors_1": {
+            "id": "ComputeErrors_1",
+            "import_path": "pyiron_nodes.atomistic.ml_potentials.fitting.linear_ace.ComputeErrors",
+            "label": "ComputeErrors_1",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "ComputeErrors_1",
+                "function": "pyiron_nodes.atomistic.ml_potentials.fitting.linear_ace.ComputeErrors",
+                "inputs": {}
+            }
+        },
+        "Predict": {
+            "id": "Predict",
+            "import_path": "pyiron_nodes.atomistic.ml_potentials.fitting.linear_ace.Predict",
+            "label": "Predict",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "Predict",
+                "function": "pyiron_nodes.atomistic.ml_potentials.fitting.linear_ace.Predict",
+                "inputs": {}
+            }
+        },
+        "Plot": {
+            "id": "Plot",
+            "import_path": "pyiron_nodes.plotting.Plot",
+            "label": "Plot",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "Plot",
+                "function": "pyiron_nodes.plotting.Plot",
+                "inputs": {}
+            }
+        },
+        "DisplayDataFrame": {
+            "id": "DisplayDataFrame",
+            "import_path": "pyiron_nodes.atomistic.ml_potentials.fitting.linear_ace.DisplayDataFrame",
+            "label": "DisplayDataFrame",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "DisplayDataFrame",
+                "function": "pyiron_nodes.atomistic.ml_potentials.fitting.linear_ace.DisplayDataFrame",
+                "inputs": {}
+            }
+        },
+        "GetColumnFromDataFrame": {
+            "id": "GetColumnFromDataFrame",
+            "import_path": "pyiron_nodes.atomistic.ml_potentials.fitting.linear_ace.GetColumnFromDataFrame",
+            "label": "GetColumnFromDataFrame",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "GetColumnFromDataFrame",
+                "function": "pyiron_nodes.atomistic.ml_potentials.fitting.linear_ace.GetColumnFromDataFrame",
+                "inputs": {
+                    "column_name": "energy_corrected"
+                }
+            }
+        },
+        "Scatter": {
+            "id": "Scatter",
+            "import_path": "pyiron_nodes.plotting.Scatter",
+            "label": "Scatter",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "Scatter",
+                "function": "pyiron_nodes.plotting.Scatter",
+                "inputs": {}
+            }
+        },
+        "Plot_1": {
+            "id": "Plot_1",
+            "import_path": "pyiron_nodes.plotting.Plot",
+            "label": "Plot_1",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "Plot_1",
+                "function": "pyiron_nodes.plotting.Plot",
+                "inputs": {}
+            }
+        },
+        "PotentialEnergy": {
+            "id": "PotentialEnergy",
+            "import_path": "pyiron_nodes.atomistic.ml_potentials.fitting.linear_ace.PotentialEnergy",
+            "label": "PotentialEnergy",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "PotentialEnergy",
+                "function": "pyiron_nodes.atomistic.ml_potentials.fitting.linear_ace.PotentialEnergy",
+                "inputs": {
+                    "atom_index": 0
+                }
+            }
+        },
+        "DisplayDataFrame_1": {
+            "id": "DisplayDataFrame_1",
+            "import_path": "pyiron_nodes.atomistic.ml_potentials.fitting.linear_ace.DisplayDataFrame",
+            "label": "DisplayDataFrame_1",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "DisplayDataFrame_1",
+                "function": "pyiron_nodes.atomistic.ml_potentials.fitting.linear_ace.DisplayDataFrame",
+                "inputs": {}
+            }
+        },
+        "GetColumnFromDataFrame_1": {
+            "id": "GetColumnFromDataFrame_1",
+            "import_path": "pyiron_nodes.atomistic.ml_potentials.fitting.linear_ace.GetColumnFromDataFrame",
+            "label": "GetColumnFromDataFrame_1",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "GetColumnFromDataFrame_1",
+                "function": "pyiron_nodes.atomistic.ml_potentials.fitting.linear_ace.GetColumnFromDataFrame",
+                "inputs": {
+                    "column_name": "NUMBER_OF_ATOMS"
+                }
+            }
+        },
+        "_obj_type": "pyiron_workflow.graph.base.GraphNode"
+    },
+    "edges": {
+        "values": [
+            {
+                "source": "ReadPickledDatasetAsDataframe",
+                "target": "SplitTrainingAndTesting",
+                "sourceHandle": "df",
+                "targetHandle": "df"
+            },
+            {
+                "source": "SplitTrainingAndTesting",
+                "target": "PrepareLinearACEdataset",
+                "sourceHandle": "df_train",
+                "targetHandle": "df_train"
+            },
+            {
+                "source": "SplitTrainingAndTesting",
+                "target": "PrepareLinearACEdataset",
+                "sourceHandle": "df_test",
+                "targetHandle": "df_test"
+            },
+            {
+                "source": "CreateEmptyBasisFunctions",
+                "target": "PrepareLinearACEdataset",
+                "sourceHandle": "bconf",
+                "targetHandle": "bconf"
+            },
+            {
+                "source": "PotentialConfig",
+                "target": "CreateEmptyBasisFunctions",
+                "sourceHandle": "dataclass",
+                "targetHandle": "potential_config"
+            },
+            {
+                "source": "Elements",
+                "target": "PotentialConfig",
+                "sourceHandle": "elements",
+                "targetHandle": "elements"
+            },
+            {
+                "source": "BondsALL",
+                "target": "Bonds",
+                "sourceHandle": "dataclass",
+                "targetHandle": "ALL"
+            },
+            {
+                "source": "Bonds",
+                "target": "PotentialConfig",
+                "sourceHandle": "dataclass",
+                "targetHandle": "bonds"
+            },
+            {
+                "source": "EmbeddingsALL",
+                "target": "Embeddings",
+                "sourceHandle": "dataclass",
+                "targetHandle": "ALL"
+            },
+            {
+                "source": "Embeddings",
+                "target": "PotentialConfig",
+                "sourceHandle": "dataclass",
+                "targetHandle": "embeddings"
+            },
+            {
+                "source": "FunctionsALL",
+                "target": "Functions",
+                "sourceHandle": "dataclass",
+                "targetHandle": "ALL"
+            },
+            {
+                "source": "Functions",
+                "target": "PotentialConfig",
+                "sourceHandle": "dataclass",
+                "targetHandle": "functions"
+            },
+            {
+                "source": "PrepareLinearACEdataset",
+                "target": "LinearACEFit",
+                "sourceHandle": "train_ds",
+                "targetHandle": "train_dataset"
+            },
+            {
+                "source": "LinearACEFit",
+                "target": "ComputeErrors",
+                "sourceHandle": "linear_fit",
+                "targetHandle": "linear_fit"
+            },
+            {
+                "source": "PrepareLinearACEdataset",
+                "target": "ComputeErrors_1",
+                "sourceHandle": "test_ds",
+                "targetHandle": "ds"
+            },
+            {
+                "source": "LinearACEFit",
+                "target": "ComputeErrors_1",
+                "sourceHandle": "linear_fit",
+                "targetHandle": "linear_fit"
+            },
+            {
+                "source": "PrepareLinearACEdataset",
+                "target": "ComputeErrors",
+                "sourceHandle": "train_ds",
+                "targetHandle": "ds"
+            },
+            {
+                "source": "LinearACEFit",
+                "target": "Predict",
+                "sourceHandle": "linear_fit",
+                "targetHandle": "linear_fit"
+            },
+            {
+                "source": "Predict",
+                "target": "Plot",
+                "sourceHandle": "e_pred",
+                "targetHandle": "y"
+            },
+            {
+                "source": "Predict",
+                "target": "Scatter",
+                "sourceHandle": "e_pred",
+                "targetHandle": "x"
+            },
+            {
+                "source": "GetColumnFromDataFrame",
+                "target": "Scatter",
+                "sourceHandle": "column",
+                "targetHandle": "y"
+            },
+            {
+                "source": "GetColumnFromDataFrame",
+                "target": "Plot_1",
+                "sourceHandle": "column",
+                "targetHandle": "y"
+            },
+            {
+                "source": "PrepareLinearACEdataset",
+                "target": "DisplayDataFrame",
+                "sourceHandle": "test_ds",
+                "targetHandle": "obj"
+            },
+            {
+                "source": "LinearACEFit",
+                "target": "PotentialEnergy",
+                "sourceHandle": "linear_fit",
+                "targetHandle": "linear_fit"
+            },
+            {
+                "source": "PrepareLinearACEdataset",
+                "target": "DisplayDataFrame_1",
+                "sourceHandle": "train_ds",
+                "targetHandle": "obj"
+            },
+            {
+                "source": "DisplayDataFrame_1",
+                "target": "PotentialEnergy",
+                "sourceHandle": "df",
+                "targetHandle": "df"
+            },
+            {
+                "source": "DisplayDataFrame_1",
+                "target": "GetColumnFromDataFrame",
+                "sourceHandle": "df",
+                "targetHandle": "df"
+            },
+            {
+                "source": "PrepareLinearACEdataset",
+                "target": "Predict",
+                "sourceHandle": "train_ds",
+                "targetHandle": "ds"
+            },
+            {
+                "source": "DisplayDataFrame_1",
+                "target": "GetColumnFromDataFrame_1",
+                "sourceHandle": "df",
+                "targetHandle": "df"
+            }
+        ],
+        "obj_type": "pyiron_workflow.graph.base.GraphEdge"
+    }
+}
