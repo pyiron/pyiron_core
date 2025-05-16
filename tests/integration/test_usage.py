@@ -13,7 +13,7 @@ class TestUsage(unittest.TestCase):
 
     def test_local_nodes_in_groups(self):
         wf = pwf.Workflow("custom_nodes_in_a_group")
-        wf.n = nodes.PassThrough(42)
+        wf.n = nodes.Identity(42)
         g = base.get_full_graph_from_wf(wf)
         g = base.create_group(g, [0], label="subgraph")
         out = base.pull_node(g, "subgraph")
@@ -27,8 +27,8 @@ class TestUsage(unittest.TestCase):
 
     def test_group_node_name_conflicts(self):
         wf = pwf.Workflow("custom_nodes_in_a_group")
-        wf.n1 = nodes.PassThrough(42)
-        wf.n2 = other_nodes.PassThrough(wf.n1)
+        wf.n1 = nodes.Identity(42)
+        wf.n2 = other_nodes.Identity(wf.n1)
         g = base.get_full_graph_from_wf(wf)
         with self.subTest(
             msg="Two nodes with the same class name should be able to co-exist in the "
@@ -43,10 +43,10 @@ class TestUsage(unittest.TestCase):
 
     def test_multiple_groups(self):
         wf = pwf.Workflow("multiple_groups")
-        wf.m1 = nodes.PassThrough(0)
-        wf.m2 = nodes.PassThrough(wf.m1)
-        wf.n1 = nodes.PassThrough(1)
-        wf.n2 = nodes.PassThrough(wf.n1)
+        wf.m1 = nodes.Identity(0)
+        wf.m2 = nodes.Identity(wf.m1)
+        wf.n1 = nodes.Identity(1)
+        wf.n2 = nodes.Identity(wf.n1)
 
         g = base.get_full_graph_from_wf(wf)
 
