@@ -19,7 +19,7 @@ from static.nodes import Identity, IdentityMacro
 
 
 @as_function_node
-def test_func(a: int, b: int = 1):
+def trial_func(a: int, b: int = 1):
     result = a + b
     return result
 
@@ -40,7 +40,7 @@ class TestSimpleWorkflow(unittest.TestCase):
         self.assertIsInstance(self.workflow._edges, list)
 
     def test_function_node_creation(self):
-        node = test_func()
+        node = trial_func()
         inp_labels = node.inputs.data["label"]
         out_labels = node.outputs.data["label"]
         ready = node.inputs.data["ready"]
