@@ -57,13 +57,7 @@ def _getstate__graph_node(self):
 def _setstate__graph_node(self, state):
     for k, v in state.items():
         if k == "node":
-            # print("setting node: ", k, v)
-            # check if virtual node (import not possible) # TODO: make more robust test
-            if v["function"].startswith("pyiron_workflow.graph.base"):
-                # graph = Graph().__setstate__(state["graph"])
-                self.node = None  # graph_to_node(graph)
-            else:
-                self.node = Node().__setstate__(v)
+            self.node = None if state["node_type"] == "graph" else Node().__setstate__(v)
         elif k == "graph":
             if v is not None:
                 self.graph = Graph().__setstate__(v)

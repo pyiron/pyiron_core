@@ -1,3 +1,5 @@
+import contextlib
+import os
 import unittest
 
 import pyiron_workflow as pwf
@@ -186,3 +188,20 @@ class TestUsage(unittest.TestCase):
             implicit_result,
             msg="If the user has created a group, we should allow them to reference its IO directly",
         )
+
+    def test_node_reinstantiation(self):
+        fname = "node_reinstantiation.json"
+        wf = pwf.Workflow(fname)
+        wf.n = nodes.AddOne(0)
+        g = base.get_full_graph_from_wf(wf)
+        g = base.create_group(g, [0], label="subgraph")
+        base._save_graph(g, filename=fname)
+        try:
+            reloaded = base._load_graph(fname)
+            self.assertTrue(
+                all(isinstance(n, pwf.Node) for n in reloaded.nodes.df["node"].values),
+                msg="All reloaded nodes should get an accompanying python instance"
+            )
+        finally:
+            with contextlib.suppress(FileNotFoundError):
+                os.remove(fname)
