@@ -1499,11 +1499,6 @@ def graph_to_code(graph):
     return graph
 
 
-# function_string in graph_to_node my contain the type hint "NonPrimitive"
-class NonPrimitive:
-    pass
-
-
 def graph_to_node(graph: Graph, exclude_unconnected_default_ports=True) -> Node:
     from pyiron_workflow.graph.to_code import (
         get_code_from_graph,
