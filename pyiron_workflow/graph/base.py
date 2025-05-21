@@ -9,6 +9,8 @@ __email__ = ""
 __status__ = "development"
 __date__ = "Jan 3, 2025"
 
+import copy
+
 from pyiron_workflow import Node, Port, as_function_node
 from pyiron_workflow.graph.edges import GraphEdge, Edges
 from pyiron_workflow.simple_workflow import Data
@@ -162,13 +164,12 @@ class Graph:
 
 
 def copy_nodes(nodes: Nodes) -> Nodes:
-    from copy import copy
 
     new_nodes = Nodes(obj_type=GraphNode)
     for k, node in nodes.items():
         new_nodes[k] = GraphNode(
             **{
-                kk: node[kk] if kk in ("node", "graph") else copy(node[kk])
+                kk: node[kk] if kk in ("node", "graph") else copy.copy(node[kk])
                 for kk in node.keys()
             }
         )
@@ -176,10 +177,8 @@ def copy_nodes(nodes: Nodes) -> Nodes:
 
 
 def copy_graph(graph: Graph) -> Graph:
-    from copy import deepcopy
-
     return Graph(
-        label=graph.label, nodes=copy_nodes(graph.nodes), edges=deepcopy(graph.edges)
+        label=graph.label, nodes=copy_nodes(graph.nodes), edges=copy.deepcopy(graph.edges)
     )
 
 
@@ -325,9 +324,7 @@ def _add_graph_instance(graph: Graph, sub_graph: Graph, label: str = None, node=
 
 
 def _rewire_edge(graph: Graph, input_edge: GraphEdge) -> GraphEdge:
-    from copy import copy
-
-    edge = copy(input_edge)
+    edge = copy.copy(input_edge)
     source_node = graph.nodes[edge.source]
     target_node = graph.nodes[edge.target]
     if target_node.node_type == "graph":
@@ -922,8 +919,6 @@ def _node_labels_to_node_ids(graph: Graph, node_labels: List[str]) -> List[str]:
 
 
 def create_group(full_graph, node_ids=[], label=None):
-    from copy import copy
-
     full_graph = copy_graph(full_graph)
     sub_graph = _get_subgraph(full_graph, node_ids, label)
     sub_graph_node = graph_to_node(sub_graph)
@@ -974,7 +969,7 @@ def create_group(full_graph, node_ids=[], label=None):
         # print(node, handle)
         for edge in full_graph.edges:
             if edge.target == node and edge.targetHandle == handle:
-                new_edge = copy(edge)
+                new_edge = copy.copy(edge)
                 new_edge.target = f"va_i_{sub_graph.label}__{edge.targetHandle}"
                 new_edge.targetHandle = "x"
                 add_edges.append(new_edge)
@@ -991,7 +986,7 @@ def create_group(full_graph, node_ids=[], label=None):
             # print(source_node, source_handle)
             for edge in full_graph.edges:
                 if edge.source == source_node:
-                    new_edge = copy(edge)
+                    new_edge = copy.copy(edge)
                     edge.source = (
                         f"va_o_{sub_graph.label}__{source_node}__{edge.sourceHandle}"
                     )
