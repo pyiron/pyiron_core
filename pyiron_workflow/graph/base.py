@@ -21,7 +21,7 @@ from pyiron_workflow.graph.decorators import (
     get_import_path_from_type,
 )
 from pyiron_workflow.graph.edges import GraphEdge, Edges
-from pyiron_workflow.simple_workflow import Data, Node, Port, as_function_node
+from pyiron_workflow.simple_workflow import Data, Node, Port, Workflow, as_function_node
 
 
 NotData = "NotData"
@@ -478,9 +478,7 @@ def graph_edges_to_wf_edges(edges: Edges) -> List[dict]:
     return wf_edges
 
 
-def get_wf_from_graph(graph: Graph) -> "Workflow":
-    from pyiron_workflow import Workflow
-
+def get_wf_from_graph(graph: Graph) -> Workflow:
     wf = Workflow(graph.label)
     # Add nodes to Workflow
     for node in graph.nodes.values():
@@ -646,7 +644,7 @@ def {graph.label}({kwargs}):
 
 
 def get_graph_from_wf(
-    wf: "Workflow",
+    wf: Workflow,
     wf_outputs: Tuple[Node | Port],
     out_labels: List[str],
     wf_label: str = None,
@@ -1146,7 +1144,7 @@ def collapse_node(
     return new_graph
 
 
-def get_full_graph_from_wf(wf: "Workflow") -> Graph:
+def get_full_graph_from_wf(wf: Workflow) -> Graph:
     graph = Graph(label=wf.label)
 
     macro_node_labels = []
@@ -1632,7 +1630,7 @@ def update_execution_graph(graph: Graph, debug=False) -> Graph:
     return graph
 
 
-def get_code_from_wf(wf: "Workflow"):
+def get_code_from_wf(wf: Workflow):
     """Generate Python source code from pyiron_workflow"""
 
     graph = get_graph_from_wf(wf)
