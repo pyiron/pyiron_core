@@ -11,19 +11,20 @@ __date__ = "Jan 3, 2025"
 
 import copy
 import dataclasses
+import importlib
+from typing import Union, List, Tuple
 
 from pyiron_workflow import Node, Port, as_function_node
-from pyiron_workflow.graph.edges import GraphEdge, Edges
-from pyiron_workflow.simple_workflow import Data
-
 from pyiron_workflow.graph.decorators import (
     as_dotdict_dataclass,
     NestedDict,
     NestedList,
     get_import_path_from_type,
 )
-from typing import Union, List, Tuple
-import importlib
+from pyiron_workflow.graph.edges import GraphEdge, Edges
+from pyiron_workflow.simple_workflow import Data
+
+
 
 
 NotData = "NotData"
