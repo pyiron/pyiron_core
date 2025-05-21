@@ -59,11 +59,15 @@ def _setstate__graph_node(self, state):
         if k == "node":
             # print("setting node: ", k, v)
             # check if virtual node (import not possible) # TODO: make more robust test
-            if v["function"].startswith("pyiron_workflow.graph.base"):
-                # graph = Graph().__setstate__(state["graph"])
-                self.node = None  # graph_to_node(graph)
-            else:
+            # if v["function"].startswith("pyiron_workflow.graph.base"):
+            #     # graph = Graph().__setstate__(state["graph"])
+            #     self.node = None  # graph_to_node(graph)
+            # else:
+            try:
                 self.node = Node().__setstate__(v)
+            except Exception as e:
+                print("Error setting node: ", e)
+                self.node = None
         elif k == "graph":
             if v is not None:
                 self.graph = Graph().__setstate__(v)
@@ -246,7 +250,7 @@ def copy_nodes(nodes: Nodes) -> Nodes:
 
 
 def copy_graph(graph: Graph) -> Graph:
-    from copy import copy, deepcopy
+    from copy import deepcopy
 
     return Graph(
         label=graph.label, nodes=copy_nodes(graph.nodes), edges=deepcopy(graph.edges)
@@ -391,6 +395,7 @@ def _add_graph_instance(graph: Graph, sub_graph: Graph, label: str = None, node=
         node_type="graph",
         widget_type="customNode",
     )
+    print("adding graph node: ", label, new_graph.nodes[label].expanded)
     return new_graph
 
 
@@ -471,7 +476,7 @@ def _mark_node_as_expanded(graph, node_label: str):
 
 
 def _get_active_nodes(graph: Graph) -> Nodes:
-    active_nodes = NestedDict(obj_type=GraphNode)
+    active_nodes = Nodes() # NestedDict(obj_type=GraphNode)
     # get all nodes that are not inside a collapsed node
     for k, v in graph.nodes.items():
         if v.parent_id is None:
@@ -484,7 +489,7 @@ def _get_active_nodes(graph: Graph) -> Nodes:
 
 
 def _get_active_edges(graph: Graph) -> Edges:
-    active_edges = NestedList(obj_type=GraphEdge)
+    active_edges = Edges()  # NestedList(obj_type=GraphEdge)
     active_nodes = _get_active_nodes(graph)
     # get all edges that are not inside a collapsed node
     for edge in graph.edges:
@@ -1235,7 +1240,9 @@ def get_full_graph_from_wf(wf: "Workflow") -> Graph:
             # new_node = get_graph_from_macro_node(node)
             # graph = add_node(graph, new_node, label=label)
             # graph.nodes[node.label].node = node
+            graph.nodes[label].expanded = False
             macro_node_labels.append(label)
+            print(f"full graph Adding macro node {label}", graph.nodes[label].expanded)
         else:
             graph = add_node(graph, node, label=label)
 
@@ -1286,7 +1293,7 @@ def _different_indices(default, value):
     return [
         i
         for i in range(len(default))
-        if (str(default[i]) != str(value[i])) or (str(value[i]) in (NotData))
+        if (str(default[i]) != str(value[i])) or (str(value[i]) in NotData)
     ]
 
 
@@ -1566,30 +1573,6 @@ def graph_to_node(graph: Graph, exclude_unconnected_default_ports=True) -> Node:
     node.label = graph.label  # should not be necessary
     node._code = function_string  # TODO: add macro decorator with output labels
     node.graph = graph
-
-    def _run(node):
-        # TODO: generalize this to tuples and node as output
-        port = func(**node.kwargs)
-
-        outs = []
-        if isinstance(port, tuple):
-            for p in port:
-                if isinstance(p, Node):
-                    outs.append(p._workflow.run())
-                elif isinstance(p, Port):
-                    outs.append(p.node._workflow.run())
-                else:
-                    raise ValueError(
-                        "Output is not a Node or Port or tuple of Nodes and Ports"
-                    )
-            return tuple(outs)
-
-        if isinstance(port, Node):
-            return port._workflow.run()
-
-        return port.node._workflow.run()
-
-    node._run = types.MethodType(_run, node)
 
     return node
 
@@ -1947,8 +1930,8 @@ def _nodes_to_gui(graph: Graph, remove_none=True) -> NestedList:
             expanded=v.expanded,
         )
         if v.expanded:
-            node_dict["type"] = "customNode"
-            node_dict["data"] = GuiData(label=v.label, expanded=True).asdict(
+            node_dict.type = "customNode"
+            node_dict.data = GuiData(label=v.label, expanded=True).asdict(
                 remove_none=remove_none
             )
         if v.parent_id is not None:
@@ -2014,7 +1997,7 @@ def _gui_children(graph, gui_node):
     return children
 
 
-def _graph_to_gui(graph: Graph, remove_none=True, optimize=True) -> dict:
+def _graph_to_gui(graph: Graph, remove_none=True) -> dict:
     layoutOptions = {
         "elk.algorithm": "layered",
         "elk.direction": "RIGHT",
@@ -2055,20 +2038,32 @@ def _graph_to_gui(graph: Graph, remove_none=True, optimize=True) -> dict:
     return graph_dict
 
 
-def display_gui_data(graph):
-    data = _nodes_to_gui(graph, remove_none=False).df.data
+def display_gui_data(graph, remove_none=False):
+    data = _nodes_to_gui(graph, remove_none=remove_none).df.data
     return pd.DataFrame(transpose_list_of_dicts(data))
 
 
-def display_gui_style(graph):
-    style = _nodes_to_gui(graph, remove_none=False).df["style"]
+def display_gui_style(graph, remove_none=False):
+    style = _nodes_to_gui(graph, remove_none=remove_none).df["style"]
     return pd.DataFrame(transpose_list_of_dicts(style))
+
+
+def _edges_to_gui_old(graph, remove_none=True):
+    edges = NestedList()
+    active_edges = _get_active_edges(graph)
+    for i, edge in enumerate(active_edges):
+        edge_dict = edge.asdict(remove_none=remove_none)
+        edge_dict["id"] = i
+        edge_dict["style"] = {"strokeWidth": 2, "stroke": "black"}
+
+        edges.append(edge_dict)
+
+    return edges
 
 
 def _edges_to_gui(graph, remove_none=True):
     edges = NestedList()
-    active_edges = _get_active_edges(graph)
-    for i, edge in enumerate(active_edges):
+    for i, edge in enumerate(graph.edges):
         edge_dict = edge.asdict(remove_none=remove_none)
         edge_dict["id"] = i
         edge_dict["style"] = {"strokeWidth": 2, "stroke": "black"}

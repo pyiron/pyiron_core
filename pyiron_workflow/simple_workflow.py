@@ -338,7 +338,21 @@ class DataElement:
 
     @property
     def connections(self):
-        return [Connection(self.value.node, self.value.label)]
+        if not self.connected:
+            return []
+        upstream_node: Node
+        upstream_port_lable: str
+        if isinstance(self.value, Port):
+            upstream_node = self.value.node
+            upstream_port_label = self.value.label
+        elif isinstance(self.value, Node):
+            if self.type == "Node":
+                raise NotImplementedError(
+                    "Cf. https://github.com/JNmpi/pyiron_core/issues/19"
+                )
+            upstream_node = self.value
+            upstream_port_label = self.value.inputs.data[PORT_LABEL][0]
+        return [Connection(upstream_node, upstream_port_label)]
 
     def type_hint(self, v):
         import numpy
@@ -596,14 +610,26 @@ class Node:
         self._validate_input()
         if self.node_type in ["macro_node", "graph"]:
             subgraph_return = self._run()  # initialize the workflow (do not run it)
-            returned_ports = (
+            return_tuple = (
                 subgraph_return
                 if isinstance(subgraph_return, tuple)
                 else (subgraph_return,)
             )
+            returned_ports = tuple(
+                (
+                    p
+                    if isinstance(p, Port)
+                    else p.outputs.__getattr__(p.outputs.data["label"][0])
+                )
+                for p in return_tuple
+            )
             self._wf_macro = returned_ports[0].node._workflow
             self._wf_macro.run()  # Now run it
-            out = tuple(p.value for p in returned_ports)
+            out = (
+                tuple(p.value for p in returned_ports)
+                if len(return_tuple) > 1
+                else returned_ports[0].value
+            )
         else:
             out = self._run()
         self._run_set_values(out)
