@@ -1906,7 +1906,7 @@ def _nodes_to_gui(graph: Graph, remove_none=True) -> NestedList:
     return nodes
 
 
-def get_child_dict(graph, node):
+def _get_child_dict(graph, node):
     if node["expanded"]:
         node_children = _gui_children(graph, node)
     targetPorts = [
@@ -1936,7 +1936,7 @@ def _gui_children(graph, gui_node):
     for node in nodes:
         node_children = []
         if node["parentId"] == gui_node["id"]:
-            child = get_child_dict(graph, node)
+            child = _get_child_dict(graph, node)
 
             child["parent"] = 1  # level in the graph? no documentation
             if len(node_children) > 0:
@@ -1964,7 +1964,7 @@ def _graph_to_gui(graph: Graph, remove_none=True, optimize=True) -> dict:
         if (
             not "parentId" in node.keys()
         ):  # TODO: make this recursive, does not work yet
-            child = get_child_dict(graph, node)
+            child = _get_child_dict(graph, node)
             node_children = _gui_children(graph, node)
             if len(node_children) > 0:
                 child["children"] = node_children
