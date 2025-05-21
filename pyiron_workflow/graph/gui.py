@@ -1,6 +1,8 @@
 import json
 
 from typing import Optional, Union
+
+import pyiron_workflow.graph.edges
 from pyiron_workflow import Workflow  # , Node, Port, as_function_node
 from pyironflow.reactflow import ReactFlowWidget
 from pyiron_workflow.graph.base import Graph
@@ -104,7 +106,7 @@ class PyironFlowWidget:
         source, target = edge_str.split(">")
         source, source_handle = source.split("/")
         target, target_handle = target.split("/")
-        return base.GraphEdge(
+        return pyiron_workflow.graph.edges.GraphEdge(
             source.strip(), target.strip(), source_handle.strip(), target_handle.strip()
         )
 

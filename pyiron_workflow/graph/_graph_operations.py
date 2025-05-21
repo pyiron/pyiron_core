@@ -1,6 +1,6 @@
 # Contains all the graph operations needed to convert graph to workflow and vice versa as well as to perform
 # collaps and expand operations on macro nodes and graphs
-
+import pyiron_workflow.graph.edges
 from pyiron_workflow.simple_workflow import Data, get_node_from_path, Workflow
 from pyiron_workflow import Node, Port, as_function_node
 from pyiron_workflow.graph import base
@@ -159,7 +159,7 @@ def remove_node_with_reconnected_edges(graph: Graph, node_label: str) -> Graph:
 
         for edge in new_graph.edges:
             if edge.source == node_label:
-                new_edge = base.GraphEdge(
+                new_edge = pyiron_workflow.graph.edges.GraphEdge(
                     inner_edge.source,
                     edge.target,
                     source_handle,
@@ -202,7 +202,7 @@ def graph_to_node(graph: Graph) -> Node:
 ####################################################################################################
 
 
-def graph_edges_to_wf_edges(edges: base.Edges) -> List[dict]:
+def graph_edges_to_wf_edges(edges: pyiron_workflow.graph.edges.Edges) -> List[dict]:
     wf_edges = []
     for edge in edges:
         if not edge.source.startswith("var_i_") and not edge.target.startswith(
@@ -347,7 +347,7 @@ def get_graph_from_wf(
                         # print(f"Adding input node {inp_node_label}")
                         graph += base.identity(label=inp_node_label)
 
-                    edge = base.GraphEdge(
+                    edge = pyiron_workflow.graph.edges.GraphEdge(
                         target=label,
                         targetHandle=handle,
                         source=inp_node_label,
@@ -357,7 +357,7 @@ def get_graph_from_wf(
                     graph += edge
 
     for edge in wf._edges:
-        graph += base.GraphEdge(**edge)
+        graph += pyiron_workflow.graph.edges.GraphEdge(**edge)
 
     # print(f"Adding output nodes {out_labels}")
     for out_label, wf_output in zip(out_labels, wf_outputs):
@@ -377,7 +377,7 @@ def get_graph_from_wf(
         else:
             raise ValueError()
 
-        edge = base.GraphEdge(
+        edge = pyiron_workflow.graph.edges.GraphEdge(
             source=target,
             sourceHandle=target_handle,
             target=out_node_label,
@@ -437,7 +437,7 @@ def expand_node(graph: Graph, node_label: str) -> Graph:
         #     new_graph.nodes[inner_node_label] = inner_node
 
         # Rewire edges
-        new_edges = base.Edges()
+        new_edges = pyiron_workflow.graph.edges.Edges()
         # Add inner edges
         for inner_edge in inner_graph.edges:
             new_edges.append(inner_edge)
@@ -517,6 +517,6 @@ def get_full_graph_from_wf(wf: "Workflow") -> Graph:
             target = "va_i_" + target + "__" + target_handle
             target_handle = "x"
 
-        graph += base.GraphEdge(source, target, source_handle, target_handle)
+        graph += pyiron_workflow.graph.edges.GraphEdge(source, target, source_handle, target_handle)
 
     return graph

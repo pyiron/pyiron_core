@@ -10,6 +10,7 @@ __status__ = "development"
 __date__ = "Jan 3, 2025"
 
 from pyiron_workflow import Node, Port, as_function_node
+from pyiron_workflow.graph.edges import GraphEdge, Edges
 from pyiron_workflow.simple_workflow import Data
 
 from dataclasses import field
@@ -95,35 +96,10 @@ class GraphNode:
     expanded: bool = False  # expanded or collapsed state
 
 
-def _getstate_GraphEdge(self):
-    return self.asdict(remove_none=True)
-
-
-def _setstate_GraphEdge(self, state):
-    for k, v in state.items():
-        self.__setattr__(k, v)
-    return self
-
-
-@as_dotdict_dataclass(
-    __getstate__=_getstate_GraphEdge, __setstate__=_setstate_GraphEdge
-)
-class GraphEdge:
-    source: str
-    target: str
-    sourceHandle: str = None
-    targetHandle: str = None
-
-
 # Nodes = NestedDict[str, GraphNode]
 # Edges = NestedList[str, GraphEdge]
 class Nodes(NestedDict):
     def __init__(self, obj_type=GraphNode):
-        super().__init__(obj_type=obj_type)
-
-
-class Edges(NestedList):
-    def __init__(self, obj_type=GraphEdge):
         super().__init__(obj_type=obj_type)
 
 
@@ -240,7 +216,7 @@ def copy_nodes(nodes: Nodes) -> Nodes:
 
 
 def copy_graph(graph: Graph) -> Graph:
-    from copy import copy, deepcopy
+    from copy import deepcopy
 
     return Graph(
         label=graph.label, nodes=copy_nodes(graph.nodes), edges=deepcopy(graph.edges)
@@ -609,7 +585,6 @@ def get_code_from_graph(
     Returns:
         str: The generated Python source code.
     """
-    import black
 
     if sort_graph:
         graph = get_updated_graph(graph)
@@ -1257,7 +1232,7 @@ def get_full_graph_from_wf(wf: "Workflow") -> Graph:
 from collections import defaultdict
 import pathlib
 import json
-from typing import List, Tuple, Union
+from typing import Union
 
 
 from typing import TYPE_CHECKING, List, Tuple
@@ -1530,11 +1505,8 @@ class NonPrimitive:
 
 
 def graph_to_node(graph: Graph, exclude_unconnected_default_ports=True) -> Node:
-    import types
-    from functools import partial
     from pyiron_workflow.graph.to_code import (
         get_code_from_graph,
-        _build_function_parameters,
     )
 
     # print("graph_to_node: ", _build_function_parameters(graph, use_node_default=False))

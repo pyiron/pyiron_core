@@ -4,7 +4,8 @@ from collections.abc import Iterable
 from typing import Any
 
 from pyiron_workflow import NOT_DATA, Node, Workflow
-from pyiron_workflow.graph.base import Graph, GraphEdge
+from pyiron_workflow.graph.base import Graph
+from pyiron_workflow.graph.edges import GraphEdge
 
 # from pyiron_workflow.node import Node
 # from pyiron_workflow.workflow import Workflow
