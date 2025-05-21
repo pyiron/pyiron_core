@@ -1,5 +1,6 @@
 from typing import Optional, TYPE_CHECKING
 
+import pyiron_workflow.graph.gui
 # import numpy as np
 # import pandas as pd
 
@@ -21,7 +22,7 @@ def LoadGraph(path: str):
 def Display(graph, optimize: bool = True):
     from pyiron_workflow.graph import base
 
-    plot = base.GuiGraph(graph, optimze=optimize)
+    plot = pyiron_workflow.graph.gui.GuiGraph(graph, optimze=optimize)
     return plot
 
 
@@ -45,7 +46,7 @@ def DisplayEdges(graph):
 def DisplayNodeData(graph):
     from pyiron_workflow.graph import base
 
-    data = base.display_gui_data(graph)
+    data = pyiron_workflow.graph.gui.display_gui_data(graph)
     return data
 
 
@@ -53,7 +54,7 @@ def DisplayNodeData(graph):
 def DisplayNodeStyle(graph):
     from pyiron_workflow.graph import base
 
-    style = base.display_gui_style(graph)
+    style = pyiron_workflow.graph.gui.display_gui_style(graph)
     return style
 
 
@@ -61,7 +62,7 @@ def DisplayNodeStyle(graph):
 def NodesToGui(graph, remove_none: Optional[bool] = False):
     from pyiron_workflow.graph import base
 
-    nodes = base._nodes_to_gui(graph, remove_none=False)
+    nodes = pyiron_workflow.graph.gui._nodes_to_gui(graph, remove_none=False)
     return nodes
 
 
@@ -69,7 +70,7 @@ def NodesToGui(graph, remove_none: Optional[bool] = False):
 def EdgesToGui(graph):
     from pyiron_workflow.graph import base
 
-    edges = base._edges_to_gui(graph, remove_none=False)
+    edges = pyiron_workflow.graph.gui._edges_to_gui(graph, remove_none=False)
     return edges
 
 
