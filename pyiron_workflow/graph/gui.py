@@ -1,23 +1,33 @@
 import dataclasses
 import json
-
-from typing import Optional, Union
-
-import numpy as np
-import pandas as pd
-
-import pyiron_workflow.graph.edges
-from pyiron_workflow import Workflow, Port, Node
-from pyiron_workflow.graph.decorators import as_dotdict_dataclass, NestedList, transpose_list_of_dicts
-from pyironflow.reactflow import ReactFlowWidget
-from pyiron_workflow.graph.base import Graph, NotData, _get_active_nodes, is_virtual_node, _get_active_edges, \
-    get_updated_graph, copy_graph
-import pyiron_workflow.graph.base as base
-from pyironflow.treeview import TreeView
-import ipywidgets as widgets
-from IPython.display import display
 import threading
 import time
+from typing import Optional, Union
+
+import ipywidgets as widgets
+import numpy as np
+import pandas as pd
+from IPython.display import display
+from pyironflow.reactflow import ReactFlowWidget
+from pyironflow.treeview import TreeView
+
+import pyiron_workflow.graph.base as base
+import pyiron_workflow.graph.edges
+from pyiron_workflow import Node, Port, Workflow
+from pyiron_workflow.graph.base import (
+    Graph,
+    NotData,
+    _get_active_edges,
+    _get_active_nodes,
+    copy_graph,
+    get_updated_graph,
+    is_virtual_node,
+)
+from pyiron_workflow.graph.decorators import (
+    NestedList,
+    as_dotdict_dataclass,
+    transpose_list_of_dicts,
+)
 
 
 class GUILayout:
@@ -202,9 +212,10 @@ class PyironFlowWidget:
                     node = self.graph.nodes[node_name].node
                     if command == "source":
                         import inspect
+
                         from pygments import highlight
-                        from pygments.lexers import Python2Lexer
                         from pygments.formatters import TerminalFormatter
+                        from pygments.lexers import Python2Lexer
 
                         self.accordion_widget.selected_index = 1
                         node = self.graph.nodes[node_name].node
@@ -726,8 +737,8 @@ class GuiGraph:
             # print("done")
 
     def _update_graph_view(self, w):
-        import time
         import json
+        import time
 
         w.observe(self.on_value_change, names="commands")
         self._reactflow_widget_status = "running"
@@ -755,6 +766,7 @@ class GuiGraph:
         and returns the widget for display.
         """
         import threading
+
         from pyironflow.reactflow import ReactFlowWidget
 
         w = ReactFlowWidget(
