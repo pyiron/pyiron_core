@@ -6,14 +6,14 @@ import numpy as np
 import pandas as pd
 
 import pyiron_workflow.graph.edges
-from pyiron_workflow import Workflow, Port, Node  # , Node, Port, as_function_node
+from pyiron_workflow import Workflow, Port, Node
 from pyiron_workflow.graph.decorators import as_dotdict_dataclass, NestedList, transpose_list_of_dicts
 from pyironflow.reactflow import ReactFlowWidget
 from pyiron_workflow.graph.base import Graph, NotData, _get_active_nodes, is_virtual_node, _get_active_edges, \
     get_updated_graph, copy_graph
 import pyiron_workflow.graph.base as base
 from pyironflow.treeview import TreeView
-from dataclasses import dataclass, field
+from dataclasses import field
 import ipywidgets as widgets
 from IPython.display import display
 import threading
