@@ -1,3 +1,4 @@
+import dataclasses
 import json
 
 from typing import Optional, Union
@@ -13,7 +14,6 @@ from pyiron_workflow.graph.base import Graph, NotData, _get_active_nodes, is_vir
     get_updated_graph, copy_graph
 import pyiron_workflow.graph.base as base
 from pyironflow.treeview import TreeView
-from dataclasses import field
 import ipywidgets as widgets
 from IPython.display import display
 import threading
@@ -467,13 +467,13 @@ class GuiNode:
 @as_dotdict_dataclass()
 class GuiData:
     label: str = None  # label/name of the node as shown in the gui
-    source_labels: list = field(default_factory=lambda: [])
-    target_labels: list = field(default_factory=lambda: [])
+    source_labels: list = dataclasses.field(default_factory=lambda: [])
+    target_labels: list = dataclasses.field(default_factory=lambda: [])
     import_path: str = None
-    target_values: list = field(default_factory=lambda: [])
-    target_types: list = field(default_factory=lambda: [])
-    source_values: list = field(default_factory=lambda: [])
-    source_types: list = field(default_factory=lambda: [])
+    target_values: list = dataclasses.field(default_factory=lambda: [])
+    target_types: list = dataclasses.field(default_factory=lambda: [])
+    source_values: list = dataclasses.field(default_factory=lambda: [])
+    source_types: list = dataclasses.field(default_factory=lambda: [])
     expanded: bool = False
 
 
