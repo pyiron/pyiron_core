@@ -10,12 +10,12 @@ __status__ = "development"
 __date__ = "Jan 3, 2025"
 
 import copy
+import dataclasses
 
 from pyiron_workflow import Node, Port, as_function_node
 from pyiron_workflow.graph.edges import GraphEdge, Edges
 from pyiron_workflow.simple_workflow import Data
 
-from dataclasses import field
 from pyiron_workflow.graph.decorators import (
     as_dotdict_dataclass,
     NestedDict,
@@ -158,9 +158,9 @@ class Graph:
     root_node: Node = (
         None  # root node of the graph (if the graph represents a macro node)
     )
-    nodes: Nodes = field(default_factory=lambda: NestedDict(obj_type=GraphNode))
-    edges: Edges = field(default_factory=lambda: NestedList(obj_type=GraphEdge))
-    graph: dict = field(default_factory=lambda: {})
+    nodes: Nodes = dataclasses.field(default_factory=lambda: NestedDict(obj_type=GraphNode))
+    edges: Edges = dataclasses.field(default_factory=lambda: NestedList(obj_type=GraphEdge))
+    graph: dict = dataclasses.field(default_factory=lambda: {})
 
 
 def copy_nodes(nodes: Nodes) -> Nodes:
