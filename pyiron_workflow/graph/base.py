@@ -1812,10 +1812,6 @@ def _to_jsonifyable(obj):
         return NotData
 
 
-def _is_connected(obj):
-    return isinstance(obj, (Port, Node))
-
-
 def gui_data(node: Node, key: str = None, expanded: bool = False) -> GuiData:
 
     label = key  # node.label
@@ -1830,7 +1826,7 @@ def gui_data(node: Node, key: str = None, expanded: bool = False) -> GuiData:
         _to_jsonifyable(v) if not isinstance(v, Node) else NotData
         for v in node.inputs.data["value"]
     ]
-    is_connected = [_is_connected(v) for v in node.inputs.data["value"]]
+    is_connected = [isinstance(v, (Port, Node)) for v in node.inputs.data["value"]]
 
     # TODO: set to None if it contains an edge (include connected parameter)
     target_types = [
