@@ -14,7 +14,6 @@ import dataclasses
 import importlib
 from typing import Union, List, Tuple
 
-from pyiron_workflow import Node, Port, as_function_node
 from pyiron_workflow.graph.decorators import (
     as_dotdict_dataclass,
     NestedDict,
@@ -22,9 +21,7 @@ from pyiron_workflow.graph.decorators import (
     get_import_path_from_type,
 )
 from pyiron_workflow.graph.edges import GraphEdge, Edges
-from pyiron_workflow.simple_workflow import Data
-
-
+from pyiron_workflow.simple_workflow import Data, Node, Port, as_function_node
 
 
 NotData = "NotData"
