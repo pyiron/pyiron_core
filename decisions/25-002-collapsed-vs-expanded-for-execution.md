@@ -8,7 +8,7 @@
 
 ## Context
 
-- We have a parent-most graph tracking information about all nodes, including whether they are "expanded" or "collapsed" (i.e. not expanded)
+- We have a parent-most graph tracking information about all nodes, including whether they are "expanded" or "collapsed" (i.e. not expanded), and whether they are in a group (have a "parent_id") or not (no "parent_id"/matches top-most graph)
 
 
 ## Decision
