@@ -16,14 +16,13 @@
 ## Decision
 
 - The top-level graph is the source of truth
-  - We will not allow the top-level graph to become invalid due to changes made to a sub-graph
+- Only the top-level graph is editable
+  - All other objects derived from the top-level graph (e.g., sub-graphs, representations for the GUI) are strictly non-editable views
+- Views are always computed from or references to the current state of the top-level graph
 - When a de-parented copy of a sub-graph is created, it becomes the top-level graph of its new context
 
 ## Consequences
 
-- Changes to the top-level graph should be propagated to relevant sub-graphs
-  - I.e., after adding an edge in the top-level graph that connects two nodes in a sub-graph, this edge should be visible when viewing the edges of that sub-graph
-- Either changes to sub-graphs must be propagated back up to the top-most graph, or they must be disallowed
-  - For the time being, we opted to disallow modifications to nodes and edges in graphs that have a `parent_id`
-- Syntactic sugar (either text-based or graphical) that gives the appearance of transiently violating this principle is not forbidden
-  - E.g., "Editing" a node in the GUI may _appear_ to be making adding connection in a sub-graph, but might simply be a shortcut to modifications in the top-most graph
+- Any changes to the top-level graph are automatically reflected in derived views
+- Explicit updates to sub-graphs or other representations are never required
+- Operations in the GUI or other interfaces that provide the appearance of editing sub-graphs are merely acting as shortcuts to operations on the top-level graph itself.
