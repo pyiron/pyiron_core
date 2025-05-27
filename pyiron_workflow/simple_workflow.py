@@ -198,6 +198,16 @@ def type_hint_to_string(type_hint: Any) -> PortTypeValue:
     return "NonPrimitive"
 
 
+def value_to_string(value: Any) -> str | None:
+    hint = type_hint_to_string(type(value))
+    if hint in ("int", "float", "bool", "None"):
+        return str(value)
+    elif hint == "str":
+        return f'"{value}"'
+    else:
+        return None
+
+
 class _NotHinted:
     """For registering un-hinted function arguments."""
 

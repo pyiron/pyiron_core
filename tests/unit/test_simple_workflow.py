@@ -12,6 +12,7 @@ from pyiron_workflow.simple_workflow import (
     as_function_node,
     as_inp_dataclass_node,
     as_macro_node,
+    value_to_string,
     PORT_LABEL,
 )
 
@@ -141,6 +142,31 @@ class TestSimpleWorkflow(unittest.TestCase):
                 storage_location = idb.store_node_outputs(n)
                 os.unlink(storage_location)
                 os.rmdir(storage_location.split(os.sep)[0])
+
+
+class TestValueToString(unittest.TestCase):
+    def test_int(self):
+        self.assertEqual(value_to_string(42), "42")
+
+    def test_float(self):
+        self.assertEqual(value_to_string(3.14), "3.14")
+
+    def test_bool(self):
+        self.assertEqual(value_to_string(True), "True")
+        self.assertEqual(value_to_string(False), "False")
+
+    def test_none(self):
+        self.assertEqual(value_to_string(None), "None")
+
+    def test_str(self):
+        self.assertEqual(value_to_string("hello"), '"hello"')
+
+    def test_list(self):
+        self.assertIsNone(value_to_string([1, 2, 3]))
+
+    def test_custom_object(self):
+        class Dummy: pass
+        self.assertIsNone(value_to_string(Dummy()))
 
 
 if __name__ == "__main__":
