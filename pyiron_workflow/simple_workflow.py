@@ -12,7 +12,7 @@ import importlib
 import inspect
 import logging
 import types
-from typing import Any, Union, get_type_hints
+from typing import Any, Literal, TypeAlias, Union, get_type_hints
 
 import pandas as pd
 from pyiron_workflow import wf_graph_tools
@@ -155,8 +155,19 @@ def extract_output_parameters_from_function(func):
 # Define a sentinel value. This should be a unique object that you're sure won't be used as a real default value.
 # no_default = "__empty"  # NoDefaultValue()
 
+PortTypeValue: TypeAlias = Literal[
+    "int",
+    "float",
+    "str",
+    "bool",
+    "None",
+    "Node",
+    "NotHinted",
+    "NonPrimitive",
+]
 
-def type_hint_to_string(type_hint: Any) -> str:
+
+def type_hint_to_string(type_hint: Any) -> PortTypeValue:
     """Convert a Python type hint to its string representation."""
 
     # Handling basic types
