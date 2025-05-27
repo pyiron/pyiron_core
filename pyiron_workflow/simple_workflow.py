@@ -168,10 +168,12 @@ def type_hint_to_string(type_hint: Any) -> str:
         return "str"
     elif type_hint is bool:
         return "bool"
-    elif type_hint is None:
+    elif type_hint is None or type_hint is type(None):
         return "None"
     elif type_hint is Node:
         return "Node"
+    elif type_hint is _NotHinted:
+        return "NotHinted"
 
     # Handling Optional and Union types (e.g. Optional[int], Union[int, float])
     if hasattr(type_hint, "__origin__") and (type_hint.__origin__ is Union):
@@ -183,6 +185,10 @@ def type_hint_to_string(type_hint: Any) -> str:
                 return type_hint_to_string(arg)
 
     return "NonPrimitive"
+
+
+class _NotHinted:
+    """For registering un-hinted function arguments."""
 
 
 def extract_input_parameters_from_function(function: callable) -> dict:
@@ -199,7 +205,7 @@ def extract_input_parameters_from_function(function: callable) -> dict:
     # Collecting parameter names, types, and default values
     for name, parameter in signature.parameters.items():
         type_hint = type_hints.get(
-            name, None
+            name, _NotHinted
         )  # TODO: keep here the full type info (use type_hint_to_string only when converting to gui)
         # print("type_hint: ", type_hint)
         labels.append(name)

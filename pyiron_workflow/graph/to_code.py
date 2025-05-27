@@ -85,7 +85,11 @@ def _build_function_parameters(graph: Graph, use_node_default) -> str:
                         raise ValueError(f"Duplicate parameter name: {param_name}")
                     seen_params.add(param_name)
                     port = get_node_input_port(node, key)
-                    param = f"{param_name}: {port.type}"
+                    param = (
+                        param_name
+                        if port.type in ("NotHinted", "NonPrimitive")
+                        else f"{param_name}: {port.type}"
+                    )
 
                     if use_node_default:
                         value = port.default
