@@ -131,39 +131,39 @@ def _process_nodes_and_edges(graph: Graph, base_code: str) -> List[str]:
     code = base_code
     return_args = []
 
-    for node in graph.nodes.values():
+    for node in (
+            node for node in graph.nodes.values() if not is_virtual_node(node.label)
+    ):
         label, import_path = node.label, node.import_path
         # print("label: ", label, import_path)
         kwargs = dict()
-        if not is_virtual_node(label):
-
-            # Process edges for the current node
-            for edge in graph.edges:
-                if edge.target == label:
-                    if is_virtual_node(edge.source):
-                        kwargs[edge.targetHandle] = edge.sourceHandle
+        # Process edges for the current node
+        for edge in graph.edges:
+            if edge.target == label:
+                if is_virtual_node(edge.source):
+                    kwargs[edge.targetHandle] = edge.sourceHandle
+                else:
+                    if edge.target.startswith("va_o_"):
+                        return_args.append(f"wf.{edge.source}")
                     else:
-                        if edge.target.startswith("va_o_"):
-                            return_args.append(f"wf.{edge.source}")
+                        source_node = graph.nodes[edge.source]
+                        if source_node.node.n_out_labels == 1:
+                            kwargs[edge.targetHandle] = f"wf.{edge.source}"
                         else:
-                            source_node = graph.nodes[edge.source]
-                            if source_node.node.n_out_labels == 1:
-                                kwargs[edge.targetHandle] = f"wf.{edge.source}"
-                            else:
-                                kwargs[edge.targetHandle] = (
-                                    f"wf.{edge.source}.outputs.{edge.sourceHandle}"
-                                )
+                            kwargs[edge.targetHandle] = (
+                                f"wf.{edge.source}.outputs.{edge.sourceHandle}"
+                            )
 
-            # Add non-default arguments
-            non_default_inputs = get_non_default_input(graph)
-            if label in non_default_inputs:
-                for key, value in non_default_inputs[label].items():
-                    if not isinstance(value, (Node, Port)):
-                        kwargs[key] = f"{label}__{key}"
-                        # if isinstance(value, str):
-                        #     kwargs[key] = f'"{value}"'
-                        # else:
-                        #     kwargs[key] = value
+        # Add non-default arguments
+        non_default_inputs = get_non_default_input(graph)
+        if label in non_default_inputs:
+            for key, value in non_default_inputs[label].items():
+                if not isinstance(value, (Node, Port)):
+                    kwargs[key] = f"{label}__{key}"
+                    # if isinstance(value, str):
+                    #     kwargs[key] = f'"{value}"'
+                    # else:
+                    #     kwargs[key] = value
 
         module_path, class_name = import_path.rsplit(".", 1)
         code += f"    from {module_path} import {class_name}\n"
