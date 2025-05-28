@@ -12,6 +12,8 @@ from pyiron_workflow.simple_workflow import (
     as_function_node,
     as_inp_dataclass_node,
     as_macro_node,
+    extract_input_parameters_from_function,
+    get_inputs_data,
     value_to_string,
     PORT_LABEL,
 )
@@ -169,6 +171,25 @@ class TestValueToString(unittest.TestCase):
             pass
 
         self.assertIsNone(value_to_string(Dummy()))
+
+
+class TestGetInputsData(unittest.TestCase):
+    @staticmethod
+    def _some_function(v: int, w: None, x: type(None), y: tuple, z):
+        whatever = 42
+        return whatever
+
+    def test_hint_parsing(self):
+        fnc_inputs = get_inputs_data(
+            self._some_function,
+            extract_input_parameters_from_function
+        )
+        self.assertListEqual(
+            ["int", "None", "None", "NonPrimitive", "NotHinted"],
+            fnc_inputs.data["type"],
+            msg="Whitelisted hints, non-primitive hints, and no hint at all should all "
+                "parse separately and correctly"
+        )
 
 
 if __name__ == "__main__":
