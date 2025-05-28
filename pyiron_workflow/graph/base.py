@@ -611,9 +611,9 @@ def get_code_from_graph(
     Returns:
         str: The generated Python source code.
     """
-    from pyiron_workflow.graph.to_code import universal_graph_to_code
+    from pyiron_workflow.graph.to_code import get_code_from_graph
 
-    return universal_graph_to_code(
+    return get_code_from_graph(
         graph,
         sort_graph=sort_graph,
         use_node_default=include_non_default_inputs,

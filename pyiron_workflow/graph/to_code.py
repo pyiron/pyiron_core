@@ -42,28 +42,53 @@ def _scope_label(scope: str, label: str, scope_delimiter: str = "__"):
 
 def get_code_from_graph(
     graph: Graph,
-    workflow_lib: str = "pyiron_workflow",
+    sort_graph: bool = False,
     use_node_default: bool = False,
-) -> str:
+    scope_inputs: bool = True,
+    enforced_node_library: str | None = None,
+):
     """
     Generate Python source code from a graph representation.
 
     Args:
         graph (Graph): The graph object containing nodes and edges.
-        workflow_lib (str, optional): Name of the workflow library. Defaults to "pyiron_workflow".
-        use_node_default (bool, optional): Whether to use node default values or actual node value as
-        default value for macro. Defaults to False.
+        sort_graph (bool): Whether to start by updating and topologically sorting the graph. (Default is False.)
+        use_node_default (bool): Whether to prioritize the use of node default values over actual current values
+        (if any) for defaults in the new macro. (Default is False, prefer to use current values if they are available.)
+        scope_inputs (bool): Whether to include node labels ahead of arguments in signatures, i.e. to scope them. This
+        is strictly necessary in the event that two nodes both used to populate the macro input have conflicting port
+        labels. (Default is True, prepend arguments with node labels.)
+        enforced_node_library (str | None): If provided, all nodes in the graph must have the given string at the start
+        of their node's `import_path`. (Default is None, don't restrict node sources.)
 
     Returns:
         str: The generated Python source code as a string.
     """
-    return universal_graph_to_code(
-        graph,
-        sort_graph=False,
-        use_node_default=use_node_default,
-        scope_inputs=True,
-        enforced_node_library=None,
+    if sort_graph:
+        graph = base.get_updated_graph(graph)
+        graph = base.topological_sort(graph)
+
+    kwargs = _build_function_parameters(
+        graph, use_node_default=use_node_default, scope_labels=scope_inputs
     )
+    returns, body_code = _process_nodes_and_edges(
+        graph, scope_labels=scope_inputs, enforced_node_library=enforced_node_library
+    )
+    returns = returns if len(returns) > 0 else _get_default_return_args(graph)
+
+    code = textwrap.dedent(
+        f"""
+    def {graph.label}({kwargs}):
+
+        from pyiron_workflow import Workflow
+        wf = Workflow('{graph.label}')
+
+    """
+    )
+    code += body_code
+    code += f"\n    return {', '.join(returns)}\n"
+
+    return code
 
 
 def _build_function_parameters(
@@ -194,37 +219,3 @@ def _dict_to_kwargs(input_dict: dict) -> str:
         str: A string with the dictionary's key-value pairs formatted as kwargs.
     """
     return ", ".join(f"{key}={value}" for key, value in input_dict.items())
-
-
-def universal_graph_to_code(
-    graph: Graph,
-    sort_graph: bool = False,
-    use_node_default: bool = False,
-    scope_inputs: bool = True,
-    enforced_node_library: str | None = None,
-):
-    if sort_graph:
-        graph = base.get_updated_graph(graph)
-        graph = base.topological_sort(graph)
-
-    kwargs = _build_function_parameters(
-        graph, use_node_default=use_node_default, scope_labels=scope_inputs
-    )
-    returns, body_code = _process_nodes_and_edges(
-        graph, scope_labels=scope_inputs, enforced_node_library=enforced_node_library
-    )
-    returns = returns if len(returns) > 0 else _get_default_return_args(graph)
-
-    code = textwrap.dedent(
-        f"""
-    def {graph.label}({kwargs}):
-
-        from pyiron_workflow import Workflow
-        wf = Workflow('{graph.label}')
-
-    """
-    )
-    code += body_code
-    code += f"\n    return {', '.join(returns)}\n"
-
-    return code
