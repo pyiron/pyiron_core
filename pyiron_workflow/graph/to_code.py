@@ -1,3 +1,7 @@
+import textwrap
+
+import black
+
 from pyiron_workflow.simple_workflow import value_to_string
 from pyiron_workflow.graph import base
 from pyiron_workflow.graph.base import (
@@ -53,28 +57,18 @@ def get_code_from_graph(
     Returns:
         str: The generated Python source code as a string.
     """
-
-    # Initialize function parameters
-    kwargs = _build_function_parameters(graph, use_node_default=use_node_default)
-
-    # Generate the function signature and initial code
-    code = f"def {graph.label}({kwargs}):\n\n"
-    code += f"    from {workflow_lib} import Workflow\n"
-    code += f"    wf = Workflow('{graph.label}')\n\n"
-
-    # Process nodes and edges to build the workflow
-    return_args, body_code = _process_nodes_and_edges(graph, code)
-    code += body_code
-
-    # Add return statement
-    if not return_args:
-        return_args = _get_default_return_args(graph)
-
-    code += f"\n    return {', '.join(return_args)}\n"
-    return code
+    return universal_graph_to_code(
+        graph,
+        sort_graph=False,
+        use_node_default=use_node_default,
+        scope_inputs=True,
+        enforced_node_library=None,
+    )
 
 
-def _build_function_parameters(graph: Graph, use_node_default, scope_labels: bool = True) -> str:
+def _build_function_parameters(
+    graph: Graph, use_node_default, scope_labels: bool = True
+) -> str:
     """
     Build the function parameter string with type hints and default values.
     Args:
@@ -106,7 +100,9 @@ def _build_function_parameters(graph: Graph, use_node_default, scope_labels: boo
                 if not isinstance(value, (Node, Port)):
                     param_name = _scope_label(node.label, key) if scope_labels else key
                     if param_name in seen_params:
-                        raise ValueError(f"Duplicate parameter name \"{param_name}\" found when parsing node {node.label} in the graph {graph.label}; try activating scoping.")
+                        raise ValueError(
+                            f'Duplicate parameter name "{param_name}" found when parsing node {node.label} in the graph {graph.label}; try activating scoping.'
+                        )
                     seen_params.add(param_name)
                     port = get_node_input_port(node, key)
                     param = port_to_code(
@@ -126,9 +122,7 @@ def _build_function_parameters(graph: Graph, use_node_default, scope_labels: boo
 
 
 def _process_nodes_and_edges(
-        graph: Graph,
-        scope_labels: bool = True,
-        enforced_node_library: str | None = None
+    graph: Graph, scope_labels: bool = True, enforced_node_library: str | None = None
 ) -> tuple[list[str], str]:
     """
     Process nodes and edges to build the workflow code.
@@ -137,9 +131,11 @@ def _process_nodes_and_edges(
     return_args = []
 
     for node in (
-            node for node in graph.nodes.values() if not is_virtual_node(node.label)
+        node for node in graph.nodes.values() if not is_virtual_node(node.label)
     ):
-        if enforced_node_library is not None and not node.import_path.startswith(enforced_node_library):
+        if enforced_node_library is not None and not node.import_path.startswith(
+            enforced_node_library
+        ):
             raise ValueError(
                 f"Only nodes from {enforced_node_library} are allowed during the conversion of the {graph.label} graph to code, but {node.label} has the import path {node.import_path}"
             )
@@ -198,3 +194,37 @@ def _dict_to_kwargs(input_dict: dict) -> str:
         str: A string with the dictionary's key-value pairs formatted as kwargs.
     """
     return ", ".join(f"{key}={value}" for key, value in input_dict.items())
+
+
+def universal_graph_to_code(
+    graph: Graph,
+    sort_graph: bool = False,
+    use_node_default: bool = False,
+    scope_inputs: bool = True,
+    enforced_node_library: str | None = None,
+):
+    if sort_graph:
+        graph = base.get_updated_graph(graph)
+        graph = base.topological_sort(graph)
+
+    kwargs = _build_function_parameters(
+        graph, use_node_default=use_node_default, scope_labels=scope_inputs
+    )
+    returns, body_code = _process_nodes_and_edges(
+        graph, scope_labels=scope_inputs, enforced_node_library=enforced_node_library
+    )
+    returns = returns if len(returns) > 0 else _get_default_return_args(graph)
+
+    code = textwrap.dedent(
+        f"""
+    def {graph.label}({kwargs}):
+
+        from pyiron_workflow import Workflow
+        wf = Workflow('{graph.label}')
+
+    """
+    )
+    code += body_code
+    code += f"\n    return {', '.join(returns)}\n"
+
+    return code
