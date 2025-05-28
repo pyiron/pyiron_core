@@ -1714,16 +1714,6 @@ def update_execution_graph(graph: Graph, debug=False) -> Graph:
     return graph
 
 
-def get_code_from_wf(wf: "Workflow"):
-    """Generate Python source code from pyiron_workflow"""
-
-    graph = get_graph_from_wf(wf)
-
-    code = get_code_from_graph(graph)
-
-    return code
-
-
 def run_wf(wf, debug=False):
     graph = get_graph_from_wf(wf)
     variable_nodes = _get_variable_nodes(graph)
