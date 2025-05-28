@@ -181,17 +181,10 @@ def _get_default_return_args(graph: Graph) -> List[str]:
     """
     Get default return arguments if none are specified.
     """
-    return_args = []
     outputs = get_unconnected_output_ports(graph)
-    if len(outputs) == 1:
-        node_label, _ = outputs[0]
-        return [f"wf.{node_label}"]
-    else:
-        raise ValueError("Macro works only for single output node.")
-    # uncomment if macro run issue is fixed
-    # for node_label, port_label in outputs:
-    #     return_args.append(f"wf.{node_label}.outputs.{port_label}")
-    # return return_args
+    return [
+        f"wf.{node_label}.outputs.{port_label}" for node_label, port_label in outputs
+    ]
 
 
 def _dict_to_kwargs(input_dict: dict) -> str:
