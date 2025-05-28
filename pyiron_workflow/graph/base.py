@@ -57,7 +57,9 @@ def _getstate__graph_node(self):
 def _setstate__graph_node(self, state):
     for k, v in state.items():
         if k == "node":
-            self.node = None if state["node_type"] == "graph" else Node().__setstate__(v)
+            self.node = (
+                None if state["node_type"] == "graph" else Node().__setstate__(v)
+            )
         elif k == "graph":
             if v is not None:
                 self.graph = Graph().__setstate__(v)
@@ -642,9 +644,10 @@ def get_code_from_graph(
                     else:
                         kwargs += """, """
                     port = get_node_input_port(node, k)
-                    kwargs += f"{k}: {port.type}"
-                    if port.default is not NotData:
-                        kwargs += f" = {port.default}"
+
+                    from pyiron_workflow.graph.to_code import port_to_code
+
+                    kwargs += port_to_code(port, use_default=True, scope=None)
 
                     if k not in kwargs_list:
                         # print(f"Adding {node.label}: {k} to kwargs_list")
@@ -1710,16 +1713,6 @@ def update_execution_graph(graph: Graph, debug=False) -> Graph:
         # print(f"Updated input {graph.nodes[edge.target].label} in node {edge.target}", graph.nodes[edge.target].node.inputs)
 
     return graph
-
-
-def get_code_from_wf(wf: "Workflow"):
-    """Generate Python source code from pyiron_workflow"""
-
-    graph = get_graph_from_wf(wf)
-
-    code = get_code_from_graph(graph)
-
-    return code
 
 
 def run_wf(wf, debug=False):

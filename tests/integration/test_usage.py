@@ -200,7 +200,7 @@ class TestUsage(unittest.TestCase):
             reloaded = base._load_graph(fname)
             self.assertTrue(
                 all(isinstance(n, pwf.Node) for n in reloaded.nodes.df["node"].values),
-                msg="All reloaded nodes should get an accompanying python instance"
+                msg="All reloaded nodes should get an accompanying python instance",
             )
         finally:
             with contextlib.suppress(FileNotFoundError):
