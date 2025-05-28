@@ -20,10 +20,8 @@ def port_to_code(port: Port, use_default: bool = False, scope: str = None):
     hint = "" if port.type in ("NotHinted", "NonPrimitive") else f": {port.type}"
 
     if port.value is not NotData and not use_default:
-        print("use_default=", use_default, "using value", port.value)
         value_str = value_to_string(port.value)
     elif port.default is not NotData:
-        print("use_default=", use_default, "using default")
         value_str = value_to_string(port.default)
     else:
         value_str = None
