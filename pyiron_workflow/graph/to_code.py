@@ -15,11 +15,8 @@ from pyiron_workflow.graph.base import (
 from typing import Dict, List
 
 
-SCOPE_DELIMITER: str = "__"
-
-
 def port_to_code(port: Port, use_default: bool = False, scope: str = None):
-    name = port.label if scope is None else f"{scope}{SCOPE_DELIMITER}{port.label}"
+    name = port.label if scope is None else _scope_label(scope, port.label)
     hint = "" if port.type in ("NotHinted", "NonPrimitive") else f": {port.type}"
 
     if port.value is not NotData and not use_default:
@@ -35,6 +32,10 @@ def port_to_code(port: Port, use_default: bool = False, scope: str = None):
     default = "" if value_str is None else f"{space}={space}{value_str}"
 
     return f"{name}{hint}{default}"
+
+
+def _scope_label(scope: str, label: str, scope_delimiter: str = "__"):
+    return f"{scope}{scope_delimiter}{label}"
 
 
 def get_code_from_graph(
@@ -105,7 +106,7 @@ def _build_function_parameters(graph: Graph, use_node_default, scope_labels: boo
         if node.label in non_default_inputs:
             for key, value in non_default_inputs[node.label].items():
                 if not isinstance(value, (Node, Port)):
-                    param_name = f"{node.label}{SCOPE_DELIMITER}{key}" if scope_labels else key
+                    param_name = _scope_label(node.label, key) if scope_labels else key
                     if param_name in seen_params:
                         raise ValueError(f"Duplicate parameter name: {param_name}")
                     seen_params.add(param_name)
@@ -161,7 +162,7 @@ def _process_nodes_and_edges(
         if node.label in non_default_inputs:
             for key, value in non_default_inputs[node.label].items():
                 if not isinstance(value, (Node, Port)):
-                    kwargs[key] = f"{node.label}{SCOPE_DELIMITER}{key}" if scope_labels else key
+                    kwargs[key] = _scope_label(node.label, key) if scope_labels else key
 
         module_path, class_name = node.import_path.rsplit(".", 1)
         code += f"    from {module_path} import {class_name}\n"
