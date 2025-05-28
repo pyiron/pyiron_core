@@ -12,7 +12,7 @@ import importlib
 import inspect
 import logging
 import types
-from typing import Any, Union, get_type_hints
+from typing import Any, Literal, TypeAlias, Union, get_type_hints
 
 import pandas as pd
 from pyiron_workflow import wf_graph_tools
@@ -155,8 +155,19 @@ def extract_output_parameters_from_function(func):
 # Define a sentinel value. This should be a unique object that you're sure won't be used as a real default value.
 # no_default = "__empty"  # NoDefaultValue()
 
+PortTypeValue: TypeAlias = Literal[
+    "int",
+    "float",
+    "str",
+    "bool",
+    "None",
+    "Node",
+    "NotHinted",
+    "NonPrimitive",
+]
 
-def type_hint_to_string(type_hint: Any) -> str:
+
+def type_hint_to_string(type_hint: Any) -> PortTypeValue:
     """Convert a Python type hint to its string representation."""
 
     # Handling basic types
@@ -168,10 +179,12 @@ def type_hint_to_string(type_hint: Any) -> str:
         return "str"
     elif type_hint is bool:
         return "bool"
-    elif type_hint is None:
+    elif type_hint is None or type_hint is type(None):
         return "None"
     elif type_hint is Node:
         return "Node"
+    elif type_hint is _NotHinted:
+        return "NotHinted"
 
     # Handling Optional and Union types (e.g. Optional[int], Union[int, float])
     if hasattr(type_hint, "__origin__") and (type_hint.__origin__ is Union):
@@ -183,6 +196,20 @@ def type_hint_to_string(type_hint: Any) -> str:
                 return type_hint_to_string(arg)
 
     return "NonPrimitive"
+
+
+def value_to_string(value: Any) -> str | None:
+    hint = type_hint_to_string(type(value))
+    if hint in ("int", "float", "bool", "None"):
+        return str(value)
+    elif hint == "str":
+        return f'"{value}"'
+    else:
+        return None
+
+
+class _NotHinted:
+    """For registering un-hinted function arguments."""
 
 
 def extract_input_parameters_from_function(function: callable) -> dict:
@@ -199,7 +226,7 @@ def extract_input_parameters_from_function(function: callable) -> dict:
     # Collecting parameter names, types, and default values
     for name, parameter in signature.parameters.items():
         type_hint = type_hints.get(
-            name, None
+            name, _NotHinted
         )  # TODO: keep here the full type info (use type_hint_to_string only when converting to gui)
         # print("type_hint: ", type_hint)
         labels.append(name)
