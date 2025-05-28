@@ -1,8 +1,14 @@
 import unittest
 
 import pyiron_workflow.simple_workflow as swf
+from pyiron_workflow.graph import base
+from pyiron_workflow.graph.to_code import get_code_from_graph, port_to_code
 
-from pyiron_workflow.graph.to_code import port_to_code
+
+@swf.as_function_node
+def NonPrimitiveHint(x: tuple):
+    y = x[0] if len(x) > 0 else None
+    return y
 
 
 class TestPortToCode(unittest.TestCase):
@@ -60,4 +66,25 @@ class TestPortToCode(unittest.TestCase):
         self.assertEqual(
             port_to_code(p, use_default=False, scope="ns", scope_delimiter="_"),
             "ns_foo: bool = True",
+        )
+
+
+class TestGetCodeFromGraph(unittest.TestCase):
+    def test_nonprimitive_hints(self):
+        node_label = "nph"
+        g = base.Graph(label="my_graph")
+        g = base.add_node(g, NonPrimitiveHint(label=node_label))
+        code_string = base.get_code_from_graph(g)
+        self.assertEqual(
+            "NonPrimitive",
+            base.get_node_input_port(g.nodes[node_label], "x").type,
+            msg="Sanity check that the port holds `NonPrimitive` type",
+        )
+        print(code_string)
+        self.assertTrue(
+            code_string.startswith("\ndef my_graph(x):"),
+            msg="Non-primitive types should be purged from code representations -- we "
+                "can't hint 'NonPrimitive'"
+            # Update test if complex types are handled more robustly
+            # https://github.com/JNmpi/pyiron_core/issues/78
         )
