@@ -190,14 +190,13 @@ class TestGetInputsData(unittest.TestCase):
 
     def test_function_hint_parsing(self):
         fnc_inputs = get_inputs_data(
-            self._some_function,
-            extract_input_parameters_from_function
+            self._some_function, extract_input_parameters_from_function
         )
         self.assertListEqual(
             ["int", "None", "None", "NonPrimitive", "NotHinted"],
             fnc_inputs.data["type"],
             msg="Whitelisted hints, non-primitive hints, and no hint at all should all "
-                "parse separately and correctly"
+            "parse separately and correctly",
         )
 
     def test_dataclass_hint_parsing(self):
@@ -209,8 +208,8 @@ class TestGetInputsData(unittest.TestCase):
             ["int", "None", "None", "NonPrimitive"],
             dc_inputs.data["type"],
             msg="Whitelisted hints, non-primitive hints should parse separately and "
-                "correctly; dataclasses _can't_ have un-hinted fields, so no worries "
-                "there."
+            "correctly; dataclasses _can't_ have un-hinted fields, so no worries "
+            "there.",
         )
 
 

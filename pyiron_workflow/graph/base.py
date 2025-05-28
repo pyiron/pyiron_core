@@ -646,6 +646,7 @@ def get_code_from_graph(
                     port = get_node_input_port(node, k)
 
                     from pyiron_workflow.graph.to_code import port_to_code
+
                     kwargs += port_to_code(port, use_default=True, scope=None)
 
                     if k not in kwargs_list:

@@ -111,7 +111,7 @@ def _build_function_parameters(graph: Graph, use_node_default) -> str:
                         port,
                         use_default=use_node_default,
                         scope=node.label,
-                        scope_delimiter="__"
+                        scope_delimiter="__",
                     )
                     value = port.default if use_node_default else port.value
                     param_has_default = None if value is NotData else True

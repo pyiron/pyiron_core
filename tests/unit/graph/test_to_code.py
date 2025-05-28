@@ -84,7 +84,7 @@ class TestGetCodeFromGraph(unittest.TestCase):
         self.assertTrue(
             code_string.startswith("\ndef my_graph(x):"),
             msg="Non-primitive types should be purged from code representations -- we "
-                "can't hint 'NonPrimitive'"
+            "can't hint 'NonPrimitive'",
             # Update test if complex types are handled more robustly
             # https://github.com/JNmpi/pyiron_core/issues/78
         )
