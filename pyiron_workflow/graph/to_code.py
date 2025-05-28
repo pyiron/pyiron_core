@@ -17,7 +17,7 @@ from typing import Dict, List
 def port_to_code(
     port: Port, use_default: bool = False, scope: str = None, scope_delimiter="__"
 ):
-    name = port.label if scope is None else f"{scope}{scope_delimiter}{port.name}"
+    name = port.label if scope is None else f"{scope}{scope_delimiter}{port.label}"
     hint = "" if port.type in ("NotHinted", "NonPrimitive") else f": {port.type}"
 
     if port.value is not NotData and not use_default:
