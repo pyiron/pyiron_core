@@ -165,7 +165,9 @@ class TestValueToString(unittest.TestCase):
         self.assertIsNone(value_to_string([1, 2, 3]))
 
     def test_custom_object(self):
-        class Dummy: pass
+        class Dummy:
+            pass
+
         self.assertIsNone(value_to_string(Dummy()))
 
 
