@@ -64,7 +64,8 @@ def get_code_from_graph(
     code += f"    wf = Workflow('{graph.label}')\n\n"
 
     # Process nodes and edges to build the workflow
-    return_args, code = _process_nodes_and_edges(graph, code)
+    return_args, body_code = _process_nodes_and_edges(graph, code)
+    code += body_code
 
     # Add return statement
     if not return_args:
@@ -125,22 +126,22 @@ def _build_function_parameters(graph: Graph, use_node_default, scope_labels: boo
     return ", ".join(param for param, _ in parameters)
 
 
-def _process_nodes_and_edges(graph: Graph, base_code: str) -> List[str]:
+def _process_nodes_and_edges(
+        graph: Graph, scope_labels: bool = True
+) -> tuple[list[str], str]:
     """
     Process nodes and edges to build the workflow code.
     """
-    code = base_code
+    code = ""
     return_args = []
 
     for node in (
             node for node in graph.nodes.values() if not is_virtual_node(node.label)
     ):
-        label, import_path = node.label, node.import_path
-        # print("label: ", label, import_path)
         kwargs = dict()
         # Process edges for the current node
         for edge in graph.edges:
-            if edge.target == label:
+            if edge.target == node.label:
                 if is_virtual_node(edge.source):
                     kwargs[edge.targetHandle] = edge.sourceHandle
                 else:
@@ -157,18 +158,14 @@ def _process_nodes_and_edges(graph: Graph, base_code: str) -> List[str]:
 
         # Add non-default arguments
         non_default_inputs = get_non_default_input(graph)
-        if label in non_default_inputs:
-            for key, value in non_default_inputs[label].items():
+        if node.label in non_default_inputs:
+            for key, value in non_default_inputs[node.label].items():
                 if not isinstance(value, (Node, Port)):
-                    kwargs[key] = f"{label}__{key}"
-                    # if isinstance(value, str):
-                    #     kwargs[key] = f'"{value}"'
-                    # else:
-                    #     kwargs[key] = value
+                    kwargs[key] = f"{node.label}{SCOPE_DELIMITER}{key}" if scope_labels else key
 
-        module_path, class_name = import_path.rsplit(".", 1)
+        module_path, class_name = node.import_path.rsplit(".", 1)
         code += f"    from {module_path} import {class_name}\n"
-        line = f"    wf.{label} = {class_name}("
+        line = f"    wf.{node.label} = {class_name}("
         line += _dict_to_kwargs(kwargs) + ")\n"
         code += line
 
