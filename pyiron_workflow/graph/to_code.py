@@ -107,24 +107,16 @@ def _build_function_parameters(graph: Graph, use_node_default) -> str:
                         raise ValueError(f"Duplicate parameter name: {param_name}")
                     seen_params.add(param_name)
                     port = get_node_input_port(node, key)
-                    param = (
-                        param_name
-                        if port.type in ("NotHinted", "NonPrimitive")
-                        else f"{param_name}: {port.type}"
+                    param = port_to_code(
+                        port,
+                        use_default=use_node_default,
+                        scope=node.label,
+                        scope_delimiter="__"
                     )
-
-                    if use_node_default:
-                        value = port.default
-                    else:
-                        value = port.value
-
-                    if value is not NotData:
-                        if isinstance(value, str):
-                            value = f'"{value}"'
-                        param += f" = {value}"  # use actual value as default
-                        parameters.append((param, True))  # Default value exists
-                    else:
-                        parameters.append((param, None))  # No default value
+                    print("MY NEW PARAM", param)
+                    value = port.default if use_node_default else port.value
+                    param_has_default = None if value is NotData else True
+                    parameters.append((param, param_has_default))
 
     # Sort parameters: args (no default) first, kwargs (with default) last
     parameters.sort(key=lambda x: x[1] is not None)

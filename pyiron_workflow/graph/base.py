@@ -644,13 +644,9 @@ def get_code_from_graph(
                     else:
                         kwargs += """, """
                     port = get_node_input_port(node, k)
-                    kwargs += (
-                        k
-                        if port.type in ("NotHinted", "NonPrimitive")
-                        else f"{k}: {port.type}"
-                    )
-                    if port.default is not NotData:
-                        kwargs += f" = {port.default}"
+
+                    from pyiron_workflow.graph.to_code import port_to_code
+                    kwargs += port_to_code(port, use_default=True, scope=None)
 
                     if k not in kwargs_list:
                         # print(f"Adding {node.label}: {k} to kwargs_list")
