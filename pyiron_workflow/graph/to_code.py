@@ -1,3 +1,4 @@
+from pyiron_workflow.simple_workflow import value_to_string
 from pyiron_workflow.graph.base import (
     Graph,
     Node,
@@ -11,6 +12,27 @@ from pyiron_workflow.graph.base import (
 )
 
 from typing import Dict, List
+
+
+def port_to_code(
+    port: Port, use_default: bool = False, scope: str = None, scope_delimiter="__"
+):
+    name = port.label if scope is None else f"{scope}{scope_delimiter}{port.name}"
+    hint = "" if port.type in ("NotHinted", "NonPrimitive") else f": {port.type}"
+
+    if port.value is not NotData and not use_default:
+        print("use_default=", use_default, "using value", port.value)
+        value_str = value_to_string(port.value)
+    elif port.default is not NotData:
+        print("use_default=", use_default, "using default")
+        value_str = value_to_string(port.default)
+    else:
+        value_str = None
+
+    space = " " if len(hint) > 0 else ""
+    default = "" if value_str is None else f"{space}={space}{value_str}"
+
+    return f"{name}{hint}{default}"
 
 
 def get_code_from_graph(
