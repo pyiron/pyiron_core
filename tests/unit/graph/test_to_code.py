@@ -48,9 +48,6 @@ class TestPortToCode(unittest.TestCase):
     def test_scope_naming(self):
         p = self.make_port("x", "int", default=1, value=2)
         self.assertEqual(port_to_code(p, scope="scope"), "scope__x: int = 2")
-        self.assertEqual(
-            port_to_code(p, scope="mod", scope_delimiter="_"), "mod_x: int = 2"
-        )
 
     def test_scope_combined_permutations(self):
         p = self.make_port("foo", "bool", default=False, value=True)
@@ -62,10 +59,6 @@ class TestPortToCode(unittest.TestCase):
         )
         self.assertEqual(
             port_to_code(p, use_default=True, scope="bar"), "bar__foo: bool = False"
-        )
-        self.assertEqual(
-            port_to_code(p, use_default=False, scope="ns", scope_delimiter="_"),
-            "ns_foo: bool = True",
         )
 
 

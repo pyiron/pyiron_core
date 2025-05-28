@@ -205,3 +205,47 @@ class TestUsage(unittest.TestCase):
         finally:
             with contextlib.suppress(FileNotFoundError):
                 os.remove(fname)
+
+    def test_macro_and_group_return_multiplicity_equivalence(self):
+        wf = pwf.Workflow("macro_returns")
+        wf.macro = nodes.ParallelIdentityMacro(0)
+        macro_out = wf.macro.run()
+        self.assertTupleEqual(
+            (0, 0),
+            macro_out,
+            msg="Sanity check that we have non-trivial output including two elements",
+        )
+
+        g_from_graph = base.get_full_graph_from_wf(wf)
+        workflow_graph_out = base.pull_node(g_from_graph, "macro")
+
+        self.assertTupleEqual(
+            macro_out,
+            workflow_graph_out,
+            msg="Cycling the workflow to a graph and pulling should yield the same result as pulling the workflow node",
+        )
+
+        g = base.Graph(label="pure_graph")
+        g = base.add_node(g, nodes.Identity(label="input_fork", x=0))
+        g = base.add_node(g, nodes.Identity(label="p1"))
+        g = base.add_node(g, nodes.Identity(label="p2"))
+        g = base.add_edge(g, "input_fork", "p1", "x", "x")
+        g = base.add_edge(g, "input_fork", "p2", "x", "x")
+        g = base.create_group(g, [0, 1, 2], label="group")
+        # This construction and value setting needs to be revisited
+        # Here the main point is to verify that we can manually create and use groups with multiple outputs
+        # https://github.com/JNmpi/pyiron_core/issues/33
+
+        pure_group_out = base.pull_node(base.get_updated_graph(g), "group")
+        self.assertTupleEqual(
+            macro_out,
+            pure_group_out,
+            msg="We should be able to obtain multiple outputs in a pure-graph paradigm",
+        )
+
+        updated_pure_group_out = base.pull_node(base.get_updated_graph(g), "group")
+        self.assertTupleEqual(
+            macro_out,
+            updated_pure_group_out,
+            msg="I don't know, really, the point is just that at the moment updating the graph does no harm",
+        )

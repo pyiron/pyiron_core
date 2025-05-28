@@ -611,111 +611,16 @@ def get_code_from_graph(
     Returns:
         str: The generated Python source code.
     """
-    import black
+    from pyiron_workflow.graph.to_code import get_code_from_graph
 
-    if sort_graph:
-        graph = get_updated_graph(graph)
-        graph = topological_sort(graph)
-
-    # get input kwargs from graph
-    kwargs = str()
-    kwargs_list = []
-    if not kwargs:
-        first_arg = True
-    for node in graph.nodes.values():
-        if node.label.startswith("va_i_"):
-            print(f"Found input node {node.label}")
-            # inp = node.label.split("__")[-1]
-            inp = handle_to_parent_label(node.label)
-            kwargs += inp + ", "  # =None, " include default values and type hints
-            kwargs_list.append(inp)
-            for edge in graph.edges:
-                if edge.target == node.label:
-                    print(f"Found edge {edge}")
-
-        # include all non-default values
-        non_default_inp = get_non_default_input(graph)
-        if node.label in non_default_inp:
-            for k, v in non_default_inp[node.label].items():
-                # print(f"Testing {node.label}: {k} to kwargs_list")
-                if not isinstance(v, (Node, Port)):
-                    if first_arg:
-                        first_arg = False
-                    else:
-                        kwargs += """, """
-                    port = get_node_input_port(node, k)
-
-                    from pyiron_workflow.graph.to_code import port_to_code
-
-                    kwargs += port_to_code(port, use_default=True, scope=None)
-
-                    if k not in kwargs_list:
-                        # print(f"Adding {node.label}: {k} to kwargs_list")
-                        kwargs_list.append(k)
-                    else:
-                        raise NotImplementedError(
-                            f"Multiple inputs with the same name: {node.label}: {k} in {kwargs_list}"
-                        )
-
-    code = f"""
-def {graph.label}({kwargs}):
-
-    from {workflow_lib} import Workflow
-    import {pyiron_nodes_lib}
-
-    wf = Workflow('{graph.label}')
-
-"""
-
-    return_args = []
-
-    # Add nodes to Workflow
-    for node in graph.nodes.values():
-        label, import_path = node.label, node.import_path
-        if not is_virtual_node(label):
-            code += f"""    wf.{label} = {import_path}("""
-
-        # Add edges
-        first_arg = True
-        for edge in graph.edges:
-            if edge.target == label:
-                if first_arg:
-                    first_arg = False
-                else:
-                    code += """, """
-                if is_virtual_node(edge.source):
-                    code += f"""{edge.targetHandle}={edge.sourceHandle}"""
-                else:
-                    if edge.target.startswith("va_o_"):
-                        return_args.append(f"wf.{edge.source}")
-                    else:
-                        source_node = graph.nodes[edge.source]
-                        if source_node.node.n_out_labels == 1:
-                            code += f"""{edge.targetHandle}=wf.{edge.source}"""
-                        else:
-                            code += f"""{edge.targetHandle}=wf.{edge.source}.outputs.{edge.sourceHandle}"""
-
-        # Add non-default arguments to function node call
-        non_default_inp = get_non_default_input(graph)
-        if label in non_default_inp:
-            for k, v in non_default_inp[label].items():
-                # code += _build_input_argument_string(k, v, first_arg)
-                if not isinstance(v, (Node, Port)):
-                    kw_code, first_arg = _build_input_argument_string(
-                        k, k, first_arg, as_string=False
-                    )
-                    code += kw_code
-
-        if not is_virtual_node(label):
-            code += f""") \n"""
-
-    if not return_args:
-        outputs = get_unconnected_output_ports(graph)
-        for node_label, port_label in outputs:
-            return_args.append(f"wf.{node_label}.outputs.{port_label}")
-
-    code += "\n" + "    return " + ", ".join(return_args) + "\n"
-    return code
+    return get_code_from_graph(
+        graph,
+        sort_graph=sort_graph,
+        use_node_default=include_non_default_inputs,
+        scope_inputs=False,
+        enforced_node_library=None,  # pyiron_nodes_lib
+        # can't enforce for dataclasses: https://github.com/JNmpi/pyiron_core/issues/80
+    )
 
 
 def get_graph_from_wf(
@@ -1521,9 +1426,7 @@ def _find_input_nodes(graph: Graph, last_node_id):
 
 
 def graph_to_code(graph):
-    graph = get_updated_graph(graph)
-    graph = topological_sort(graph)
-    graph = get_code_from_graph(graph)
+    graph = get_code_from_graph(graph, sort_graph=True)
     return graph
 
 
