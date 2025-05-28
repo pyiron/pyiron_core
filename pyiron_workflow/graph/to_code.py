@@ -128,7 +128,9 @@ def _build_function_parameters(graph: Graph, use_node_default, scope_labels: boo
 
 
 def _process_nodes_and_edges(
-        graph: Graph, scope_labels: bool = True
+        graph: Graph,
+        scope_labels: bool = True,
+        enforced_node_library: str | None = None
 ) -> tuple[list[str], str]:
     """
     Process nodes and edges to build the workflow code.
@@ -139,6 +141,10 @@ def _process_nodes_and_edges(
     for node in (
             node for node in graph.nodes.values() if not is_virtual_node(node.label)
     ):
+        if enforced_node_library is not None and not node.import_path.startswith(enforced_node_library):
+            raise ValueError(
+                f"Only nodes from {enforced_node_library} are allowed during the conversion of the {graph.label} graph to code, but {node.label} has the import path {node.import_path}"
+            )
         kwargs = dict()
         # Process edges for the current node
         for edge in graph.edges:
