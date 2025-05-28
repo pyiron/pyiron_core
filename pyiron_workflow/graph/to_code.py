@@ -113,7 +113,6 @@ def _build_function_parameters(graph: Graph, use_node_default) -> str:
                         scope=node.label,
                         scope_delimiter="__"
                     )
-                    print("MY NEW PARAM", param)
                     value = port.default if use_node_default else port.value
                     param_has_default = None if value is NotData else True
                     parameters.append((param, param_has_default))
