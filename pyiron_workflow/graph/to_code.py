@@ -108,7 +108,7 @@ def _build_function_parameters(graph: Graph, use_node_default, scope_labels: boo
                 if not isinstance(value, (Node, Port)):
                     param_name = _scope_label(node.label, key) if scope_labels else key
                     if param_name in seen_params:
-                        raise ValueError(f"Duplicate parameter name: {param_name}")
+                        raise ValueError(f"Duplicate parameter name \"{param_name}\" found when parsing node {node.label} in the graph {graph.label}; try activating scoping.")
                     seen_params.add(param_name)
                     port = get_node_input_port(node, key)
                     param = port_to_code(
