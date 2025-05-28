@@ -1,4 +1,5 @@
 from pyiron_workflow.simple_workflow import value_to_string
+from pyiron_workflow.graph import base
 from pyiron_workflow.graph.base import (
     Graph,
     Node,
@@ -14,10 +15,11 @@ from pyiron_workflow.graph.base import (
 from typing import Dict, List
 
 
-def port_to_code(
-    port: Port, use_default: bool = False, scope: str = None, scope_delimiter="__"
-):
-    name = port.label if scope is None else f"{scope}{scope_delimiter}{port.label}"
+SCOPE_DELIMITER: str = "__"
+
+
+def port_to_code(port: Port, use_default: bool = False, scope: str = None):
+    name = port.label if scope is None else f"{scope}{SCOPE_DELIMITER}{port.label}"
     hint = "" if port.type in ("NotHinted", "NonPrimitive") else f": {port.type}"
 
     if port.value is not NotData and not use_default:
@@ -72,7 +74,7 @@ def get_code_from_graph(
     return code
 
 
-def _build_function_parameters(graph: Graph, use_node_default) -> str:
+def _build_function_parameters(graph: Graph, use_node_default, scope_labels: bool = True) -> str:
     """
     Build the function parameter string with type hints and default values.
     Args:
@@ -102,7 +104,7 @@ def _build_function_parameters(graph: Graph, use_node_default) -> str:
         if node.label in non_default_inputs:
             for key, value in non_default_inputs[node.label].items():
                 if not isinstance(value, (Node, Port)):
-                    param_name = f"{node.label}__{key}"
+                    param_name = f"{node.label}{SCOPE_DELIMITER}{key}" if scope_labels else key
                     if param_name in seen_params:
                         raise ValueError(f"Duplicate parameter name: {param_name}")
                     seen_params.add(param_name)
@@ -110,8 +112,7 @@ def _build_function_parameters(graph: Graph, use_node_default) -> str:
                     param = port_to_code(
                         port,
                         use_default=use_node_default,
-                        scope=node.label,
-                        scope_delimiter="__",
+                        scope=node.label if scope_labels else None,
                     )
                     value = port.default if use_node_default else port.value
                     param_has_default = None if value is NotData else True
