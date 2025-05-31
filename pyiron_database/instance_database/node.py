@@ -3,12 +3,8 @@ import json
 from collections.abc import Iterable
 from typing import Any
 
-from pyiron_workflow import NOT_DATA, Node, Workflow
-from pyiron_workflow.graph.base import Graph
-from pyiron_workflow.graph.edges import GraphEdge
-
-# from pyiron_workflow.node import Node
-# from pyiron_workflow.workflow import Workflow
+from pyiron_workflow import NOT_DATA, Node
+from pyiron_workflow.api import Graph, GraphEdge
 
 from pyiron_database.generic_storage import HDF5Storage, JSONGroup
 from pyiron_database.obj_reconstruction.util import (

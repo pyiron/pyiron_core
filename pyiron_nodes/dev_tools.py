@@ -79,13 +79,14 @@ def set_replacer(node, node_dict):
 
 
 def register_libraries(libraries, library_path="pyiron_workflow.pyiron_nodes"):
-    import importlib
-    from pyiron_workflow.workflow import Workflow
-
-    wf = Workflow("lib")
-    for nodes in libraries:
-        module = importlib.import_module(f"{library_path}.{nodes}")
-        wf.create.register(nodes, *module.nodes)
+    raise NotImplementedError("pyiron_workflow.workflow.Workflow did not exist at time of refactoring")
+    # import importlib
+    # from pyiron_workflow.workflow import Workflow
+    #
+    # wf = Workflow("lib")
+    # for nodes in libraries:
+    #     module = importlib.import_module(f"{library_path}.{nodes}")
+    #     wf.create.register(nodes, *module.nodes)
 
 
 # storage tools (hdf5 etc.)

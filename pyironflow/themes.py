@@ -5,7 +5,7 @@ import typing
 # from pyiron_workflow.nodes.transform import DataclassNode
 
 if typing.TYPE_CHECKING:
-    from pyiron_workflow.node import Node
+    from pyiron_workflow import Node
 
 
 def get_color(node: 'Node', theme: typing.Literal['light']):

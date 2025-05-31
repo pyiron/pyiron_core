@@ -34,7 +34,7 @@ def IterNode(
 
     # TODO: add to node ._hash_parent (with hash of this node)
     from concurrent.futures import as_completed
-    from pyiron_workflow.graph import base
+    from pyiron_workflow.api import run_node
     from copy import copy
     from pandas import DataFrame
 
@@ -64,7 +64,7 @@ def IterNode(
                 )
             for el in kwarg_list:
                 futures[
-                    executor.submit(base.run_node, graph_node, **{kwarg_name: el})
+                    executor.submit(run_node, graph_node, **{kwarg_name: el})
                 ] = el
 
             for future in as_completed(futures):

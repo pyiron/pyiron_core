@@ -114,6 +114,14 @@ class PyironFlowWidget:
 
     # handle the commands from the ReactFlowWidget
     def on_value_change(self, change):
+        # from pyiron_database.instance_database import node as idb_node
+        # gui module is exposed in the API
+        # pyiron_database leverages the API
+        # This is cyclic, but at time of writing pyiron_database exclusively imports
+        # back-end model elements of the API, so if we separate the back-end and
+        # front-end to separate modules, this will resolve itself.
+        # We are also using a customized version of pyiron_database, so it's possible
+        # a resolution is also available there.
 
         print("on_value_change: ", change["new"], change["old"], change["name"])
 
