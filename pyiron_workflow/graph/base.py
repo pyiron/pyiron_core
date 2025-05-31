@@ -158,8 +158,12 @@ class Graph:
     root_node: Node = (
         None  # root node of the graph (if the graph represents a macro node)
     )
-    nodes: Nodes = dataclasses.field(default_factory=lambda: NestedDict(obj_type=GraphNode))
-    edges: Edges = dataclasses.field(default_factory=lambda: NestedList(obj_type=GraphEdge))
+    nodes: Nodes = dataclasses.field(
+        default_factory=lambda: NestedDict(obj_type=GraphNode)
+    )
+    edges: Edges = dataclasses.field(
+        default_factory=lambda: NestedList(obj_type=GraphEdge)
+    )
     graph: dict = dataclasses.field(default_factory=lambda: {})
 
 
@@ -178,7 +182,9 @@ def copy_nodes(nodes: Nodes) -> Nodes:
 
 def copy_graph(graph: Graph) -> Graph:
     return Graph(
-        label=graph.label, nodes=copy_nodes(graph.nodes), edges=copy.deepcopy(graph.edges)
+        label=graph.label,
+        nodes=copy_nodes(graph.nodes),
+        edges=copy.deepcopy(graph.edges),
     )
 
 

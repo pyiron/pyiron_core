@@ -132,7 +132,9 @@ def _build_function_parameters(
 
 
 def _process_nodes_and_edges(
-    graph: base.Graph, scope_labels: bool = True, enforced_node_library: str | None = None
+    graph: base.Graph,
+    scope_labels: bool = True,
+    enforced_node_library: str | None = None,
 ) -> tuple[list[str], str]:
     """
     Process nodes and edges to build the workflow code.

@@ -121,7 +121,6 @@ class PyironFlowWidget:
 
         with self.out_widget:
 
-
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
 
@@ -210,7 +209,13 @@ class PyironFlowWidget:
                         else:
                             code = inspect.getsource(node._func)
 
-                        print(pygments.highlight(code, pygments.lexers.Python2Lexer(), pygments.formatters.TerminalFormatter()))
+                        print(
+                            pygments.highlight(
+                                code,
+                                pygments.lexers.Python2Lexer(),
+                                pygments.formatters.TerminalFormatter(),
+                            )
+                        )
 
                     elif command == "run":
                         self.accordion_widget.selected_index = 1
@@ -493,7 +498,9 @@ def _to_jsonifyable(obj):
         return base.NotData
 
 
-def gui_data(node: simple_workflow.Node, key: str = None, expanded: bool = False) -> GuiData:
+def gui_data(
+    node: simple_workflow.Node, key: str = None, expanded: bool = False
+) -> GuiData:
 
     label = key  # node.label
     # The following does not work since the label change is not reflected in the edges
@@ -507,7 +514,10 @@ def gui_data(node: simple_workflow.Node, key: str = None, expanded: bool = False
         _to_jsonifyable(v) if not isinstance(v, simple_workflow.Node) else base.NotData
         for v in node.inputs.data["value"]
     ]
-    is_connected = [isinstance(v, (simple_workflow.Port, simple_workflow.Node)) for v in node.inputs.data["value"]]
+    is_connected = [
+        isinstance(v, (simple_workflow.Port, simple_workflow.Node))
+        for v in node.inputs.data["value"]
+    ]
 
     # TODO: set to None if it contains an edge (include connected parameter)
     target_types = [
