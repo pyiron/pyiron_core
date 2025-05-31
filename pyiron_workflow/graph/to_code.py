@@ -187,7 +187,7 @@ def _process_nodes_and_edges(
     return return_args, code
 
 
-def _get_default_return_args(graph: base.Graph) -> List[str]:
+def _get_default_return_args(graph: base.Graph) -> list[str]:
     """
     Get default return arguments if none are specified.
     """
