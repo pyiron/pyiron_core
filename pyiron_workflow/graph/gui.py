@@ -7,27 +7,11 @@ from typing import Optional, Union
 import ipywidgets as widgets
 import numpy as np
 import pandas as pd
+import pyironflow
 from IPython.display import display
-from pyironflow.reactflow import ReactFlowWidget
-from pyironflow.treeview import TreeView
 
-import pyiron_workflow.graph.base as base
-import pyiron_workflow.graph.edges
-from pyiron_workflow import Node, Port, Workflow
-from pyiron_workflow.graph.base import (
-    Graph,
-    NotData,
-    _get_active_edges,
-    _get_active_nodes,
-    copy_graph,
-    get_updated_graph,
-    is_virtual_node,
-)
-from pyiron_workflow.graph.decorators import (
-    NestedList,
-    as_dotdict_dataclass,
-    transpose_list_of_dicts,
-)
+from pyiron_workflow.graph import base, decorators, edges
+from pyiron_workflow import simple_workflow
 
 
 class GUILayout:
@@ -44,18 +28,17 @@ Connect graph with ReactflowWidget and other GUI elements for interactive graph/
 class PyironFlowWidget:
     def __init__(
         self,
-        wf: Optional[Union["Workflow", "Graph"]] = None,
+        wf: Optional[Union[simple_workflow.Workflow, base.Graph]] = None,
         gui_layout: GUILayout = GUILayout(),
         main_widget=None,
         hash_nodes=False,
     ):
 
         if wf is None:
-            # from pyiron_workflow import Workflow
-            graph = Graph("Workflow")
-        elif isinstance(wf, Workflow):
+            graph = base.Graph("Workflow")
+        elif isinstance(wf, simple_workflow.Workflow):
             graph = base.get_full_graph_from_wf(wf)
-        elif isinstance(wf, Graph):
+        elif isinstance(wf, base.Graph):
             graph = base.copy_graph(wf)
         else:
             raise ValueError("wf must be a Workflow or Graph object")
@@ -69,7 +52,7 @@ class PyironFlowWidget:
         self.db = None
         self.hash_nodes = hash_nodes
 
-        self.flow_widget = ReactFlowWidget(
+        self.flow_widget = pyironflow.reactflow.ReactFlowWidget(
             layout={
                 "width": f"100%",
                 "height": f"{gui_layout.flow_widget_height}px",
@@ -87,7 +70,7 @@ class PyironFlowWidget:
         self.log_widget = widgets.Output(layout=layout_accordion_widgets)
 
         self.out_widget = widgets.Output(layout=layout_accordion_widgets)
-        self.tree_widget = TreeView(
+        self.tree_widget = pyironflow.treeview.TreeView(
             log=self.log_widget, layout=layout_accordion_widgets
         )
         self.tree_widget.flow_widget = self
@@ -121,7 +104,7 @@ class PyironFlowWidget:
         source, target = edge_str.split(">")
         source, source_handle = source.split("/")
         target, target_handle = target.split("/")
-        return pyiron_workflow.graph.edges.GraphEdge(
+        return edges.GraphEdge(
             source.strip(), target.strip(), source_handle.strip(), target_handle.strip()
         )
 
@@ -158,7 +141,7 @@ class PyironFlowWidget:
                 elif command == "clearFlow":
                     print("clearFlow")
                     label = self.graph.label
-                    self.graph = Graph(label=label)
+                    self.graph = base.Graph(label=label)
                     tab = self.main_widget.tab_widget
                     tab.set_title(tab.selected_index, self.graph.label)
                     self.update_gui()
@@ -314,7 +297,7 @@ class PyironFlow:
     ):
 
         if wf_list is None:
-            wf_list = [Graph(label="Workflow")]
+            wf_list = [base.Graph(label="Workflow")]
 
         # self._gui_layout = gui_layout
         self.hash_nodes = hash_nodes
@@ -404,7 +387,7 @@ class PyironFlow:
             if self.tab_widget.titles[new_index] == "+":
                 # Create a new tab
                 new_index = len(self.tab_widget.children) - 1
-                new_wf = Graph(label="Workflow_" + str(new_index))
+                new_wf = base.Graph(label="Workflow_" + str(new_index))
                 print(
                     f"Creating new tab for {new_wf.label}",
                     len(self.wf_widgets),
@@ -444,7 +427,7 @@ class PyironFlow:
         wf_widget = self.wf_widgets[self.tab_widget.selected_index]
 
         graph = base.copy_graph(wf_widget.graph)
-        wf_widget.graph = Graph(label=graph.label)
+        wf_widget.graph = base.Graph(label=graph.label)
         wf_widget.update_graph_view(sleep_time=0.1)
         time.sleep(0.2)
         print("redraw_reset: ", wf_widget.graph.label)
@@ -461,7 +444,7 @@ class PyironFlow:
         self.tab_widget.children = tab_children
 
 
-@as_dotdict_dataclass()
+@decorators.as_dotdict_dataclass()
 class GuiNode:
     id: str  # unique identifier for the node (no two nodes can have the same id)
     data: dict = None
@@ -475,7 +458,7 @@ class GuiNode:
     expanded: bool = False
 
 
-@as_dotdict_dataclass()
+@decorators.as_dotdict_dataclass()
 class GuiData:
     label: str = None  # label/name of the node as shown in the gui
     source_labels: list = dataclasses.field(default_factory=lambda: [])
@@ -488,7 +471,7 @@ class GuiData:
     expanded: bool = False
 
 
-@as_dotdict_dataclass()
+@decorators.as_dotdict_dataclass()
 class GuiStyle:
     backgroundColor: str = "rgba(0, 255, 0, 0.5)"  # light green
     height: int = 50
@@ -501,22 +484,22 @@ class GuiStyle:
 def _to_jsonifyable(obj):
     if isinstance(obj, np.ndarray):
         return obj.tolist()
-    elif isinstance(obj, Port):
+    elif isinstance(obj, simple_workflow.Port):
         value = obj.value
         # print("value: ", obj._to_dict())
         if isinstance(value, (str, int, float, bool)):
             return value
         else:
-            return NotData
-    elif isinstance(obj, Node):
-        return NotData
+            return base.NotData
+    elif isinstance(obj, simple_workflow.Node):
+        return base.NotData
     elif isinstance(obj, (str, int, float, bool, type(None))):
         return obj
     else:
-        return NotData
+        return base.NotData
 
 
-def gui_data(node: Node, key: str = None, expanded: bool = False) -> GuiData:
+def gui_data(node: simple_workflow.Node, key: str = None, expanded: bool = False) -> GuiData:
 
     label = key  # node.label
     # The following does not work since the label change is not reflected in the edges
@@ -527,10 +510,10 @@ def gui_data(node: Node, key: str = None, expanded: bool = False) -> GuiData:
         return GuiData(label=label)
 
     target_values = [
-        _to_jsonifyable(v) if not isinstance(v, Node) else NotData
+        _to_jsonifyable(v) if not isinstance(v, simple_workflow.Node) else base.NotData
         for v in node.inputs.data["value"]
     ]
-    is_connected = [isinstance(v, (Port, Node)) for v in node.inputs.data["value"]]
+    is_connected = [isinstance(v, (simple_workflow.Port, simple_workflow.Node)) for v in node.inputs.data["value"]]
 
     # TODO: set to None if it contains an edge (include connected parameter)
     target_types = [
@@ -545,14 +528,14 @@ def gui_data(node: Node, key: str = None, expanded: bool = False) -> GuiData:
         import_path=node.function["import_path"],
         target_values=target_values,
         target_types=target_types,
-        source_values=[NotData for _ in node.outputs.data["value"]],
+        source_values=[base.NotData for _ in node.outputs.data["value"]],
         source_types=node.outputs.data["type"],
         expanded=expanded,
     )
 
 
-def _get_node_height(node: Node) -> int | float:
-    if isinstance(node, Graph) or node is None:
+def _get_node_height(node: simple_workflow.Node) -> int | float:
+    if isinstance(node, base.Graph) or node is None:
         height = 250
     else:
         n_max_ports = max(node.n_out_labels, node.n_inp_labels)
@@ -560,11 +543,11 @@ def _get_node_height(node: Node) -> int | float:
     return height
 
 
-def _nodes_to_gui(graph: Graph, remove_none=True) -> NestedList:
+def _nodes_to_gui(graph: base.Graph, remove_none=True) -> decorators.NestedList:
     node_width = 200
 
-    nodes = NestedList()
-    active_nodes = _get_active_nodes(graph)
+    nodes = decorators.NestedList()
+    active_nodes = base._get_active_nodes(graph)
     for i, (k, v) in enumerate(active_nodes.items()):
         # print("gui node: ", k, v.label, v.expanded)
         # print('node: ', k, v.label, v.node.label)
@@ -594,7 +577,7 @@ def _nodes_to_gui(graph: Graph, remove_none=True) -> NestedList:
         if v.node_type == "graph":
             node_dict.type = "customNode"  # None
             node_dict.style["backgroundColor"] = "rgba(255, 165, 0, 0.3)"
-        elif is_virtual_node(v.label):
+        elif base.is_virtual_node(v.label):
             node_dict.style["border"] = "1px black dashed"
             node_dict.style["backgroundColor"] = "rgba(50, 50, 50, 0.1)"
         elif v.node.node_type == "out_dataclass_node":
@@ -635,7 +618,7 @@ def _get_child_dict(graph, node):
 
 
 def _gui_children(graph, gui_node):
-    children = NestedList()
+    children = decorators.NestedList()
     nodes = _nodes_to_gui(graph, remove_none=False)  # TODO: cache it, avoid recomputing
     for node in nodes:
         node_children = []
@@ -650,7 +633,7 @@ def _gui_children(graph, gui_node):
     return children
 
 
-def _graph_to_gui(graph: Graph, remove_none=True, optimize=True) -> dict:
+def _graph_to_gui(graph: base.Graph, remove_none=True, optimize=True) -> dict:
     layoutOptions = {
         "elk.algorithm": "layered",
         "elk.direction": "RIGHT",
@@ -674,7 +657,7 @@ def _graph_to_gui(graph: Graph, remove_none=True, optimize=True) -> dict:
                 child["children"] = node_children
             children.append(child)
 
-    elk_edges = NestedList()
+    elk_edges = decorators.NestedList()
     for edge in edges:
         elk_edges.append(
             dict(
@@ -693,17 +676,17 @@ def _graph_to_gui(graph: Graph, remove_none=True, optimize=True) -> dict:
 
 def display_gui_data(graph):
     data = _nodes_to_gui(graph, remove_none=False).df.data
-    return pd.DataFrame(transpose_list_of_dicts(data))
+    return pd.DataFrame(decorators.transpose_list_of_dicts(data))
 
 
 def display_gui_style(graph):
     style = _nodes_to_gui(graph, remove_none=False).df["style"]
-    return pd.DataFrame(transpose_list_of_dicts(style))
+    return pd.DataFrame(decorators.transpose_list_of_dicts(style))
 
 
 def _edges_to_gui(graph, remove_none=True):
-    edges = NestedList()
-    active_edges = _get_active_edges(graph)
+    edges = decorators.NestedList()
+    active_edges = base._get_active_edges(graph)
     for i, edge in enumerate(active_edges):
         edge_dict = edge.asdict(remove_none=remove_none)
         edge_dict["id"] = i
@@ -716,12 +699,12 @@ def _edges_to_gui(graph, remove_none=True):
 
 class GuiGraph:
     def __init__(
-        self, graph: Graph, full_graph=False, sleep=0.5, width=800, height=600
+        self, graph: base.Graph, full_graph=False, sleep=0.5, width=800, height=600
     ):
         if full_graph:
             self.graph = graph
         else:
-            self.graph = get_updated_graph(graph)
+            self.graph = base.get_updated_graph(graph)
 
         self._width = width
         self._height = height
@@ -743,7 +726,7 @@ class GuiGraph:
         w.observe(self.on_value_change, names="commands")
         self._reactflow_widget_status = "running"
 
-        opt_graph = copy_graph(self.graph)
+        opt_graph = base.copy_graph(self.graph)
         data = dict(
             #    label=graph.label,
             nodes=_nodes_to_gui(opt_graph),
@@ -769,7 +752,7 @@ class GuiGraph:
 
         from pyironflow.reactflow import ReactFlowWidget
 
-        w = ReactFlowWidget(
+        w = pyironflow.reactflow.ReactFlowWidget(
             layout={
                 "width": f"{self._width}px",
                 "height": f"{self._height}px",
