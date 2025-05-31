@@ -1,6 +1,6 @@
 import textwrap
 
-from pyiron_workflow.simple_workflow import value_to_string
+from pyiron_workflow import simple_workflow
 from pyiron_workflow.graph import base
 
 
@@ -9,9 +9,9 @@ def port_to_code(port: base.Port, use_default: bool = False, scope: str = None):
     hint = "" if port.type in ("NotHinted", "NonPrimitive") else f": {port.type}"
 
     if port.value is not base.NotData and not use_default:
-        value_str = value_to_string(port.value)
+        value_str = simple_workflow.value_to_string(port.value)
     elif port.default is not base.NotData:
-        value_str = value_to_string(port.default)
+        value_str = simple_workflow.value_to_string(port.default)
     else:
         value_str = None
 
