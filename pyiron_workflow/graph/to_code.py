@@ -4,28 +4,17 @@ import black
 
 from pyiron_workflow.simple_workflow import value_to_string
 from pyiron_workflow.graph import base
-from pyiron_workflow.graph.base import (
-    Graph,
-    Node,
-    Port,
-    get_non_default_input,
-    get_node_input_port,
-    NotData,
-    is_virtual_node,
-    get_unconnected_output_ports,
-    handle_to_parent_label,
-)
 
 from typing import Dict, List
 
 
-def port_to_code(port: Port, use_default: bool = False, scope: str = None):
+def port_to_code(port: base.Port, use_default: bool = False, scope: str = None):
     name = port.label if scope is None else _scope_label(scope, port.label)
     hint = "" if port.type in ("NotHinted", "NonPrimitive") else f": {port.type}"
 
-    if port.value is not NotData and not use_default:
+    if port.value is not base.NotData and not use_default:
         value_str = value_to_string(port.value)
-    elif port.default is not NotData:
+    elif port.default is not base.NotData:
         value_str = value_to_string(port.default)
     else:
         value_str = None
@@ -41,7 +30,7 @@ def _scope_label(scope: str, label: str, scope_delimiter: str = "__"):
 
 
 def get_code_from_graph(
-    graph: Graph,
+    graph: base.Graph,
     sort_graph: bool = False,
     use_node_default: bool = False,
     scope_inputs: bool = True,
@@ -51,7 +40,7 @@ def get_code_from_graph(
     Generate Python source code from a graph representation.
 
     Args:
-        graph (Graph): The graph object containing nodes and edges.
+        graph (base.Graph): The graph object containing nodes and edges.
         sort_graph (bool): Whether to start by updating and topologically sorting the graph. (Default is False.)
         use_node_default (bool): Whether to prioritize the use of node default values over actual current values
         (if any) for defaults in the new macro. (Default is False, prefer to use current values if they are available.)
@@ -92,12 +81,12 @@ def get_code_from_graph(
 
 
 def _build_function_parameters(
-    graph: Graph, use_node_default, scope_labels: bool = True
+    graph: base.Graph, use_node_default, scope_labels: bool = True
 ) -> str:
     """
     Build the function parameter string with type hints and default values.
     Args:
-        graph (Graph): The graph object containing nodes and edges.
+        graph (base.Graph): The graph object containing nodes and edges.
         use_node_default (bool): Whether to use node default values or actual node value as default value for macro.
     Returns:
         str: The function parameter string.
@@ -107,7 +96,7 @@ def _build_function_parameters(
 
     for node in graph.nodes.values():
         if node.label.startswith("va_i_"):
-            inp = handle_to_parent_label(node.label)
+            inp = base.handle_to_parent_label(node.label)
             parameters.append((inp, None))  # No default value
             seen_params.add(inp)
 
@@ -118,25 +107,25 @@ def _build_function_parameters(
                     pass
 
     # Add non-default values
-    non_default_inputs = get_non_default_input(graph)
+    non_default_inputs = base.get_non_default_input(graph)
     for node in graph.nodes.values():
         if node.label in non_default_inputs:
             for key, value in non_default_inputs[node.label].items():
-                if not isinstance(value, (Node, Port)):
+                if not isinstance(value, (base.Node, base.Port)):
                     param_name = _scope_label(node.label, key) if scope_labels else key
                     if param_name in seen_params:
                         raise ValueError(
                             f'Duplicate parameter name "{param_name}" found when parsing node {node.label} in the graph {graph.label}; try activating scoping.'
                         )
                     seen_params.add(param_name)
-                    port = get_node_input_port(node, key)
+                    port = base.get_node_input_port(node, key)
                     param = port_to_code(
                         port,
                         use_default=use_node_default,
                         scope=node.label if scope_labels else None,
                     )
                     value = port.default if use_node_default else port.value
-                    param_has_default = None if value is NotData else True
+                    param_has_default = None if value is base.NotData else True
                     parameters.append((param, param_has_default))
 
     # Sort parameters: args (no default) first, kwargs (with default) last
@@ -147,7 +136,7 @@ def _build_function_parameters(
 
 
 def _process_nodes_and_edges(
-    graph: Graph, scope_labels: bool = True, enforced_node_library: str | None = None
+    graph: base.Graph, scope_labels: bool = True, enforced_node_library: str | None = None
 ) -> tuple[list[str], str]:
     """
     Process nodes and edges to build the workflow code.
@@ -156,7 +145,7 @@ def _process_nodes_and_edges(
     return_args = []
 
     for node in (
-        node for node in graph.nodes.values() if not is_virtual_node(node.label)
+        node for node in graph.nodes.values() if not base.is_virtual_node(node.label)
     ):
         if enforced_node_library is not None and not node.import_path.startswith(
             enforced_node_library
@@ -168,7 +157,7 @@ def _process_nodes_and_edges(
         # Process edges for the current node
         for edge in graph.edges:
             if edge.target == node.label:
-                if is_virtual_node(edge.source):
+                if base.is_virtual_node(edge.source):
                     kwargs[edge.targetHandle] = edge.sourceHandle
                 else:
                     if edge.target.startswith("va_o_"):
@@ -183,10 +172,10 @@ def _process_nodes_and_edges(
                             )
 
         # Add non-default arguments
-        non_default_inputs = get_non_default_input(graph)
+        non_default_inputs = base.get_non_default_input(graph)
         if node.label in non_default_inputs:
             for key, value in non_default_inputs[node.label].items():
-                if not isinstance(value, (Node, Port)):
+                if not isinstance(value, (base.Node, base.Port)):
                     kwargs[key] = _scope_label(node.label, key) if scope_labels else key
 
         module_path, class_name = node.import_path.rsplit(".", 1)
@@ -198,11 +187,11 @@ def _process_nodes_and_edges(
     return return_args, code
 
 
-def _get_default_return_args(graph: Graph) -> List[str]:
+def _get_default_return_args(graph: base.Graph) -> List[str]:
     """
     Get default return arguments if none are specified.
     """
-    outputs = get_unconnected_output_ports(graph)
+    outputs = base.get_unconnected_output_ports(graph)
     return [
         f"wf.{node_label}.outputs.{port_label}" for node_label, port_label in outputs
     ]
