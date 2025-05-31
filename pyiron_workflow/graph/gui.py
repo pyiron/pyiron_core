@@ -1,7 +1,9 @@
 import dataclasses
+import inspect
 import json
 import threading
 import time
+import warnings
 from typing import Optional, Union
 
 import ipywidgets as widgets
@@ -9,6 +11,10 @@ import numpy as np
 import pandas as pd
 import pyironflow
 from IPython.display import display
+from pygments import highlight
+from pygments.formatters import TerminalFormatter
+from pygments.lexers import Python2Lexer
+from pyiron_database.instance_database.node import get_hash
 
 from pyiron_workflow.graph import base, decorators, edges
 from pyiron_workflow import simple_workflow
@@ -110,14 +116,13 @@ class PyironFlowWidget:
 
     # handle the commands from the ReactFlowWidget
     def on_value_change(self, change):
-        from IPython.display import display
 
         print("on_value_change: ", change["new"], change["old"], change["name"])
 
         self.out_widget.clear_output()
 
         with self.out_widget:
-            import warnings
+
 
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
@@ -194,18 +199,11 @@ class PyironFlowWidget:
                 elif node_name in self.graph.nodes.keys():
                     node = self.graph.nodes[node_name].node
                     if command == "source":
-                        import inspect
-
-                        from pygments import highlight
-                        from pygments.formatters import TerminalFormatter
-                        from pygments.lexers import Python2Lexer
 
                         self.accordion_widget.selected_index = 1
                         node = self.graph.nodes[node_name].node
 
                         # get node hash
-                        from pyiron_database.instance_database.node import get_hash
-
                         print("node hash: ", get_hash(node))
                         if node.node_type == "graph":
                             if hasattr(node, "graph"):
@@ -421,8 +419,6 @@ class PyironFlow:
                 display(wf_widget.accordion_widget)
 
     def redraw(self):
-        # from copy import copy
-
         print("redraw", self.tab_widget.selected_index)
         wf_widget = self.wf_widgets[self.tab_widget.selected_index]
 
@@ -720,9 +716,6 @@ class GuiGraph:
             # print("done")
 
     def _update_graph_view(self, w):
-        import json
-        import time
-
         w.observe(self.on_value_change, names="commands")
         self._reactflow_widget_status = "running"
 
@@ -740,17 +733,12 @@ class GuiGraph:
         time.sleep(self._sleep)  # wait to give the gui time to finalize the graph
 
     def _repr_html_(self):
-        from IPython.display import display
-
         """
         Display the graph using the ReactFlowWidget.
 
         This method initializes a ReactFlowWidget, updates the graph view in a separate thread,
         and returns the widget for display.
         """
-        import threading
-
-        from pyironflow.reactflow import ReactFlowWidget
 
         w = pyironflow.reactflow.ReactFlowWidget(
             layout={
