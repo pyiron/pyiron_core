@@ -10,11 +10,9 @@ import ipywidgets as widgets
 import numpy as np
 import pandas as pd
 import pyironflow
+import pygments
 from IPython.display import display
-from pygments import highlight
-from pygments.formatters import TerminalFormatter
-from pygments.lexers import Python2Lexer
-from pyiron_database.instance_database.node import get_hash
+from pyiron_database.instance_database import node as idb_node
 
 from pyiron_workflow.graph import base, decorators, edges
 from pyiron_workflow import simple_workflow
@@ -204,7 +202,7 @@ class PyironFlowWidget:
                         node = self.graph.nodes[node_name].node
 
                         # get node hash
-                        print("node hash: ", get_hash(node))
+                        print("node hash: ", idb_node.get_hash(node))
                         if node.node_type == "graph":
                             if hasattr(node, "graph"):
                                 code = base.get_code_from_graph(node.graph)
@@ -212,7 +210,7 @@ class PyironFlowWidget:
                         else:
                             code = inspect.getsource(node._func)
 
-                        print(highlight(code, Python2Lexer(), TerminalFormatter()))
+                        print(pygments.highlight(code, pygments.lexers.Python2Lexer(), pygments.formatters.TerminalFormatter()))
 
                     elif command == "run":
                         self.accordion_widget.selected_index = 1
