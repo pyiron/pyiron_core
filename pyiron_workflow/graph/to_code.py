@@ -1,11 +1,7 @@
 import textwrap
 
-import black
-
 from pyiron_workflow.simple_workflow import value_to_string
 from pyiron_workflow.graph import base
-
-from typing import Dict, List
 
 
 def port_to_code(port: base.Port, use_default: bool = False, scope: str = None):
