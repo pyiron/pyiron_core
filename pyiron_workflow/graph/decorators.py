@@ -15,6 +15,11 @@ import importlib
 
 
 def get_import_path_from_type(obj):
+    from pyiron_workflow.api import serial
+
+    if obj.__name__ in dir(serial):
+        return f"{serial.__name__}.{obj.__name__}"
+
     module = obj.__module__ if hasattr(obj, "__module__") else obj.__class__.__module__
     name = obj.__name__ if hasattr(obj, "__name__") else obj.__class__.__name__
     path = f"{module}.{name}"
