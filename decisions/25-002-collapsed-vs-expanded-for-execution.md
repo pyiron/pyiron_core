@@ -1,4 +1,4 @@
-# Decision 25-002 -- Collapsed and expanded do not impact execution representations
+# Decision 25-002 -- The role of collapsed and expanded in execution flow 
 
 ## Status
 
