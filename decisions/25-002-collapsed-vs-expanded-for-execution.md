@@ -19,5 +19,5 @@
 
 ## Consequences
 
-- We can ignore data in the "expanded" column when computing execution flows for a given graph
-- We have a path to modify and represent modifications to the execution flow in the GUI by expanding/collapsing groups and using copies prior to execution
+- The execution flow depends on a smaller set of variables
+- We can easily modify execution flow via the GUI by invoking the above graph-copying tool and executing on the graph copy
