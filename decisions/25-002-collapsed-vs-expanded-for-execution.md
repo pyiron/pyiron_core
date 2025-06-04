@@ -13,8 +13,8 @@
 
 ## Decision
 
-- The boolean "expanded" data should impact only the visual representation, and have no impact on execution representations
-- The "expanded" data should be retained in the graph table, not shunted to the GUI, in case we want to use it to modify group status in graph copies
+- The boolean "expanded" data should impact only the visual representation, and have no impact on execution flow
+- The "expanded" data should be retained in the graph table, not shunted to the GUI, so that we can use it to modify group status in graph copies and thus impact execution flow
 
 
 ## Consequences
