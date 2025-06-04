@@ -13,8 +13,8 @@
 
 ## Decision
 
-- The boolean "expanded" data should impact only the visual representation, and have no impact on execution flow
-- The "expanded" data should be retained in the graph table, not shunted to the GUI, so that we can use it to modify group status in graph copies and thus impact execution flow
+- The "expanded" column will not be used to compute execution flow, only (un)grouped status
+- We will provide a graph-copying tool where all "expanded" groups are explicitly un-grouped in the copy
 
 
 ## Consequences
