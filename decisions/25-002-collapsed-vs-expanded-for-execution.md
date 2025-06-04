@@ -19,5 +19,5 @@
 
 ## Consequences
 
-- The scope of use for "expanded" is concretely narrowed to visualization
 - Impacts of the "expanded" state on execution flows can be treated as bugs
+- We have a path to modify and represent modifications to the execution flow in the GUI by expanding/collapsing groups and using copies prior to execution
