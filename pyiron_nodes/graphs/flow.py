@@ -19,7 +19,7 @@ def LoadGraph(path: str):
 
 @as_function_node
 def Display(graph, optimize: bool = True):
-    from pyiron_workflow.api_gui import GuiGraph
+    from pyiron_workflow.api.gui import GuiGraph
 
     plot = GuiGraph(graph, optimze=optimize)
     return plot
@@ -39,7 +39,7 @@ def DisplayEdges(graph):
 
 @as_function_node
 def DisplayNodeData(graph):
-    from pyiron_workflow.api_gui import display_gui_data
+    from pyiron_workflow.api.gui import display_gui_data
 
     data = display_gui_data(graph)
     return data
@@ -47,7 +47,7 @@ def DisplayNodeData(graph):
 
 @as_function_node
 def DisplayNodeStyle(graph):
-    from pyiron_workflow.api_gui import display_gui_style
+    from pyiron_workflow.api.gui import display_gui_style
 
     style = display_gui_style(graph)
     return style
@@ -55,14 +55,14 @@ def DisplayNodeStyle(graph):
 
 @as_function_node
 def NodesToGui(graph, remove_none: Optional[bool] = False):
-    from pyiron_workflow.api_gui import _nodes_to_gui
+    from pyiron_workflow.api.gui import _nodes_to_gui
     nodes = _nodes_to_gui(graph, remove_none=False)
     return nodes
 
 
 @as_function_node
 def EdgesToGui(graph):
-    from pyiron_workflow.api_gui import _edges_to_gui
+    from pyiron_workflow.api.gui import _edges_to_gui
 
     edges = _edges_to_gui(graph, remove_none=False)
     return edges
