@@ -19,5 +19,5 @@
 
 ## Consequences
 
-- Impacts of the "expanded" state on execution flows can be treated as bugs
+- We can ignore data in the "expanded" column when computing execution flows for a given graph
 - We have a path to modify and represent modifications to the execution flow in the GUI by expanding/collapsing groups and using copies prior to execution
