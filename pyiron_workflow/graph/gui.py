@@ -214,9 +214,6 @@ class PyironFlowWidget:
                             code = to_code.get_code_from_graph(
                                 node.graph,
                                 sort_graph=True,
-                                use_node_default=True,
-                                scope_inputs=False,
-                                enforced_node_library=None,
                             )
                         else:
                             code = inspect.getsource(node._func)
