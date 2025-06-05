@@ -3,7 +3,7 @@ import os
 import unittest
 
 import pyiron_workflow as pwf
-from pyiron_workflow.graph import base, group
+from pyiron_workflow.graph import base, group, run
 
 from static import nodes, other_nodes
 
@@ -19,7 +19,7 @@ class TestUsage(unittest.TestCase):
         wf.n = nodes.Identity(data)
         g = base.get_full_graph_from_wf(wf)
         g = group.create_group(g, [0], label="subgraph")
-        out = base.pull_node(base.get_updated_graph(g), "subgraph")
+        out = run.pull_node(base.get_updated_graph(g), "subgraph")
         self.assertEqual(
             out,
             data,
@@ -43,7 +43,7 @@ class TestUsage(unittest.TestCase):
 
         self.assertEqual(
             data,
-            base.pull_node(base.get_updated_graph(g), "n1"),
+            run.pull_node(base.get_updated_graph(g), "n1"),
             msg="Two nodes with the same source name should be able to co-exist in the "
             "same workflow/graph",
         )
@@ -53,7 +53,7 @@ class TestUsage(unittest.TestCase):
             "same group"
         ):
             g = group.create_group(g, [0, 1], label="subgraph")
-            out = base.pull_node(base.get_updated_graph(g), "subgraph")
+            out = run.pull_node(base.get_updated_graph(g), "subgraph")
             self.assertEqual(
                 out, data, msg="Just verifying the group is also operational"
             )
@@ -78,12 +78,12 @@ class TestUsage(unittest.TestCase):
 
         self.assertEqual(
             m_data,
-            base.pull_node(base.get_updated_graph(g), "m_subgraph"),
+            run.pull_node(base.get_updated_graph(g), "m_subgraph"),
             msg="Both groups should be pullable",
         )
         self.assertEqual(
             n_data,
-            base.pull_node(base.get_updated_graph(g), "n_subgraph"),
+            run.pull_node(base.get_updated_graph(g), "n_subgraph"),
             msg="Both groups should be pullable",
         )
 
@@ -106,7 +106,7 @@ class TestUsage(unittest.TestCase):
             wf.n3.inputs.x = wf.n2
             g_connected = base.get_full_graph_from_wf(make_workflow())
             g_connected = base.add_edge(g_connected, "n2", "n3", "y", "x")
-            expected_terminal_result = base.pull_node(
+            expected_terminal_result = run.pull_node(
                 base.get_updated_graph(g_connected), "n4"
             )
 
@@ -125,7 +125,7 @@ class TestUsage(unittest.TestCase):
             g = base.add_edge(g, "upstream_group", "n3", "n2__y", "x")
             self.assertEqual(
                 expected_out,
-                base.pull_node(base.get_updated_graph(g), labels[-1]),
+                run.pull_node(base.get_updated_graph(g), labels[-1]),
                 "Output from groups should propagate to downstream nodes",
             )
 
@@ -136,7 +136,7 @@ class TestUsage(unittest.TestCase):
             g = base.add_edge(g, "n2", "downstream_group", "y", "n3__x")
             self.assertEqual(
                 expected_out,
-                base.pull_node(base.get_updated_graph(g), "downstream_group"),
+                run.pull_node(base.get_updated_graph(g), "downstream_group"),
                 "Output from groups should propagate to downstream nodes",
             )
 
@@ -149,7 +149,7 @@ class TestUsage(unittest.TestCase):
             g = base.add_edge(g, "upstream_group", "downstream_group", "n2__y", "n3__x")
             self.assertEqual(
                 expected_out,
-                base.pull_node(base.get_updated_graph(g), "downstream_group"),
+                run.pull_node(base.get_updated_graph(g), "downstream_group"),
                 "Output from groups should propagate to downstream nodes",
             )
 
@@ -163,7 +163,7 @@ class TestUsage(unittest.TestCase):
 
             run_group = base.get_full_graph_from_wf(make_workflow())
             run_group = base.add_edge(run_group, "n1", "n2", "y", "x")
-            expected_result = base.pull_node(base.get_updated_graph(run_group), "n2")
+            expected_result = run.pull_node(base.get_updated_graph(run_group), "n2")
 
             g = base.get_full_graph_from_wf(make_workflow())
             g = group.create_group(g, [0], label="subgraph")
@@ -173,7 +173,7 @@ class TestUsage(unittest.TestCase):
         explicit_graph = base.add_edge(
             explicit_graph, "va_o_subgraph__n1__y", "n2", "y", "x"
         )
-        explicit_result = base.pull_node(base.get_updated_graph(explicit_graph), "n2")
+        explicit_result = run.pull_node(base.get_updated_graph(explicit_graph), "n2")
         self.assertEqual(
             expected_result,
             explicit_result,
@@ -182,7 +182,7 @@ class TestUsage(unittest.TestCase):
 
         _, implicit_graph = make_graph()
         implicit_graph = base.add_edge(implicit_graph, "subgraph", "n2", "n1__y", "x")
-        implicit_result = base.pull_node(base.get_updated_graph(implicit_graph), "n2")
+        implicit_result = run.pull_node(base.get_updated_graph(implicit_graph), "n2")
         self.assertEqual(
             expected_result,
             implicit_result,
@@ -217,7 +217,7 @@ class TestUsage(unittest.TestCase):
         )
 
         g_from_graph = base.get_full_graph_from_wf(wf)
-        workflow_graph_out = base.pull_node(g_from_graph, "macro")
+        workflow_graph_out = run.pull_node(g_from_graph, "macro")
 
         self.assertTupleEqual(
             macro_out,
@@ -236,14 +236,14 @@ class TestUsage(unittest.TestCase):
         # Here the main point is to verify that we can manually create and use groups with multiple outputs
         # https://github.com/JNmpi/pyiron_core/issues/33
 
-        pure_group_out = base.pull_node(base.get_updated_graph(g), "group")
+        pure_group_out = run.pull_node(base.get_updated_graph(g), "group")
         self.assertTupleEqual(
             macro_out,
             pure_group_out,
             msg="We should be able to obtain multiple outputs in a pure-graph paradigm",
         )
 
-        updated_pure_group_out = base.pull_node(base.get_updated_graph(g), "group")
+        updated_pure_group_out = run.pull_node(base.get_updated_graph(g), "group")
         self.assertTupleEqual(
             macro_out,
             updated_pure_group_out,

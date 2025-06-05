@@ -14,7 +14,7 @@ import pygments
 from IPython.display import display
 from pyiron_database.instance_database import node as idb_node
 
-from pyiron_workflow.graph import base, decorators, edges, group, to_code
+from pyiron_workflow.graph import base, decorators, edges, group, run, to_code
 from pyiron_workflow import simple_workflow
 
 
@@ -230,7 +230,7 @@ class PyironFlowWidget:
                         self.accordion_widget.selected_index = 1
                         self.out_widget.clear_output()
                         if self.db is None:
-                            out = base.pull_node(
+                            out = run.pull_node(
                                 base.get_updated_graph(self.graph), node.label
                             )
                         else:
