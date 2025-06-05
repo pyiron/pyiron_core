@@ -4,7 +4,7 @@ from pyiron_workflow import simple_workflow
 from pyiron_workflow.graph import base, decorators, edges
 
 
-def create_group(full_graph, node_ids=None, label=None):
+def create_group(full_graph, node_ids=None, label: str = "subgraph"):
     node_ids = [] if node_ids is None else node_ids
     full_graph = base.copy_graph(full_graph)
     sub_graph = _get_subgraph(full_graph, node_ids, label)
@@ -115,7 +115,9 @@ def move_parent_nodes_to_top(graph):
     return new_graph
 
 
-def _get_subgraph(graph: base.Graph, node_indices, label=None) -> base.Graph:
+def _get_subgraph(
+    graph: base.Graph, node_indices, label: str = "subgraph"
+) -> base.Graph:
     # collapse all nodes that are in the subgraph
     # TODO: remove child nodes in subgraph of collapsed nodes
     graph = base.copy_graph(graph)
@@ -132,8 +134,6 @@ def _get_subgraph(graph: base.Graph, node_indices, label=None) -> base.Graph:
         if id_source in node_indices and id_target in node_indices:
             subgraph_edges.append(edges[i])
 
-    if label is None:
-        label = "subgraph"
     subgraph = base.Graph(
         nodes=subgraph_nodes,
         edges=subgraph_edges,
