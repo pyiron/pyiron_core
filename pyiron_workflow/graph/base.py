@@ -21,8 +21,7 @@ from pyiron_workflow.graph.decorators import (
     get_import_path_from_type,
 )
 from pyiron_workflow.graph.edges import GraphEdge, Edges
-from pyiron_workflow.simple_workflow import Data, Node, Port, Workflow, as_function_node
-
+from pyiron_workflow.simple_workflow import Data, Node, Port, Workflow, identity
 
 NotData = "NotData"
 
@@ -1428,11 +1427,6 @@ def topological_sort(graph: Graph) -> Graph:
     sorted_graph = Graph(nodes=sorted_nodes, edges=graph.edges, label=graph.label)
 
     return sorted_graph
-
-
-@as_function_node
-def identity(x):
-    return x
 
 
 # find in a pandas dataframe whether the target and tagetHandle column match a given target and targetHandle

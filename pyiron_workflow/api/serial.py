@@ -11,8 +11,8 @@ import functools
 from pyiron_workflow.graph.base import (
     GraphEdge as _GraphEdge,
     GraphNode as _GraphNode,
-    identity as _identity,
 )
+from pyiron_workflow.simple_workflow import identity as _identity
 
 
 class GraphEdge(_GraphEdge): ...
