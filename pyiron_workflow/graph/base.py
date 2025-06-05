@@ -528,36 +528,6 @@ def _build_input_argument_string(k, v, first_arg, as_string=True):
     return code, first_arg
 
 
-def get_code_from_graph(
-    graph: Graph,
-    workflow_lib: str = "pyiron_workflow",
-    pyiron_nodes_lib: str = "pyiron_nodes",
-    sort_graph: bool = True,
-    include_non_default_inputs: bool = True,
-):
-    """
-    Generate Python source code from graph.
-
-    Args:
-        label (str): The label to use in the generated code.
-        module_a (str): The name of the module to import from.
-        module_b (str): The name of the module to import.
-
-    Returns:
-        str: The generated Python source code.
-    """
-    from pyiron_workflow.graph.to_code import get_code_from_graph
-
-    return get_code_from_graph(
-        graph,
-        sort_graph=sort_graph,
-        use_node_default=include_non_default_inputs,
-        scope_inputs=False,
-        enforced_node_library=None,  # pyiron_nodes_lib
-        # can't enforce for dataclasses: https://github.com/JNmpi/pyiron_core/issues/80
-    )
-
-
 def get_graph_from_wf(
     wf: Workflow,
     wf_outputs: Tuple[Node | Port],
