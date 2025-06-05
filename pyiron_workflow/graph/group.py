@@ -134,7 +134,9 @@ def _get_subgraph(graph: base.Graph, node_indices, label=None) -> base.Graph:
     if label is None:
         label = "subgraph"
     subgraph = base.Graph(
-        nodes=subgraph_nodes, edges=subgraph_edges, label=base.get_unique_label(graph, label)
+        nodes=subgraph_nodes,
+        edges=subgraph_edges,
+        label=base.get_unique_label(graph, label),
     )
     sorted_subgraph = base.topological_sort(subgraph)
 
