@@ -4,7 +4,8 @@ from pyiron_workflow import simple_workflow
 from pyiron_workflow.graph import base, decorators, edges
 
 
-def create_group(full_graph, node_ids=[], label=None):
+def create_group(full_graph, node_ids=None, label=None):
+    node_ids = [] if node_ids is None else node_ids
     full_graph = base.copy_graph(full_graph)
     sub_graph = _get_subgraph(full_graph, node_ids, label)
     sub_graph_node = base.graph_to_node(sub_graph)
