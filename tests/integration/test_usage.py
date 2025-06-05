@@ -3,7 +3,7 @@ import os
 import unittest
 
 import pyiron_workflow as pwf
-from pyiron_workflow.graph import base
+from pyiron_workflow.graph import base, group
 
 from static import nodes, other_nodes
 
@@ -18,7 +18,7 @@ class TestUsage(unittest.TestCase):
         wf = pwf.Workflow("custom_nodes_in_a_group")
         wf.n = nodes.Identity(data)
         g = base.get_full_graph_from_wf(wf)
-        g = base.create_group(g, [0], label="subgraph")
+        g = group.create_group(g, [0], label="subgraph")
         out = base.pull_node(base.get_updated_graph(g), "subgraph")
         self.assertEqual(
             out,
@@ -52,7 +52,7 @@ class TestUsage(unittest.TestCase):
             msg="Two nodes with the same source name should be able to co-exist in the "
             "same group"
         ):
-            g = base.create_group(g, [0, 1], label="subgraph")
+            g = group.create_group(g, [0, 1], label="subgraph")
             out = base.pull_node(base.get_updated_graph(g), "subgraph")
             self.assertEqual(
                 out, data, msg="Just verifying the group is also operational"
@@ -71,10 +71,10 @@ class TestUsage(unittest.TestCase):
         g = base.get_full_graph_from_wf(wf)
 
         m_ids = base._node_labels_to_node_ids(g, ["m1", "m2"])
-        g = base.create_group(g, m_ids, label="m_subgraph")
+        g = group.create_group(g, m_ids, label="m_subgraph")
 
         n_ids = base._node_labels_to_node_ids(g, ["n1", "n2"])
-        g = base.create_group(g, n_ids, label="n_subgraph")
+        g = group.create_group(g, n_ids, label="n_subgraph")
 
         self.assertEqual(
             m_data,
@@ -121,7 +121,7 @@ class TestUsage(unittest.TestCase):
         with self.subTest("Upstream group"):
             expected_out, g, labels = make_graph()
             ids = base._node_labels_to_node_ids(g, labels[:2])
-            g = base.create_group(g, ids, label="upstream_group")
+            g = group.create_group(g, ids, label="upstream_group")
             g = base.add_edge(g, "upstream_group", "n3", "n2__y", "x")
             self.assertEqual(
                 expected_out,
@@ -132,7 +132,7 @@ class TestUsage(unittest.TestCase):
         with self.subTest("Downstream group"):
             expected_out, g, labels = make_graph()
             ids = base._node_labels_to_node_ids(g, labels[2:])
-            g = base.create_group(g, ids, label="downstream_group")
+            g = group.create_group(g, ids, label="downstream_group")
             g = base.add_edge(g, "n2", "downstream_group", "y", "n3__x")
             self.assertEqual(
                 expected_out,
@@ -143,9 +143,9 @@ class TestUsage(unittest.TestCase):
         with self.subTest("Two groups"):
             expected_out, g, labels = make_graph()
             upstream_ids = base._node_labels_to_node_ids(g, labels[:2])
-            g = base.create_group(g, upstream_ids, label="upstream_group")
+            g = group.create_group(g, upstream_ids, label="upstream_group")
             downstream_ids = base._node_labels_to_node_ids(g, labels[2:])
-            g = base.create_group(g, downstream_ids, label="downstream_group")
+            g = group.create_group(g, downstream_ids, label="downstream_group")
             g = base.add_edge(g, "upstream_group", "downstream_group", "n2__y", "n3__x")
             self.assertEqual(
                 expected_out,
@@ -166,7 +166,7 @@ class TestUsage(unittest.TestCase):
             expected_result = base.pull_node(base.get_updated_graph(run_group), "n2")
 
             g = base.get_full_graph_from_wf(make_workflow())
-            g = base.create_group(g, [0], label="subgraph")
+            g = group.create_group(g, [0], label="subgraph")
             return expected_result, g
 
         expected_result, explicit_graph = make_graph()
@@ -194,7 +194,7 @@ class TestUsage(unittest.TestCase):
         wf = pwf.Workflow(fname)
         wf.n = nodes.AddOne(0)
         g = base.get_full_graph_from_wf(wf)
-        g = base.create_group(g, [0], label="subgraph")
+        g = group.create_group(g, [0], label="subgraph")
         base._save_graph(g, filename=fname)
         try:
             reloaded = base._load_graph(fname)
@@ -231,7 +231,7 @@ class TestUsage(unittest.TestCase):
         g = base.add_node(g, nodes.Identity(label="p2"))
         g = base.add_edge(g, "input_fork", "p1", "x", "x")
         g = base.add_edge(g, "input_fork", "p2", "x", "x")
-        g = base.create_group(g, [0, 1, 2], label="group")
+        g = group.create_group(g, [0, 1, 2], label="group")
         # This construction and value setting needs to be revisited
         # Here the main point is to verify that we can manually create and use groups with multiple outputs
         # https://github.com/JNmpi/pyiron_core/issues/33
