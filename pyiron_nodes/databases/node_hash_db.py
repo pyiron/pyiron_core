@@ -72,7 +72,7 @@ def GetGraph(db, node_id: int):
     Get the graph of a node with id *node_id from the database.
     """
     import pyiron_database.instance_database as idb
-    from pyiron_workflow.api import GuiGraph
+    from pyiron_workflow.api.gui import GuiGraph
     from sqlalchemy.orm import sessionmaker
     import pandas as pd
 

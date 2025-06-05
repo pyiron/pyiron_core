@@ -11,6 +11,7 @@ components.
 
 from pyiron_workflow.graph.gui import (
     GuiGraph,
+    PyironFlow,
     display_gui_data,
     _edges_to_gui,
     _nodes_to_gui,

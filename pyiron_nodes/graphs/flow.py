@@ -11,7 +11,7 @@ from pyiron_workflow import as_function_node
 
 @as_function_node
 def LoadGraph(path: str):
-    from pyiron_workflow.api import _load_graph
+    from pyiron_workflow.api.graph import _load_graph
 
     graph = _load_graph(path)
     return graph
@@ -101,7 +101,7 @@ def OptimizeGraphConnections(graph):
 
 @as_function_node
 def MarkNodeAsExpanded(graph, node_label: str, expanded: Optional[bool] = True):
-    from pyiron_workflow.api import _mark_node_as_collapsed, _mark_node_as_expanded
+    from pyiron_workflow.api.graph import _mark_node_as_collapsed, _mark_node_as_expanded
 
     if expanded:
         graph = _mark_node_as_expanded(graph, node_label)
@@ -122,7 +122,7 @@ def GetGraphFromMacro(macro_node):
 # def _get_active_nodes(graph: Graph) -> Nodes:
 @as_function_node
 def GetActiveNodes(graph):
-    from pyiron_workflow.api import _get_active_nodes
+    from pyiron_workflow.api.graph import _get_active_nodes
 
     nodes = _get_active_nodes(graph)
     return nodes
@@ -130,7 +130,7 @@ def GetActiveNodes(graph):
 
 @as_function_node
 def GetCodeFromGraph(graph):
-    from pyiron_workflow.api import get_code_from_graph
+    from pyiron_workflow.api.graph import get_code_from_graph
 
     code = get_code_from_graph(graph)
     return code
@@ -171,7 +171,7 @@ def ConvertMacroToWorkflow(macro_node):
 
 @as_function_node
 def GetUpdatedGraph(full_graph, level: Optional[int] = 0):
-    from pyiron_workflow.api import get_updated_graph
+    from pyiron_workflow.api.graph import get_updated_graph
 
     graph = get_updated_graph(full_graph, level=level)
     return graph
@@ -179,7 +179,7 @@ def GetUpdatedGraph(full_graph, level: Optional[int] = 0):
 
 @as_function_node
 def TopologicalSort(graph):
-    from pyiron_workflow.api import topological_sort
+    from pyiron_workflow.api.graph import topological_sort
 
     graph = topological_sort(graph)
     return graph
