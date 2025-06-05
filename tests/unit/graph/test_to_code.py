@@ -67,7 +67,7 @@ class TestGetCodeFromGraph(unittest.TestCase):
         node_label = "nph"
         g = base.Graph(label="my_graph")
         g = base.add_node(g, NonPrimitiveHint(label=node_label))
-        code_string = base.get_code_from_graph(g)
+        code_string = get_code_from_graph(g, scope_inputs=False)
         self.assertEqual(
             "NonPrimitive",
             base.get_node_input_port(g.nodes[node_label], "x").type,

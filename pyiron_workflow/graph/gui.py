@@ -14,7 +14,7 @@ import pygments
 from IPython.display import display
 from pyiron_database.instance_database import node as idb_node
 
-from pyiron_workflow.graph import base, decorators, edges
+from pyiron_workflow.graph import base, decorators, edges, to_code
 from pyiron_workflow import simple_workflow
 
 
@@ -211,9 +211,13 @@ class PyironFlowWidget:
                         # get node hash
                         print("node hash: ", idb_node.get_hash(node))
                         if node.node_type == "graph":
-                            if hasattr(node, "graph"):
-                                code = base.get_code_from_graph(node.graph)
-                            base.get_code_from_graph(node.graph)
+                            code = to_code.get_code_from_graph(
+                                node.graph,
+                                sort_graph=True,
+                                use_node_default=True,
+                                scope_inputs=False,
+                                enforced_node_library=None,
+                            )
                         else:
                             code = inspect.getsource(node._func)
 
