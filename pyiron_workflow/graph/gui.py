@@ -14,7 +14,7 @@ import pygments
 from IPython.display import display
 from pyiron_database.instance_database import node as idb_node
 
-from pyiron_workflow.graph import base, decorators, edges, to_code
+from pyiron_workflow.graph import base, decorators, edges, group, to_code
 from pyiron_workflow import simple_workflow
 
 
@@ -170,7 +170,7 @@ class PyironFlowWidget:
                         self.graph, self._selected_nodes
                     )
                     print("group_nodes: ", node_ids)
-                    self.graph = base.create_group(self.graph, node_ids)
+                    self.graph = group.create_group(self.graph, node_ids)
                     # self.graph = base.create_group(self.graph, node_ids)
                     # self.graph = base.get_updated_graph(self.graph)
                     self.update_gui()
