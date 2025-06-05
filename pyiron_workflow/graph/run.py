@@ -2,51 +2,6 @@ from pyiron_workflow import simple_workflow
 from pyiron_workflow.graph import base, group
 
 
-def run_macro_node(macro_node):
-    macro_graph = base.get_graph_from_macro_node(macro_node)
-
-    output_nodes = list()
-    output_labels = dict()
-    for edge in macro_graph.edges:
-        if f"va_o_{macro_node.label}__" in edge.target:
-            output_nodes.append(edge.source)
-            o_label = edge.target.split("__")[-1]
-            output_labels[o_label] = (edge.source, edge.sourceHandle)
-
-    # connect inner node input directly with outer node, eliminate in execution macro input port
-    for graph_node in macro_graph.nodes.values():
-        values = graph_node.node.inputs.data["value"]
-        labels = graph_node.node.inputs.data["label"]
-        for port_label, port_value in zip(labels, values):
-            # print('label: ', port_label)
-            if isinstance(port_value, (simple_workflow.Port)):
-                # print(port_label, type(port_value.value))
-                if isinstance(port_value.value, (simple_workflow.Port)):
-                    # print('double: ', port_value.value.label, port_value.value.node.label)
-                    graph_node.node.inputs.__setattr__(port_label, port_value.value)
-
-    outputs = list()
-    # output_labels = macro_node.outputs.data["label"]
-    for out_label in set(output_nodes):
-        # print(f"output node {out_label} of macro {macro_node.label}")
-        outputs.append(
-            pull_node(macro_graph, out_label)
-        )  # use graph theory to avoid recalculating nodes (or use ready)
-
-    if len(outputs) == 1:
-        return outputs[0]  # works only for nodes with single output
-    else:
-        outputs = list()
-        for label in macro_node.outputs.data["label"]:
-            # print(f"output label {label}")
-            o_source, o_handle = output_labels[label]
-            out = macro_graph.nodes[o_source].node.outputs.__getattr__(o_handle)
-            outputs.append(out.value)
-
-        # raise NotImplementedError("Multiple outputs not yet implemented. Sort sequence by macro output labels.")
-        return outputs
-
-
 def run_node(node: simple_workflow.Node | base.GraphNode, **kwargs):
     """
     Executes a given node and returns its output.
@@ -82,18 +37,6 @@ def run_node(node: simple_workflow.Node | base.GraphNode, **kwargs):
         result = None
 
     return result
-
-
-def run_wf(wf, debug=False):
-    graph = base.get_graph_from_wf(wf)
-    variable_nodes = group._get_variable_nodes(graph)
-    for i, node_label in enumerate(graph.nodes.keys()):
-        if i not in variable_nodes:
-            if debug:
-                print(f"running node {node_label}")
-            out = wf._nodes[node_label].run()
-
-    return out
 
 
 def pull_node(graph: base.Graph, node_label: str):

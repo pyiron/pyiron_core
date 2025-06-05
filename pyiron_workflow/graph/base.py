@@ -477,56 +477,6 @@ def remove_node_with_reconnected_edges(graph: Graph, node_label: str) -> Graph:
 ####################################################################################################
 
 
-def graph_edges_to_wf_edges(edges: Edges) -> List[dict]:
-    wf_edges = []
-    for edge in edges:
-        if not edge.source.startswith("va_i_") and not edge.target.startswith("va_o_"):
-            wf_edges.append(edge.asdict())
-    return wf_edges
-
-
-def get_wf_from_graph(graph: Graph) -> Workflow:
-    wf = Workflow(graph.label)
-    # Add nodes to Workflow
-    for node in graph.nodes.values():
-        label, import_path = node.label, node.import_path
-
-        if not label.startswith("va_i_"):
-            kwargs = dict()
-
-            # Add non-default arguments to node
-            for edge in graph.edges:
-                if edge.target == label:
-                    # TODO: get value from source node (is there not converted to string)
-                    if edge.source.startswith("va_i_"):
-                        if edge.sourceHandle.startswith("__str_"):
-                            kwargs[edge.targetHandle] = edge.sourceHandle[6:]
-                        else:
-                            kwargs[edge.targetHandle] = eval(edge.sourceHandle)
-                    # kwargs[target_handle] = source_handle
-
-            new_node = get_node_from_path(import_path)(**kwargs)
-            wf.add_node(label, new_node)
-    wf._set_edges(graph_edges_to_wf_edges(graph.edges))
-
-    return wf
-
-
-def _build_input_argument_string(k, v, first_arg, as_string=True):
-    code = ""
-    if first_arg:
-        first_arg = False
-    else:
-        code += """, """
-
-    if isinstance(v, str) and as_string:
-        code += f"""{k}='{v}'"""
-    else:
-        code += f"""{k}={v}"""
-
-    return code, first_arg
-
-
 def get_graph_from_wf(
     wf: Workflow,
     wf_outputs: Tuple[Node | Port],
@@ -662,11 +612,6 @@ def handle_to_port_label(handle: str) -> str:
             return "__".join(path_list[1:])
         return handle.split("__")[-1]
     return handle
-
-
-def handle_to_node_label(handle: str) -> str:
-    if is_virtual_node(handle):
-        return handle.split("__")[-2]
 
 
 def handle_to_parent_label(handle: str) -> str:
@@ -879,15 +824,6 @@ from typing import TYPE_CHECKING, List, Tuple, Union
 
 if TYPE_CHECKING:
     from pyiron_workflow import Workflow
-
-
-def get_ports_of_node_type(graph: Graph) -> List[Port]:
-    ports = []
-    for node in graph.nodes.values():
-        inds = node.inputs.data["type"].select("Node")
-        for ind in inds:
-            ports += node.inputs.data["value"][ind]
-    return ports
 
 
 def _different_indices(default, value):
@@ -1161,28 +1097,6 @@ def topological_sort(graph: Graph) -> Graph:
     sorted_graph = Graph(nodes=sorted_nodes, edges=graph.edges, label=graph.label)
 
     return sorted_graph
-
-
-# find in a pandas dataframe whether the target and tagetHandle column match a given target and targetHandle
-def _find_target_edge(graph: Graph, target, targetHandle):
-    df = graph.edges.df
-    edges = df.loc[(df["target"] == target) & (df["targetHandle"] == targetHandle)]
-    return edges
-
-
-def _find_source_edge(graph: Graph, source, sourceHandle):
-    df = graph.edges.df
-    edges = df.loc[(df["source"] == source) & (df["sourceHandle"] == sourceHandle)]
-    return edges
-
-
-def update_input_values(graph: Graph, node_label: str, values: list):
-    node: Node = graph.nodes[node_label].node
-    for i, value in enumerate(values):
-        handle = node.inputs.data["label"][i]
-        update_input_value(graph, node_label, handle, value)
-
-    return graph
 
 
 def update_input_value(
