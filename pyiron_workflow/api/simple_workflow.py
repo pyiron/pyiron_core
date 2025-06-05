@@ -5,9 +5,7 @@ from pyiron_workflow.simple_workflow import (
     as_macro_node,
     get_node_from_path,
     Node,
-    NotData,
+    NotData as NOT_DATA,
     Port,
     Workflow,
 )
-
-NOT_DATA = NotData
