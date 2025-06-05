@@ -15,11 +15,10 @@ from pyiron_workflow.graph.base import (
     get_non_default_input,
     get_updated_graph,
     graph_to_node,
-    pull_node,
-    run_node,
     topological_sort,
     update_execution_graph,
 )
+from pyiron_workflow.graph.run import pull_node, run_node
 from pyiron_workflow.graph.edges import GraphEdge
 from pyiron_workflow.graph.group import _find_input_nodes, create_group
 from pyiron_workflow.graph.to_code import (
