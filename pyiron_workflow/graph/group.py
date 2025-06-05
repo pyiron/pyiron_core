@@ -1,29 +1,16 @@
 import copy
 
-from pyiron_workflow.graph.base import (
-    Graph,
-    GraphNode,
-    Nodes,
-    _convert_to_integer_representation,
-    copy_graph,
-    get_externally_connected_input_ports,
-    get_unique_label,
-    is_virtual_node,
-    graph_to_node,
-    topological_sort,
-)
-from pyiron_workflow.graph.decorators import NestedList
-from pyiron_workflow.graph.edges import GraphEdge
-from pyiron_workflow.simple_workflow import identity
+from pyiron_workflow import simple_workflow
+from pyiron_workflow.graph import base, decorators, edges
 
 
 def create_group(full_graph, node_ids=[], label=None):
-    full_graph = copy_graph(full_graph)
+    full_graph = base.copy_graph(full_graph)
     sub_graph = _get_subgraph(full_graph, node_ids, label)
-    sub_graph_node = graph_to_node(sub_graph)
+    sub_graph_node = base.graph_to_node(sub_graph)
 
     # print("sub_graph: ", sub_graph.label, "_obj_type" in full_graph.nodes.__getstate__())
-    full_graph.nodes[sub_graph.label] = GraphNode(
+    full_graph.nodes[sub_graph.label] = base.GraphNode(
         id=sub_graph.label,
         label=sub_graph.label,
         parent_id=None,
@@ -48,12 +35,12 @@ def create_group(full_graph, node_ids=[], label=None):
         for handle, value in zip(labels, values):
             handle = f"va_{io_type[0]}_{sub_graph.label}__{handle}"
             # handle = f"va_{io_type[0]}_{handle}"
-            full_graph += identity(label=handle)
+            full_graph += simple_workflow.identity(label=handle)
             full_graph.nodes[handle].parent_id = sub_graph.label
             if io_type[0] == "i":
                 target_node, target_handle = handle.split("__")[1:]
                 print("inp: ", target_node, target_handle)
-                edge = GraphEdge(
+                edge = edges.GraphEdge(
                     source=handle,
                     target=target_node,
                     sourceHandle="x",
@@ -63,7 +50,7 @@ def create_group(full_graph, node_ids=[], label=None):
                 print(edge)
 
     # rewire connections to external output nodes
-    node_ports = get_externally_connected_input_ports(sub_graph)
+    node_ports = base.get_externally_connected_input_ports(sub_graph)
     for node, handle in node_ports:
         # print(node, handle)
         for edge in full_graph.edges:
@@ -118,19 +105,19 @@ def move_parent_nodes_to_top(graph):
             node_labels.append(node.label)
 
     print(reordered_nodes)
-    new_nodes = Nodes(obj_type=GraphNode)
+    new_nodes = base.Nodes(obj_type=base.GraphNode)
     # print("sub_graph22: ", "_obj_type" in new_nodes.__getstate__())
     for label in node_labels:
         new_nodes[label] = graph.nodes[label]
-    new_graph = copy_graph(graph)
+    new_graph = base.copy_graph(graph)
     new_graph.nodes = new_nodes
     return new_graph
 
 
-def _get_subgraph(graph: Graph, node_indices, label=None) -> Graph:
+def _get_subgraph(graph: base.Graph, node_indices, label=None) -> base.Graph:
     # collapse all nodes that are in the subgraph
     # TODO: remove child nodes in subgraph of collapsed nodes
-    graph = copy_graph(graph)
+    graph = base.copy_graph(graph)
     for subgraph_node in graph.nodes.iloc(node_indices):
         # print(f"Collapsing node {subgraph_node}", type(subgraph_node))
         graph.nodes[subgraph_node].expanded = False
@@ -138,25 +125,25 @@ def _get_subgraph(graph: Graph, node_indices, label=None) -> Graph:
     edges = graph.edges
     subgraph_nodes = graph.nodes.iloc(node_indices)
 
-    subgraph_edges = NestedList(obj_type=GraphEdge)
-    integer_edges = _convert_to_integer_representation(graph)
+    subgraph_edges = decorators.NestedList(obj_type=base.GraphEdge)
+    integer_edges = base._convert_to_integer_representation(graph)
     for i, (id_source, id_target) in enumerate(integer_edges):
         if id_source in node_indices and id_target in node_indices:
             subgraph_edges.append(edges[i])
 
     if label is None:
         label = "subgraph"
-    subgraph = Graph(
-        nodes=subgraph_nodes, edges=subgraph_edges, label=get_unique_label(graph, label)
+    subgraph = base.Graph(
+        nodes=subgraph_nodes, edges=subgraph_edges, label=base.get_unique_label(graph, label)
     )
-    sorted_subgraph = topological_sort(subgraph)
+    sorted_subgraph = base.topological_sort(subgraph)
 
     return sorted_subgraph
 
 
-def _find_input_nodes(graph: Graph, last_node_id):
+def _find_input_nodes(graph: base.Graph, last_node_id):
     # Create a reverse adjacency list from the graph
-    integer_edges = _convert_to_integer_representation(graph)
+    integer_edges = base._convert_to_integer_representation(graph)
     variable_nodes_bool = _get_variable_nodes(graph)
 
     reverse_adjacency_list = {}
@@ -186,12 +173,12 @@ def _find_input_nodes(graph: Graph, last_node_id):
     return node_list
 
 
-def _get_node_labels(graph: Graph):
+def _get_node_labels(graph: base.Graph):
     """
     Retrieve list of the labels of all nodes in the workflow graph.
 
     Args:
-        graph (Graph): The workflow graph containing nodes.
+        graph (base.Graph): The workflow graph containing nodes.
 
     Returns:
         list: A list of node labels.
@@ -199,10 +186,10 @@ def _get_node_labels(graph: Graph):
     return [node_label for node_label in graph.nodes.keys()]
 
 
-def _get_variable_nodes(graph: Graph):
+def _get_variable_nodes(graph: base.Graph):
     variable_nodes = [
         i
         for i, node_label in enumerate(graph.nodes.keys())
-        if is_virtual_node(node_label)
+        if base.is_virtual_node(node_label)
     ]
     return variable_nodes
