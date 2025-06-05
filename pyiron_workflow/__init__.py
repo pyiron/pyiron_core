@@ -2,19 +2,17 @@
 
 # __version__ = get_versions()["version"]
 
-from pyiron_workflow import simple_workflow
-from pyiron_workflow.simple_workflow import NotData as NOT_DATA
-
 # User entry point
-from pyiron_workflow.simple_workflow import Workflow
+from pyiron_workflow.api import Workflow
 
 # Node developer entry points
-from pyiron_workflow.simple_workflow import (
+from pyiron_workflow.api import (
     as_function_node,
     as_inp_dataclass_node,
     as_out_dataclass_node,
     as_macro_node,
     Node,
-    Port,
     NotData,
+    NOT_DATA,
+    Port,
 )
