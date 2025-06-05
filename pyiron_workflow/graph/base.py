@@ -1358,9 +1358,7 @@ def _find_input_nodes(graph: Graph, last_node_id):
     return node_list
 
 
-def graph_to_code(graph):
-    graph = get_code_from_graph(graph, sort_graph=True)
-    return graph
+
 
 
 def graph_to_node(graph: Graph, exclude_unconnected_default_ports=True) -> Node:

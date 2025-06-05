@@ -206,3 +206,8 @@ def _dict_to_kwargs(input_dict: dict) -> str:
         str: A string with the dictionary's key-value pairs formatted as kwargs.
     """
     return ", ".join(f"{key}={value}" for key, value in input_dict.items())
+
+
+def graph_to_code(graph):
+    graph = get_code_from_graph(graph, sort_graph=True)
+    return graph
