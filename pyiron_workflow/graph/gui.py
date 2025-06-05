@@ -9,13 +9,13 @@ from typing import Optional, Union
 import ipywidgets as widgets
 import numpy as np
 import pandas as pd
-import pyironflow
 import pygments
+import pyironflow
 from IPython.display import display
 from pyiron_database.instance_database import node as idb_node
 
-from pyiron_workflow.graph import base, decorators, edges, group, run, to_code
 from pyiron_workflow import simple_workflow
+from pyiron_workflow.graph import base, decorators, edges, group, run, to_code
 
 
 class GUILayout:

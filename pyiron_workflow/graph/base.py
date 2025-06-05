@@ -12,15 +12,15 @@ __date__ = "Jan 3, 2025"
 import copy
 import dataclasses
 import importlib
-from typing import Union, List, Tuple
+from typing import List, Tuple, Union
 
 from pyiron_workflow.graph.decorators import (
-    as_dotdict_dataclass,
     NestedDict,
     NestedList,
+    as_dotdict_dataclass,
     get_import_path_from_type,
 )
-from pyiron_workflow.graph.edges import GraphEdge, Edges
+from pyiron_workflow.graph.edges import Edges, GraphEdge
 from pyiron_workflow.simple_workflow import Data, Node, Port, Workflow, identity
 
 NotData = "NotData"
@@ -872,13 +872,10 @@ def get_full_graph_from_wf(wf: Workflow) -> Graph:
 ####################################################################################################
 # Graph topology, sorting, and traversal functions
 ####################################################################################################
-from collections import defaultdict
-import pathlib
 import json
-from typing import Union
-
-
-from typing import TYPE_CHECKING, List, Tuple
+import pathlib
+from collections import defaultdict
+from typing import TYPE_CHECKING, List, Tuple, Union
 
 if TYPE_CHECKING:
     from pyiron_workflow import Workflow

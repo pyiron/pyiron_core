@@ -1,4 +1,4 @@
-from pyiron_workflow.graph.decorators import as_dotdict_dataclass, NestedList
+from pyiron_workflow.graph.decorators import NestedList, as_dotdict_dataclass
 
 
 def _getstate_GraphEdge(self):

@@ -9,9 +9,9 @@ __email__ = ""
 __status__ = "development"
 __date__ = "Jan 3, 2025"
 
-from dataclasses import dataclass
-from collections import OrderedDict
 import importlib
+from collections import OrderedDict
+from dataclasses import dataclass
 
 
 def get_import_path_from_type(obj):
