@@ -11,8 +11,8 @@ from pyiron_workflow.api.simple_workflow import (
     as_inp_dataclass_node,
     as_out_dataclass_node,
     as_macro_node,
+    get_node_from_path,
     Node,
-    NotData,
     NOT_DATA,
     Port,
 )
