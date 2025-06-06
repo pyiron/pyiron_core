@@ -10,12 +10,13 @@ import ipywidgets as widgets
 import numpy as np
 import pandas as pd
 import pygments
+
 import pyironflow
 from IPython.display import display
 from pyiron_database.instance_database import node as idb_node
 
 from pyiron_workflow import simple_workflow
-from pyiron_workflow.graph import base, decorators, edges, group, run, to_code
+from pyiron_workflow.graph import base, decorators, edges, graph_json, group, run, to_code
 
 
 class GUILayout:
@@ -143,10 +144,10 @@ class PyironFlowWidget:
                     self.update_gui()
                 elif command == "saveFlow":
                     print("saveFlow")
-                    base._save_graph(self.graph, overwrite=True)
+                    graph_json._save_graph(self.graph, overwrite=True)
                 elif command == "restoreFlow":
                     print("restoreFlow")
-                    self.graph = base._load_graph(f"{self.graph.label}.json")
+                    self.graph = graph_json._load_graph(f"{self.graph.label}.json")
                     self.update_gui()
                 elif command == "clearFlow":
                     print("clearFlow")
@@ -312,7 +313,7 @@ class PyironFlow:
         self.wf_widgets = list()  # list of PyironFlowWidget objects
         for wf in wf_list:
             if isinstance(wf, str):
-                wf = base._load_graph(wf)
+                wf = graph_json._load_graph(wf)
             self.wf_widgets.append(
                 PyironFlowWidget(wf, gui_layout=gui_layout, main_widget=self)
             )

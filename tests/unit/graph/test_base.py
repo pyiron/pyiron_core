@@ -2,7 +2,7 @@ import contextlib
 import os
 import unittest
 
-from pyiron_workflow.graph import base, run
+from pyiron_workflow.graph import base, graph_json, run
 
 from static.nodes import AddOne
 
@@ -16,9 +16,9 @@ class TestSaveLoad(unittest.TestCase):
         out = run.pull_node(base.get_updated_graph(g), "n2")
 
         fname = "serial.json"
-        base._save_graph(g, fname)
+        graph_json._save_graph(g, fname)
         try:
-            g_loaded = base._load_graph(fname)
+            g_loaded = graph_json._load_graph(fname)
             out_loaded = run.pull_node(base.get_updated_graph(g_loaded), "n2")
             self.assertEqual(
                 out_loaded,

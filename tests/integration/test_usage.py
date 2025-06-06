@@ -3,7 +3,7 @@ import os
 import unittest
 
 import pyiron_workflow as pwf
-from pyiron_workflow.graph import base, group, run
+from pyiron_workflow.graph import base, graph_json, group, run
 
 from static import nodes, other_nodes
 
@@ -188,9 +188,9 @@ class TestUsage(unittest.TestCase):
         wf.n = nodes.AddOne(0)
         g = base.get_full_graph_from_wf(wf)
         g = group.create_group(g, [0], label="subgraph")
-        base._save_graph(g, filename=fname)
+        graph_json._save_graph(g, filename=fname)
         try:
-            reloaded = base._load_graph(fname)
+            reloaded = graph_json._load_graph(fname)
             self.assertTrue(
                 all(isinstance(n, pwf.Node) for n in reloaded.nodes.df["node"].values),
                 msg="All reloaded nodes should get an accompanying python instance",
