@@ -1,15 +1,42 @@
 import copy
+from typing import TypeAlias
 
 from pyiron_workflow import simple_workflow
 from pyiron_workflow.graph import base, decorators, edges
 
 
-def create_group(full_graph, node_identifiers: list, label: str = "subgraph"):
+NodeIdLike: TypeAlias = list[str] | list[int] | tuple[str, ...] | tuple[int, ...]
+
+
+def _to_node_ids(g: base.Graph, node_identifiers: NodeIdLike) -> list[int]:
+    if isinstance(node_identifiers, (list, tuple)):
+        node_ids: list[int]
+        if all(isinstance(v, int) for v in node_identifiers):
+            node_ids = list(node_identifiers)
+        elif all(isinstance(v, str) for v in node_identifiers):
+            node_ids = base._node_labels_to_node_ids(g, node_identifiers)
+        else:
+            raise TypeError(
+                f"Expected something like {NodeIdLike} but got {node_identifiers}"
+            )
+    else:
+        raise TypeError(
+            f"Expected something like {NodeIdLike} but got {node_identifiers}"
+        )
+    return node_ids
+
+
+def create_group(
+    full_graph,
+    node_identifiers: NodeIdLike,
+    label: str = "subgraph",
+):
     if len(node_identifiers) == 0:
         raise ValueError("node_identifiers cannot be empty")
-    
+    node_ids = _to_node_ids(full_graph, node_identifiers)
+
     full_graph = base.copy_graph(full_graph)
-    sub_graph = _get_subgraph(full_graph, node_identifiers, label)
+    sub_graph = _get_subgraph(full_graph, node_ids, label)
     sub_graph_node = base.graph_to_node(sub_graph)
 
     # print("sub_graph: ", sub_graph.label, "_obj_type" in full_graph.nodes.__getstate__())
