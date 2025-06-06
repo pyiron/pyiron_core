@@ -629,14 +629,6 @@ def _is_parent_in_node_label(label: str, parent_label: str) -> bool:
     return False
 
 
-def _node_labels_to_node_ids(graph: Graph, node_labels: List[str]) -> List[str]:
-    ind_dict = dict()
-    for ind, label in enumerate(graph.nodes.keys()):
-        ind_dict[label] = ind
-
-    return [ind_dict[label] for label in node_labels]
-
-
 def _remove_virtual_nodes(
     graph: Graph, reconnect_edges=False, parent_label: str = None
 ) -> Graph:

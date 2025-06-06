@@ -166,11 +166,7 @@ class PyironFlowWidget:
                     print("selected_nodes: ", self._selected_nodes)
                 elif command == "groupSelectedNodes":
                     print("group_nodes: ", self._selected_nodes)
-                    node_ids = base._node_labels_to_node_ids(
-                        self.graph, self._selected_nodes
-                    )
-                    print("group_nodes: ", node_ids)
-                    self.graph = group.create_group(self.graph, node_ids)
+                    self.graph = group.create_group(self.graph, self._selected_nodes)
                     # self.graph = base.create_group(self.graph, node_ids)
                     # self.graph = base.get_updated_graph(self.graph)
                     self.update_gui()
