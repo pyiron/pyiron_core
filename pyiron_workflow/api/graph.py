@@ -5,7 +5,6 @@ from pyiron_workflow.graph.base import (
     _load_graph,
     _mark_node_as_collapsed,
     _mark_node_as_expanded,
-    _remove_node_inputs,
     _save_graph,
     get_full_graph_from_wf,
     get_graph_from_macro_node,
@@ -17,7 +16,7 @@ from pyiron_workflow.graph.base import (
     topological_sort,
     update_execution_graph,
 )
-from pyiron_workflow.graph.run import pull_node, run_node
+from pyiron_workflow.graph.run import _remove_node_inputs, pull_node, run_node
 from pyiron_workflow.graph.edges import GraphEdge
 from pyiron_workflow.graph.group import _find_input_nodes, create_group
 from pyiron_workflow.graph.to_code import (
