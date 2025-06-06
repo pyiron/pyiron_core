@@ -1,3 +1,5 @@
+from typing import List
+
 from pyiron_workflow import simple_workflow
 from pyiron_workflow.graph import base, group
 
@@ -53,7 +55,7 @@ def pull_node(graph: base.Graph, node_label: str):
     opt_graph = base.copy_graph(graph)
 
     # closures are not part of the execution pipeline (called inside the function!)
-    opt_graph = base._remove_node_inputs(opt_graph)
+    opt_graph = _remove_node_inputs(opt_graph)
     node_labels = group._get_node_labels(opt_graph)
     if node_label not in node_labels:
         raise ValueError(f"Node label '{node_label}' not found in the workflow graph.")
@@ -65,3 +67,29 @@ def pull_node(graph: base.Graph, node_label: str):
         print(f"Running node {input_node_label}")
         out = opt_graph.nodes[input_node_label].node.run()
     return out
+
+
+def _remove_node_inputs(graph: base.Graph) -> base.Graph:
+    new_graph = base.copy_graph(graph)
+    node_inputs = _find_node_inputs(graph)
+    for node, handle in node_inputs:
+        for edge in new_graph.edges:
+            if edge.target == node and edge.targetHandle == handle:
+                new_graph.edges.remove(edge)
+
+    return new_graph
+
+
+def _find_node_inputs(graph: base.Graph) -> List[simple_workflow.Port]:
+    node_inputs = []
+    for graph_node in graph.nodes.values():
+        node_inp_types = graph_node.node.inputs.data["type"]
+        if "Node" in node_inp_types:
+            indices = [i for i, x in enumerate(node_inp_types) if x == "Node"]
+            target = graph_node.node.label
+            for i in indices:
+                target_handle = graph_node.node.inputs.data["label"][i]
+                node_inputs.append((target, target_handle))
+                # print(target, target_handle, i)
+
+    return node_inputs

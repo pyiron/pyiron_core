@@ -979,32 +979,6 @@ def get_outputs_of_graph(graph: Graph) -> Data:
     )
 
 
-def _find_node_inputs(graph: Graph) -> List[Port]:
-    node_inputs = []
-    for graph_node in graph.nodes.values():
-        node_inp_types = graph_node.node.inputs.data["type"]
-        if "Node" in node_inp_types:
-            indices = [i for i, x in enumerate(node_inp_types) if x == "Node"]
-            target = graph_node.node.label
-            for i in indices:
-                target_handle = graph_node.node.inputs.data["label"][i]
-                node_inputs.append((target, target_handle))
-                # print(target, target_handle, i)
-
-    return node_inputs
-
-
-def _remove_node_inputs(graph: Graph) -> Graph:
-    new_graph = copy_graph(graph)
-    node_inputs = _find_node_inputs(graph)
-    for node, handle in node_inputs:
-        for edge in new_graph.edges:
-            if edge.target == node and edge.targetHandle == handle:
-                new_graph.edges.remove(edge)
-
-    return new_graph
-
-
 def _convert_to_integer_representation(graph: Graph):
     # Create a dictionary mapping node labels to indices
     node_to_index = {
