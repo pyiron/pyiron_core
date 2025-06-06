@@ -1,9 +1,9 @@
 import copy
-from typing import TypeAlias
+from typing import TypeAlias, List
 
 from pyiron_workflow import simple_workflow
 from pyiron_workflow.graph import base, decorators, edges
-
+from pyiron_workflow.graph.base import Graph
 
 NodeIdLike: TypeAlias = list[str] | list[int] | tuple[str, ...] | tuple[int, ...]
 
@@ -14,7 +14,7 @@ def _to_node_ids(g: base.Graph, node_identifiers: NodeIdLike) -> list[int]:
         if all(isinstance(v, int) for v in node_identifiers):
             node_ids = list(node_identifiers)
         elif all(isinstance(v, str) for v in node_identifiers):
-            node_ids = base._node_labels_to_node_ids(g, node_identifiers)
+            node_ids = _node_labels_to_node_ids(g, node_identifiers)
         else:
             raise TypeError(
                 f"Expected something like {NodeIdLike} but got {node_identifiers}"
@@ -118,6 +118,14 @@ def create_group(
     full_graph = move_parent_nodes_to_top(full_graph)
     # print("sub_graph2: ", sub_graph.label, "_obj_type" in full_graph.nodes.__getstate__())
     return full_graph
+
+
+def _node_labels_to_node_ids(graph: Graph, node_labels: List[str]) -> List[str]:
+    ind_dict = dict()
+    for ind, label in enumerate(graph.nodes.keys()):
+        ind_dict[label] = ind
+
+    return [ind_dict[label] for label in node_labels]
 
 
 def move_parent_nodes_to_top(graph):

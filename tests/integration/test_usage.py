@@ -70,11 +70,8 @@ class TestUsage(unittest.TestCase):
 
         g = base.get_full_graph_from_wf(wf)
 
-        m_ids = base._node_labels_to_node_ids(g, ["m1", "m2"])
-        g = group.create_group(g, m_ids, label="m_subgraph")
-
-        n_ids = base._node_labels_to_node_ids(g, ["n1", "n2"])
-        g = group.create_group(g, n_ids, label="n_subgraph")
+        g = group.create_group(g, ["m1", "m2"], label="m_subgraph")
+        g = group.create_group(g, ["n1", "n2"], label="n_subgraph")
 
         self.assertEqual(
             m_data,
@@ -120,8 +117,7 @@ class TestUsage(unittest.TestCase):
 
         with self.subTest("Upstream group"):
             expected_out, g, labels = make_graph()
-            ids = base._node_labels_to_node_ids(g, labels[:2])
-            g = group.create_group(g, ids, label="upstream_group")
+            g = group.create_group(g, labels[:2], label="upstream_group")
             g = base.add_edge(g, "upstream_group", "n3", "n2__y", "x")
             self.assertEqual(
                 expected_out,
@@ -131,8 +127,7 @@ class TestUsage(unittest.TestCase):
 
         with self.subTest("Downstream group"):
             expected_out, g, labels = make_graph()
-            ids = base._node_labels_to_node_ids(g, labels[2:])
-            g = group.create_group(g, ids, label="downstream_group")
+            g = group.create_group(g, labels[2:], label="downstream_group")
             g = base.add_edge(g, "n2", "downstream_group", "y", "n3__x")
             self.assertEqual(
                 expected_out,
@@ -142,10 +137,8 @@ class TestUsage(unittest.TestCase):
 
         with self.subTest("Two groups"):
             expected_out, g, labels = make_graph()
-            upstream_ids = base._node_labels_to_node_ids(g, labels[:2])
-            g = group.create_group(g, upstream_ids, label="upstream_group")
-            downstream_ids = base._node_labels_to_node_ids(g, labels[2:])
-            g = group.create_group(g, downstream_ids, label="downstream_group")
+            g = group.create_group(g, labels[:2], label="upstream_group")
+            g = group.create_group(g, labels[2:], label="downstream_group")
             g = base.add_edge(g, "upstream_group", "downstream_group", "n2__y", "n3__x")
             self.assertEqual(
                 expected_out,

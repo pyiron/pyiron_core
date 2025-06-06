@@ -5,7 +5,6 @@ from pyiron_workflow.graph.base import (
     _load_graph,
     _mark_node_as_collapsed,
     _mark_node_as_expanded,
-    _node_labels_to_node_ids,
     _remove_node_inputs,
     _save_graph,
     get_full_graph_from_wf,
