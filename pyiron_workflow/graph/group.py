@@ -62,12 +62,12 @@ def create_group(
         labels = getattr(sub_graph_node, io_type).data["label"]
         print("labels", labels)
         for handle, value in zip(labels, values):
-            handle = f"{labelling.VIRTUAL}{io_type[0]}_{sub_graph.label}__{handle}"
+            handle = f"{labelling.VIRTUAL}{io_type[0]}_{sub_graph.label}{labelling.DELIM}{handle}"
             # handle = f"va_{io_type[0]}_{handle}"
             full_graph += simple_workflow.identity(label=handle)
             full_graph.nodes[handle].parent_id = sub_graph.label
             if io_type[0] == "i":
-                target_node, target_handle = handle.split("__")[1:]
+                target_node, target_handle = handle.split(labelling.DELIM)[1:]
                 print("inp: ", target_node, target_handle)
                 edge = edges.GraphEdge(
                     source=handle,
