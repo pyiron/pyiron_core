@@ -1,16 +1,16 @@
 import textwrap
 
 from pyiron_workflow import simple_workflow
-from pyiron_workflow.graph import base, symbols
+from pyiron_workflow.graph import base, not_data, symbols
 
 
 def port_to_code(port: base.Port, use_default: bool = False, scope: str = None):
     name = port.label if scope is None else _scope_label(scope, port.label)
     hint = "" if port.type in ("NotHinted", "NonPrimitive") else f": {port.type}"
 
-    if port.value is not symbols.NotData and not use_default:
+    if port.value is not not_data.NotData and not use_default:
         value_str = simple_workflow.value_to_string(port.value)
-    elif port.default is not symbols.NotData:
+    elif port.default is not not_data.NotData:
         value_str = simple_workflow.value_to_string(port.default)
     else:
         value_str = None
@@ -121,7 +121,7 @@ def _build_function_parameters(
                         scope=node.label if scope_labels else None,
                     )
                     value = port.default if use_node_default else port.value
-                    param_has_default = None if value is symbols.NotData else True
+                    param_has_default = None if value is not_data.NotData else True
                     parameters.append((param, param_has_default))
 
     # Sort parameters: args (no default) first, kwargs (with default) last

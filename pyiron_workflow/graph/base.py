@@ -23,7 +23,8 @@ from pyiron_workflow.graph.decorators import (
     get_import_path_from_type,
 )
 from pyiron_workflow.graph.edges import Edges, GraphEdge
-from pyiron_workflow.graph.symbols import DELIM, NotData, VINPUT, VIRTUAL, VOUTPUT
+from pyiron_workflow.graph.symbols import DELIM, VINPUT, VIRTUAL, VOUTPUT
+from pyiron_workflow.graph.not_data import NotData
 from pyiron_workflow.simple_workflow import Data, Node, Port, Workflow, identity
 
 
