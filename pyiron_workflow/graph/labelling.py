@@ -40,8 +40,8 @@ def is_virtual_output(label: str) -> bool:
     return label.startswith(VOUTPUT)
 
 
-def is_virtual(node_label: str) -> bool:
-    return node_label.startswith(VIRTUAL)
+def is_virtual(label: str) -> bool:
+    return label.startswith(VIRTUAL)
 
 
 def handle_to_port_label(handle: str) -> str:
