@@ -23,6 +23,7 @@ from pyiron_workflow.graph import (
     graph_json,
     group,
     run,
+    symbols,
     to_code,
 )
 
@@ -499,13 +500,13 @@ def _to_jsonifyable(obj):
         if isinstance(value, (str, int, float, bool)):
             return value
         else:
-            return base.NotData
+            return symbols.NotData
     elif isinstance(obj, simple_workflow.Node):
-        return base.NotData
+        return symbols.NotData
     elif isinstance(obj, (str, int, float, bool, type(None))):
         return obj
     else:
-        return base.NotData
+        return symbols.NotData
 
 
 def gui_data(
@@ -521,7 +522,7 @@ def gui_data(
         return GuiData(label=label)
 
     target_values = [
-        _to_jsonifyable(v) if not isinstance(v, simple_workflow.Node) else base.NotData
+        _to_jsonifyable(v) if not isinstance(v, simple_workflow.Node) else symbols.NotData
         for v in node.inputs.data["value"]
     ]
     is_connected = [
@@ -542,7 +543,7 @@ def gui_data(
         import_path=node.function["import_path"],
         target_values=target_values,
         target_types=target_types,
-        source_values=[base.NotData for _ in node.outputs.data["value"]],
+        source_values=[symbols.NotData for _ in node.outputs.data["value"]],
         source_types=node.outputs.data["type"],
         expanded=expanded,
     )

@@ -23,9 +23,8 @@ from pyiron_workflow.graph.decorators import (
     get_import_path_from_type,
 )
 from pyiron_workflow.graph.edges import Edges, GraphEdge
+from pyiron_workflow.graph.symbols import DELIM, NotData, VINPUT, VIRTUAL, VOUTPUT
 from pyiron_workflow.simple_workflow import Data, Node, Port, Workflow, identity
-
-NotData = "NotData"
 
 
 def get_node_from_path(import_path, log=None):
@@ -69,7 +68,7 @@ def _setstate__graph_node(self, state):
 
     if self.node is None:
         # print(f"node is None: {self}")
-        if self.graph is not None and not self.graph.label.startswith("va_"):
+        if self.graph is not None and not self.graph.label.startswith(VIRTUAL):
             self.label = self.graph.label
             self.node = graph_to_node(self.graph)
 
@@ -140,7 +139,7 @@ def _setstate__graph(self, state):
 
     # instantiate virtual macros in node.node using node.graph
     for key, node in self.nodes.items():
-        if node is not None and node["node"] is None and not key.startswith("va_"):
+        if node is not None and node["node"] is None and not key.startswith(VIRTUAL):
             # print(f"key: {key}, node: {node}")
             graph = node.graph
             node.node = graph_to_node(graph)
@@ -336,14 +335,14 @@ def _rewire_edge(graph: Graph, input_edge: GraphEdge) -> GraphEdge:
     target_node = graph.nodes[edge.target]
     if target_node.node_type == "graph":
         if source_node.parent_id == target_node.parent_id:
-            edge.target = f"va_i_{edge.target}__{edge.targetHandle}"
+            edge.target = f"{VINPUT}{edge.target}{DELIM}{edge.targetHandle}"
             edge.targetHandle = "x"
-            print(f"Rewiring edge to {edge.target}__{edge.targetHandle}")
+            print(f"Rewiring edge to {edge.target}{DELIM}{edge.targetHandle}")
     if source_node.node_type == "graph":
         if source_node.parent_id == target_node.parent_id:
-            edge.source = f"va_o_{edge.source}__{edge.sourceHandle}"
+            edge.source = f"{VOUTPUT}{edge.source}{DELIM}{edge.sourceHandle}"
             edge.sourceHandle = "x"
-            print(f"Rewiring edge to {edge.source}__{edge.sourceHandle}")
+            print(f"Rewiring edge to {edge.source}{DELIM}{edge.sourceHandle}")
     return edge
 
 
@@ -466,7 +465,7 @@ def get_graph_from_wf(
             value = data["value"][i]
             handle = data["label"][i]
             if not isinstance(value, (Node, Port)):
-                if isinstance(value, str) and value.startswith("va_i_"):
+                if isinstance(value, str) and value.startswith(VINPUT):
                     # print(f"Adding input node {handle}", value)
                     inp_node_label = value
                     if inp_node_label not in graph.nodes:
@@ -487,7 +486,7 @@ def get_graph_from_wf(
 
     # print(f"Adding output nodes {out_labels}")
     for out_label, wf_output in zip(out_labels, wf_outputs):
-        out_node_label = f"va_o_{wf_label}__{out_label}"
+        out_node_label = f"{VOUTPUT}{wf_label}{DELIM}{out_label}"
         graph += identity(label=out_node_label)
 
         if isinstance(wf_output, Port):
@@ -521,7 +520,7 @@ def get_graph_from_macro_node(macro_node: Node) -> Graph:
     orig_values = dict()
     kwargs = {}
     for inp in macro_node.inputs.data["label"]:
-        inp_port_label = f"va_i_{macro_node.label}__{inp}"
+        inp_port_label = f"{VINPUT}{macro_node.label}{DELIM}{inp}"
         kwargs[inp] = inp_port_label
         orig_values[inp_port_label] = macro_node.inputs.__getattr__(inp)
 
@@ -580,10 +579,10 @@ def get_full_graph_from_wf(wf: Workflow) -> Graph:
         target_handle = edge["targetHandle"]
 
         if source in macro_node_labels:
-            source = "va_o_" + source + "__" + source_handle
+            source = VOUTPUT + source + DELIM + source_handle
             source_handle = "x"
         elif target in macro_node_labels:
-            target = "va_i_" + target + "__" + target_handle
+            target = VINPUT + target + DELIM + target_handle
             target_handle = "x"
 
         graph += GraphEdge(source, target, source_handle, target_handle)
@@ -597,22 +596,22 @@ def get_full_graph_from_wf(wf: Workflow) -> Graph:
 
 
 def is_virtual_node(node_label: str) -> bool:
-    return node_label.startswith("va_")
+    return node_label.startswith(VIRTUAL)
 
 
 def handle_to_port_label(handle: str) -> str:
     if is_virtual_node(handle):
-        path_list = handle[len("va_i_") :].split("__")
+        path_list = handle[len(VINPUT) :].split(DELIM)
         # print(f"path_list: {path_list}")
         if len(path_list) > 2:
-            return "__".join(path_list[1:])
-        return handle.split("__")[-1]
+            return DELIM.join(path_list[1:])
+        return handle.split(DELIM)[-1]
     return handle
 
 
 def handle_to_parent_label(handle: str) -> str:
     if is_virtual_node(handle):
-        return handle[len("va_i_") :].split("__")[0]
+        return handle[len(VINPUT) :].split(DELIM)[0]
 
 
 def _is_parent_in_node_label(label: str, parent_label: str) -> bool:
