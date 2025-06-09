@@ -1,9 +1,6 @@
 from pyiron_workflow.graph.base import (
     Graph,
     GraphNode,
-    _get_active_nodes,
-    _mark_node_as_collapsed,
-    _mark_node_as_expanded,
     get_full_graph_from_wf,
     get_graph_from_macro_node,
     get_graph_from_wf,

@@ -388,45 +388,6 @@ def _expand_node(graph, node_label: str):
     return new_graph
 
 
-def _mark_node_as_collapsed(graph, node_label: str):
-    new_graph = copy_graph(graph)
-    graph_node = new_graph.nodes[node_label]
-    if graph_node.node_type == "graph":
-        graph_node.expanded = False
-    return new_graph
-
-
-def _mark_node_as_expanded(graph, node_label: str):
-    new_graph = copy_graph(graph)
-    graph_node = new_graph.nodes[node_label]
-    if graph_node.node_type == "graph":
-        graph_node.expanded = True
-    return new_graph
-
-
-def _get_active_nodes(graph: Graph) -> Nodes:
-    active_nodes = NestedDict(obj_type=GraphNode)
-    # get all nodes that are not inside a collapsed node
-    for k, v in graph.nodes.items():
-        if v.parent_id is None:
-            active_nodes[k] = v
-        else:
-            parent = graph.nodes[v.parent_id]
-            if parent.expanded:
-                active_nodes[k] = v
-    return active_nodes
-
-
-def _get_active_edges(graph: Graph) -> Edges:
-    active_edges = NestedList(obj_type=GraphEdge)
-    active_nodes = _get_active_nodes(graph)
-    # get all edges that are not inside a collapsed node
-    for edge in graph.edges:
-        if edge.source in active_nodes.keys() and edge.target in active_nodes.keys():
-            active_edges.append(edge)
-    return active_edges
-
-
 ####################################################################################################
 # Utility functions
 ####################################################################################################

@@ -16,7 +16,15 @@ from IPython.display import display
 from pyiron_database.instance_database import node as idb_node
 
 from pyiron_workflow import simple_workflow
-from pyiron_workflow.graph import base, decorators, edges, graph_json, group, run, to_code
+from pyiron_workflow.graph import (
+    base,
+    decorators,
+    edges,
+    graph_json,
+    group,
+    run,
+    to_code,
+)
 
 
 class GUILayout:
@@ -240,14 +248,10 @@ class PyironFlowWidget:
                             "expand: ", node_name, self.graph.nodes[node_name].expanded
                         )
                         if self.graph.nodes[node_name].expanded:
-                            self.graph = base._mark_node_as_collapsed(
-                                self.graph, node_name
-                            )
+                            self.graph = _mark_node_as_collapsed(self.graph, node_name)
                             print("collapsed")
                         else:
-                            self.graph = base._mark_node_as_expanded(
-                                self.graph, node_name
-                            )
+                            self.graph = _mark_node_as_expanded(self.graph, node_name)
                             print("expanded")
                         print(
                             "expanded: ",
@@ -557,7 +561,7 @@ def _nodes_to_gui(graph: base.Graph, remove_none=True) -> decorators.NestedList:
     node_width = 200
 
     nodes = decorators.NestedList()
-    active_nodes = base._get_active_nodes(graph)
+    active_nodes = _get_active_nodes(graph)
     for i, (k, v) in enumerate(active_nodes.items()):
         # print("gui node: ", k, v.label, v.expanded)
         # print('node: ', k, v.label, v.node.label)
@@ -696,7 +700,7 @@ def display_gui_style(graph):
 
 def _edges_to_gui(graph, remove_none=True):
     edges = decorators.NestedList()
-    active_edges = base._get_active_edges(graph)
+    active_edges = _get_active_edges(graph)
     for i, edge in enumerate(active_edges):
         edge_dict = edge.asdict(remove_none=remove_none)
         edge_dict["id"] = i
@@ -765,3 +769,42 @@ class GuiGraph:
             self._thread = threading.Thread(target=self._update_graph_view, args=(w,))
             self._thread.start()
         return display(w)
+
+
+def _mark_node_as_collapsed(graph, node_label: str):
+    new_graph = base.copy_graph(graph)
+    graph_node = new_graph.nodes[node_label]
+    if graph_node.node_type == "graph":
+        graph_node.expanded = False
+    return new_graph
+
+
+def _mark_node_as_expanded(graph, node_label: str):
+    new_graph = base.copy_graph(graph)
+    graph_node = new_graph.nodes[node_label]
+    if graph_node.node_type == "graph":
+        graph_node.expanded = True
+    return new_graph
+
+
+def _get_active_nodes(graph: base.Graph) -> base.Nodes:
+    active_nodes = decorators.NestedDict(obj_type=base.GraphNode)
+    # get all nodes that are not inside a collapsed node
+    for k, v in graph.nodes.items():
+        if v.parent_id is None:
+            active_nodes[k] = v
+        else:
+            parent = graph.nodes[v.parent_id]
+            if parent.expanded:
+                active_nodes[k] = v
+    return active_nodes
+
+
+def _get_active_edges(graph: base.Graph) -> edges.Edges:
+    active_edges = decorators.NestedList(obj_type=edges.GraphEdge)
+    active_nodes = _get_active_nodes(graph)
+    # get all edges that are not inside a collapsed node
+    for edge in graph.edges:
+        if edge.source in active_nodes.keys() and edge.target in active_nodes.keys():
+            active_edges.append(edge)
+    return active_edges
