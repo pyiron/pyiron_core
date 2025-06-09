@@ -25,7 +25,6 @@ from pyiron_workflow.graph import (
     labelling,
     not_data,
     run,
-    to_code,
 )
 
 
@@ -218,7 +217,7 @@ class PyironFlowWidget:
                         # get node hash
                         print("node hash: ", idb_node.get_hash(node))
                         if node.node_type == "graph":
-                            code = to_code.get_code_from_graph(
+                            code = base.get_code_from_graph(
                                 node.graph,
                                 sort_graph=True,
                             )
