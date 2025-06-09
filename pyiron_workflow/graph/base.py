@@ -23,7 +23,8 @@ from pyiron_workflow.graph.decorators import (
     get_import_path_from_type,
 )
 from pyiron_workflow.graph.edges import Edges, GraphEdge
-from pyiron_workflow.graph.labelling import DELIM, VINPUT, VIRTUAL, VOUTPUT, is_virtual_input, virtual_input_label, virtual_output_label
+from pyiron_workflow.graph.labelling import DELIM, VIRTUAL, VOUTPUT, is_virtual_input, virtual_input_label, \
+    virtual_output_label, is_virtual_node, handle_to_port_label, handle_to_parent_label
 from pyiron_workflow.graph.not_data import NotData
 from pyiron_workflow.simple_workflow import Data, Node, Port, Workflow, identity
 
@@ -592,25 +593,6 @@ def get_full_graph_from_wf(wf: Workflow) -> Graph:
 ####################################################################################################
 # Collapse and Expand Graphs and Macro Nodes
 ####################################################################################################
-
-
-def is_virtual_node(node_label: str) -> bool:
-    return node_label.startswith(VIRTUAL)
-
-
-def handle_to_port_label(handle: str) -> str:
-    if is_virtual_node(handle):
-        path_list = handle[len(VINPUT) :].split(DELIM)
-        # print(f"path_list: {path_list}")
-        if len(path_list) > 2:
-            return DELIM.join(path_list[1:])
-        return handle.split(DELIM)[-1]
-    return handle
-
-
-def handle_to_parent_label(handle: str) -> str:
-    if is_virtual_node(handle):
-        return handle[len(VINPUT) :].split(DELIM)[0]
 
 
 def _is_parent_in_node_label(label: str, parent_label: str) -> bool:
