@@ -64,12 +64,12 @@ def create_group(
         for handle, value in zip(labels, values):
             io_handle = (
                 labelling.virtual_input_label(sub_graph.label, handle)
-                if io_type == "input" else
+                if io_type == "inputs" else
                 labelling.virtual_output_label(sub_graph.label, handle)
             )
             full_graph += simple_workflow.identity(label=io_handle)
             full_graph.nodes[io_handle].parent_id = sub_graph.label
-            if io_type == "input":
+            if io_type == "inputs":
                 target_node, target_handle = labelling.extract_node_handle(io_handle)
                 print("inp: ", target_node, target_handle)
                 edge = edges.GraphEdge(
