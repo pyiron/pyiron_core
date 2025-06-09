@@ -23,7 +23,7 @@ from pyiron_workflow.graph.decorators import (
     get_import_path_from_type,
 )
 from pyiron_workflow.graph.edges import Edges, GraphEdge
-from pyiron_workflow.graph.labelling import DELIM, VINPUT, VIRTUAL, VOUTPUT
+from pyiron_workflow.graph.labelling import DELIM, VINPUT, VIRTUAL, VOUTPUT, is_virtual_input, virtual_input_label, virtual_output_label
 from pyiron_workflow.graph.not_data import NotData
 from pyiron_workflow.simple_workflow import Data, Node, Port, Workflow, identity
 
@@ -336,14 +336,12 @@ def _rewire_edge(graph: Graph, input_edge: GraphEdge) -> GraphEdge:
     target_node = graph.nodes[edge.target]
     if target_node.node_type == "graph":
         if source_node.parent_id == target_node.parent_id:
-            edge.target = f"{VINPUT}{edge.target}{DELIM}{edge.targetHandle}"
+            edge.target = virtual_input_label(edge.target, edge.targetHandle)
             edge.targetHandle = "x"
-            print(f"Rewiring edge to {edge.target}{DELIM}{edge.targetHandle}")
     if source_node.node_type == "graph":
         if source_node.parent_id == target_node.parent_id:
-            edge.source = f"{VOUTPUT}{edge.source}{DELIM}{edge.sourceHandle}"
+            edge.source = virtual_output_label(edge.source, edge.sourceHandle)
             edge.sourceHandle = "x"
-            print(f"Rewiring edge to {edge.source}{DELIM}{edge.sourceHandle}")
     return edge
 
 
@@ -466,7 +464,7 @@ def get_graph_from_wf(
             value = data["value"][i]
             handle = data["label"][i]
             if not isinstance(value, (Node, Port)):
-                if isinstance(value, str) and value.startswith(VINPUT):
+                if isinstance(value, str) and is_virtual_input(value):
                     # print(f"Adding input node {handle}", value)
                     inp_node_label = value
                     if inp_node_label not in graph.nodes:
@@ -521,7 +519,7 @@ def get_graph_from_macro_node(macro_node: Node) -> Graph:
     orig_values = dict()
     kwargs = {}
     for inp in macro_node.inputs.data["label"]:
-        inp_port_label = f"{VINPUT}{macro_node.label}{DELIM}{inp}"
+        inp_port_label = virtual_input_label(macro_node.label, inp)
         kwargs[inp] = inp_port_label
         orig_values[inp_port_label] = macro_node.inputs.__getattr__(inp)
 
@@ -580,10 +578,10 @@ def get_full_graph_from_wf(wf: Workflow) -> Graph:
         target_handle = edge["targetHandle"]
 
         if source in macro_node_labels:
-            source = VOUTPUT + source + DELIM + source_handle
+            source = virtual_output_label(source, source_handle)
             source_handle = "x"
         elif target in macro_node_labels:
-            target = VINPUT + target + DELIM + target_handle
+            target = virtual_input_label(target, target_handle)
             target_handle = "x"
 
         graph += GraphEdge(source, target, source_handle, target_handle)

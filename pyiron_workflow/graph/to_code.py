@@ -91,7 +91,7 @@ def _build_function_parameters(
     seen_params = set()
 
     for node in graph.nodes.values():
-        if node.label.startswith(labelling.VINPUT):
+        if labelling.is_virtual_input(node.label):
             inp = base.handle_to_parent_label(node.label)
             parameters.append((inp, None))  # No default value
             seen_params.add(inp)
@@ -158,7 +158,7 @@ def _process_nodes_and_edges(
                 if base.is_virtual_node(edge.source):
                     kwargs[edge.targetHandle] = edge.sourceHandle
                 else:
-                    if edge.target.startswith(labelling.VOUTPUT):
+                    if labelling.is_virtual_output(edge.target):
                         return_args.append(f"wf.{edge.source}")
                     else:
                         source_node = graph.nodes[edge.source]

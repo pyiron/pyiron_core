@@ -164,7 +164,11 @@ class TestUsage(unittest.TestCase):
 
         expected_result, explicit_graph = make_graph()
         explicit_graph = base.add_edge(
-            explicit_graph, f"{labelling.VOUTPUT}subgraph{labelling.DELIM}n1{labelling.DELIM}y", "n2", "y", "x"
+            explicit_graph,
+            labelling.virtual_output_label("subgraph", "n1", "y"),
+            "n2",
+            "y",
+            "x"
         )
         explicit_result = run.pull_node(base.get_updated_graph(explicit_graph), "n2")
         self.assertEqual(

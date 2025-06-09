@@ -62,15 +62,18 @@ def create_group(
         labels = getattr(sub_graph_node, io_type).data["label"]
         print("labels", labels)
         for handle, value in zip(labels, values):
-            handle = f"{labelling.VINPUT if io_type == "input" else labelling.VOUTPUT}{sub_graph.label}{labelling.DELIM}{handle}"
-            # handle = f"va_{io_type[0]}_{handle}"
-            full_graph += simple_workflow.identity(label=handle)
-            full_graph.nodes[handle].parent_id = sub_graph.label
-            if io_type[0] == "i":
-                target_node, target_handle = handle.split(labelling.DELIM)[1:]
+            io_handle = (
+                labelling.virtual_input_label(sub_graph.label, handle)
+                if io_type == "input" else
+                labelling.virtual_output_label(sub_graph.label, handle)
+            )
+            full_graph += simple_workflow.identity(label=io_handle)
+            full_graph.nodes[io_handle].parent_id = sub_graph.label
+            if io_type == "input":
+                target_node, target_handle = labelling.extract_node_handle(io_handle)
                 print("inp: ", target_node, target_handle)
                 edge = edges.GraphEdge(
-                    source=handle,
+                    source=io_handle,
                     target=target_node,
                     sourceHandle="x",
                     targetHandle=target_handle,
@@ -85,7 +88,7 @@ def create_group(
         for edge in full_graph.edges:
             if edge.target == node and edge.targetHandle == handle:
                 new_edge = copy.copy(edge)
-                new_edge.target = f"{labelling.VINPUT}{sub_graph.label}{labelling.DELIM}{edge.targetHandle}"
+                new_edge.target = labelling.virtual_input_label(sub_graph.label, edge.targetHandle)
                 new_edge.targetHandle = "x"
                 add_edges.append(new_edge)
 
@@ -94,19 +97,17 @@ def create_group(
     # rewire connections to external input nodes
     for key, node in full_graph.nodes.items():
         print("node: ", key, node)
-        marker = f"{labelling.VOUTPUT}{sub_graph.label}{labelling.DELIM}"
+        marker = labelling.virtual_output_label(sub_graph.label)
         if marker in node.label:
             # print("virtual output node", node.label)
-            source_node, source_handle = node.label[len(marker) :].split(labelling.DELIM)
+            source_node, source_handle = labelling.extract_node_handle(node.label)
             # print(source_node, source_handle)
             for edge in full_graph.edges:
                 if edge.source == source_node:
                     new_edge = copy.copy(edge)
-                    edge.source = (
-                        f"{labelling.VOUTPUT}{sub_graph.label}{labelling.DELIM}{source_node}{labelling.DELIM}{edge.sourceHandle}"
-                    )
+                    edge.source = labelling.virtual_output_label(sub_graph.label, source_node, edge.sourceHandle)
                     edge.sourceHandle = "x"
-                    new_edge.target = f"{labelling.VOUTPUT}{sub_graph.label}{labelling.DELIM}{source_node}{labelling.DELIM}{new_edge.sourceHandle}"
+                    new_edge.target = labelling.virtual_output_label(sub_graph.label, source_node, new_edge.sourceHandle)
                     new_edge.targetHandle = "x"
                     add_edges.append(new_edge)
 
