@@ -76,7 +76,7 @@ def graph_edges_to_wf_edges(edges: edges.Edges) -> List[dict]:
 
 
 def handle_to_node_label(handle: str) -> str:
-    if labelling.is_virtual_node(handle):
+    if labelling.is_virtual(handle):
         return handle.split("__")[-2]
 
 

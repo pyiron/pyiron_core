@@ -24,7 +24,7 @@ from pyiron_workflow.graph.decorators import (
 )
 from pyiron_workflow.graph.edges import Edges, GraphEdge
 from pyiron_workflow.graph.labelling import DELIM, VIRTUAL, VOUTPUT, is_virtual_input, virtual_input_label, \
-    virtual_output_label, is_virtual_node, handle_to_port_label, handle_to_parent_label
+    virtual_output_label, is_virtual, handle_to_port_label, handle_to_parent_label
 from pyiron_workflow.graph.not_data import NotData
 from pyiron_workflow.simple_workflow import Data, Node, Port, Workflow, identity
 
@@ -356,7 +356,7 @@ def add_edge(
     edge = _rewire_edge(graph, GraphEdge(source, target, sourceHandle, targetHandle))
     new_graph = copy_graph(graph)
     new_graph.edges.append(edge)
-    if not (is_virtual_node(source) or is_virtual_node(target)):
+    if not (is_virtual(source) or is_virtual(target)):
         new_graph = _update_target_port(new_graph, new_graph.edges[-1])
     return new_graph
 
@@ -548,7 +548,7 @@ def get_graph_from_macro_node(macro_node: Node) -> Graph:
     # print("new_graph: ", new_graph.label)
     for node in new_graph.nodes.values():
         # iterate over all non-virtual nodes
-        if not is_virtual_node(node.label):
+        if not is_virtual(node.label):
             for i, value in enumerate(node.node.inputs.data["value"]):
                 if value in orig_values:
                     # print(f"Setting value {value} to {orig_values[value]}")
@@ -599,7 +599,7 @@ def _is_parent_in_node_label(label: str, parent_label: str) -> bool:
     if parent_label is None:
         return False
 
-    if is_virtual_node(label):
+    if is_virtual(label):
         return handle_to_parent_label(label) == parent_label
 
     return False
@@ -630,7 +630,7 @@ def _remove_virtual_edges(graph: Graph) -> Graph:
     edges_to_remove = [
         edge
         for edge in graph.edges
-        if is_virtual_node(edge.source) or is_virtual_node(edge.target)
+        if is_virtual(edge.source) or is_virtual(edge.target)
     ]
     for edge in edges_to_remove:
         new_graph.edges.remove(edge)

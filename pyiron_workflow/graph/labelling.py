@@ -40,12 +40,12 @@ def is_virtual_output(label: str) -> bool:
     return label.startswith(VOUTPUT)
 
 
-def is_virtual_node(node_label: str) -> bool:
+def is_virtual(node_label: str) -> bool:
     return node_label.startswith(VIRTUAL)
 
 
 def handle_to_port_label(handle: str) -> str:
-    if is_virtual_node(handle):
+    if is_virtual(handle):
         path_list = handle[len(VINPUT) :].split(DELIM)
         # print(f"path_list: {path_list}")
         if len(path_list) > 2:
@@ -55,5 +55,5 @@ def handle_to_port_label(handle: str) -> str:
 
 
 def handle_to_parent_label(handle: str) -> str:
-    if is_virtual_node(handle):
+    if is_virtual(handle):
         return handle[len(VINPUT) :].split(DELIM)[0]

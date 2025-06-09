@@ -593,7 +593,7 @@ def _nodes_to_gui(graph: base.Graph, remove_none=True) -> decorators.NestedList:
         if v.node_type == "graph":
             node_dict.type = "customNode"  # None
             node_dict.style["backgroundColor"] = "rgba(255, 165, 0, 0.3)"
-        elif labelling.is_virtual_node(v.label):
+        elif labelling.is_virtual(v.label):
             node_dict.style["border"] = "1px black dashed"
             node_dict.style["backgroundColor"] = "rgba(50, 50, 50, 0.1)"
         elif v.node.node_type == "out_dataclass_node":
