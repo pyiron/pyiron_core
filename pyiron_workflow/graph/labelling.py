@@ -22,8 +22,12 @@ def virtual_output_label(root: str, *paths: str) -> str:
     return _to_virtual_label(VOUTPUT, root, *paths)
 
 
+def _get_paths_without_root(label: str) -> list[str]:
+    return label.split(DELIM)[1:]
+
+
 def extract_node_handle(label: str) -> tuple[str, str]:
-    paths = label.split(DELIM)[1:]
+    paths = _get_paths_without_root(label)
     if len(paths) != 2:
         raise ValueError(
             f"Expected find three elements when splitting on \"{DELIM}\", but this "
@@ -46,11 +50,8 @@ def is_virtual(label: str) -> bool:
 
 def handle_to_port_label(handle: str) -> str:
     if is_virtual(handle):
-        path_list = handle[len(VINPUT) :].split(DELIM)
-        # print(f"path_list: {path_list}")
-        if len(path_list) > 2:
-            return DELIM.join(path_list[1:])
-        return handle.split(DELIM)[-1]
+        paths = _get_paths_without_root(handle)
+        return DELIM.join(paths)
     return handle
 
 
