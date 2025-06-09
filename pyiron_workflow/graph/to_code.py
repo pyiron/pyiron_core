@@ -143,7 +143,7 @@ def _process_nodes_and_edges(
     return_args = []
 
     for node in (
-        node for node in graph.nodes.values() if not labelling.is_virtual_node(node.label)
+        node for node in graph.nodes.values() if not labelling.is_virtual(node.label)
     ):
         if enforced_node_library is not None and not node.import_path.startswith(
             enforced_node_library
@@ -155,7 +155,7 @@ def _process_nodes_and_edges(
         # Process edges for the current node
         for edge in graph.edges:
             if edge.target == node.label:
-                if labelling.is_virtual_node(edge.source):
+                if labelling.is_virtual(edge.source):
                     kwargs[edge.targetHandle] = edge.sourceHandle
                 else:
                     if labelling.is_virtual_output(edge.target):

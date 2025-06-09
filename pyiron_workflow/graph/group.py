@@ -230,6 +230,6 @@ def _get_variable_nodes(graph: base.Graph):
     variable_nodes = [
         i
         for i, node_label in enumerate(graph.nodes.keys())
-        if labelling.is_virtual_node(node_label)
+        if labelling.is_virtual(node_label)
     ]
     return variable_nodes
