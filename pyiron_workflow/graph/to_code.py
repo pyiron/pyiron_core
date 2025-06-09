@@ -1,16 +1,16 @@
 import textwrap
 
 from pyiron_workflow import simple_workflow
-from pyiron_workflow.graph import base
+from pyiron_workflow.graph import base, symbols
 
 
 def port_to_code(port: base.Port, use_default: bool = False, scope: str = None):
     name = port.label if scope is None else _scope_label(scope, port.label)
     hint = "" if port.type in ("NotHinted", "NonPrimitive") else f": {port.type}"
 
-    if port.value is not base.NotData and not use_default:
+    if port.value is not symbols.NotData and not use_default:
         value_str = simple_workflow.value_to_string(port.value)
-    elif port.default is not base.NotData:
+    elif port.default is not symbols.NotData:
         value_str = simple_workflow.value_to_string(port.default)
     else:
         value_str = None
@@ -91,7 +91,7 @@ def _build_function_parameters(
     seen_params = set()
 
     for node in graph.nodes.values():
-        if node.label.startswith("va_i_"):
+        if node.label.startswith(symbols.VINPUT):
             inp = base.handle_to_parent_label(node.label)
             parameters.append((inp, None))  # No default value
             seen_params.add(inp)
@@ -121,7 +121,7 @@ def _build_function_parameters(
                         scope=node.label if scope_labels else None,
                     )
                     value = port.default if use_node_default else port.value
-                    param_has_default = None if value is base.NotData else True
+                    param_has_default = None if value is symbols.NotData else True
                     parameters.append((param, param_has_default))
 
     # Sort parameters: args (no default) first, kwargs (with default) last
@@ -158,7 +158,7 @@ def _process_nodes_and_edges(
                 if base.is_virtual_node(edge.source):
                     kwargs[edge.targetHandle] = edge.sourceHandle
                 else:
-                    if edge.target.startswith("va_o_"):
+                    if edge.target.startswith(symbols.VOUTPUT):
                         return_args.append(f"wf.{edge.source}")
                     else:
                         source_node = graph.nodes[edge.source]

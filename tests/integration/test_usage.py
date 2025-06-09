@@ -3,7 +3,7 @@ import os
 import unittest
 
 import pyiron_workflow as pwf
-from pyiron_workflow.graph import base, graph_json, group, run
+from pyiron_workflow.graph import base, graph_json, group, run, symbols
 
 from static import nodes, other_nodes
 
@@ -164,7 +164,7 @@ class TestUsage(unittest.TestCase):
 
         expected_result, explicit_graph = make_graph()
         explicit_graph = base.add_edge(
-            explicit_graph, "va_o_subgraph__n1__y", "n2", "y", "x"
+            explicit_graph, f"{symbols.VOUTPUT}subgraph{symbols.DELIM}n1{symbols.DELIM}y", "n2", "y", "x"
         )
         explicit_result = run.pull_node(base.get_updated_graph(explicit_graph), "n2")
         self.assertEqual(
