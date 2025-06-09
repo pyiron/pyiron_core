@@ -595,6 +595,39 @@ def get_graph_from_macro_node(macro_node: Node) -> Graph:
     return new_graph
 
 
+def get_full_graph_from_wf(wf: Workflow) -> Graph:
+    graph = Graph(label=wf.label)
+
+    macro_node_labels = []
+    for label, node in wf._nodes.items():
+        if node.node_type == "macro_node":
+            node.label = label
+            graph += node
+            # new_node = get_graph_from_macro_node(node)
+            # graph = add_node(graph, new_node, label=label)
+            # graph.nodes[node.label].node = node
+            macro_node_labels.append(label)
+        else:
+            graph = add_node(graph, node, label=label)
+
+    for edge in wf._edges:
+        source = edge["source"]
+        target = edge["target"]
+        source_handle = edge["sourceHandle"]
+        target_handle = edge["targetHandle"]
+
+        if source in macro_node_labels:
+            source = "va_o_" + source + "__" + source_handle
+            source_handle = "x"
+        elif target in macro_node_labels:
+            target = "va_i_" + target + "__" + target_handle
+            target_handle = "x"
+
+        graph += GraphEdge(source, target, source_handle, target_handle)
+
+    return graph
+
+
 ####################################################################################################
 # Collapse and Expand Graphs and Macro Nodes
 ####################################################################################################
@@ -771,39 +804,6 @@ def collapse_node(
         new_graph = remove_hidden_nodes(new_graph, node_label)
 
     return new_graph
-
-
-def get_full_graph_from_wf(wf: Workflow) -> Graph:
-    graph = Graph(label=wf.label)
-
-    macro_node_labels = []
-    for label, node in wf._nodes.items():
-        if node.node_type == "macro_node":
-            node.label = label
-            graph += node
-            # new_node = get_graph_from_macro_node(node)
-            # graph = add_node(graph, new_node, label=label)
-            # graph.nodes[node.label].node = node
-            macro_node_labels.append(label)
-        else:
-            graph = add_node(graph, node, label=label)
-
-    for edge in wf._edges:
-        source = edge["source"]
-        target = edge["target"]
-        source_handle = edge["sourceHandle"]
-        target_handle = edge["targetHandle"]
-
-        if source in macro_node_labels:
-            source = "va_o_" + source + "__" + source_handle
-            source_handle = "x"
-        elif target in macro_node_labels:
-            target = "va_i_" + target + "__" + target_handle
-            target_handle = "x"
-
-        graph += GraphEdge(source, target, source_handle, target_handle)
-
-    return graph
 
 
 ####################################################################################################
