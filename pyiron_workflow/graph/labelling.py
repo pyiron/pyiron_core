@@ -55,8 +55,10 @@ def handle_to_port_label(handle: str) -> str:
 
 
 def handle_to_parent_label(handle: str) -> str:
-    if is_virtual(handle):
-        return handle[len(VINPUT) :].split(DELIM)[0]
+    if is_virtual_input(handle):
+        return handle.lstrip(VINPUT).split(DELIM)[0]
+    elif is_virtual_output(handle):
+        return handle.lstrip(VOUTPUT).split(DELIM)[0]
     else:
         raise NotImplementedError(
             f"Method indicates a string return, but first checks to see if the handle "
