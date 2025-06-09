@@ -23,8 +23,14 @@ from pyiron_workflow.graph.decorators import (
     get_import_path_from_type,
 )
 from pyiron_workflow.graph.edges import Edges, GraphEdge
-from pyiron_workflow.graph.labelling import DELIM, VIRTUAL, VOUTPUT, is_virtual_input, virtual_input_label, \
-    virtual_output_label, is_virtual, handle_to_port_label, handle_to_parent_label
+from pyiron_workflow.graph.labelling import (
+    is_virtual,
+    is_virtual_input,
+    handle_to_port_label,
+    handle_to_parent_label,
+    virtual_input_label,
+    virtual_output_label,
+)
 from pyiron_workflow.graph.not_data import NotData
 from pyiron_workflow.simple_workflow import Data, Node, Port, Workflow, identity
 
@@ -70,7 +76,7 @@ def _setstate__graph_node(self, state):
 
     if self.node is None:
         # print(f"node is None: {self}")
-        if self.graph is not None and not self.graph.label.startswith(VIRTUAL):
+        if self.graph is not None and not is_virtual(self.graph.label):
             self.label = self.graph.label
             self.node = graph_to_node(self.graph)
 
@@ -141,7 +147,7 @@ def _setstate__graph(self, state):
 
     # instantiate virtual macros in node.node using node.graph
     for key, node in self.nodes.items():
-        if node is not None and node["node"] is None and not key.startswith(VIRTUAL):
+        if node is not None and node["node"] is None and not is_virtual(key):
             # print(f"key: {key}, node: {node}")
             graph = node.graph
             node.node = graph_to_node(graph)
@@ -486,7 +492,7 @@ def get_graph_from_wf(
 
     # print(f"Adding output nodes {out_labels}")
     for out_label, wf_output in zip(out_labels, wf_outputs):
-        out_node_label = f"{VOUTPUT}{wf_label}{DELIM}{out_label}"
+        out_node_label = virtual_output_label(wf_label, out_label)
         graph += identity(label=out_node_label)
 
         if isinstance(wf_output, Port):
