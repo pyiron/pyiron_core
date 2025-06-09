@@ -14,6 +14,9 @@ from pyiron_workflow.graph.gui import (
     PyironFlow,
     display_gui_data,
     _edges_to_gui,
+    _get_active_nodes,
+    _mark_node_as_collapsed,
+    _mark_node_as_expanded,
     _nodes_to_gui,
     display_gui_style,
 )

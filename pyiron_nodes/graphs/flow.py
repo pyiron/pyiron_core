@@ -101,7 +101,7 @@ def OptimizeGraphConnections(graph):
 
 @as_function_node
 def MarkNodeAsExpanded(graph, node_label: str, expanded: Optional[bool] = True):
-    from pyiron_workflow.api.graph import _mark_node_as_collapsed, _mark_node_as_expanded
+    from pyiron_workflow.api.gui import _mark_node_as_collapsed, _mark_node_as_expanded
 
     if expanded:
         graph = _mark_node_as_expanded(graph, node_label)
@@ -122,7 +122,7 @@ def GetGraphFromMacro(macro_node):
 # def _get_active_nodes(graph: Graph) -> Nodes:
 @as_function_node
 def GetActiveNodes(graph):
-    from pyiron_workflow.api.graph import _get_active_nodes
+    from pyiron_workflow.api.gui import _get_active_nodes
 
     nodes = _get_active_nodes(graph)
     return nodes
