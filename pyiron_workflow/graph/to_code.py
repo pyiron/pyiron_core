@@ -21,7 +21,7 @@ def port_to_code(port: base.Port, use_default: bool = False, scope: str = None):
     return f"{name}{hint}{default}"
 
 
-def _scope_label(scope: str, label: str, scope_delimiter: str = "__"):
+def _scope_label(scope: str, label: str, scope_delimiter: str = labelling.DELIM):
     return f"{scope}{scope_delimiter}{label}"
 
 
