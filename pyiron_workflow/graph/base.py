@@ -12,7 +12,9 @@ __date__ = "Jan 3, 2025"
 import copy
 import dataclasses
 import importlib
+from collections import defaultdict
 from typing import List, Tuple, Union
+
 
 from pyiron_workflow.graph.decorators import (
     NestedDict,
@@ -809,11 +811,6 @@ def collapse_node(
 ####################################################################################################
 # Graph topology, sorting, and traversal functions
 ####################################################################################################
-from collections import defaultdict
-from typing import TYPE_CHECKING, List, Tuple, Union
-
-if TYPE_CHECKING:
-    from pyiron_workflow import Workflow
 
 
 def _different_indices(default, value):
