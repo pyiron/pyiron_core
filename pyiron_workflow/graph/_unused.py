@@ -1,7 +1,7 @@
 from typing import List
 
 from pyiron_workflow import simple_workflow
-from pyiron_workflow.graph import base, edges, group, run
+from pyiron_workflow.graph import base, edges, group, labelling, run
 
 
 def _build_input_argument_string(k, v, first_arg, as_string=True):
@@ -76,7 +76,7 @@ def graph_edges_to_wf_edges(edges: edges.Edges) -> List[dict]:
 
 
 def handle_to_node_label(handle: str) -> str:
-    if base.is_virtual_node(handle):
+    if labelling.is_virtual_node(handle):
         return handle.split("__")[-2]
 
 

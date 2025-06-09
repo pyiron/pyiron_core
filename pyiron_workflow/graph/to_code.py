@@ -92,7 +92,7 @@ def _build_function_parameters(
 
     for node in graph.nodes.values():
         if labelling.is_virtual_input(node.label):
-            inp = base.handle_to_parent_label(node.label)
+            inp = labelling.handle_to_parent_label(node.label)
             parameters.append((inp, None))  # No default value
             seen_params.add(inp)
 
@@ -143,7 +143,7 @@ def _process_nodes_and_edges(
     return_args = []
 
     for node in (
-        node for node in graph.nodes.values() if not base.is_virtual_node(node.label)
+        node for node in graph.nodes.values() if not labelling.is_virtual_node(node.label)
     ):
         if enforced_node_library is not None and not node.import_path.startswith(
             enforced_node_library
@@ -155,7 +155,7 @@ def _process_nodes_and_edges(
         # Process edges for the current node
         for edge in graph.edges:
             if edge.target == node.label:
-                if base.is_virtual_node(edge.source):
+                if labelling.is_virtual_node(edge.source):
                     kwargs[edge.targetHandle] = edge.sourceHandle
                 else:
                     if labelling.is_virtual_output(edge.target):
