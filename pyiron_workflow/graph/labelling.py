@@ -7,11 +7,12 @@ VOUTPUT = f"{VIRTUAL}o_"
 DELIM = "__"
 
 
+def concatenate(*parts: str) -> str:
+    return DELIM.join(parts)
+
+
 def _to_virtual_label(prefix: Literal[VINPUT, VOUTPUT], root: str, *paths: str) -> str:
-    label = f"{prefix}{root}"
-    for path in paths:
-        label += f"{DELIM}{path}"
-    return label
+    return concatenate(f"{prefix}{root}", *paths)
 
 
 def virtual_input_label(root: str, *paths: str) -> str:
