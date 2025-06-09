@@ -5,7 +5,7 @@ from pyiron_workflow.graph import base, not_data, labelling
 
 
 def port_to_code(port: base.Port, use_default: bool = False, scope: str = None):
-    name = port.label if scope is None else _scope_label(scope, port.label)
+    name = port.label if scope is None else labelling.concatenate(scope, port.label)
     hint = "" if port.type in ("NotHinted", "NonPrimitive") else f": {port.type}"
 
     if port.value is not not_data.NotData and not use_default:
@@ -19,10 +19,6 @@ def port_to_code(port: base.Port, use_default: bool = False, scope: str = None):
     default = "" if value_str is None else f"{space}={space}{value_str}"
 
     return f"{name}{hint}{default}"
-
-
-def _scope_label(scope: str, label: str, scope_delimiter: str = labelling.DELIM):
-    return f"{scope}{scope_delimiter}{label}"
 
 
 def get_code_from_graph(
@@ -108,7 +104,7 @@ def _build_function_parameters(
         if node.label in non_default_inputs:
             for key, value in non_default_inputs[node.label].items():
                 if not isinstance(value, (base.Node, base.Port)):
-                    param_name = _scope_label(node.label, key) if scope_labels else key
+                    param_name = labelling.concatenate(node.label, key) if scope_labels else key
                     if param_name in seen_params:
                         raise ValueError(
                             f'Duplicate parameter name "{param_name}" found when parsing node {node.label} in the graph {graph.label}; try activating scoping.'
@@ -174,7 +170,7 @@ def _process_nodes_and_edges(
         if node.label in non_default_inputs:
             for key, value in non_default_inputs[node.label].items():
                 if not isinstance(value, (base.Node, base.Port)):
-                    kwargs[key] = _scope_label(node.label, key) if scope_labels else key
+                    kwargs[key] = labelling.concatenate(node.label, key) if scope_labels else key
 
         module_path, class_name = node.import_path.rsplit(".", 1)
         code += f"    from {module_path} import {class_name}\n"
