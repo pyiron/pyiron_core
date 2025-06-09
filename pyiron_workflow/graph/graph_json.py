@@ -1,11 +1,11 @@
 import json
 import pathlib
 
-from pyiron_workflow.graph.base import Graph
+from pyiron_workflow.graph import base
 
 
 def _save_graph(
-    graph: Graph,
+    graph: base.Graph,
     filename: str | pathlib.Path = None,
     workflow_dir: str = ".",
     overwrite: bool = False,
@@ -46,6 +46,6 @@ def _load_graph(filename: str | pathlib.Path, workflow_dir: str = "."):
         raise FileNotFoundError(f"File '{filename}' not found in dir {workflow_dir}.")
 
     with open(wf_file, "r") as f:
-        graph = Graph().__setstate__(json.load(f))
+        graph = base.Graph().__setstate__(json.load(f))
 
     return graph
