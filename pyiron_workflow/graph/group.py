@@ -3,7 +3,6 @@ from typing import TypeAlias, List
 
 from pyiron_workflow import simple_workflow
 from pyiron_workflow.graph import base, decorators, edges
-from pyiron_workflow.graph.base import Graph
 
 NodeIdLike: TypeAlias = list[str] | list[int] | tuple[str, ...] | tuple[int, ...]
 
@@ -120,7 +119,7 @@ def create_group(
     return full_graph
 
 
-def _node_labels_to_node_ids(graph: Graph, node_labels: List[str]) -> List[str]:
+def _node_labels_to_node_ids(graph: base.Graph, node_labels: List[str]) -> List[str]:
     ind_dict = dict()
     for ind, label in enumerate(graph.nodes.keys()):
         ind_dict[label] = ind

@@ -1,4 +1,4 @@
-from pyiron_workflow.graph.decorators import NestedList, as_dotdict_dataclass
+from pyiron_workflow.graph import decorators
 
 
 def _getstate_GraphEdge(self):
@@ -11,7 +11,7 @@ def _setstate_GraphEdge(self, state):
     return self
 
 
-@as_dotdict_dataclass(
+@decorators.as_dotdict_dataclass(
     __getstate__=_getstate_GraphEdge, __setstate__=_setstate_GraphEdge
 )
 class GraphEdge:
@@ -21,6 +21,6 @@ class GraphEdge:
     targetHandle: str = None
 
 
-class Edges(NestedList):
+class Edges(decorators.NestedList):
     def __init__(self, obj_type=GraphEdge):
         super().__init__(obj_type=obj_type)
