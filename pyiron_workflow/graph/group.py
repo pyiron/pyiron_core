@@ -2,7 +2,7 @@ import copy
 from typing import TypeAlias, List
 
 from pyiron_workflow import simple_workflow
-from pyiron_workflow.graph import base, decorators, edges, symbols
+from pyiron_workflow.graph import base, decorators, edges, labelling
 
 NodeIdLike: TypeAlias = list[str] | list[int] | tuple[str, ...] | tuple[int, ...]
 
@@ -62,7 +62,7 @@ def create_group(
         labels = getattr(sub_graph_node, io_type).data["label"]
         print("labels", labels)
         for handle, value in zip(labels, values):
-            handle = f"{symbols.VIRTUAL}{io_type[0]}_{sub_graph.label}__{handle}"
+            handle = f"{labelling.VIRTUAL}{io_type[0]}_{sub_graph.label}__{handle}"
             # handle = f"va_{io_type[0]}_{handle}"
             full_graph += simple_workflow.identity(label=handle)
             full_graph.nodes[handle].parent_id = sub_graph.label
@@ -85,7 +85,7 @@ def create_group(
         for edge in full_graph.edges:
             if edge.target == node and edge.targetHandle == handle:
                 new_edge = copy.copy(edge)
-                new_edge.target = f"{symbols.VINPUT}{sub_graph.label}{symbols.DELIM}{edge.targetHandle}"
+                new_edge.target = f"{labelling.VINPUT}{sub_graph.label}{labelling.DELIM}{edge.targetHandle}"
                 new_edge.targetHandle = "x"
                 add_edges.append(new_edge)
 
@@ -94,19 +94,19 @@ def create_group(
     # rewire connections to external input nodes
     for key, node in full_graph.nodes.items():
         print("node: ", key, node)
-        marker = f"{symbols.VOUTPUT}{sub_graph.label}{symbols.DELIM}"
+        marker = f"{labelling.VOUTPUT}{sub_graph.label}{labelling.DELIM}"
         if marker in node.label:
             # print("virtual output node", node.label)
-            source_node, source_handle = node.label[len(marker) :].split(symbols.DELIM)
+            source_node, source_handle = node.label[len(marker) :].split(labelling.DELIM)
             # print(source_node, source_handle)
             for edge in full_graph.edges:
                 if edge.source == source_node:
                     new_edge = copy.copy(edge)
                     edge.source = (
-                        f"{symbols.VOUTPUT}{sub_graph.label}{symbols.DELIM}{source_node}{symbols.DELIM}{edge.sourceHandle}"
+                        f"{labelling.VOUTPUT}{sub_graph.label}{labelling.DELIM}{source_node}{labelling.DELIM}{edge.sourceHandle}"
                     )
                     edge.sourceHandle = "x"
-                    new_edge.target = f"{symbols.VOUTPUT}{sub_graph.label}{symbols.DELIM}{source_node}{symbols.DELIM}{new_edge.sourceHandle}"
+                    new_edge.target = f"{labelling.VOUTPUT}{sub_graph.label}{labelling.DELIM}{source_node}{labelling.DELIM}{new_edge.sourceHandle}"
                     new_edge.targetHandle = "x"
                     add_edges.append(new_edge)
 

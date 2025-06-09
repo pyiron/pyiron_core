@@ -1,7 +1,7 @@
 import textwrap
 
 from pyiron_workflow import simple_workflow
-from pyiron_workflow.graph import base, not_data, symbols
+from pyiron_workflow.graph import base, not_data, labelling
 
 
 def port_to_code(port: base.Port, use_default: bool = False, scope: str = None):
@@ -91,7 +91,7 @@ def _build_function_parameters(
     seen_params = set()
 
     for node in graph.nodes.values():
-        if node.label.startswith(symbols.VINPUT):
+        if node.label.startswith(labelling.VINPUT):
             inp = base.handle_to_parent_label(node.label)
             parameters.append((inp, None))  # No default value
             seen_params.add(inp)
@@ -158,7 +158,7 @@ def _process_nodes_and_edges(
                 if base.is_virtual_node(edge.source):
                     kwargs[edge.targetHandle] = edge.sourceHandle
                 else:
-                    if edge.target.startswith(symbols.VOUTPUT):
+                    if edge.target.startswith(labelling.VOUTPUT):
                         return_args.append(f"wf.{edge.source}")
                     else:
                         source_node = graph.nodes[edge.source]
