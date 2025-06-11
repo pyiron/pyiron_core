@@ -19,11 +19,13 @@
 
 ## Decision
 
-- All nodes will be assigned a regular output port carrying that node's node data
+- Interpreting a node-as-input will remain be the responsibility of the receiver
+  - Interpretation of node input for functional programming will be controlled by type-hinting the receiving location as node-type
+  - In the absence of a node-type type hint, the receiver will attempt to interpret the node object as a reference to that node's output, failing if there is more than out output to choose from
+- A port-like element will be added to the GUI to expose a node-object handle for creating functional programming connections
+- The data structure for defining an edge will be expanded from a four-tuple of (source, target)x(source handle, target handle) to also allow three-tuple of (source, target, target handle)
 
 
 ## Consequences
 
-- Improved symmetry between subgraph nodes and other nodes
-- Improved clarity between collapsed and expanded views of subgraphs
-  - I.e., node data always comes from a port on the node to which that data belongs, never from a different node
+- GUI edge representations for groups being used as functional input always go from the group's "node" graphical element to the receiving port graphical element, completely independent of the group's collapsed/expanded state
