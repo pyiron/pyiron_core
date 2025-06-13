@@ -13,7 +13,7 @@ def Repeat(structure: Atoms, repeat_scalar: int = 1) -> Atoms:
 
 @as_function_node("structure")
 def ApplyStrain(
-    structure: Optional[Atoms] = None, strain: Union[float, int] = 0
+    structure: Optional[Atoms] = None, strain: Union[float] = 0
 ) -> Atoms:
     struct = structure.copy()
     struct.apply_strain(strain)

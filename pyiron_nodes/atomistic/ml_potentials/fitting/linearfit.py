@@ -505,3 +505,87 @@ def PlotForcesFittingCurve(data_dict: dict):
     axe.legend()
 
     return plt.show()
+
+
+@as_function_node("design_matrix")
+def DesignMatrix(
+    df: pd.DataFrame,
+    potential_config: PotentialConfig,
+    verbose: bool = False,
+    store: bool = True,
+):
+    """
+    Constructs the design matrix for the training dataset using the provided potential configuration.
+    Args:
+        df_train (pd.DataFrame): The training dataset containing ASE atoms and other properties.
+        potential_config (PotentialConfig): The configuration for the potential.
+    Returns:
+        LinearACEDataset: The constructed design matrix for the training dataset.
+    """
+
+    from pyace.linearacefit import LinearACEDataset
+    from pyace import create_multispecies_basis_config
+
+    from pyiron_snippets.logger import logger
+
+    logger.setLevel(30)
+
+    elements_set = set()
+    for atoms in df["ase_atoms"]:
+        elements_set.update(atoms.get_chemical_symbols())
+
+    elements = sorted(elements_set)
+    potential_config.elements = elements
+    potential_config_dict = potential_config.to_dict()
+
+    bconf = create_multispecies_basis_config(potential_config_dict)
+
+    ds = LinearACEDataset(bconf, df)
+    ds.construct_design_matrix(verbose=verbose)
+    return ds.design_matrix
+
+
+@as_function_node("matrix")
+def SliceArray(matrix, indices):
+    return matrix[indices]
+
+
+@as_function_node("vector")
+def GetVector(
+    df: pd.DataFrame,
+    indices,
+    scale_energy_per_atom: bool = False,
+):
+    import numpy as np
+
+    vec = df.energy_corrected
+    if scale_energy_per_atom:
+        vec /= df.NUMBER_OF_ATOMS
+
+    forces_vec = []
+    for f in df.forces.apply(lambda x: x.flatten()):
+        forces_vec += list(f)
+    vec = np.append(vec, forces_vec)
+    return vec[indices]
+
+
+@as_function_node
+def MinMaxIndices(
+    df: pd.DataFrame,
+    i_min: int = 0,
+    i_max: int = None,
+    energy_only: bool = False,
+):
+    num_structures = len(df)
+    num_atoms = np.sum(df.NUMBER_OF_ATOMS)
+
+    indices = np.arange(num_structures + 3 * num_atoms)
+    if i_max is None or i_max == "":
+        i_max = num_structures
+    energies = indices[i_min:i_max]
+    forces = indices[num_atoms + 3 * i_min : num_atoms + 3 * i_max]
+    if energy_only:
+        indices = energies
+    else:
+        indices = np.append(energies, forces, axis=0)
+    return indices

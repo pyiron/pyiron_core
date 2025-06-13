@@ -61,7 +61,7 @@ def LinearFittingCurve(
     from matplotlib import pyplot as plt
     import numpy as np
 
-    rms = np.var(x - y)
+    rms = np.sqrt(np.var(x - y))
     print(f"RMS: {rms}")
     x_ideal = np.linspace(min(x), max(x), 100)
     y_ideal = np.poly1d(np.polyfit(x, y, 1))(x_ideal)
@@ -73,9 +73,11 @@ def LinearFittingCurve(
 
 
 @as_function_node("fig")
-def ShowArray(mat: Optional[np.ndarray]):
+def ShowArray(mat: Optional[np.ndarray], aspect_ratio: float=None):
     from matplotlib import pyplot as plt
 
+    if aspect_ratio is not None:   
+        plt.imshow(mat, aspect=aspect_ratio)
     plt.imshow(mat)
     return plt.show()
 
@@ -97,6 +99,9 @@ def Plot(
     color: Optional[str] = "b",
     symbol: Optional[str] = "o",
     legend_label: Optional[str] = "",
+    log_x: bool = False,
+    log_y: bool = False,
+
 ):
     from matplotlib import pyplot as plt
 
@@ -107,6 +112,10 @@ def Plot(
         axis = plt
         axis.title = title
         axis.plot(x, y, color=color, marker=symbol, label=legend_label)
+        if log_x:
+            axis.xscale("log")
+        if log_y:
+            axis.yscale("log")
         figure = axis.show()
 
     else:

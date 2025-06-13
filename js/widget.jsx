@@ -2,24 +2,15 @@
  * Author: Joerg Neugebauer
  * Copyright: Copyright 2024, Max-Planck-Institut for Sustainable Materials GmbH - Computational Materials Design (CM) Department
  * Version: 0.2
- * Maintainer:
- * Email:
  * Status: development
  * Date: Aug 1, 2024
  */
 
-import React, {
-  useCallback,
-  useState,
-  createContext,
-  useSelection,
-} from "react";
+import React, { useCallback, useState, createContext, useEffect } from "react";
 import { createRender, useModel } from "@anywidget/react";
 import { getLayoutedNodes } from "./useElkLayout";
-// import ELK from "elkjs/lib/elk.bundled.js";
 import {
   ReactFlow,
-  ReactFlowProvider,
   Controls,
   ControlButton,
   MiniMap,
@@ -28,7 +19,6 @@ import {
   applyNodeChanges,
   addEdge,
   Panel,
-  useOnSelectionChange,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import {
@@ -36,7 +26,6 @@ import {
   UploadIcon,
   DownloadIcon,
   Cross1Icon,
-  Pencil1Icon,
   GroupIcon,
 } from "@radix-ui/react-icons";
 
@@ -46,28 +35,33 @@ import CustomNode from "./CustomNode.jsx";
 import "./text-updater-node.css";
 
 const rfStyle = {
-  //backgroundColor: '#B8CEFF',
   backgroundColor: "#dce1ea",
-  //backgroundColor: 'white',
 };
 
 export const UpdateDataContext = createContext(null);
-let globalStatus = "initial";
-// const nodeTypes = { textUpdater: TextUpdaterNode, customNode: CustomNode };
+
+// const globalStatusRef = { current: "initial" };
+
+const COMMAND_PREFIXES = {
+  CHANGE_NODE_VALUE: "change_node_value",
+  SELECTED_NODES: "selected_nodes",
+  ADD_EDGE: "add_edge",
+  DELETE_NODE: "delete_node",
+  DELETE_EDGE: "delete_edge",
+  REFRESH_GRAPH_VIEW: "refreshGraphView",
+  SAVE_FLOW: "saveFlow",
+  RESTORE_FLOW: "restoreFlow",
+  CLEAR_FLOW: "clearFlow",
+  GROUP_NODES: "groupSelectedNodes",
+  RENAME_WORKFLOW: "renameWorkflow",
+  SAVE_WORKFLOW_NAME: "saveWorkflowName",
+};
 
 const render = createRender(() => {
-  console.log("rendering");
   const model = useModel();
 
-  //   const initialNodes = JSON.parse(model.get("nodes"));
-  //   const initialEdges = JSON.parse(model.get("edges"));
-  const initialNodes = [];
-  const initialEdges = [];
-  console.log("initialData: ", initialNodes, initialEdges);
-
-  const [nodes, setNodes] = useState(initialNodes);
-  const [edges, setEdges] = useState(initialEdges);
-
+  const [nodes, setNodes] = useState([]);
+  const [edges, setEdges] = useState([]);
   const [selectedNodes, setSelectedNodes] = useState([]);
 
   const nodeTypes = {
@@ -75,272 +69,212 @@ const render = createRender(() => {
     customNode: CustomNode,
   };
 
-  const updateData = (nodeLabel, handleIndex, newValue) => {
-    const var_data = { label: nodeLabel, handle: handleIndex, value: newValue };
-    model.set("commands", `change_node_value: ` + JSON.stringify(var_data));
-    model.save_changes();
-    console.log("updateData: ", nodeLabel, handleIndex, newValue);
+  const sendCommand = useCallback(
+    (command, payload = "__global__") => {
+      console.log(`Sending command: ${command} with payload: ${payload}`);
+      const timestamp = new Date().getTime();
+      model.set("commands", `${command}: ${payload} - ${timestamp}`);
+      model.save_changes();
+    },
+    [model]
+  );
 
-    setNodes((prevNodes) =>
-      prevNodes.map((node, idx) => {
-        // console.log('updatedDataNodes: ', nodeLabel, handleIndex, newValue, node.id);
-        if (node.id !== nodeLabel) {
-          return node;
-        }
+  const updateData = useCallback(
+    (nodeLabel, handleIndex, newValue) => {
+      console.log(
+        `Updating node ${nodeLabel}, handle ${handleIndex} with value: ${newValue}`
+      );
+      const var_data = {
+        label: nodeLabel,
+        handle: handleIndex,
+        value: newValue,
+      };
+      sendCommand(COMMAND_PREFIXES.CHANGE_NODE_VALUE, JSON.stringify(var_data));
+      setNodes((prevNodes) =>
+        prevNodes.map((node) => {
+          if (node.id !== nodeLabel) return node;
 
-        // This line assumes that node.data.target_values is an array
-        const updatedTargetValues = [...node.data.target_values];
-        updatedTargetValues[handleIndex] = newValue;
-        console.log("updatedData2: ", updatedTargetValues);
+          const updatedTargetValues = [...node.data.target_values];
+          updatedTargetValues[handleIndex] = newValue;
 
-        return {
-          ...node,
-          data: {
-            ...node.data,
-            target_values: updatedTargetValues,
-          },
-        };
-      })
-    );
-  };
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              target_values: updatedTargetValues,
+            },
+          };
+        })
+      );
+    },
+    [sendCommand]
+  );
 
-  //   // for test only, can be later removed
-  //   useEffect(() => {
-  //     console.log("nodes_test:", nodes);
-  //     model.set("nodes", JSON.stringify(nodes)); // TODO: maybe better do it via command changeValue(nodeID, handleID, value)
-  //     model.save_changes();
-  //   }, [nodes]);
+  // Setup event listeners on model with cleanup
+  useEffect(() => {
+    const onNodesChange = () => {
+      const newNodesRaw = model.get("nodes");
+      try {
+        const newNodes = JSON.parse(newNodesRaw);
+        setNodes(newNodes);
+      } catch {
+        console.error("Failed to parse nodes from model.");
+      }
+    };
 
-  model.on("change:nodes", () => {
-    const new_nodes = model.get("nodes");
-    console.log("load nodes: ", JSON.parse(new_nodes));
-    setNodes(JSON.parse(new_nodes));
-  });
+    const onEdgesChange = () => {
+      const newEdgesRaw = model.get("edges");
+      try {
+        const newEdges = JSON.parse(newEdgesRaw);
+        setEdges(newEdges);
+      } catch {
+        console.error("Failed to parse edges from model.");
+      }
+    };
 
-  model.on("change:edges", () => {
-    const new_edges = model.get("edges");
-    console.log("load edges: ", JSON.parse(new_edges));
-    setEdges(JSON.parse(new_edges));
-  });
+    const onMyDataChange = () => {
+      // if (globalStatusRef.current === "running") {
+      //   console.log("Data change ignored due to running status");
+      //   return;
+      // }
+      // globalStatusRef.current = "running";
 
-  model.on("change:mydata", () => {
-    // it appears that there is a bug in the interplay between traitlets and setNodes and setEdges.
-    // Calling setNodes and setEdges triggers a change event, which in turn triggers a new mydata event.
-    // This leads to an increasing number of mydata events, which probably causes a slow down and eventually a crash.
-    // To avoid this partly, we need to check if we are already running and return if this is the case.
-    // This avoids repeating the expensive layouting process, but still triggers the creation of many objects.
-    // This is not a solution, but a workaround. A possible way would be to make the data communication via files.
-    // If this problem becomes a practical issue, we need to consider/switch to a file based communication.
-    if (globalStatus === "running") {
-      console.log("data changed, but we are running");
-      return;
-    }
-    globalStatus = "running";
+      const rawData = model.get("mydata");
+      try {
+        const data = JSON.parse(rawData);
+        const { nodes: newNodes, edges: newEdges, graph: newGraph } = data;
 
-    console.log("data changed");
-    const new_data = model.get("mydata");
-    // console.log("load data: ", new_data);
-    const data = JSON.parse(new_data);
+        getLayoutedNodes(newNodes, newEdges, newGraph).then((layoutedNodes) => {
+          setNodes(layoutedNodes);
+          setEdges(newEdges);
+          globalStatusRef.current = "finished";
+        });
+      } catch {
+        console.error("Failed to parse mydata from model.");
+        globalStatusRef.current = "finished";
+      }
+    };
 
-    console.log("load data: ", data);
+    const onCommandsChange = () => {
+      const cmds = model.get("commands");
+      console.log("Commands changed:", cmds);
+    };
 
-    const new_nodes = data.nodes;
-    const new_edges = data.edges;
-    const new_graph = data.graph;
+    model.on("change:nodes", onNodesChange);
+    model.on("change:edges", onEdgesChange);
+    model.on("change:mydata", onMyDataChange);
+    model.on("change:commands", onCommandsChange);
 
-    // give start and end time for the layouting
+    return () => {
+      model.off("change:nodes", onNodesChange);
+      model.off("change:edges", onEdgesChange);
+      model.off("change:mydata", onMyDataChange);
+      model.off("change:commands", onCommandsChange);
+    };
+  }, [model]);
 
-    console.log("start: ", new Date().getTime());
-    getLayoutedNodes(new_nodes, new_edges, new_graph).then((layoutedNodes) => {
-      console.log("layoutedNodes: ", layoutedNodes);
-      setNodes(layoutedNodes);
-      setEdges(new_edges);
-      console.log("finished: ", new Date().getTime());
-      globalStatus = "finished";
-    });
-    // since this is async, we need to wait for the layouted nodes
-    // it appears that we never get here
-  });
-
-  model.on("change:commands", () => {
-    const new_commands = model.get("commands");
-    console.log("load commands: ", new_commands);
-  });
-
+  // Handlers for ReactFlow events
   const onNodesChange = useCallback(
     (changes) => {
       setNodes((nds) => {
-        const new_nodes = applyNodeChanges(changes, nds);
-        // clear selectedNodes
-        setSelectedNodes([]);
-        for (const i in changes) {
-          if (Object.hasOwn(changes[i], "selected")) {
-            if (changes[i].selected) {
-              for (const k in new_nodes) {
-                if (new_nodes[k].id == changes[i].id) {
-                  selectedNodes.push(new_nodes[k]);
-                }
-              }
-            } else {
-              for (const j in selectedNodes) {
-                if (selectedNodes[j].id == changes[i].id) {
-                  selectedNodes.splice(j, 1);
-                }
-              }
-            }
-          }
-        }
-        console.log("onNodesChange: ", changes, new_nodes);
-        console.log("selectedNodes: ", selectedNodes);
-        // convert list of selectedNodes to a string of comma separated node ids
-        // and submit it to GUI
-        let selectedNodesStr = selectedNodes.map((node) => node.id).join(",");
-        model.set(
-          "commands",
-          `selected_nodes: ${selectedNodesStr} - ${new Date().getTime()}`
+        const updatedNodes = applyNodeChanges(changes, nds);
+
+        // After node changes are applied, filter nodes with selected === true to get full current selection
+        const currentlySelectedNodes = updatedNodes.filter(
+          (node) => node.selected
         );
+
+        setSelectedNodes(currentlySelectedNodes);
+
+        const selectedIdsStr = currentlySelectedNodes
+          .map((node) => node.id)
+          .join(",");
+        sendCommand(COMMAND_PREFIXES.SELECTED_NODES, selectedIdsStr);
+
+        model.set("nodes", JSON.stringify(updatedNodes));
         model.save_changes();
 
-        model.set("nodes", JSON.stringify(new_nodes));
-        model.save_changes();
-        return new_nodes;
+        return updatedNodes;
       });
     },
-    [setNodes]
+    [model, sendCommand]
   );
 
   const onEdgesChange = useCallback(
     (changes) => {
       setEdges((eds) => {
-        console.log("onEdgesChange: ", changes);
-        const new_edges = applyEdgeChanges(changes, eds);
-        model.set("edges", JSON.stringify(new_edges));
+        const updatedEdges = applyEdgeChanges(changes, eds);
+        model.set("edges", JSON.stringify(updatedEdges));
         model.save_changes();
-        return new_edges;
+        return updatedEdges;
       });
     },
-    [setEdges]
+    [model]
   );
 
   const onConnect = useCallback(
     (params) => {
       setEdges((eds) => {
-        const new_edges = addEdge(params, eds);
-        model.set("edges", JSON.stringify(new_edges));
-        model.save_changes();
-        console.log("onConnect: ", params);
-        model.set(
-          "commands",
-          `add_edge: ${params.source}/${params.sourceHandle} > ${
-            params.target
-          }/${params.targetHandle} - ${new Date().getTime()}`
+        const newEdges = addEdge(params, eds);
+        model.set("edges", JSON.stringify(newEdges));
+        sendCommand(
+          COMMAND_PREFIXES.ADD_EDGE,
+          `${params.source}/${params.sourceHandle} > ${params.target}/${params.targetHandle}`
         );
-        model.save_changes();
-        return new_edges;
+        return newEdges;
       });
     },
-    [setEdges]
+    [model, sendCommand]
   );
 
-  const deleteNode = (id) => {
-    // direct output of node to output widget
-    console.log("output: ", id);
-    if (model) {
-      model.set("commands", `delete_node: ${id} - ${new Date().getTime()}`);
-      model.save_changes();
-    } else {
-      console.error("model is undefined");
-    }
-  };
+  const deleteNode = useCallback(
+    (id) => {
+      sendCommand(COMMAND_PREFIXES.DELETE_NODE, id);
+    },
+    [sendCommand]
+  );
 
-  const onNodesDelete = useCallback((deleted) => {
-    console.log("onNodesDelete: ", deleted);
-    deleteNode(deleted[0].id);
-  });
+  const onNodesDelete = useCallback(
+    (deleted) => {
+      if (deleted.length > 0) {
+        deleteNode(deleted[0].id);
+      }
+    },
+    [deleteNode]
+  );
 
-  const deleteEdge = (params) => {
-    console.log("delete edge: ", params);
-    model.set(
-      "commands",
-      `delete_edge: ${params.source}/${params.sourceHandle} > ${
-        params.target
-      }/${params.targetHandle} - ${new Date().getTime()}`
-    );
-    model.save_changes();
-  };
+  const deleteEdge = useCallback(
+    (params) => {
+      sendCommand(
+        COMMAND_PREFIXES.DELETE_EDGE,
+        `${params.source}/${params.sourceHandle} > ${params.target}/${params.targetHandle}`
+      );
+    },
+    [sendCommand]
+  );
 
-  const onEdgesDelete = useCallback((deleted) => {
-    console.log("onEdgesDelete: ", deleted);
-    deleteEdge(deleted[0]);
-  });
+  const onEdgesDelete = useCallback(
+    (deleted) => {
+      if (deleted.length > 0) {
+        deleteEdge(deleted[0]);
+      }
+    },
+    [deleteEdge]
+  );
 
-  const refreshGraphView = (id) => {
-    // refresh data on python side
-    console.log("refreshGraphView: ", id);
-    model.set(
-      "commands",
-      `refreshGraphView: __global__ - ${new Date().getTime()}`
-    );
-    model.save_changes();
-  };
-
-  const saveFlow = (id) => {
-    // save data on python side
-    console.log("saveFlow: ", id);
-    model.set("commands", `saveFlow: __global__ - ${new Date().getTime()}`);
-    model.save_changes();
-  };
-
-  const restoreFlow = (id) => {
-    // restore data on python side
-    console.log("restoreFlow: ", id);
-    model.set("commands", `restoreFlow: __global__ - ${new Date().getTime()}`);
-    model.save_changes();
-  };
-
-  const clearFlow = (id) => {
-    // delete data on python side
-    console.log("clearFlow: ", id);
-    model.set("commands", `clearFlow: __global__ - ${new Date().getTime()}`);
-    model.save_changes();
-  };
-
-  const groupNodes = (id) => {
-    // group nodes
-    console.log("groupNodes: ", id);
-    // convert list of selectedNodes to a string of comma separated node ids
-    // let selectedNodesStr = selectedNodes.map((node) => node.id).join(",");
-    // console.log("selectedNodesStr: ", selectedNodesStr, selectedNodes);
-    // model.set(
-    //   "commands",
-    //   `group_nodes: ${selectedNodesStr} - ${new Date().getTime()}`
-    // );
-    // model.save_changes();
-    model.set(
-      "commands",
-      `groupSelectedNodes: __global__ - ${new Date().getTime()}`
-    );
-    model.save_changes();
-  };
-
-  const renameWorkflow = (id) => {
-    // rename data on python side
-    console.log("renameWorkflow: ", id);
-    model.set(
-      "commands",
-      `renameWorkflow: __global__ - ${new Date().getTime()}`
-    );
-    model.save_changes();
-  };
-
-  const saveWorkflowName = (name) => {
-    // rename data on python side
-    console.log("saveWorkflowName: ", name);
-    model.set(
-      "commands",
-      `saveWorkflowName: ${name} - ${new Date().getTime()}`
-    );
-    model.save_changes();
+  // Commands for controlling the workflow
+  const workflowCommands = {
+    refreshGraphView: () => sendCommand(COMMAND_PREFIXES.REFRESH_GRAPH_VIEW),
+    saveFlow: () => sendCommand(COMMAND_PREFIXES.SAVE_FLOW),
+    restoreFlow: () => sendCommand(COMMAND_PREFIXES.RESTORE_FLOW),
+    clearFlow: () => sendCommand(COMMAND_PREFIXES.CLEAR_FLOW),
+    groupNodes: () => sendCommand(COMMAND_PREFIXES.GROUP_NODES),
+    renameWorkflow: () => sendCommand(COMMAND_PREFIXES.RENAME_WORKFLOW),
+    saveWorkflowName: (name) => {
+      if (name.trim()) {
+        sendCommand(COMMAND_PREFIXES.SAVE_WORKFLOW_NAME, name.trim());
+      }
+    },
   };
 
   const setPosition = useCallback(
@@ -351,16 +285,18 @@ const render = createRender(() => {
           data: { ...node.data, toolbarPosition: pos },
         }))
       ),
-    [setNodes]
+    []
   );
 
-  const forceToolbarVisible = useCallback((enabled) =>
-    setNodes((nodes) =>
-      nodes.map((node) => ({
-        ...node,
-        data: { ...node.data, forceToolbarVisible: enabled },
-      }))
-    )
+  const forceToolbarVisible = useCallback(
+    (enabled) =>
+      setNodes((nodes) =>
+        nodes.map((node) => ({
+          ...node,
+          data: { ...node.data, forceToolbarVisible: enabled },
+        }))
+      ),
+    []
   );
 
   return (
@@ -385,24 +321,37 @@ const render = createRender(() => {
           <MiniMap />
           <Controls orientation="horizontal" position="top-left">
             <ControlButton
-              onClick={refreshGraphView}
+              onClick={workflowCommands.refreshGraphView}
               title="Refresh Graph View"
             >
               <SymbolIcon />
             </ControlButton>
-            <ControlButton onClick={saveFlow} title="Save Flow">
+            <ControlButton
+              onClick={workflowCommands.saveFlow}
+              title="Save Flow"
+            >
               <UploadIcon />
             </ControlButton>
-            <ControlButton onClick={restoreFlow} title="Restore Flow">
+            <ControlButton
+              onClick={workflowCommands.restoreFlow}
+              title="Restore Flow"
+            >
               <DownloadIcon />
             </ControlButton>
-            <ControlButton onClick={clearFlow} title="Delete Workflow">
+            <ControlButton
+              onClick={workflowCommands.clearFlow}
+              title="Delete Workflow"
+            >
               <Cross1Icon />
             </ControlButton>
-            <ControlButton onClick={groupNodes} title="Group Nodes">
+            <ControlButton
+              onClick={workflowCommands.groupNodes}
+              title="Group Nodes"
+            >
               <GroupIcon />
             </ControlButton>
-            {/* <ControlButton onClick={renameWorkflow} title="Rename Workflow">
+            {/* Uncomment if rename workflow will be implemented */}
+            {/* <ControlButton onClick={workflowCommands.renameWorkflow} title="Rename Workflow">
               <Pencil1Icon />
             </ControlButton> */}
           </Controls>
@@ -412,7 +361,8 @@ const render = createRender(() => {
               placeholder="Enter workflow name"
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
-                  saveWorkflowName(e.target.value);
+                  workflowCommands.saveWorkflowName(e.target.value);
+                  e.target.value = "";
                 }
               }}
             />

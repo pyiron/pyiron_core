@@ -592,7 +592,7 @@ class Node:
                 restored = False
                 try:
                     restored = idb.restore_node_outputs(self)
-                    print("restored: ", restored)
+                    # print("restored: ", restored)
                 except FileNotFoundError as e:
                     print("No stored data found for node: ", self.label)
                 except Exception as e:

@@ -1,5 +1,6 @@
 from typing import Optional, TYPE_CHECKING
 
+import pyiron_workflow.graph.gui
 # import numpy as np
 # import pandas as pd
 
@@ -21,7 +22,7 @@ def LoadGraph(path: str):
 def Display(graph, optimize: bool = True):
     from pyiron_workflow.graph import base
 
-    plot = base.GuiGraph(graph, full_graph=not optimize)
+    plot = pyiron_workflow.graph.gui.GuiGraph(graph, optimze=optimize)
     return plot
 
 
@@ -42,30 +43,18 @@ def DisplayEdges(graph):
 
 
 @as_function_node
-def DisplayNodeData(graph, remove_none: bool = False):
+def DisplayNodeData(graph):
     from pyiron_workflow.graph import base
 
-    if remove_none:
-        import json
-
-        # import JSON
-        from IPython.display import JSON
-
-        data = base._nodes_to_gui(graph, remove_none=remove_none)
-        graph_json = JSON(data, exanded=True)
-
-        return graph_json
-
-    data = base.display_gui_data(graph, remove_none=remove_none)
-
+    data = pyiron_workflow.graph.gui.display_gui_data(graph)
     return data
 
 
 @as_function_node
-def DisplayNodeStyle(graph, remove_none: bool = False):
+def DisplayNodeStyle(graph):
     from pyiron_workflow.graph import base
 
-    style = base.display_gui_style(graph, remove_none=remove_none)
+    style = pyiron_workflow.graph.gui.display_gui_style(graph)
     return style
 
 
@@ -73,7 +62,7 @@ def DisplayNodeStyle(graph, remove_none: bool = False):
 def NodesToGui(graph, remove_none: Optional[bool] = False):
     from pyiron_workflow.graph import base
 
-    nodes = base._nodes_to_gui(graph, remove_none=False)
+    nodes = pyiron_workflow.graph.gui._nodes_to_gui(graph, remove_none=False)
     return nodes
 
 
@@ -81,7 +70,7 @@ def NodesToGui(graph, remove_none: Optional[bool] = False):
 def EdgesToGui(graph):
     from pyiron_workflow.graph import base
 
-    edges = base._edges_to_gui(graph, remove_none=False)
+    edges = pyiron_workflow.graph.gui._edges_to_gui(graph, remove_none=False)
     return edges
 
 

@@ -1,16 +1,33 @@
+import dataclasses
 import json
-
-from typing import Optional, Union
-from pyiron_workflow import Workflow  # , Node, Port, as_function_node
-from pyironflow.reactflow import ReactFlowWidget
-from pyiron_workflow.graph.base import Graph
-import pyiron_workflow.graph.base as base
-from pyironflow.treeview import TreeView
-from dataclasses import dataclass
-import ipywidgets as widgets
-from IPython.display import display
 import threading
 import time
+from typing import Optional, Union
+
+import ipywidgets as widgets
+import numpy as np
+import pandas as pd
+from IPython.display import display
+from pyironflow.reactflow import ReactFlowWidget
+from pyironflow.treeview import TreeView
+
+import pyiron_workflow.graph.base as base
+import pyiron_workflow.graph.edges
+from pyiron_workflow import Node, Port, Workflow
+from pyiron_workflow.graph.base import (
+    Graph,
+    NotData,
+    _get_active_edges,
+    _get_active_nodes,
+    copy_graph,
+    get_updated_graph,
+    is_virtual_node,
+)
+from pyiron_workflow.graph.decorators import (
+    NestedList,
+    as_dotdict_dataclass,
+    transpose_list_of_dicts,
+)
 
 
 class GUILayout:
@@ -104,7 +121,7 @@ class PyironFlowWidget:
         source, target = edge_str.split(">")
         source, source_handle = source.split("/")
         target, target_handle = target.split("/")
-        return base.GraphEdge(
+        return pyiron_workflow.graph.edges.GraphEdge(
             source.strip(), target.strip(), source_handle.strip(), target_handle.strip()
         )
 
@@ -122,11 +139,13 @@ class PyironFlowWidget:
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
 
-                print("command: ", change["new"])
+                # print("command: ", change["new"])
                 command, node_name = change["new"].split(":", 1)
                 command = command.strip()
-                node_name = node_name.split("-")[0].strip()
-                print("node_name: ", node_name, command)
+                print("command: ", command, "node_name: ", node_name)
+                # if command not in ["change_node_value"]:
+                node_name = node_name.rsplit("-", 1)[0].strip()
+                # print("node_name: ", node_name, command)
 
                 if command == "refreshGraphView":
                     print("refreshGraphView")
@@ -153,7 +172,7 @@ class PyironFlowWidget:
                     self.update_gui()  # ???
                 elif command == "selected_nodes":
                     self._selected_nodes = node_name.split(",")
-                    print("selected_nodes: ", self._selected_nodes)
+                    # print("selected_nodes: ", self._selected_nodes)
                 elif command == "groupSelectedNodes":
                     print("group_nodes: ", self._selected_nodes)
                     node_ids = base._node_labels_to_node_ids(
@@ -195,9 +214,10 @@ class PyironFlowWidget:
                     node = self.graph.nodes[node_name].node
                     if command == "source":
                         import inspect
+
                         from pygments import highlight
-                        from pygments.lexers import Python2Lexer
                         from pygments.formatters import TerminalFormatter
+                        from pygments.lexers import Python2Lexer
 
                         self.accordion_widget.selected_index = 1
                         node = self.graph.nodes[node_name].node
@@ -258,9 +278,9 @@ class PyironFlowWidget:
         opt_graph = base.get_updated_graph(self.graph)
         data = dict(
             #    label=graph.label,
-            nodes=base._nodes_to_gui(opt_graph),
-            edges=base._edges_to_gui(opt_graph),
-            graph=base._graph_to_gui(opt_graph),
+            nodes=_nodes_to_gui(opt_graph),
+            edges=_edges_to_gui(opt_graph),
+            graph=_graph_to_gui(opt_graph),
             date=str(self._counter),  # unique value to activate traitlets
         )
         self._counter += 1
@@ -441,3 +461,324 @@ class PyironFlow:
                 print("Updating tab ", i)
                 tab_children[i] = wf_widget.flow_widget
         self.tab_widget.children = tab_children
+
+
+@as_dotdict_dataclass()
+class GuiNode:
+    id: str  # unique identifier for the node (no two nodes can have the same id)
+    data: dict = None
+    position: dict = None
+    style: dict = None
+    targetPosition: str = "left"
+    sourcePosition: str = "right"
+    type: str = None
+    parentId: str = None
+    extent: str = None
+    expanded: bool = False
+
+
+@as_dotdict_dataclass()
+class GuiData:
+    label: str = None  # label/name of the node as shown in the gui
+    source_labels: list = dataclasses.field(default_factory=lambda: [])
+    target_labels: list = dataclasses.field(default_factory=lambda: [])
+    import_path: str = None
+    target_values: list = dataclasses.field(default_factory=lambda: [])
+    target_types: list = dataclasses.field(default_factory=lambda: [])
+    source_values: list = dataclasses.field(default_factory=lambda: [])
+    source_types: list = dataclasses.field(default_factory=lambda: [])
+    expanded: bool = False
+
+
+@as_dotdict_dataclass()
+class GuiStyle:
+    backgroundColor: str = "rgba(0, 255, 0, 0.5)"  # light green
+    height: int = 50
+    width: int = 100
+    padding: int = 5
+    border: str = "1px black solid"
+    borderRadius: str = "10px"
+
+
+def _to_jsonifyable(obj):
+    if isinstance(obj, np.ndarray):
+        return obj.tolist()
+    elif isinstance(obj, Port):
+        value = obj.value
+        # print("value: ", obj._to_dict())
+        if isinstance(value, (str, int, float, bool)):
+            return value
+        else:
+            return NotData
+    elif isinstance(obj, Node):
+        return NotData
+    elif isinstance(obj, (str, int, float, bool, type(None))):
+        return obj
+    else:
+        return NotData
+
+
+def gui_data(node: Node, key: str = None, expanded: bool = False) -> GuiData:
+
+    label = key  # node.label
+    # The following does not work since the label change is not reflected in the edges
+    # if (node.label != key) and (key is not None):
+    #     label = f"{node.label}_{key}"
+
+    if node is None:
+        return GuiData(label=label)
+
+    target_values = [
+        _to_jsonifyable(v) if not isinstance(v, Node) else NotData
+        for v in node.inputs.data["value"]
+    ]
+    is_connected = [isinstance(v, (Port, Node)) for v in node.inputs.data["value"]]
+
+    # TODO: set to None if it contains an edge (include connected parameter)
+    target_types = [
+        "None" if (t == "builtins.NoneType") or connected else t
+        for t, connected in zip(node.inputs.data["type"], is_connected)
+    ]
+
+    return GuiData(
+        label=label,
+        source_labels=node.outputs.data["label"],
+        target_labels=node.inputs.data["label"],
+        import_path=node.function["import_path"],
+        target_values=target_values,
+        target_types=target_types,
+        source_values=[NotData for _ in node.outputs.data["value"]],
+        source_types=node.outputs.data["type"],
+        expanded=expanded,
+    )
+
+
+def _get_node_height(node: Node) -> int | float:
+    if isinstance(node, Graph) or node is None:
+        height = 250
+    else:
+        n_max_ports = max(node.n_out_labels, node.n_inp_labels)
+        height = 30 + 16 * n_max_ports
+    return height
+
+
+def _nodes_to_gui(graph: Graph, remove_none=True) -> NestedList:
+    node_width = 300
+
+    nodes = NestedList()
+    active_nodes = _get_active_nodes(graph)
+    for i, (k, v) in enumerate(active_nodes.items()):
+        # print("gui node: ", k, v.label, v.expanded)
+        # print('node: ', k, v.label, v.node.label)
+        node_dict = GuiNode(
+            id=k,
+            data=gui_data(v.node, key=k, expanded=v.expanded).asdict(
+                remove_none=remove_none
+            ),
+            position=dict(x=i * (node_width + 20), y=0),
+            style=GuiStyle(width=node_width, height=_get_node_height(v.node)).asdict(
+                remove_none=remove_none
+            ),
+            targetPosition="left",
+            sourcePosition="right",
+            type=v.widget_type,
+            expanded=v.expanded,
+        )
+        if v.expanded:
+            node_dict["type"] = "customNode"
+            node_dict["data"] = GuiData(label=v.label, expanded=True).asdict(
+                remove_none=remove_none
+            )
+        if v.parent_id is not None:
+            node_dict.parentId = v.parent_id
+            node_dict.extent = "parent"
+
+        if v.node_type == "graph":
+            node_dict.type = "customNode"  # None
+            node_dict.style["backgroundColor"] = "rgba(255, 165, 0, 0.3)"
+        elif is_virtual_node(v.label):
+            node_dict.style["border"] = "1px black dashed"
+            node_dict.style["backgroundColor"] = "rgba(50, 50, 50, 0.1)"
+        elif v.node.node_type == "out_dataclass_node":
+            # light purple
+            node_dict.style["backgroundColor"] = "rgba(200, 200, 255, 0.3)"
+        elif v.node.node_type == "inp_dataclass_node":
+            # light blue
+            node_dict.style["backgroundColor"] = "rgba(100, 100, 255, 0.3)"
+
+        # if not v.expanded:  # for testing automated layout
+        nodes.append(node_dict.asdict(remove_none=remove_none))
+
+    return nodes
+
+
+def _get_child_dict(graph, node):
+    if node["expanded"]:
+        node_children = _gui_children(graph, node)
+    targetPorts = [
+        dict(id=f"{node['id']}_in_{label}", properties=dict(side="WEST"))
+        for label in node["data"]["target_labels"]
+    ][
+        ::-1
+    ]  # TODO: provide port positions x, y (this is only a quick fix)
+    sourcePorts = [
+        dict(id=f"{node['id']}_out_{label}", properties=dict(side="EAST"))
+        for label in node["data"]["source_labels"]
+    ][::-1]
+    child = dict(
+        id=node["id"],
+        width=node["style"]["width"],
+        height=node["style"]["height"],
+        properties={"org.eclipse.elk.portConstraints": "FIXED_ORDER"},
+        ports=[*targetPorts, *sourcePorts],
+    )
+
+    return child
+
+
+def _gui_children(graph, gui_node):
+    children = NestedList()
+    nodes = _nodes_to_gui(graph, remove_none=False)  # TODO: cache it, avoid recomputing
+    for node in nodes:
+        node_children = []
+        if node["parentId"] == gui_node["id"]:
+            child = _get_child_dict(graph, node)
+
+            child["parent"] = 1  # level in the graph? no documentation
+            if len(node_children) > 0:
+                child["children"] = node_children
+            children.append(child)
+
+    return children
+
+
+def _graph_to_gui(graph: Graph, remove_none=True, optimize=True) -> dict:
+    layoutOptions = {
+        "elk.algorithm": "layered",
+        "elk.direction": "RIGHT",
+        "elk.layered.spacing.edgeNodeBetweenLayers": "40",
+        "elk.spacing.nodeNode": "40",
+        "elk.layered.nodePlacement.strategy": "SIMPLE",
+        "elk.hierarchyHandling": "INCLUDE_CHILDREN",
+    }
+    graph_dict = dict(id="root", layoutOptions=layoutOptions)
+
+    nodes = _nodes_to_gui(graph, remove_none=remove_none)
+    edges = _edges_to_gui(graph, remove_none=remove_none)
+    children = []
+    for node in nodes:
+        if (
+            not "parentId" in node.keys()
+        ):  # TODO: make this recursive, does not work yet
+            child = _get_child_dict(graph, node)
+            node_children = _gui_children(graph, node)
+            if len(node_children) > 0:
+                child["children"] = node_children
+            children.append(child)
+
+    elk_edges = NestedList()
+    for edge in edges:
+        elk_edges.append(
+            dict(
+                id=edge["id"],
+                source=edge["source"],
+                target=edge["target"],
+                sourcePort=f"{edge['source']}_out_{edge['sourceHandle']}",
+                targetPort=f"{edge['target']}_in_{edge['targetHandle']}",
+            )
+        )
+
+    graph_dict["children"] = children
+    graph_dict["edges"] = elk_edges
+    return graph_dict
+
+
+def display_gui_data(graph):
+    data = _nodes_to_gui(graph, remove_none=False).df.data
+    return pd.DataFrame(transpose_list_of_dicts(data))
+
+
+def display_gui_style(graph):
+    style = _nodes_to_gui(graph, remove_none=False).df["style"]
+    return pd.DataFrame(transpose_list_of_dicts(style))
+
+
+def _edges_to_gui(graph, remove_none=True):
+    edges = NestedList()
+    active_edges = _get_active_edges(graph)
+    for i, edge in enumerate(active_edges):
+        edge_dict = edge.asdict(remove_none=remove_none)
+        edge_dict["id"] = i
+        edge_dict["style"] = {"strokeWidth": 2, "stroke": "black"}
+
+        edges.append(edge_dict)
+
+    return edges
+
+
+class GuiGraph:
+    def __init__(
+        self, graph: Graph, full_graph=False, sleep=0.5, width=800, height=600
+    ):
+        if full_graph:
+            self.graph = graph
+        else:
+            self.graph = get_updated_graph(graph)
+
+        self._width = width
+        self._height = height
+
+        self._reactflow_widget_status = "ina"
+        self._sleep = sleep
+
+    def on_value_change(self, change):
+        # print("print command: ", change["new"])
+        command, node_name = change["new"].split(":")
+        if command == "finished":
+            self._reactflow_widget_status = "done"
+            # print("done")
+
+    def _update_graph_view(self, w):
+        import json
+        import time
+
+        w.observe(self.on_value_change, names="commands")
+        self._reactflow_widget_status = "running"
+
+        opt_graph = copy_graph(self.graph)
+        data = dict(
+            #    label=graph.label,
+            nodes=_nodes_to_gui(opt_graph),
+            edges=_edges_to_gui(opt_graph),
+            graph=_graph_to_gui(opt_graph),
+        )
+        time.sleep(0.2)
+
+        w.mydata = json.dumps(data)
+
+        time.sleep(self._sleep)  # wait to give the gui time to finalize the graph
+
+    def _repr_html_(self):
+        from IPython.display import display
+
+        """
+        Display the graph using the ReactFlowWidget.
+
+        This method initializes a ReactFlowWidget, updates the graph view in a separate thread,
+        and returns the widget for display.
+        """
+        import threading
+
+        from pyironflow.reactflow import ReactFlowWidget
+
+        w = ReactFlowWidget(
+            layout={
+                "width": f"{self._width}px",
+                "height": f"{self._height}px",
+            }
+        )
+
+        if not hasattr(self, "_thread") or not self._thread.is_alive():
+            self._thread = threading.Thread(target=self._update_graph_view, args=(w,))
+            self._thread.start()
+        return display(w)

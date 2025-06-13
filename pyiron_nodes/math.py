@@ -96,3 +96,77 @@ def npMultiply(x: list | np.ndarray | float | int, y: list | np.ndarray | float 
 @as_function_node("multiply")
 def Multiply(x: any, y: any):
     return x * y
+
+
+@as_function_node("shape")
+def Shape(x: list | np.ndarray | float | int):
+    """
+    Get the shape of an array or a list.
+    """
+    return np.shape(x) if isinstance(x, (list, np.ndarray)) else None
+
+
+@as_function_node
+def SVD(x: np.ndarray, full_matrices: bool = False):
+    """
+    Perform Singular Value Decomposition (SVD) on a 2D array.
+    """
+    if not isinstance(x, np.ndarray) and x.ndim == 2:
+        raise ValueError("Input must be a 2D numpy array.")
+
+    u, s, vh = np.linalg.svd(x, full_matrices=full_matrices)
+    return u, s, vh
+
+
+@as_function_node
+def SVDComponents(
+    matrix: np.ndarray, full_matrices: bool = False, i_min: int = 0, i_max: int = None
+):
+    """
+    Perform Singular Value Decomposition (SVD) and return specified components.
+
+    Parameters:
+    - matrix: 2D numpy array to decompose.
+    - full_matrices: If True, U and Vh are of shape (M, M) and (N, N), respectively.
+    - i_min: Minimum index of the singular values to return.
+    - i_max: Maximum index of the singular values to return (exclusive).
+
+    Returns:
+    - Tuple containing U, S, Vh matrices with specified singular values.
+    """
+    u, s, vh = np.linalg.svd(matrix, full_matrices=full_matrices)
+    if i_max is None:
+        i_max = len(s)
+
+    svd_mat = np.zeros(matrix.shape)
+    norm_list = []
+    for i in range(i_min, i_max):
+        svd_mat += np.outer(u.T[i], vh[i]) * s[i]
+        norm_list.append(np.linalg.norm(svd_mat - matrix))
+
+    return svd_mat, norm_list
+
+
+@as_function_node("array")
+def PseudoInverse(matrix: np.ndarray, rcond: float = 1e-15, hermitian: bool = False):
+    return np.linalg.pinv(matrix, rcond, hermitian)
+
+
+@as_function_node("array")
+def DotProduct(a: np.ndarray, b: np.ndarray, store: bool = False):
+    return np.dot(a, b)
+
+
+@as_function_node("array")
+def Transpose(a: np.ndarray):
+    return np.transpose(a)
+
+
+@as_function_node("result")
+def aAddBC(a, b: float, c):
+    return a + b * c
+
+
+@as_function_node
+def Identity(x: float):
+    return x
