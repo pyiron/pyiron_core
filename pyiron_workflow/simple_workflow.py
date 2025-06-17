@@ -549,7 +549,7 @@ class Node:
 
                 hash = idb.get_hash(val)
                 val._hash_parent = hash
-                print("copy node (port): ", val.label, val._hash_parent)
+                # print("copy node (port): ", val.label, val._hash_parent)
                 # print("copy port: ", val.label, val.inputs)
             else:
                 val = inp_port.value

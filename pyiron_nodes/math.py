@@ -2,7 +2,7 @@
 For mathematical operations.
 """
 
-from __future__ import annotations
+from typing import Optional
 
 import numpy as np
 
@@ -98,6 +98,19 @@ def Multiply(x: any, y: any):
     return x * y
 
 
+@as_function_node
+def Sum(
+    x: list | np.ndarray,
+    axis: Optional[int] = None,
+    keepdims: bool = False,
+):
+    """
+    Calculate the sum of elements along a given axis in an array or a list.
+    """
+    sum = np.sum(x, axis=axis, keepdims=keepdims)
+    return sum
+
+
 @as_function_node("shape")
 def Shape(x: list | np.ndarray | float | int):
     """
@@ -170,3 +183,131 @@ def aAddBC(a, b: float, c):
 @as_function_node
 def Identity(x: float):
     return x
+
+
+@as_function_node
+def Mean(numbers: list | np.ndarray | float | int):
+    """
+    Calculate the mean of a list or numpy array of numbers.
+    """
+    mean = np.mean(numbers)
+    return mean
+
+
+@as_function_node
+def Array(data):
+    """
+    Convert input data to a numpy array.
+
+    Parameters:
+        data (list or np.ndarray): Input data to be converted.
+
+    Returns:
+        np.ndarray: Numpy array representation of the input data.
+    """
+    array = np.asarray(data)
+    return array
+
+
+@as_function_node
+def WeightedHistogram(
+    data,
+    bins: int = 50,
+    weighting: str = "linear",
+    bin_centers: Optional[np.ndarray] = None,
+):
+    """
+    Compute a weighted histogram for a list of floats using linear, quadratic, or cubic weights
+    to share a value between multiple nearest bins.
+
+    Parameters:
+        data (list or np.ndarray): Input data (list of floats).
+        bins (int): Number of bins for the histogram (ignored if bin_centers is provided).
+        weighting (str): Type of weighting ("linear", "quadratic", "cubic").
+        bin_centers (np.ndarray, optional): Predefined bin centers. If None, bin centers are computed.
+
+    Returns:
+        bin_centers (np.ndarray): Centers of the histogram bins.
+        weighted_histogram (np.ndarray): Weighted histogram values.
+    """
+    # Compute bin centers if not provided
+    if bin_centers is None:
+        bin_edges = np.linspace(min(data), max(data), bins + 1)
+        bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
+
+    # Initialize the weighted histogram
+    weighted_histogram = np.zeros_like(bin_centers)
+
+    # Determine the number of bins to consider based on weighting type
+    if weighting == "linear":
+        num_bins_to_consider = 2
+    elif weighting == "quadratic":
+        num_bins_to_consider = 3
+    elif weighting == "cubic":
+        num_bins_to_consider = 4
+    else:
+        raise ValueError(
+            "Invalid weighting type. Use 'linear', 'quadratic', or 'cubic'."
+        )
+
+    # Apply weighting for each data point
+    for x in data:
+        # Find the nearest bins
+        distances = np.abs(bin_centers - x)
+        nearest_bins = np.argsort(distances)[
+            :num_bins_to_consider
+        ]  # Indices of the nearest bins
+
+        # Compute weights based on distance to the bin centers
+        total_distance = np.sum(distances[nearest_bins])
+        if weighting == "linear":
+            weights = 1 - distances[nearest_bins] / total_distance
+        elif weighting == "quadratic":
+            weights = (1 - distances[nearest_bins] / total_distance) ** 2
+        elif weighting == "cubic":
+            weights = (1 - distances[nearest_bins] / total_distance) ** 3
+
+        # Normalize weights so their sum is 1
+        weights /= np.sum(weights)
+
+        # Add weighted contributions to the histogram
+        for i, bin_idx in enumerate(nearest_bins):
+            weighted_histogram[bin_idx] += weights[i]
+
+    return weighted_histogram, bin_centers
+
+
+@as_function_node
+def LinearBin(data, bin_centers):
+    """
+    Smoothly bins data points over neighboring bin centers using linear interpolation.
+
+    Parameters:
+        data (array-like): The data points to bin.
+        bin_centers (array-like): The centers of the bins.
+
+    Returns:
+        np.ndarray: Array of binned counts, linear spline interpolated.
+    """
+    data = np.asarray(data)
+    bin_centers = np.asarray(bin_centers)
+    counts = np.zeros_like(bin_centers, dtype=float)
+
+    x_min = np.min(bin_centers)
+    dx = np.mean(np.diff(bin_centers))
+    steps = len(bin_centers)
+
+    for x0 in data:
+        i_left = int((x0 - x_min) / dx)
+
+        # ensure i_left is within bounds
+        if i_left < 0:
+            continue
+        elif i_left >= steps - 1:
+            continue
+
+        w = (x0 - bin_centers[i_left]) / dx
+        counts[i_left] += 1 - w
+        counts[i_left + 1] += w
+
+    return counts, bin_centers

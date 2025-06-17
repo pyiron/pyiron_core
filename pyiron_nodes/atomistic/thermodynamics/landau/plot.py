@@ -149,10 +149,11 @@ def ComputePhaseDiagram(
     T_steps=20,
 ):
     import pyiron_nodes as pn
+    from pyiron_nodes.atomistic.thermodynamics.landau.phases import PhasesFromDataFrame
 
     wf = Workflow("PhaseDiagram")
-    wf.read_data = pn.utilities.ReadDataFrame(filename=filename, compression="gzip")
-    wf.phases_from_df = pn.atomistic.thermodynamics.landau.phases.PhasesFromDataFrame(
+    wf.read_data = pn.dataframe.ReadDataFrame(filename=filename, compression="gzip")
+    wf.phases_from_df = PhasesFromDataFrame(
         dataframe=wf.read_data
     )
     wf.temperatures = pn.math.Linspace(
