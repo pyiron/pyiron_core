@@ -100,7 +100,7 @@ def deserialize_obj(serialized_obj: dict[str, Any]) -> Any:
             print("return recreated node object")
             return recreated_type(**serialized_obj["__getstate__"])
         
-        print("recreate object", recreated_type)
+        # print("recreate object", recreated_type)
         new_obj = recreated_type()
         new_obj.__setstate__(serialized_obj["__getstate__"])
         return new_obj

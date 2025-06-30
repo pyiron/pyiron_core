@@ -12,7 +12,7 @@ from pyiron_workflow import as_function_node
 @as_function_node("linspace")
 def Linspace(
     x_min: float = 0,
-    x_max: float = 0,
+    x_max: float = 1,
     num_points: int = 50,
     endpoint: bool = True,
 ):
@@ -195,7 +195,7 @@ def Mean(numbers: list | np.ndarray | float | int):
 
 
 @as_function_node
-def Array(data):
+def Array(data, dtype: Optional[str] = None):
     """
     Convert input data to a numpy array.
 
@@ -205,8 +205,31 @@ def Array(data):
     Returns:
         np.ndarray: Numpy array representation of the input data.
     """
+
     array = np.asarray(data)
+    if dtype is not None:
+        array = np.asarray(data, dtype=dtype)
     return array
+
+
+@as_function_node
+def Reshape(data: np.ndarray, new_shape: str = "(1, -1)"):
+    """
+    Reshape a numpy array to a new shape.
+
+    Parameters:
+        data (np.ndarray): Input data to be reshaped.
+        new_shape (tuple[int, ...]): New shape for the array.
+
+    Returns:
+        np.ndarray: Reshaped numpy array.
+    """
+    if isinstance(new_shape, str):
+        # Convert string representation of shape to tuple
+        new_shape = tuple(int(dim) for dim in new_shape.strip("()").split(","))
+
+    reshaped_data = np.reshape(data, new_shape)
+    return reshaped_data
 
 
 @as_function_node
@@ -311,3 +334,95 @@ def LinearBin(data, bin_centers):
         counts[i_left + 1] += w
 
     return counts, bin_centers
+
+
+def b_spline_basis(i, k, t, x):
+    """
+    Compute the B-spline basis function N_i,k at x.
+
+    Parameters:
+    - i: index of the basis function
+    - k: degree of the spline (order = k + 1)
+    - t: knot vector (non-decreasing sequence)
+    - x: position(s) to evaluate the basis function
+
+    Returns:
+    - values of N_i,k(x)
+    """
+    if k == 0:
+        # zero degree basis function
+        return np.where((x >= t[i]) & (x < t[i + 1]), 1.0, 0.0)
+    else:
+        denom1 = t[i + k] - t[i]
+        denom2 = t[i + k + 1] - t[i + 1]
+
+        term1 = 0
+        if denom1 != 0:
+            term1 = (x - t[i]) / denom1 * b_spline_basis(i, k - 1, t, x)
+
+        term2 = 0
+        if denom2 != 0:
+            term2 = (t[i + k + 1] - x) / denom2 * b_spline_basis(i + 1, k - 1, t, x)
+
+        return term1 + term2
+
+
+def b_spline_basis_derivative(i, k, t, x):
+    if k == 0:
+        # The derivative of degree 0 basis is zero everywhere
+        return np.zeros_like(x)
+    else:
+        denom1 = t[i + k] - t[i]
+        denom2 = t[i + k + 1] - t[i + 1]
+
+        term1 = 0
+        if denom1 != 0:
+            term1 = k / denom1 * b_spline_basis(i, k - 1, t, x)
+
+        term2 = 0
+        if denom2 != 0:
+            term2 = k / denom2 * b_spline_basis(i + 1, k - 1, t, x)
+
+        return term2 - term1
+
+
+@as_function_node
+def BSpline(
+    x0_vals: np.ndarray,
+    x_min: float = 0,
+    x_max: float = 1,
+    steps: int = 10,
+    degree: int = 3,
+):
+    """
+    Create a B-spline descriptor for the given range and degree.
+
+    Parameters:
+    - x0_vals: array of x values where the B-spline basis will be evaluated
+    - x_min: minimum x value
+    - x_max: maximum x value
+    - degree: degree of the B-spline
+
+    Returns:
+    - A function that evaluates the B-spline basis at given x0 values.
+    """
+    import numpy as np
+
+    knots, dx = np.linspace(
+        x_min - degree * 0, x_max + degree * 0, steps, retstep=True
+    )  # Create a uniform knot vector
+    x_vals = np.linspace(x_min, x_max, steps)
+    y_vals = np.zeros(steps)
+    y_vals_derivative = np.zeros(steps)
+
+    # Evaluate the B-spline basis at each x0 value
+    x_shift = degree * dx / 2 + 3 / 2 * dx
+    for x0 in x0_vals:
+        y_vals += b_spline_basis(
+            1, degree, knots, x_vals - x0 + np.min(knots) + x_shift
+        )
+        y_vals_derivative += b_spline_basis_derivative(
+            1, degree, knots, x_vals - x0 + np.min(knots) + x_shift
+        )
+
+    return y_vals, y_vals_derivative, x_vals

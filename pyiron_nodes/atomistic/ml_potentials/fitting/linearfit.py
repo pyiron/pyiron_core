@@ -485,7 +485,7 @@ def PlotForcesFittingCurve(data_dict: dict):
             color="black",
             s=30,
             marker="+",
-            label=f"Testing RMSE = {rmse_testing:.2f} (meV/$\AA$)",
+            label=f"Testing RMSE = {rmse_testing:.2f}" + r"(meV/$\AA$)",
         )
 
     rmse_training = _calc_rmse(
@@ -496,11 +496,11 @@ def PlotForcesFittingCurve(data_dict: dict):
         data_dict["predicted_training_fpa"],
         color="C1",
         s=30,
-        label=f"Training RMSE = {rmse_training:.2f} (meV/$\AA$)",
+        label=f"Training RMSE = {rmse_training:.2f}" + r"(meV/$\AA$)",
     )
 
-    axe.set_xlabel("DFT $F_i$ (eV/$\AA$)")
-    axe.set_ylabel("Predicted $F_i$ (eV/$\AA$)")
+    axe.set_xlabel("DFT $F_i$" + r"(eV/$\AA$)")
+    axe.set_ylabel("Predicted $F_i$" + r"(eV/$\AA$)")
     axe.set_title("Predicted Force Vs Reference Force")
     axe.legend()
 

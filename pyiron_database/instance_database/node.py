@@ -3,12 +3,8 @@ import json
 from collections.abc import Iterable
 from typing import Any
 
-from pyiron_workflow import NOT_DATA, Node, Workflow
-from pyiron_workflow.graph.base import Graph
-from pyiron_workflow.graph.edges import GraphEdge
-
-# from pyiron_workflow.node import Node
-# from pyiron_workflow.workflow import Workflow
+from pyiron_workflow import NOT_DATA, Node
+from pyiron_workflow.api.graph import Graph, GraphEdge
 
 from pyiron_database.generic_storage import HDF5Storage, JSONGroup
 from pyiron_database.obj_reconstruction.util import (
@@ -78,7 +74,7 @@ def restore_node_outputs(node: Node) -> bool:
 
     node_hash = get_hash(node)
     output_path = f".storage/{node_hash}.hdf5"
-    # print(f"Restoring node outputs  {node_hash} {pathlib.Path(output_path).exists()}")
+    print(f"Restoring node outputs  {node_hash} {node.label} {pathlib.Path(output_path).exists()}")
     with HDF5Storage(output_path, "r") as storage:
         for k, v in storage.items():
             # print(f"Restoring output {k} of node {node_hash}")

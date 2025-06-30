@@ -1,18 +1,22 @@
+import dataclasses
 import os
 import time
 import unittest
 from collections import OrderedDict
 
 import pyiron_database.instance_database as idb
-
 from pyiron_workflow.simple_workflow import (
-    Workflow,
+    PORT_LABEL,
     Node,
-    make_node_decorator,
+    Workflow,
     as_function_node,
     as_inp_dataclass_node,
     as_macro_node,
-    PORT_LABEL,
+    extract_dataclass_parameters,
+    extract_input_parameters_from_function,
+    get_inputs_data,
+    make_node_decorator,
+    value_to_string,
 )
 
 from static.nodes import Identity, IdentityMacro
@@ -141,6 +145,71 @@ class TestSimpleWorkflow(unittest.TestCase):
                 storage_location = idb.store_node_outputs(n)
                 os.unlink(storage_location)
                 os.rmdir(storage_location.split(os.sep)[0])
+
+
+class TestValueToString(unittest.TestCase):
+    def test_int(self):
+        self.assertEqual(value_to_string(42), "42")
+
+    def test_float(self):
+        self.assertEqual(value_to_string(3.14), "3.14")
+
+    def test_bool(self):
+        self.assertEqual(value_to_string(True), "True")
+        self.assertEqual(value_to_string(False), "False")
+
+    def test_none(self):
+        self.assertEqual(value_to_string(None), "None")
+
+    def test_str(self):
+        self.assertEqual(value_to_string("hello"), '"hello"')
+
+    def test_list(self):
+        self.assertIsNone(value_to_string([1, 2, 3]))
+
+    def test_custom_object(self):
+        class Dummy:
+            pass
+
+        self.assertIsNone(value_to_string(Dummy()))
+
+
+class TestGetInputsData(unittest.TestCase):
+    @staticmethod
+    def _some_function(v: int, w: None, x: type(None), y: tuple, z):
+        whatever = 42
+        return whatever
+
+    @dataclasses.dataclass
+    class _SomeData:
+        w: int = 42
+        x: None = None
+        y: type(None) = None
+        z: tuple = ()
+
+    def test_function_hint_parsing(self):
+        fnc_inputs = get_inputs_data(
+            self._some_function, extract_input_parameters_from_function
+        )
+        self.assertListEqual(
+            ["int", "None", "None", "NonPrimitive", "NotHinted"],
+            fnc_inputs.data["type"],
+            msg="Whitelisted hints, non-primitive hints, and no hint at all should all "
+            "parse separately and correctly",
+        )
+
+    def test_dataclass_hint_parsing(self):
+        dc_inputs = get_inputs_data(
+            self._SomeData(),
+            extract_dataclass_parameters,
+        )
+        self.assertListEqual(
+            ["int", "None", "None", "NonPrimitive"],
+            dc_inputs.data["type"],
+            msg="Whitelisted hints, non-primitive hints should parse separately and "
+            "correctly; dataclasses _can't_ have un-hinted fields, so no worries "
+            "there.",
+        )
 
 
 if __name__ == "__main__":
