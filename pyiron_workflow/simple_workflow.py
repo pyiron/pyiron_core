@@ -406,7 +406,7 @@ class Data:
         self._attribute = attribute
 
     def __getattr__(self, key):
-        # print('Data.__getattr__: ', key)
+        # print('Data.__getattr__: ', key, self.data[PORT_LABEL])
         if key not in self.data[PORT_LABEL]:
             raise AttributeError(f"No attribute named {key}")
 
