@@ -46,7 +46,11 @@ def get_node_from_path(import_path, log=None):
     try:
         module = importlib.import_module(module_path)
     except ModuleNotFoundError as e:
-        log.append_stderr(e)
+        # handle case if log is None
+        if log is None:
+            print(f"Error importing module: {e}")  # Print the error if log is None
+        else:   
+            log.append_stderr(e)
         return None
     # Get the object
     object_from_path = getattr(module, name)
