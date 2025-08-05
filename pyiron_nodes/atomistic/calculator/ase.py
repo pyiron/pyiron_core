@@ -1,5 +1,6 @@
 from ase import Atoms
 from pyiron_workflow import as_function_node
+from pyiron_nodes.atomistic.engine.generic import OutputEngine
 
 
 @as_function_node
@@ -22,9 +23,21 @@ def Static(
     out.energies_pot = np.array(
         [float(structure.get_potential_energy())]
     )  # TODO: originally of type np.float32 -> why??
-    out.force = np.array([structure.get_forces()])
+    out.forces = np.array([structure.get_forces()])
 
     return out
+
+
+@as_function_node
+def StaticEnergy(
+    structure: Atoms,
+    engine: OutputEngine,
+):
+    # print("structure: ", structure, engine)
+    structure.calc = engine.calculator
+    energy = structure.get_potential_energy()
+
+    return energy
 
 
 @as_function_node("out")

@@ -559,8 +559,12 @@ class Node:
                 val = inp_port.copy()
                 # add hash to closure node
                 import pyiron_database.instance_database as idb
-
-                hash = idb.get_hash(inp_port)
+                try:
+                    hash = idb.get_hash(inp_port)
+                    # inp_port._hash_parent = hash
+                except Exception as e:
+                    print("Error getting hash for node:", inp_port.label, e)
+                    hash = None
                 inp_port._hash_parent = hash
                 print("copy node: ", val.label, inp_port._hash_parent)
                 # print("copy node: ", val.label)

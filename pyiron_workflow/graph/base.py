@@ -1108,6 +1108,7 @@ def get_code_from_graph(
     Returns:
         str: The generated Python source code as a string.
     """
+    graph = copy_graph(graph)
     if sort_graph:
         graph = get_updated_graph(graph)
         graph = topological_sort(graph)
@@ -1115,7 +1116,7 @@ def get_code_from_graph(
     kwargs = _build_function_parameters(
         graph, use_node_default=use_node_default, scope_labels=scope_inputs
     )
-    returns, body_code = _process_nodes_and_edges(
+    returns, body_code, imports = _process_nodes_and_edges(
         graph, scope_labels=scope_inputs, enforced_node_library=enforced_node_library
     )
     returns = returns if len(returns) > 0 else _get_default_return_args(graph)
@@ -1125,10 +1126,11 @@ def get_code_from_graph(
     def {graph.label}({kwargs}):
 
         from pyiron_workflow import Workflow
-        wf = Workflow('{graph.label}')
-
     """
     )
+    
+    code += imports + "\n"
+    code += f"    wf = Workflow('{graph.label}')\n"
     code += body_code
     code += f"\n    return {', '.join(returns)}\n"
 
@@ -1198,6 +1200,7 @@ def _process_nodes_and_edges(
     """
     Process nodes and edges to build the workflow code.
     """
+    imports = ""
     code = ""
     return_args = []
 
@@ -1234,12 +1237,12 @@ def _process_nodes_and_edges(
                     kwargs[key] = concatenate(node.label, key) if scope_labels else key
 
         module_path, class_name = node.import_path.rsplit(".", 1)
-        code += f"    from {module_path} import {class_name}\n"
-        line = f"    wf.{node.label} = {class_name}("
-        line += _dict_to_kwargs(kwargs) + ")\n"
-        code += line
+        imports += f"    from {module_path} import {class_name}\n"
+        code += f"    wf.{node.label} = {class_name}("
+        code += _dict_to_kwargs(kwargs) + ")\n"
+    # code = imports + "\n" + code
 
-    return return_args, code
+    return return_args, code, imports
 
 
 def _get_default_return_args(graph: Graph) -> list[str]:

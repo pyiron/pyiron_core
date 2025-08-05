@@ -32,4 +32,11 @@ def light_mode(node: 'Node'):
         color_light_blue = "#9fd7ea"
         return color_light_blue    
     else:
+        if hasattr(node, 'color'):
+            # If the node has a color attribute, return it
+            return node.color
+        color_light_red = "#ea9f9f"
+        # Default color for unknown node types
+        print(f"Warning: Unknown node type {node.node_type}. Using default color.")
+        node.color = color_light_red
         return node.color
