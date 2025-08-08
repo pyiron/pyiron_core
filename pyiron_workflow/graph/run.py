@@ -64,7 +64,7 @@ def pull_node(graph: base.Graph, node_label: str):
     input_nodes_labels = [node_labels[i] for i in input_nodes]
 
     for input_node_label in input_nodes_labels:
-        # print(f"Running node {input_node_label}")
+        print(f"Running node {input_node_label}")
         out = opt_graph.nodes[input_node_label].node.run()
     return out
 
