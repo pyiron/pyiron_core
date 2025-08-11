@@ -559,6 +559,7 @@ class Node:
                 val = inp_port.copy()
                 # add hash to closure node
                 import pyiron_database.instance_database as idb
+
                 try:
                     hash = idb.get_hash(inp_port)
                     # inp_port._hash_parent = hash
@@ -613,7 +614,7 @@ class Node:
     def _set_state(self, state):
         pass
 
-    def run(self):
+    def run(self, db=None):
         import pyiron_database.instance_database as idb
         from datetime import datetime
         import getpass
@@ -671,23 +672,18 @@ class Node:
         # get user name
         self._user = getpass.getuser()
 
-        if "_db" in self.inputs.keys():
-            # print("node: ", self.inputs.node.value.node.inputs)
-            db = self.inputs._db.value
-            if db is not None:
-                if isinstance(db, Port):
-                    db = db.value
-                # print("store in db: ", self.label, type(db), db)
-                idb.store_node_in_database(
-                    db, self, store_outputs=False, store_input_nodes_recursively=True
-                )
-                path = idb.store_node_outputs(self)
-                print("stored: ", self.label, path)
-
-        elif "store" in self.inputs.keys():
+        if "store" in self.inputs.keys():
             if self.inputs.store.value:
-                path = idb.store_node_outputs(self)
-                print("stored: ", self.label, path)
+                # path = idb.store_node_outputs(self)
+                # print("stored: ", self.label, path)
+                if db is not None:
+                    idb.store_node_in_database(
+                        db,
+                        self,
+                        store_outputs=True,
+                        store_input_nodes_recursively=True,
+                    )
+
 
         return out
 

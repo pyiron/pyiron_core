@@ -1,8 +1,14 @@
 from pyiron_workflow import as_function_node
+from pyiron_nodes.atomistic.calculator.data import InputCalcMD
 
 
 @as_function_node
-def Equilibrate(solvated_electrode, water_potential, temperature: float = 300, n_ionic_steps:int=1000, n_print: int=10):
+def Equilibrate(
+    solvated_electrode,
+    water_potential,
+    parameters: InputCalcMD = InputCalcMD().run(),
+    store: bool = True,
+):
     """
     Function to equilibrate a solvated electrode structure using LAMMPS.
 
@@ -15,13 +21,17 @@ def Equilibrate(solvated_electrode, water_potential, temperature: float = 300, n
         None
     """
     from pyiron import Project
+    from dataclasses import asdict
+    from pyiron_nodes.atomistic.calculator.data import OutputCalcMD
 
     # Create a job for LAMMPS equilibration
     pr = Project("equilibrate")
     j = pr.create.job.Lammps("water_equilibration", delete_existing_job=True)
 
     solvated_electrode.add_tag(selective_dynamics=[False, False, False])
-    solvated_electrode.selective_dynamics[solvated_electrode.select_index(["O", "H"])] = [
+    solvated_electrode.selective_dynamics[
+        solvated_electrode.select_index(["O", "H"])
+    ] = [
         True,
         True,
         True,
@@ -29,10 +39,27 @@ def Equilibrate(solvated_electrode, water_potential, temperature: float = 300, n
 
     j.structure = solvated_electrode
     j.potential = water_potential
-    j.calc_md(temperature=temperature, n_ionic_steps=n_ionic_steps, n_print=n_print)
+    j.calc_md(**asdict(parameters))
 
     j.run(delete_existing_job=True)
-    return j
+    job_out = j["output/generic"]
+
+    out = OutputCalcMD().dataclass()
+    out.cells = job_out["cells"]
+    out.energies_pot = job_out["energy_pot"]
+    out.energies_tot = job_out["energy_tot"]
+    out.forces = job_out["forces"]
+    out.indices = job_out["indices"]
+    out.natoms = job_out["natoms"]
+    out.positions = job_out["positions"]
+    out.pressures = job_out["pressures"]
+    out.steps = job_out["steps"]
+    out.temperatures = job_out["temperature"]
+    out.unwrapped_positions = job_out["unwrapped_positions"]
+    out.velocities = job_out["velocities"]
+    out.volumes = job_out["volume"]
+
+    return out
 
 
 @as_function_node

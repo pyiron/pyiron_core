@@ -1,5 +1,6 @@
 import hashlib
 import json
+import os
 from collections.abc import Iterable
 from typing import Any
 
@@ -19,7 +20,10 @@ from pyiron_database.obj_reconstruction.util import (
 from .InstanceDatabase import InstanceDatabase
 
 
-def store_node_outputs(node: Node) -> str:
+PyironStoragePath: str = os.path.expanduser("~/.storage")
+
+
+def store_node_outputs(node: Node, storage_path: str = PyironStoragePath) -> str:
     """
     Store a node's outputs into an HDF5 file.
 
@@ -33,7 +37,7 @@ def store_node_outputs(node: Node) -> str:
         ValueError: If any output of the node is NOT_DATA.
     """
     node_hash = get_hash(node)
-    output_path = f".storage/{node_hash}.hdf5"
+    output_path = f"{storage_path}/{node_hash}.hdf5"
     with HDF5Storage(output_path, "w") as storage:
         for k, v in node.outputs.items():
             is_default_check = v.value == v.default
@@ -55,11 +59,16 @@ def store_node_outputs(node: Node) -> str:
                 raise ValueError(f"Output '{k}' has no value.")
             # print(f"Storing output {k} of node {node_hash}")
             # print(f"Value: {serialize_obj(v.value)}")
-            storage[k] = pickle_dump(serialize_obj(v.value))
+            try:
+                storage[k] = pickle_dump(serialize_obj(v.value))
+            except Exception as e:
+                raise ValueError(
+                    f"Failed to store output '{k}' of node '{node.label}': {e}"
+                ) from e
     return output_path
 
 
-def restore_node_outputs(node: Node) -> bool:
+def restore_node_outputs(node: Node, storage_path: str = PyironStoragePath) -> bool:
     """
     Restore a node's outputs from a stored HDF5 file, given by node.hash.
 
@@ -73,8 +82,10 @@ def restore_node_outputs(node: Node) -> bool:
     import pathlib
 
     node_hash = get_hash(node)
-    output_path = f".storage/{node_hash}.hdf5"
-    print(f"Restoring node outputs  {node_hash} {node.label} {pathlib.Path(output_path).exists()}")
+    output_path = f"{storage_path}/{node_hash}.hdf5"
+    print(
+        f"Restoring node outputs  {node_hash} {node.label} {pathlib.Path(output_path).exists()}"
+    )
     with HDF5Storage(output_path, "r") as storage:
         for k, v in storage.items():
             # print(f"Restoring output {k} of node {node_hash}")
@@ -209,11 +220,13 @@ def store_node_in_database(
     node_dict = node_jsongroup.data
     output_path = None
     if store_outputs:
-        output_path = store_node_outputs(node)
+        if "store" in node.inputs.keys():
+            if node.inputs.store.value:
+                output_path = store_node_outputs(node)
     if hasattr(node, "_hash_parent"):
         node_dict["node"]["master_hash"] = node._hash_parent
     else:
-        node_dict["node"]["master_hash"] = None    
+        node_dict["node"]["master_hash"] = None
     if hasattr(node, "_start_time"):
         node_dict["node"]["start_time"] = node._start_time
     if hasattr(node, "_execution_time"):
@@ -230,10 +243,10 @@ def store_node_in_database(
         inputs=node_dict["inputs"],
         outputs=node_dict["outputs"],
         output_path=output_path,
-        master_hash = node_dict["node"]["master_hash"],
-        start_time= node_dict["node"].get("start_time", None),
-        cpu_time= node_dict["node"].get("execution_time", None),
-        user= node_dict["node"].get("user", None),
+        master_hash=node_dict["node"]["master_hash"],
+        start_time=node_dict["node"].get("start_time", None),
+        cpu_time=node_dict["node"].get("execution_time", None),
+        user=node_dict["node"].get("user", None),
     )
     db.create(node_data)
     return node_hash
@@ -277,7 +290,9 @@ def restore_node_from_database(
         module=db_result.module,
         qualname=db_result.qualname,
         version=db_result.version,
-        init_args={"label": db_result.qualname}, # TODO: make sure that this is unique (use graph tool to generate a unique label)
+        init_args={
+            "label": db_result.qualname
+        },  # TODO: make sure that this is unique (use graph tool to generate a unique label)
         # init_args={"label": generate_random_string()},
     )
 
@@ -293,7 +308,12 @@ def restore_node_from_database(
             # if connect_nodes:
             input_hash, input_label = v.split("@")
             input_node, parent = restore_node_from_database(db, input_hash, parent)
-            parent += GraphEdge(target=node.label, targetHandle=k, source=input_node.label, sourceHandle=input_label)
+            parent += GraphEdge(
+                target=node.label,
+                targetHandle=k,
+                source=input_node.label,
+                sourceHandle=input_label,
+            )
             # node.inputs[k].connect(input_node.outputs[input_label])
         else:
             node.inputs[k] = v
