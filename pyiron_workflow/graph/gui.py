@@ -13,7 +13,7 @@ import pygments
 
 import pyironflow
 from IPython.display import display
-from pyiron_database.instance_database import node as idb_node
+from pyiron_database import instance_database as idb
 
 from pyiron_workflow import simple_workflow
 from pyiron_workflow.graph import (
@@ -315,7 +315,7 @@ class PyironFlowWidget:
 
 class PyironFlow:
     def __init__(
-        self, wf_list=None, hash_nodes=False, gui_layout: GUILayout = GUILayout()
+        self, wf_list=None, hash_nodes=False, gui_layout: GUILayout = GUILayout(), db: idb.PostgreSQLInstanceDatabase | None = None,
     ):
 
         if wf_list is None:
@@ -325,7 +325,7 @@ class PyironFlow:
         self.hash_nodes = hash_nodes
         if hash_nodes:
             # self.db = hs.create_nodes_table(echo=False)
-            self.db = create_db()
+            self.db = create_db() if db is None else db
             print(f"Database created: {self.db}")
         else:
             self.db = None
