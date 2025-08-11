@@ -77,6 +77,7 @@ def _save_graph(
     filename: str | pathlib.Path = None,
     workflow_dir: str = ".",
     overwrite: bool = False,
+    compact: bool = False,
 ):
     if filename is None:
         filename = f"{graph.label}.json"
@@ -95,12 +96,13 @@ def _save_graph(
         )
 
     with open(file, "w") as f:
-        f.write(json.dumps((_compact_graph(graph).__getstate__()), indent=4))
+        state = _compact_graph(graph).__getstate__() if compact else graph.__getstate__()
+        f.write(json.dumps(state, indent=4))
 
     return True
 
 
-def _load_graph(filename: str | pathlib.Path, workflow_dir: str = "."):
+def _load_graph(filename: str | pathlib.Path, workflow_dir: str = ".", compact: bool = False):
     # check if filename has extension json, if not add it
     if isinstance(filename, str):
         if not filename.endswith(".json"):
@@ -115,8 +117,6 @@ def _load_graph(filename: str | pathlib.Path, workflow_dir: str = "."):
 
     with open(wf_file, "r") as f:
         state = json.load(f)
-    graph = _uncompact_graph_from_state(state)
-
-        # graph = base.Graph().__setstate__(json.load(f))
+    graph = _uncompact_graph_from_state(state) if compact else base.Graph().__setstate__(state)
 
     return graph
