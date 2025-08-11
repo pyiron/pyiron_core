@@ -674,8 +674,6 @@ class Node:
 
         if "store" in self.inputs.keys():
             if self.inputs.store.value:
-                # path = idb.store_node_outputs(self)
-                # print("stored: ", self.label, path)
                 if db is not None:
                     idb.store_node_in_database(
                         db,
@@ -683,6 +681,8 @@ class Node:
                         store_outputs=True,
                         store_input_nodes_recursively=True,
                     )
+                else:
+                    idb.store_node_outputs(self)
 
 
         return out
