@@ -5,19 +5,18 @@ import unittest
 from collections import OrderedDict
 
 import pyiron_database.instance_database as idb
-
 from pyiron_workflow.simple_workflow import (
-    Workflow,
+    PORT_LABEL,
     Node,
-    make_node_decorator,
+    Workflow,
     as_function_node,
     as_inp_dataclass_node,
     as_macro_node,
     extract_dataclass_parameters,
     extract_input_parameters_from_function,
     get_inputs_data,
+    make_node_decorator,
     value_to_string,
-    PORT_LABEL,
 )
 
 from static.nodes import Identity, IdentityMacro

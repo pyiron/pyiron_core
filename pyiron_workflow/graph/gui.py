@@ -9,13 +9,23 @@ from typing import Optional, Union
 import ipywidgets as widgets
 import numpy as np
 import pandas as pd
-import pyironflow
 import pygments
+
+import pyironflow
 from IPython.display import display
 from pyiron_database.instance_database import node as idb_node
 
-from pyiron_workflow.graph import base, decorators, edges
 from pyiron_workflow import simple_workflow
+from pyiron_workflow.graph import (
+    base,
+    decorators,
+    edges,
+    graph_json,
+    group,
+    labelling,
+    not_data,
+    run,
+)
 
 
 class GUILayout:
@@ -143,10 +153,10 @@ class PyironFlowWidget:
                     self.update_gui()
                 elif command == "saveFlow":
                     print("saveFlow")
-                    base._save_graph(self.graph, overwrite=True)
+                    graph_json._save_graph(self.graph, overwrite=True)
                 elif command == "restoreFlow":
                     print("restoreFlow")
-                    self.graph = base._load_graph(f"{self.graph.label}.json")
+                    self.graph = graph_json._load_graph(f"{self.graph.label}.json")
                     self.update_gui()
                 elif command == "clearFlow":
                     print("clearFlow")
@@ -166,11 +176,7 @@ class PyironFlowWidget:
                     print("selected_nodes: ", self._selected_nodes)
                 elif command == "groupSelectedNodes":
                     print("group_nodes: ", self._selected_nodes)
-                    node_ids = base._node_labels_to_node_ids(
-                        self.graph, self._selected_nodes
-                    )
-                    print("group_nodes: ", node_ids)
-                    self.graph = base.create_group(self.graph, node_ids)
+                    self.graph = group.create_group(self.graph, self._selected_nodes)
                     # self.graph = base.create_group(self.graph, node_ids)
                     # self.graph = base.get_updated_graph(self.graph)
                     self.update_gui()
@@ -211,9 +217,10 @@ class PyironFlowWidget:
                         # get node hash
                         print("node hash: ", idb_node.get_hash(node))
                         if node.node_type == "graph":
-                            if hasattr(node, "graph"):
-                                code = base.get_code_from_graph(node.graph)
-                            base.get_code_from_graph(node.graph)
+                            code = base.get_code_from_graph(
+                                node.graph,
+                                sort_graph=True,
+                            )
                         else:
                             code = inspect.getsource(node._func)
 
@@ -229,7 +236,7 @@ class PyironFlowWidget:
                         self.accordion_widget.selected_index = 1
                         self.out_widget.clear_output()
                         if self.db is None:
-                            out = base.pull_node(
+                            out = run.pull_node(
                                 base.get_updated_graph(self.graph), node.label
                             )
                         else:
@@ -242,14 +249,10 @@ class PyironFlowWidget:
                             "expand: ", node_name, self.graph.nodes[node_name].expanded
                         )
                         if self.graph.nodes[node_name].expanded:
-                            self.graph = base._mark_node_as_collapsed(
-                                self.graph, node_name
-                            )
+                            self.graph = _mark_node_as_collapsed(self.graph, node_name)
                             print("collapsed")
                         else:
-                            self.graph = base._mark_node_as_expanded(
-                                self.graph, node_name
-                            )
+                            self.graph = _mark_node_as_expanded(self.graph, node_name)
                             print("expanded")
                         print(
                             "expanded: ",
@@ -315,7 +318,7 @@ class PyironFlow:
         self.wf_widgets = list()  # list of PyironFlowWidget objects
         for wf in wf_list:
             if isinstance(wf, str):
-                wf = base._load_graph(wf)
+                wf = graph_json._load_graph(wf)
             self.wf_widgets.append(
                 PyironFlowWidget(wf, gui_layout=gui_layout, main_widget=self)
             )
@@ -497,13 +500,13 @@ def _to_jsonifyable(obj):
         if isinstance(value, (str, int, float, bool)):
             return value
         else:
-            return base.NotData
+            return not_data.NotData
     elif isinstance(obj, simple_workflow.Node):
-        return base.NotData
+        return not_data.NotData
     elif isinstance(obj, (str, int, float, bool, type(None))):
         return obj
     else:
-        return base.NotData
+        return not_data.NotData
 
 
 def gui_data(
@@ -519,7 +522,7 @@ def gui_data(
         return GuiData(label=label)
 
     target_values = [
-        _to_jsonifyable(v) if not isinstance(v, simple_workflow.Node) else base.NotData
+        _to_jsonifyable(v) if not isinstance(v, simple_workflow.Node) else not_data.NotData
         for v in node.inputs.data["value"]
     ]
     is_connected = [
@@ -540,7 +543,7 @@ def gui_data(
         import_path=node.function["import_path"],
         target_values=target_values,
         target_types=target_types,
-        source_values=[base.NotData for _ in node.outputs.data["value"]],
+        source_values=[not_data.NotData for _ in node.outputs.data["value"]],
         source_types=node.outputs.data["type"],
         expanded=expanded,
     )
@@ -559,7 +562,7 @@ def _nodes_to_gui(graph: base.Graph, remove_none=True) -> decorators.NestedList:
     node_width = 200
 
     nodes = decorators.NestedList()
-    active_nodes = base._get_active_nodes(graph)
+    active_nodes = _get_active_nodes(graph)
     for i, (k, v) in enumerate(active_nodes.items()):
         # print("gui node: ", k, v.label, v.expanded)
         # print('node: ', k, v.label, v.node.label)
@@ -589,7 +592,7 @@ def _nodes_to_gui(graph: base.Graph, remove_none=True) -> decorators.NestedList:
         if v.node_type == "graph":
             node_dict.type = "customNode"  # None
             node_dict.style["backgroundColor"] = "rgba(255, 165, 0, 0.3)"
-        elif base.is_virtual_node(v.label):
+        elif labelling.is_virtual(v.label):
             node_dict.style["border"] = "1px black dashed"
             node_dict.style["backgroundColor"] = "rgba(50, 50, 50, 0.1)"
         elif v.node.node_type == "out_dataclass_node":
@@ -698,7 +701,7 @@ def display_gui_style(graph):
 
 def _edges_to_gui(graph, remove_none=True):
     edges = decorators.NestedList()
-    active_edges = base._get_active_edges(graph)
+    active_edges = _get_active_edges(graph)
     for i, edge in enumerate(active_edges):
         edge_dict = edge.asdict(remove_none=remove_none)
         edge_dict["id"] = i
@@ -767,3 +770,42 @@ class GuiGraph:
             self._thread = threading.Thread(target=self._update_graph_view, args=(w,))
             self._thread.start()
         return display(w)
+
+
+def _mark_node_as_collapsed(graph, node_label: str):
+    new_graph = base.copy_graph(graph)
+    graph_node = new_graph.nodes[node_label]
+    if graph_node.node_type == "graph":
+        graph_node.expanded = False
+    return new_graph
+
+
+def _mark_node_as_expanded(graph, node_label: str):
+    new_graph = base.copy_graph(graph)
+    graph_node = new_graph.nodes[node_label]
+    if graph_node.node_type == "graph":
+        graph_node.expanded = True
+    return new_graph
+
+
+def _get_active_nodes(graph: base.Graph) -> base.Nodes:
+    active_nodes = decorators.NestedDict(obj_type=base.GraphNode)
+    # get all nodes that are not inside a collapsed node
+    for k, v in graph.nodes.items():
+        if v.parent_id is None:
+            active_nodes[k] = v
+        else:
+            parent = graph.nodes[v.parent_id]
+            if parent.expanded:
+                active_nodes[k] = v
+    return active_nodes
+
+
+def _get_active_edges(graph: base.Graph) -> edges.Edges:
+    active_edges = decorators.NestedList(obj_type=edges.GraphEdge)
+    active_nodes = _get_active_nodes(graph)
+    # get all edges that are not inside a collapsed node
+    for edge in graph.edges:
+        if edge.source in active_nodes.keys() and edge.target in active_nodes.keys():
+            active_edges.append(edge)
+    return active_edges

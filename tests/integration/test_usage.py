@@ -3,7 +3,7 @@ import os
 import unittest
 
 import pyiron_workflow as pwf
-from pyiron_workflow.graph import base
+from pyiron_workflow.graph import base, graph_json, group, run, labelling
 
 from static import nodes, other_nodes
 
@@ -18,8 +18,8 @@ class TestUsage(unittest.TestCase):
         wf = pwf.Workflow("custom_nodes_in_a_group")
         wf.n = nodes.Identity(data)
         g = base.get_full_graph_from_wf(wf)
-        g = base.create_group(g, [0], label="subgraph")
-        out = base.pull_node(base.get_updated_graph(g), "subgraph")
+        g = group.create_group(g, [0], label="subgraph")
+        out = run.pull_node(base.get_updated_graph(g), "subgraph")
         self.assertEqual(
             out,
             data,
@@ -43,7 +43,7 @@ class TestUsage(unittest.TestCase):
 
         self.assertEqual(
             data,
-            base.pull_node(base.get_updated_graph(g), "n1"),
+            run.pull_node(base.get_updated_graph(g), "n1"),
             msg="Two nodes with the same source name should be able to co-exist in the "
             "same workflow/graph",
         )
@@ -52,8 +52,8 @@ class TestUsage(unittest.TestCase):
             msg="Two nodes with the same source name should be able to co-exist in the "
             "same group"
         ):
-            g = base.create_group(g, [0, 1], label="subgraph")
-            out = base.pull_node(base.get_updated_graph(g), "subgraph")
+            g = group.create_group(g, [0, 1], label="subgraph")
+            out = run.pull_node(base.get_updated_graph(g), "subgraph")
             self.assertEqual(
                 out, data, msg="Just verifying the group is also operational"
             )
@@ -70,20 +70,17 @@ class TestUsage(unittest.TestCase):
 
         g = base.get_full_graph_from_wf(wf)
 
-        m_ids = base._node_labels_to_node_ids(g, ["m1", "m2"])
-        g = base.create_group(g, m_ids, label="m_subgraph")
-
-        n_ids = base._node_labels_to_node_ids(g, ["n1", "n2"])
-        g = base.create_group(g, n_ids, label="n_subgraph")
+        g = group.create_group(g, ["m1", "m2"], label="m_subgraph")
+        g = group.create_group(g, ["n1", "n2"], label="n_subgraph")
 
         self.assertEqual(
             m_data,
-            base.pull_node(base.get_updated_graph(g), "m_subgraph"),
+            run.pull_node(base.get_updated_graph(g), "m_subgraph"),
             msg="Both groups should be pullable",
         )
         self.assertEqual(
             n_data,
-            base.pull_node(base.get_updated_graph(g), "n_subgraph"),
+            run.pull_node(base.get_updated_graph(g), "n_subgraph"),
             msg="Both groups should be pullable",
         )
 
@@ -106,7 +103,7 @@ class TestUsage(unittest.TestCase):
             wf.n3.inputs.x = wf.n2
             g_connected = base.get_full_graph_from_wf(make_workflow())
             g_connected = base.add_edge(g_connected, "n2", "n3", "y", "x")
-            expected_terminal_result = base.pull_node(
+            expected_terminal_result = run.pull_node(
                 base.get_updated_graph(g_connected), "n4"
             )
 
@@ -120,36 +117,32 @@ class TestUsage(unittest.TestCase):
 
         with self.subTest("Upstream group"):
             expected_out, g, labels = make_graph()
-            ids = base._node_labels_to_node_ids(g, labels[:2])
-            g = base.create_group(g, ids, label="upstream_group")
+            g = group.create_group(g, labels[:2], label="upstream_group")
             g = base.add_edge(g, "upstream_group", "n3", "n2__y", "x")
             self.assertEqual(
                 expected_out,
-                base.pull_node(base.get_updated_graph(g), labels[-1]),
+                run.pull_node(base.get_updated_graph(g), labels[-1]),
                 "Output from groups should propagate to downstream nodes",
             )
 
         with self.subTest("Downstream group"):
             expected_out, g, labels = make_graph()
-            ids = base._node_labels_to_node_ids(g, labels[2:])
-            g = base.create_group(g, ids, label="downstream_group")
+            g = group.create_group(g, labels[2:], label="downstream_group")
             g = base.add_edge(g, "n2", "downstream_group", "y", "n3__x")
             self.assertEqual(
                 expected_out,
-                base.pull_node(base.get_updated_graph(g), "downstream_group"),
+                run.pull_node(base.get_updated_graph(g), "downstream_group"),
                 "Output from groups should propagate to downstream nodes",
             )
 
         with self.subTest("Two groups"):
             expected_out, g, labels = make_graph()
-            upstream_ids = base._node_labels_to_node_ids(g, labels[:2])
-            g = base.create_group(g, upstream_ids, label="upstream_group")
-            downstream_ids = base._node_labels_to_node_ids(g, labels[2:])
-            g = base.create_group(g, downstream_ids, label="downstream_group")
+            g = group.create_group(g, labels[:2], label="upstream_group")
+            g = group.create_group(g, labels[2:], label="downstream_group")
             g = base.add_edge(g, "upstream_group", "downstream_group", "n2__y", "n3__x")
             self.assertEqual(
                 expected_out,
-                base.pull_node(base.get_updated_graph(g), "downstream_group"),
+                run.pull_node(base.get_updated_graph(g), "downstream_group"),
                 "Output from groups should propagate to downstream nodes",
             )
 
@@ -163,17 +156,21 @@ class TestUsage(unittest.TestCase):
 
             run_group = base.get_full_graph_from_wf(make_workflow())
             run_group = base.add_edge(run_group, "n1", "n2", "y", "x")
-            expected_result = base.pull_node(base.get_updated_graph(run_group), "n2")
+            expected_result = run.pull_node(base.get_updated_graph(run_group), "n2")
 
             g = base.get_full_graph_from_wf(make_workflow())
-            g = base.create_group(g, [0], label="subgraph")
+            g = group.create_group(g, [0], label="subgraph")
             return expected_result, g
 
         expected_result, explicit_graph = make_graph()
         explicit_graph = base.add_edge(
-            explicit_graph, "va_o_subgraph__n1__y", "n2", "y", "x"
+            explicit_graph,
+            labelling.virtual_output_label("subgraph", "n1", "y"),
+            "n2",
+            "y",
+            "x"
         )
-        explicit_result = base.pull_node(base.get_updated_graph(explicit_graph), "n2")
+        explicit_result = run.pull_node(base.get_updated_graph(explicit_graph), "n2")
         self.assertEqual(
             expected_result,
             explicit_result,
@@ -182,7 +179,7 @@ class TestUsage(unittest.TestCase):
 
         _, implicit_graph = make_graph()
         implicit_graph = base.add_edge(implicit_graph, "subgraph", "n2", "n1__y", "x")
-        implicit_result = base.pull_node(base.get_updated_graph(implicit_graph), "n2")
+        implicit_result = run.pull_node(base.get_updated_graph(implicit_graph), "n2")
         self.assertEqual(
             expected_result,
             implicit_result,
@@ -194,10 +191,10 @@ class TestUsage(unittest.TestCase):
         wf = pwf.Workflow(fname)
         wf.n = nodes.AddOne(0)
         g = base.get_full_graph_from_wf(wf)
-        g = base.create_group(g, [0], label="subgraph")
-        base._save_graph(g, filename=fname)
+        g = group.create_group(g, [0], label="subgraph")
+        graph_json._save_graph(g, filename=fname)
         try:
-            reloaded = base._load_graph(fname)
+            reloaded = graph_json._load_graph(fname)
             self.assertTrue(
                 all(isinstance(n, pwf.Node) for n in reloaded.nodes.df["node"].values),
                 msg="All reloaded nodes should get an accompanying python instance",
@@ -217,7 +214,7 @@ class TestUsage(unittest.TestCase):
         )
 
         g_from_graph = base.get_full_graph_from_wf(wf)
-        workflow_graph_out = base.pull_node(g_from_graph, "macro")
+        workflow_graph_out = run.pull_node(g_from_graph, "macro")
 
         self.assertTupleEqual(
             macro_out,
@@ -231,19 +228,19 @@ class TestUsage(unittest.TestCase):
         g = base.add_node(g, nodes.Identity(label="p2"))
         g = base.add_edge(g, "input_fork", "p1", "x", "x")
         g = base.add_edge(g, "input_fork", "p2", "x", "x")
-        g = base.create_group(g, [0, 1, 2], label="group")
+        g = group.create_group(g, [0, 1, 2], label="group")
         # This construction and value setting needs to be revisited
         # Here the main point is to verify that we can manually create and use groups with multiple outputs
         # https://github.com/JNmpi/pyiron_core/issues/33
 
-        pure_group_out = base.pull_node(base.get_updated_graph(g), "group")
+        pure_group_out = run.pull_node(base.get_updated_graph(g), "group")
         self.assertTupleEqual(
             macro_out,
             pure_group_out,
             msg="We should be able to obtain multiple outputs in a pure-graph paradigm",
         )
 
-        updated_pure_group_out = base.pull_node(base.get_updated_graph(g), "group")
+        updated_pure_group_out = run.pull_node(base.get_updated_graph(g), "group")
         self.assertTupleEqual(
             macro_out,
             updated_pure_group_out,

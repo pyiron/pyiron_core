@@ -1202,3 +1202,8 @@ class Workflow:
         graph = wf_graph_tools._load_graph(filename=filename, workflow_dir=workflow_dir)
         wf = wf_graph_tools.get_wf_from_graph(graph)
         return wf
+
+
+@as_function_node
+def identity(x):
+    return x

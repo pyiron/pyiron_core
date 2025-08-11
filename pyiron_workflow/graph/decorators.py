@@ -9,9 +9,12 @@ __email__ = ""
 __status__ = "development"
 __date__ = "Jan 3, 2025"
 
-from dataclasses import dataclass
-from collections import OrderedDict
+import copy
 import importlib
+from collections import OrderedDict
+from dataclasses import dataclass
+
+import pandas as pd
 
 
 def get_import_path_from_type(obj):
@@ -153,8 +156,6 @@ class NestedDict(OrderedDict):
 
     @property
     def df(self):
-        import pandas as pd
-
         return pd.DataFrame(transpose_dict_of_dicts(self))
 
     def iloc(self, idx: int | list):
@@ -168,8 +169,6 @@ class NestedDict(OrderedDict):
             return self[self.index_dict[idx]]
 
     def _repr_html_(self):
-        import pandas as pd
-
         return self.df._repr_html_()
 
     def __getstate__(self):
@@ -232,13 +231,9 @@ class NestedList(list):
 
     @property
     def df(self):
-        import pandas as pd
-
         return pd.DataFrame(transpose_list_of_dicts(self))
 
     def _repr_html_(self):
-        import pandas as pd
-
         return self.df._repr_html_()
 
     def __getstate__(self):
@@ -264,8 +259,6 @@ class NestedList(list):
     # prevent getting the object twice (list is double with the first part coming
     # from __setstate__)
     def __deepcopy__(self, memo):
-        import copy
-
         # Create a new list instance
         new_list = NestedList(obj_type=self._obj_type)
         # Ensure each element is deeply copied

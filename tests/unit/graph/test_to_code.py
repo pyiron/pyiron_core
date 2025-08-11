@@ -2,7 +2,6 @@ import unittest
 
 import pyiron_workflow.simple_workflow as swf
 from pyiron_workflow.graph import base
-from pyiron_workflow.graph.to_code import get_code_from_graph, port_to_code
 
 
 @swf.as_function_node
@@ -37,28 +36,28 @@ class TestPortToCode(unittest.TestCase):
         for type_, val, dflt, expected in cases:
             with self.subTest(type=type_):
                 p = self.make_port("port", type_, default=dflt, value=val)
-                print((type_, val, dflt, expected), port_to_code(p))
-                self.assertEqual(port_to_code(p), expected)
+                print((type_, val, dflt, expected), base.port_to_code(p))
+                self.assertEqual(base.port_to_code(p), expected)
 
     def test_use_default_flag(self):
         p = self.make_port("port", "int", default=42, value=0)
-        self.assertEqual(port_to_code(p, use_default=False), "port: int = 0")
-        self.assertEqual(port_to_code(p, use_default=True), "port: int = 42")
+        self.assertEqual(base.port_to_code(p, use_default=False), "port: int = 0")
+        self.assertEqual(base.port_to_code(p, use_default=True), "port: int = 42")
 
     def test_scope_naming(self):
         p = self.make_port("x", "int", default=1, value=2)
-        self.assertEqual(port_to_code(p, scope="scope"), "scope__x: int = 2")
+        self.assertEqual(base.port_to_code(p, scope="scope"), "scope__x: int = 2")
 
     def test_scope_combined_permutations(self):
         p = self.make_port("foo", "bool", default=False, value=True)
         self.assertEqual(
-            port_to_code(p, use_default=False, scope=None), "foo: bool = True"
+            base.port_to_code(p, use_default=False, scope=None), "foo: bool = True"
         )
         self.assertEqual(
-            port_to_code(p, use_default=True, scope=None), "foo: bool = False"
+            base.port_to_code(p, use_default=True, scope=None), "foo: bool = False"
         )
         self.assertEqual(
-            port_to_code(p, use_default=True, scope="bar"), "bar__foo: bool = False"
+            base.port_to_code(p, use_default=True, scope="bar"), "bar__foo: bool = False"
         )
 
 
@@ -67,7 +66,7 @@ class TestGetCodeFromGraph(unittest.TestCase):
         node_label = "nph"
         g = base.Graph(label="my_graph")
         g = base.add_node(g, NonPrimitiveHint(label=node_label))
-        code_string = base.get_code_from_graph(g)
+        code_string = base.get_code_from_graph(g, scope_inputs=False)
         self.assertEqual(
             "NonPrimitive",
             base.get_node_input_port(g.nodes[node_label], "x").type,
