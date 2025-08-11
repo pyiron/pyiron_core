@@ -83,7 +83,7 @@ def deserialize_obj(serialized_obj: dict[str, Any]) -> Any:
     if isinstance(serialized_obj, dict):
         # print("deserialization needed", serialized_obj)
         if "__import_path__" not in serialized_obj:
-            print("return original object")
+            # print("return original object")
             return serialized_obj
         # print("recreate object", serialized_obj)
         import_path = serialized_obj["__import_path__"]
@@ -100,13 +100,13 @@ def deserialize_obj(serialized_obj: dict[str, Any]) -> Any:
             print("return recreated node object")
             return recreated_type(**serialized_obj["__getstate__"])
         
-        print("recreate object", recreated_type)
+        # print("recreate object", recreated_type)
         new_obj = recreated_type()
         new_obj.__setstate__(serialized_obj["__getstate__"])
         return new_obj
         
     else:
-        print("return original object")
+        # print("return original object")
         return serialized_obj
 
 

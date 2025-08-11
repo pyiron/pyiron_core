@@ -9,4 +9,6 @@ from pyiron_nodes import (
     graphs,
     math,
     executors,
+    dataframe,
+    utilities,
 )  # , continuum_fem, large_scale_atomistic

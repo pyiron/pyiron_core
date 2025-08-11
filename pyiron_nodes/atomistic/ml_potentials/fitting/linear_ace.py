@@ -3,6 +3,7 @@ import pandas as pd
 from dataclasses import dataclass, field, asdict
 from typing import Optional
 from pyiron_workflow import as_function_node, as_inp_dataclass_node
+import numpy as np
 
 
 @as_inp_dataclass_node
@@ -84,7 +85,7 @@ def CreateEmptyBasisFunctions(potential_config: PotentialConfig):
 
 
 @as_function_node
-def ReadPickledDatasetAsDataframe(file_path: str, compression: str = "gzip"):
+def ReadPickledDatasetAsDataframe(file_path: str, compression: str = None):
 
     from pyiron_atomistics import Atoms as pyironAtoms
     from ase.atoms import Atoms as aseAtoms
@@ -228,3 +229,87 @@ def PotentialEnergy(df: pd.DataFrame, atom_index: int, linear_fit):
 def GetColumnFromDataFrame(df, column_name: str):
     column = df[column_name]
     return column
+
+
+@as_function_node("design_matrix")
+def DesignMatrix(
+    df_train: pd.DataFrame,
+    potential_config: PotentialConfig,
+    energy_only: bool = False,
+    verbose: bool = False,
+    store: bool = True,
+):
+    """
+    Constructs the design matrix for the training dataset using the provided potential configuration.
+    Args:
+        df_train (pd.DataFrame): The training dataset containing ASE atoms and other properties.
+        potential_config (PotentialConfig): The configuration for the potential.
+    Returns:
+        LinearACEDataset: The constructed design matrix for the training dataset.
+    """
+
+    from pyace.linearacefit import LinearACEDataset
+    from pyace import create_multispecies_basis_config
+
+    from pyiron_snippets.logger import logger
+
+    logger.setLevel(30)
+
+    elements_set = set()
+    for at in df_train["ase_atoms"]:
+        elements_set.update(at.get_chemical_symbols())
+
+    elements = sorted(elements_set)
+    potential_config.elements = elements
+    potential_config_dict = potential_config.to_dict()
+
+    bconf = create_multispecies_basis_config(potential_config_dict)
+
+    train_ds = LinearACEDataset(bconf, df_train)
+    train_ds.construct_design_matrix(verbose=verbose)
+    design_matrix = train_ds.design_matrix
+    if energy_only:
+        design_matrix = design_matrix[: len(df_train)]
+    return design_matrix
+
+
+@as_function_node("matrix")
+def GetMatrix(
+    df: pd.DataFrame,
+    matrix,
+    energy_only: bool = False,
+    min_index: int = 0,
+    max_index: int = None,
+):
+    import numpy as np
+
+    num_structures = len(df)
+    num_atoms = np.sum(df.NUMBER_OF_ATOMS)
+
+    if max_index is None:
+        max_index = num_structures
+    new_matrix = matrix[min_index, max_index]
+    return new_matrix
+
+
+@as_function_node
+def GetVector(
+    df: pd.DataFrame,
+    energies: bool = True,
+    forces: bool = True,
+    scale_energy_per_atom: bool = False,
+):
+    import numpy as np
+
+    vec = np.array([])
+    if energies:
+        vec = np.append(vec, df.energy_corrected)
+        if scale_energy_per_atom:
+            vec /= df.NUMBER_OF_ATOMS
+    if forces:
+        # Flatten the forces array and append to the vector
+        forces_vec = []
+        for f in df.forces.apply(lambda x: x.flatten()):
+            forces_vec += list(f)
+        vec = np.append(vec, forces_vec)
+    return vec

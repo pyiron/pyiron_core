@@ -32,7 +32,6 @@ class OutputElasticSymmetryAnalysis:
 
 
 @as_inp_dataclass_node
-# @wf_data_class()
 class InputElasticTensor:
     num_of_point: int = 5
     eps_range: float = 0.005
@@ -78,55 +77,6 @@ class OutputElasticAnalysis:
     _skip_default_values = False
 
 
-# @as_function_node
-# def StorageSettings(settings: Optional[Storage.dataclass] = Storage.dataclass()):
-#     return settings
-
-
-@as_macro_node
-def ElasticConstants(
-    self,
-    structure,
-    engine: Optional[OutputEngine] = None,
-    # But OutputEngine had better be holding a ase.calculators.calculator.BaseCalculator
-    # There is too much misdirection for me to track everything right now, but I think
-    # some of the "generic" stuff doesn't work
-    parameters: Optional[InputElasticTensor] = InputElasticTensor(),
-    # storage: Optional[Storage.dataclass] = Storage.dataclass(hash_output=True),
-    # contains the default values
-):  # -> OutputElasticAnalysis.dataclass:
-    # This is a fix since providing only an input parameter 'storage' fails pickling
-    # This is a strange bug in pyiron_workflow and should be fixed
-    # self._settings = StorageSettings(storage)
-
-    # self.my_storage = my_storage
-    self.symmetry_analysis = SymmetryAnalysis(structure, parameters=parameters)
-
-    self.structure_table = GenerateStructures(
-        structure, self.symmetry_analysis, parameters=parameters
-    )
-    # self.gs = for_node(
-    #     body_node_class=Static,
-    #     iter_on=("structure",),
-    #     engine=engine,
-    #     structure=self.structure_table.structure,
-    # )
-    self.gs_energy = ExtractFinalEnergy(self.gs)
-
-    # self.liam_doesnt_like_this = standard.SetAttr(
-    #     self.structure_table, "energy", self.gs_energy
-    # )  # This is not functional and idempotent!
-    # With phonopy we had little choice, but here we can change our own architecture
-
-    self.elastic = AnalyseStructures(
-        data_df=self.liam_doesnt_like_this,  # Merely a mutated copy of structure_table
-        analysis=self.symmetry_analysis,
-        parameters=parameters,
-    )
-
-    return self.elastic
-
-
 @as_function_node  # ("structure_container")
 def AddEnergies(
     structure_container: DataStructureContainer,
@@ -148,7 +98,7 @@ def ExtractFinalEnergy(df):
 
 @as_function_node
 def SymmetryAnalysis(
-    structure, parameters: Optional[InputElasticTensor]
+    structure, parameters: Optional[InputElasticTensor] = None
 ) -> OutputElasticSymmetryAnalysis:
     parameters = InputElasticTensor() if parameters is None else parameters
     out = OutputElasticSymmetryAnalysis().dataclass()  # structure)
@@ -171,10 +121,12 @@ def GenerateStructures(
     parameters: Optional[InputElasticTensor] = None,
 ):
     structure_dict = {}
+    structures = []
 
     zero_strain_job_name = "s_e_0"
     if 0.0 in analysis.epss:
         structure_dict[zero_strain_job_name] = structure.copy()
+        structures.append(structure.copy())
 
     for lag_strain in analysis.Lag_strain_list:
         Ls_list = sym.Ls_Dic[lag_strain]
@@ -221,18 +173,117 @@ def GenerateStructures(
 
             jobname = subjob_name(lag_strain, eps)
 
+            structures.append(struct.copy())
             structure_dict[jobname] = struct
             structure_container = DataStructureContainer().dataclass(
                 structure=list(structure_dict.values()),
                 job_name=list(structure_dict.keys()),
             )
+    job_names = list(structure_dict.keys())
+    return structures, job_names
 
-    return structure_container
+
+@as_macro_node("elastic_constants")
+def ComputeElasticConstantsMacro(
+    structure,
+    engine,
+    calculator: Node,
+    input_elastic_tensor: InputElasticTensor = InputElasticTensor(),
+):
+    """
+    Get the elastic constants of a structure using an ASE calculator.
+    """
+    from pyiron_workflow import Workflow
+    from pyiron_nodes.controls import iterate, IterToDataFrame, Print
+    from pyiron_nodes.atomistic.calculator.ase import StaticEnergy, Static
+    from pyiron_nodes.atomistic.property.phonons import GetFreeEnergy
+
+    wf = Workflow("elastic_constants")
+
+    wf.calculator = calculator
+    # if calculator == "StaticEnergy":
+    #     wf.calculator = StaticEnergy(structure=structure, engine=engine)
+    # elif calculator == "GetFreeEnergy":
+    #     wf.calculator = GetFreeEnergy(structure=structure, engine=engine)
+    # else:
+    #     test1, test2 = (calculator == "StaticEnergy"), (calculator == "GetFreeEnergy")
+    #     raise ValueError(f"Unknown calculator: '{calculator}' {test1} {test2}")
+
+    wf.print = Print(f"calculator: {calculator}")
+    # wf.calculator = StaticEnergy(structure=structure, engine=engine)
+    # wf.calculator = GetFreeEnergy(structure=structure, engine=engine)
+    # print(f"Using calculator: {wf.calculator}")
+    # print(f"Input calculator: {calculator}")
+    wf.symmetry = SymmetryAnalysis(structure=structure, parameters=input_elastic_tensor)
+    wf.structures = GenerateStructures(
+        structure=structure, analysis=wf.symmetry, parameters=input_elastic_tensor
+    )
+    wf.energies = iterate(
+        node=wf.calculator,
+        values=wf.structures.outputs.structures,
+        input_label="structure",
+    )
+
+    wf.elastic_constants = AnalyseStructures(
+        energies=wf.energies,
+        job_names=wf.structures.outputs.job_names,
+        analysis=wf.symmetry,
+        parameters=input_elastic_tensor,
+    )
+    return wf.elastic_constants
+
+
+@as_function_node
+def ComputeElasticConstants(
+    structure,
+    engine,
+    calculator: str = "StaticEnergy",  # "StaticEnergy", "GetFreeEnergy"
+    input_elastic_tensor: InputElasticTensor = None,
+):
+    from pyiron_workflow import Workflow
+    from pyiron_nodes.controls import iterate
+    from pyiron_nodes.atomistic.calculator.ase import StaticEnergy
+    from pyiron_nodes.atomistic.property.phonons import GetFreeEnergy
+
+    wf = Workflow("elastic_constants")
+    if input_elastic_tensor is None:
+        input_elastic_tensor = InputElasticTensor().run()
+
+    if calculator == "StaticEnergy":
+        wf.calculator = StaticEnergy(structure=structure, engine=engine)
+    elif calculator == "GetFreeEnergy":
+        wf.calculator = GetFreeEnergy(structure=structure, engine=engine)
+    else:
+        test1, test2 = (calculator == "StaticEnergy"), (calculator == "GetFreeEnergy")
+        raise ValueError(f"Unknown calculator: '{calculator}' {test1} {test2}")
+
+    wf.symmetry = SymmetryAnalysis(structure=structure, parameters=input_elastic_tensor)
+    wf.structures = GenerateStructures(
+        structure=structure, analysis=wf.symmetry, parameters=input_elastic_tensor
+    )
+    wf.energies = iterate(
+        node=wf.calculator,
+        values=wf.structures.outputs.structures,
+        input_label="structure",
+    )
+
+    wf.elastic_constants = AnalyseStructures(
+        energies=wf.energies,
+        job_names=wf.structures.outputs.job_names,
+        analysis=wf.symmetry,
+        parameters=input_elastic_tensor,
+    )
+
+    elastic_constants = wf.elastic_constants.pull()
+    print("Energies:", wf.energies.outputs.out_lst)
+    return elastic_constants
 
 
 @as_function_node("structures")
 def AnalyseStructures(
-    data_df: DataStructureContainer,
+    # data_df: DataStructureContainer,
+    energies,
+    job_names,
     analysis: OutputElasticSymmetryAnalysis,
     parameters: Optional[InputElasticTensor] = None,
 ) -> OutputElasticAnalysis:
@@ -242,7 +293,7 @@ def AnalyseStructures(
     Lag_strain_list = analysis.Lag_strain_list
 
     out = OutputElasticAnalysis().dataclass()
-    energy_dict = {k: v for k, v in zip(data_df.job_name, data_df.energy)}
+    energy_dict = {k: v for k, v in zip(job_names, energies)}
 
     if 0.0 in epss:
         out.energy_0 = energy_dict[zero_strain_job_name]

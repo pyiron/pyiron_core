@@ -114,3 +114,107 @@ def CubicBulkCell(
 
     wf.vacancy = CreateVacancy(structure=wf.repeat, index=vacancy_index)
     return wf.vacancy
+
+
+@as_function_node("structure")
+def Surface(
+    element: str,
+    surface_type: str,
+    size: str = "1 1 1",
+    vacuum: float = 1.0,
+    center: bool = False,
+    pbc: bool = True,
+    orthogonal: bool = False,
+):
+    """
+    Generate a surface based on the ase.build.surface module.
+
+    Args:
+        element (str): Element name
+        surface_type (str): The string specifying the surface type generators available through ase (fcc111,
+        hcp0001 etc.)
+        size (tuple): Size of the surface
+        vacuum (float): Length of vacuum layer added to the surface along the z direction
+        center (bool): Tells if the surface layers have to be at the center or at one end along the z-direction
+        orthogonal (bool): Orthogonal option
+        pbc (list/numpy.ndarray): List of booleans specifying the periodic boundary conditions along all three
+                                  directions.
+        **kwargs: Additional, arguments you would normally pass to the structure generator like 'a', 'b', etc.
+
+    Returns:
+        pyiron_atomistics.atomistics.structure.atoms.Atoms instance: Required surface
+
+    """
+    import types
+    import numpy as np
+    from pyiron_atomistics.atomistics.structure.atoms import (
+        ase_to_pyiron,
+    )
+    from ase.build import (
+        add_adsorbate,
+        add_vacuum,
+        bcc100,
+        bcc110,
+        bcc111,
+        bcc111_root,
+        diamond100,
+        diamond111,
+        fcc100,
+        fcc110,
+        fcc111,
+        fcc111_root,
+        fcc211,
+        hcp0001,
+        hcp0001_root,
+        hcp10m10,
+        mx2,
+        root_surface,
+        root_surface_analysis,
+    )
+    from ase.build import (
+        surface as ase_surf,
+    )
+
+    # https://gitlab.com/ase/ase/blob/master/ase/lattice/surface.py
+    if pbc is None:
+        pbc = True
+    for surface_class in [
+        add_adsorbate,
+        add_vacuum,
+        bcc100,
+        bcc110,
+        bcc111,
+        diamond100,
+        diamond111,
+        fcc100,
+        fcc110,
+        fcc111,
+        fcc211,
+        hcp0001,
+        hcp10m10,
+        mx2,
+        hcp0001_root,
+        fcc111_root,
+        bcc111_root,
+        root_surface,
+        root_surface_analysis,
+        ase_surf,
+    ]:
+        if surface_type == surface_class.__name__:
+            surface_type = surface_class
+            break
+
+    size = [int(x) for x in size.split(" ")]
+    if isinstance(surface_type, types.FunctionType):
+        if center:
+            surface = surface_type(
+                symbol=element, size=size, vacuum=vacuum, orthogonal=orthogonal
+            )
+        else:
+            surface = surface_type(symbol=element, size=size, orthogonal=orthogonal)
+            z_max = np.max(surface.positions[:, 2])
+            surface.cell[2, 2] = z_max + vacuum
+        surface.pbc = pbc
+    return ase_to_pyiron(surface)
+    # else:
+    #     raise ValueError(f"Surface type {surface_type} not recognized.")

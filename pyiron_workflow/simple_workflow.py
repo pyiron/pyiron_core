@@ -373,10 +373,10 @@ class DataElement:
             upstream_node = self.value.node
             upstream_port_label = self.value.label
         elif isinstance(self.value, Node):
-            if self.type == "Node":
-                raise NotImplementedError(
-                    "Cf. https://github.com/JNmpi/pyiron_core/issues/19"
-                )
+            # if self.type == "Node":
+            #     raise NotImplementedError(
+            #         "Cf. https://github.com/JNmpi/pyiron_core/issues/19"
+            #     )
             upstream_node = self.value
             upstream_port_label = self.value.inputs.data[PORT_LABEL][0]
         return [Connection(upstream_node, upstream_port_label)]
@@ -406,7 +406,7 @@ class Data:
         self._attribute = attribute
 
     def __getattr__(self, key):
-        # print('Data.__getattr__: ', key)
+        # print('Data.__getattr__: ', key, self.data[PORT_LABEL])
         if key not in self.data[PORT_LABEL]:
             raise AttributeError(f"No attribute named {key}")
 
@@ -560,7 +560,12 @@ class Node:
                 # add hash to closure node
                 import pyiron_database.instance_database as idb
 
-                hash = idb.get_hash(inp_port)
+                try:
+                    hash = idb.get_hash(inp_port)
+                    # inp_port._hash_parent = hash
+                except Exception as e:
+                    print("Error getting hash for node:", inp_port.label, e)
+                    hash = None
                 inp_port._hash_parent = hash
                 print("copy node: ", val.label, inp_port._hash_parent)
                 # print("copy node: ", val.label)
@@ -609,7 +614,7 @@ class Node:
     def _set_state(self, state):
         pass
 
-    def run(self):
+    def run(self, db=None):
         import pyiron_database.instance_database as idb
         from datetime import datetime
         import getpass
@@ -619,7 +624,7 @@ class Node:
                 restored = False
                 try:
                     restored = idb.restore_node_outputs(self)
-                    print("restored: ", restored)
+                    # print("restored: ", restored)
                 except FileNotFoundError as e:
                     print("No stored data found for node: ", self.label)
                 except Exception as e:
@@ -667,23 +672,18 @@ class Node:
         # get user name
         self._user = getpass.getuser()
 
-        if "_db" in self.inputs.keys():
-            # print("node: ", self.inputs.node.value.node.inputs)
-            db = self.inputs._db.value
-            if db is not None:
-                if isinstance(db, Port):
-                    db = db.value
-                # print("store in db: ", self.label, type(db), db)
-                idb.store_node_in_database(
-                    db, self, store_outputs=False, store_input_nodes_recursively=True
-                )
-                path = idb.store_node_outputs(self)
-                print("stored: ", self.label, path)
-
-        elif "store" in self.inputs.keys():
+        if "store" in self.inputs.keys():
             if self.inputs.store.value:
-                path = idb.store_node_outputs(self)
-                print("stored: ", self.label, path)
+                # path = idb.store_node_outputs(self)
+                # print("stored: ", self.label, path)
+                if db is not None:
+                    idb.store_node_in_database(
+                        db,
+                        self,
+                        store_outputs=True,
+                        store_input_nodes_recursively=True,
+                    )
+
 
         return out
 
