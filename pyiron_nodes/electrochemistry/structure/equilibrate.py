@@ -20,7 +20,7 @@ def Equilibrate(
     Returns:
         None
     """
-    from pyiron import Project
+    from pyiron_atomistics import Project
     from dataclasses import asdict
     from pyiron_nodes.atomistic.calculator.data import OutputCalcMD
 
