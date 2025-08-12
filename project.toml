@@ -1,0 +1,83 @@
+[build-system]
+requires = [
+    "hatchling==1.27.0",
+    "hatch-vcs==0.5.0",
+    "hatch-jupyter-builder>=0.5.0"
+]
+build-backend = "hatchling.build"
+
+[project]
+name = "pyiron_core"
+description = "pyiron_core"
+readme = "README.md"
+keywords = ["pyiron"]
+requires-python = ">=3.11, <3.14"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Topic :: Scientific/Engineering",
+    "License :: OSI Approved :: BSD License",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
+
+dependencies = [
+   "anywidget==0.9.18",
+   "ase==3.24.0",
+   "black==25.1.0",
+   "calphy==1.3.13",
+   "cloudpickle==3.1.1",
+   "ipytree==0.2.2",
+   "ipywidgets==8.1.6",
+   "jupyterlab==4.4.1",
+   "matplotlib==3.10.0",
+   "numpy==1.26.4",
+   "pyiron_atomistics==0.6.25",
+   "pyiron-data==0.0.30",
+   "pyiron_lammps==0.4.1",
+   "sqlalchemy==2.0.38",
+   "traitlets==5.14.3"
+]
+dynamic = ["version"]
+authors = [
+    { name = "Joerg Neugebauer"}
+]
+
+[project.license]
+file = "LICENSE"
+
+[project.urls]
+Homepage = "https://pyiron.org/"
+Repository = "https://github.com/pyiron/pyiron_core"
+
+[tool.hatch.build]
+only-packages = true
+artifacts = [
+    "pyiron_database/*",
+    "pyiron_nodes/*",
+    "pyiron_workflow/*",
+    "pyironflow/*",
+    "static/*",
+]
+
+[tool.hatch.build.hooks.vcs]
+version-file = "pyiron_workflow/_version.py"
+
+[tool.hatch.version]
+source = "vcs"
+path = "pyiron_workflow/_version.py"
+
+[tool.hatch.build.hooks.jupyter-builder]
+build-function = "hatch_jupyter_builder.npm_builder"
+ensured-targets = [
+    "static/widget.js",
+    "static/widget.css"
+]
+skip-if-exists = ["static/widget.js"]
+dependencies = ["hatch-jupyter-builder>=0.5.0"]
+
+[tool.hatch.build.hooks.jupyter-builder.build-kwargs]
+npm = "npm"
+build_cmd = "build"
