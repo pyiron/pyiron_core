@@ -70,8 +70,3 @@ jobs:
           fi
           echo "All notebooks passed!"
         timeout-minutes: 5
-
-      - name: Execute notebooks
-        shell: bash -l {0}
-        run: |
-          find ./notebooks/liam -name "*.ipynb" -exec papermill {} {} \;
