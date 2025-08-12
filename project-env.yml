@@ -15,6 +15,7 @@ dependencies:
 - jupyterlab =4.4.1
 - matplotlib =3.10.0
 - numpy =1.26.4
+- psycopg2 =2.9.9
 - pyiron_atomistics =0.6.25
 - pyiron-data =0.0.30
 - pyiron_lammps =0.4.1
