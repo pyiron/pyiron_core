@@ -49,4 +49,25 @@ jobs:
       - name: Execute notebooks
         shell: bash -l {0}
         run: |
+          failed_notebooks=()
+    
+          for notebook in ./notebooks/liam/*.ipynb; do
+            echo "Executing: $notebook"
+            if papermill "$notebook" "$notebook"; then
+              echo "✓ PASSED: $notebook"
+            else
+              echo "✗ FAILED: $notebook" 
+              failed_notebooks+=("$notebook")
+            fi
+          done
+          
+          if [ ${#failed_notebooks[@]} -ne 0 ]; then
+            echo "Failed notebooks: ${failed_notebooks[*]}"
+            exit 1
+          fi
+          echo "All notebooks passed!"
+
+      - name: Execute notebooks
+        shell: bash -l {0}
+        run: |
           find ./notebooks/liam -name "*.ipynb" -exec papermill {} {} \;
