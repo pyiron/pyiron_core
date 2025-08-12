@@ -591,7 +591,7 @@ class Node:
 
         return val
 
-    def __call__(self, *args: Any, **kwargs: Any) -> Any:
+    def to_inputs(self, *args: Any, **kwargs: Any):
         i_args = 0
         labels = self.inputs.data[PORT_LABEL]
         for key in labels:
@@ -601,6 +601,8 @@ class Node:
                 self.inputs[key] = args[i_args]
                 i_args += 1
 
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:
+        self.to_inputs(*args, **kwargs)
         out = self.run()
         return out  # self.run()
 
