@@ -13,5 +13,6 @@ dependencies:
 - numpy =1.26.4
 - pyiron_atomistics =0.6.25
 - pyiron-data =0.0.30
+- pyiron_lammps =0.4.1
 - sqlalchemy =2.0.38
 - traitlets =5.14.3
