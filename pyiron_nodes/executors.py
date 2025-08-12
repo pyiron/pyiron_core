@@ -47,10 +47,19 @@ def IterNode(
     if Executor is None:
         for el in kwarg_list:
             # print('iter kwargs: ', node.kwargs)
-            out_dict[el] = node(**{kwarg_name: el})
+            node.to_inputs(**{kwarg_name: el})
+            out_dict[el] = node.run(db=_db)
             # if hasattr(node, "_hash_parent"):
             #     print("node._hash_parent", el, node._hash_parent)
             # print("iter_node: ", node.inputs, node_run.inputs)
+    elif _db is not None:
+        raise ValueError(
+            "Communicating with the database is not supported for IterNode while using "
+            "and executor. At time of writing, the proximate cause for this limitation "
+            "is that the `db` argument of `pyiron_workflow.simple_workflow.Node.run` "
+            "cannot be propagated into the `pyiron_workflow.graph.run.run_node` "
+            "function used in the executor case."
+        )
     else:
         with Executor as executor:
             # Start the load operations and mark each future with its index
