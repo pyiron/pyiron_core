@@ -4,6 +4,7 @@ import json
 import threading
 import time
 import warnings
+import os
 from typing import Optional, Union
 
 import ipywidgets as widgets
@@ -66,6 +67,7 @@ class PyironFlowWidget:
         gui_layout: GUILayout = GUILayout(),
         main_widget=None,
         db = None,
+        workflow_path: str = os.path.expanduser("~/pyiron_workflows") # rooth path to directory where .json graph workflows are stored
     ):
 
         if wf is None:
@@ -80,6 +82,7 @@ class PyironFlowWidget:
         self.graph = graph
         self.main_widget = main_widget
         self.db = db
+        self.workflow_path = workflow_path
 
         self.flow_widget = pyironflow.reactflow.ReactFlowWidget(
             layout={
@@ -168,10 +171,10 @@ class PyironFlowWidget:
                     self.update_gui()
                 elif command == "saveFlow":
                     print("saveFlow")
-                    graph_json._save_graph(self.graph, overwrite=True)
+                    graph_json._save_graph(self.graph, overwrite=True, workflow_dir=self.workflow_path)
                 elif command == "restoreFlow":
                     print("restoreFlow")
-                    self.graph = graph_json._load_graph(f"{self.graph.label}.json")
+                    self.graph = graph_json._load_graph(f"{self.graph.label}.json", workflow_dir=self.workflow_path)
                     self.update_gui()
                 elif command == "clearFlow":
                     print("clearFlow")

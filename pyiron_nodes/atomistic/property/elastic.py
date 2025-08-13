@@ -275,7 +275,7 @@ def ComputeElasticConstants(
     )
 
     elastic_constants = wf.elastic_constants.pull()
-    print("Energies:", wf.energies.outputs.out_lst)
+    # print("Energies:", wf.energies.outputs.out_lst)
     return elastic_constants
 
 
