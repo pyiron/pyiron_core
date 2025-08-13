@@ -39,7 +39,9 @@ def _iterate_node(
     if executor is None:
         # Sequential execution
         for value in values:
-            out = node(**{input_label: value})
+            # out = node(**{input_label: value})
+            node.inputs[input_label].value = value
+            out = node.pull()
             if copy_results:
                 out = copy(out)
             out_lst.append(out)
