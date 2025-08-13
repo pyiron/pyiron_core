@@ -63,11 +63,11 @@ Connect graph with ReactflowWidget and other GUI elements for interactive graph/
 class PyironFlowWidget:
     def __init__(
         self,
+        workflow_path: str,
         wf: Optional[Union[simple_workflow.Workflow, base.Graph]] = None,
         gui_layout: GUILayout = GUILayout(),
         main_widget=None,
         db = None,
-        workflow_path: str = os.path.expanduser("~/pyiron_workflows") # rooth path to directory where .json graph workflows are stored
     ):
 
         if wf is None:
@@ -320,9 +320,17 @@ class PyironFlowWidget:
 
 class PyironFlow:
     def __init__(
-        self, wf_list=None, hash_nodes=False, gui_layout: GUILayout = GUILayout()
+        self, wf_list=None, 
+        hash_nodes=False, 
+        gui_layout: GUILayout = GUILayout(), 
+        workflow_path: str = os.path.expanduser("~/pyiron_workflows") # rooth path to directory where .json graph workflows are stored
     ):
 
+        # create empty workflow directory if it does not exist
+        if not os.path.exists(workflow_path):
+            os.makedirs(workflow_path)
+            
+        self.workflow_path = workflow_path
         if wf_list is None:
             wf_list = [base.Graph(label="Workflow")]
 
@@ -340,10 +348,10 @@ class PyironFlow:
         self.wf_widgets = list()  # list of PyironFlowWidget objects
         for wf in wf_list:
             if isinstance(wf, str):
-                wf = graph_json._load_graph(wf)
+                wf = graph_json._load_graph(f"{workflow_path}/{wf}")
             self.wf_widgets.append(
                 PyironFlowWidget(
-                    wf, gui_layout=gui_layout, main_widget=self, db=self.db
+                    wf=wf, gui_layout=gui_layout, main_widget=self, db=self.db, workflow_path=workflow_path
                 )
             )
 
@@ -431,7 +439,10 @@ class PyironFlow:
                 )
                 self.wf_widgets.append(
                     PyironFlowWidget(
-                        new_wf, gui_layout=self.gui_layout, main_widget=self
+                        workflow_path=self.workflow_path,
+                        wf=new_wf, 
+                        gui_layout=self.gui_layout, 
+                        main_widget=self
                     )
                 )
 
