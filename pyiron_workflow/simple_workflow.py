@@ -683,7 +683,9 @@ class Node:
                         store_outputs=True,
                         store_input_nodes_recursively=True,
                     )
-
+                else: # explicitly store node if there is no database 
+                    path = idb.store_node_outputs(self)
+                    print("stored: ", self.label, path)
 
         return out
 
@@ -1046,6 +1048,7 @@ as_macro_node = make_node_decorator(_return_as_macro_node, "_postfix", "macro_no
 
 
 WORKFLOW_DIR = "../pyiron_nodes/local_workflows"
+
 
 
 class Workflow:
