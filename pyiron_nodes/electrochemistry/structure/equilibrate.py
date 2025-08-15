@@ -63,9 +63,13 @@ def Equilibrate(
 
 
 @as_function_node
-def WaterPotential(metal: str = "Al", 
-                   metal_charge: float = 0., neon_charge: float = 0., 
-                   epsilon: float = 0.102, sigma: float =3.188):
+def WaterPotential(
+    metal: str = "Al",
+    metal_charge: float = 0.0,
+    neon_charge: float = 0.0,
+    epsilon: float = 0.102,
+    sigma: float = 3.188,
+):
     import pandas
 
     water_potential = pandas.DataFrame(
@@ -118,9 +122,9 @@ def WaterPotential(metal: str = "Al",
     return water_potential
 
 
-
 @as_function_node("animate")
 def Animate(trajectory, initial_structure):
     from pyiron_atomistics.atomistics.job.atomistic import Trajectory
+
     traj = Trajectory(positions=trajectory.positions, structure=initial_structure)
     return traj.animate_structures()
