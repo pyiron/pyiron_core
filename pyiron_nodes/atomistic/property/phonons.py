@@ -220,7 +220,8 @@ def GetThermalProperties(
     store: bool = False,
 ):
     """Get thermal properties from phonopy."""
-
+    from pint import UnitRegistry
+    ureg = UnitRegistry()
     _, phonopy_new = GetDynamicalMatrix(phonopy).run()
     phonopy_new.run_mesh([mesh, mesh, mesh])
     phonopy_new.run_thermal_properties(
@@ -233,5 +234,34 @@ def GetThermalProperties(
     # print(f"Thermal properties calculated for temperatures: {tp_dict['temperatures']}")
     # Convert the dictionary to a ThermalProperties dataclass
     thermal_properties = ThermalProperties().dataclass(**tp_dict)
+    thermal_properties.free_energy *= (1* ureg.kilojoule / ureg.avogadro_number).to('eV').magnitude
+
 
     return thermal_properties
+
+
+@as_function_node
+def get_analytical_free_energy(nu, 
+                               dos,
+                                n_atoms,
+                                temperatures, 
+                                quantum: bool =True):
+    from scipy.integrate import simpson
+    from scipy.constants import physical_constants
+    KB = physical_constants['Boltzmann constant in eV/K'][0]
+    H = physical_constants['Planck constant in eV/Hz'][0]
+
+
+    sel = nu > 0.
+    nu_sel  = nu[sel]*1e12
+    dos_sel = dos[sel]
+    dos_sel /= simpson(y=dos_sel, x=nu_sel)
+    u, fe = [], []
+    for temp in temperatures:
+        if not quantum:
+            u.append(3*n_atoms*KB*temp)
+            fe.append(3*n_atoms*simpson(y=KB*temp*dos_sel*np.log(H*nu_sel/(KB*temp)), x=nu_sel))
+        else:
+            u.append(3*n_atoms*simpson(y=H*dos_sel*nu_sel*(0.5+(1/(np.exp(H*nu_sel/(KB*temp))-1))), x=nu_sel)) 
+            fe.append(3*n_atoms*simpson(y=((H*dos_sel*nu_sel*0.5)+(KB*temp*dos_sel*np.log(1-np.exp(-H*nu_sel/(KB*temp))))), x=nu_sel))
+    return u, fe
