@@ -361,7 +361,7 @@ class PyironFlow:
             self.wf_widgets.append(
                 PyironFlowWidget(
                     wf=wf,
-                    ui_layout=gui_layout,
+                    gui_layout=gui_layout,
                     main_widget=self,
                     db=self.db,
                     workflow_path=workflow_path,
