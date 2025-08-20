@@ -4,6 +4,7 @@ import json
 import threading
 import time
 import warnings
+import os
 from typing import Optional, Union
 
 import ipywidgets as widgets
@@ -62,6 +63,7 @@ Connect graph with ReactflowWidget and other GUI elements for interactive graph/
 class PyironFlowWidget:
     def __init__(
         self,
+        workflow_path: str,
         wf: Optional[Union[simple_workflow.Workflow, base.Graph]] = None,
         gui_layout: GUILayout = GUILayout(),
         main_widget=None,
@@ -80,6 +82,7 @@ class PyironFlowWidget:
         self.graph = graph
         self.main_widget = main_widget
         self.db = db
+        self.workflow_path = workflow_path
 
         self.flow_widget = pyironflow.reactflow.ReactFlowWidget(
             layout={
@@ -168,10 +171,17 @@ class PyironFlowWidget:
                     self.update_gui()
                 elif command == "saveFlow":
                     print("saveFlow")
-                    graph_json._save_graph(self.graph, overwrite=True)
+                    graph_json._save_graph(
+                        self.graph,
+                        overwrite=True,
+                        workflow_dir=self.workflow_path,
+                    )
                 elif command == "restoreFlow":
                     print("restoreFlow")
-                    self.graph = graph_json._load_graph(f"{self.graph.label}.json")
+                    self.graph = graph_json._load_graph(
+                        f"{self.graph.label}.json",
+                        workflow_dir=self.workflow_path
+                    )
                     self.update_gui()
                 elif command == "clearFlow":
                     print("clearFlow")
@@ -229,6 +239,8 @@ class PyironFlowWidget:
                         self.accordion_widget.selected_index = 1
                         node = self.graph.nodes[node_name].node
 
+                        # get node hash
+                        # print("node hash: ", idb_node.get_hash(node))
                         if node.node_type == "graph":
                             code = base.get_code_from_graph(
                                 node.graph,
@@ -315,9 +327,19 @@ class PyironFlowWidget:
 
 class PyironFlow:
     def __init__(
-        self, wf_list=None, hash_nodes=False, gui_layout: GUILayout = GUILayout(), db: idb.PostgreSQLInstanceDatabase | None = None,
+        self,
+        wf_list=None,
+        hash_nodes=False,
+        gui_layout: GUILayout = GUILayout(),
+        db: idb.PostgreSQLInstanceDatabase | None = None,
+        workflow_path: str = os.path.expanduser("~/pyiron_workflows") # rooth path to directory where .json graph workflows are stored
     ):
 
+        # create empty workflow directory if it does not exist
+        if not os.path.exists(workflow_path):
+            os.makedirs(workflow_path)
+
+        self.workflow_path = workflow_path
         if wf_list is None:
             wf_list = [base.Graph(label="Workflow")]
 
@@ -335,10 +357,14 @@ class PyironFlow:
         self.wf_widgets = list()  # list of PyironFlowWidget objects
         for wf in wf_list:
             if isinstance(wf, str):
-                wf = graph_json._load_graph(wf)
+                wf = graph_json._load_graph(f"{workflow_path}/{wf}")
             self.wf_widgets.append(
                 PyironFlowWidget(
-                    wf, gui_layout=gui_layout, main_widget=self, db=self.db
+                    wf=wf,
+                    ui_layout=gui_layout,
+                    main_widget=self,
+                    db=self.db,
+                    workflow_path=workflow_path,
                 )
             )
 
@@ -426,7 +452,10 @@ class PyironFlow:
                 )
                 self.wf_widgets.append(
                     PyironFlowWidget(
-                        new_wf, gui_layout=self.gui_layout, main_widget=self
+                        workflow_path=self.workflow_path,
+                        wf=new_wf,
+                        gui_layout=self.gui_layout,
+                        main_widget=self
                     )
                 )
 
