@@ -1,0 +1,72 @@
+name: Test suite
+on: [pull_request]
+
+jobs:
+  test-suite:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres
+        env:  # Taken from pyiron_workflow.util.LocalPostgres defaults
+          POSTGRES_USER: localuser
+          POSTGRES_PASSWORD: none
+          POSTGRES_DB: localdb
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432  # Map container port to runner
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      - name: Build environment from file
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          python-version: "3.12"
+          miniforge-version: latest
+          channels: conda-forge
+          conda-remove-defaults: true
+          channel-priority: strict
+          environment-file: project-env.yml
+        timeout-minutes: 5
+
+      - name: Build package
+        shell: bash -l {0}
+        run: |
+          pip install . --no-deps --no-build-isolation
+        timeout-minutes: 1
+
+      - name: Run unit tests
+        shell: bash -l {0}
+        run: |
+          python -m unittest discover -s tests -v
+        timeout-minutes: 1
+
+      - name: Execute notebooks
+        shell: bash -l {0}
+        run: |
+          failed_notebooks=()
+    
+          for notebook in ./notebooks/liam/*.ipynb; do
+            echo "Executing: $notebook"
+            if papermill "$notebook" "$notebook"; then
+              echo "✓ PASSED: $notebook"
+            else
+              echo "✗ FAILED: $notebook" 
+              failed_notebooks+=("$notebook")
+            fi
+          done
+          
+          if [ ${#failed_notebooks[@]} -ne 0 ]; then
+            echo "Failed notebooks: ${failed_notebooks[*]}"
+            exit 1
+          fi
+          echo "All notebooks passed!"
+        timeout-minutes: 5
