@@ -3,6 +3,7 @@
 from dataclasses import field, dataclass
 from typing import Optional
 import numpy as np
+from pyiron_workflow.data_fields import DataArray, EmptyArrayField
 
 
 # from pyiron_nodes.dev_tools import wf_data_class, wfMetaData
@@ -85,29 +86,19 @@ class OutputCalcMinimize:
 
 @as_out_dataclass_node
 class OutputCalcMD:
-    energies_pot: list | np.ndarray = field(
-        default_factory=lambda: np.array([]), metadata=wfMetaData(log_level=0)
-    )
-
-    energies_kin: list | np.ndarray = field(
-        default_factory=lambda: np.array([]), metadata=wfMetaData(log_level=0)
-    )
-
-    forces: list | np.ndarray = field(
-        default_factory=lambda: np.array([]), metadata=wfMetaData(log_level=0)
-    )
-
-    positions: list | np.ndarray = field(
-        default_factory=lambda: np.array([]), metadata=wfMetaData(log_level=0)
-    )
-
-    stresses: list | np.ndarray = field(
-        default_factory=lambda: np.array([]), metadata=wfMetaData(log_level=0)
-    )
-
-    temperatures: list | np.ndarray = field(
-        default_factory=lambda: np.array([]), metadata=wfMetaData(log_level=0)
-    )
+    cells: DataArray = EmptyArrayField()
+    energies_tot: DataArray = EmptyArrayField()
+    energies_pot: DataArray = EmptyArrayField()
+    forces: DataArray = EmptyArrayField()
+    indices: DataArray = EmptyArrayField()
+    natoms: DataArray = EmptyArrayField()
+    positions: DataArray = EmptyArrayField()
+    pressures: DataArray = EmptyArrayField()
+    steps: DataArray = EmptyArrayField()
+    temperatures: DataArray = EmptyArrayField()
+    unwrapped_positions: DataArray = EmptyArrayField()
+    velocities: DataArray = EmptyArrayField()
+    volumes: DataArray = EmptyArrayField()
 
 
 @as_inp_dataclass_node

@@ -144,7 +144,6 @@ class TestSimpleWorkflow(unittest.TestCase):
             finally:
                 storage_location = idb.store_node_outputs(n)
                 os.unlink(storage_location)
-                os.rmdir(storage_location.split(os.sep)[0])
 
 
 class TestValueToString(unittest.TestCase):

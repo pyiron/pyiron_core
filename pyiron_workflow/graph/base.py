@@ -46,7 +46,11 @@ def get_node_from_path(import_path, log=None):
     try:
         module = importlib.import_module(module_path)
     except ModuleNotFoundError as e:
-        log.append_stderr(e)
+        # handle case if log is None
+        if log is None:
+            print(f"Error importing module: {e}")  # Print the error if log is None
+        else:
+            log.append_stderr(e)
         return None
     # Get the object
     object_from_path = getattr(module, name)
@@ -71,6 +75,7 @@ def _setstate__graph_node(self, state):
             )
         elif k == "graph":
             if v is not None:
+                # print(f"Setting graph: {v}")
                 self.graph = Graph().__setstate__(v)
             # print("setting graph: ", v, state)
             # self.graph = Graph().__setstate__(v)
@@ -940,7 +945,9 @@ def _convert_to_integer_representation(graph: Graph):
 
 def graph_to_node(graph: Graph, exclude_unconnected_default_ports=True) -> Node:
     # print("graph_to_node: ", _build_function_parameters(graph, use_node_default=False))
-    function_string = get_code_from_graph(graph, use_node_default=False)
+    function_string = get_code_from_graph(
+        graph, sort_graph=True, use_node_default=False
+    )
 
     # Create a dictionary to serve as the local namespace
     virtual_namespace = {}
@@ -1101,6 +1108,7 @@ def get_code_from_graph(
     Returns:
         str: The generated Python source code as a string.
     """
+    graph = copy_graph(graph)
     if sort_graph:
         graph = get_updated_graph(graph)
         graph = topological_sort(graph)
@@ -1108,7 +1116,7 @@ def get_code_from_graph(
     kwargs = _build_function_parameters(
         graph, use_node_default=use_node_default, scope_labels=scope_inputs
     )
-    returns, body_code = _process_nodes_and_edges(
+    returns, body_code, imports = _process_nodes_and_edges(
         graph, scope_labels=scope_inputs, enforced_node_library=enforced_node_library
     )
     returns = returns if len(returns) > 0 else _get_default_return_args(graph)
@@ -1118,10 +1126,11 @@ def get_code_from_graph(
     def {graph.label}({kwargs}):
 
         from pyiron_workflow import Workflow
-        wf = Workflow('{graph.label}')
-
     """
     )
+
+    code += imports + "\n"
+    code += f"    wf = Workflow('{graph.label}')\n"
     code += body_code
     code += f"\n    return {', '.join(returns)}\n"
 
@@ -1191,12 +1200,11 @@ def _process_nodes_and_edges(
     """
     Process nodes and edges to build the workflow code.
     """
+    imports = ""
     code = ""
     return_args = []
 
-    for node in (
-        node for node in graph.nodes.values() if not is_virtual(node.label)
-    ):
+    for node in (node for node in graph.nodes.values() if not is_virtual(node.label)):
         if enforced_node_library is not None and not node.import_path.startswith(
             enforced_node_library
         ):
@@ -1229,12 +1237,12 @@ def _process_nodes_and_edges(
                     kwargs[key] = concatenate(node.label, key) if scope_labels else key
 
         module_path, class_name = node.import_path.rsplit(".", 1)
-        code += f"    from {module_path} import {class_name}\n"
-        line = f"    wf.{node.label} = {class_name}("
-        line += _dict_to_kwargs(kwargs) + ")\n"
-        code += line
+        imports += f"    from {module_path} import {class_name}\n"
+        code += f"    wf.{node.label} = {class_name}("
+        code += _dict_to_kwargs(kwargs) + ")\n"
+    # code = imports + "\n" + code
 
-    return return_args, code
+    return return_args, code, imports
 
 
 def _get_default_return_args(graph: Graph) -> list[str]:

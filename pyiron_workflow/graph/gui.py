@@ -13,7 +13,7 @@ import pygments
 
 import pyironflow
 from IPython.display import display
-from pyiron_database.instance_database import node as idb_node
+from pyiron_database import instance_database as idb
 
 from pyiron_workflow import simple_workflow
 from pyiron_workflow.graph import (
@@ -34,6 +34,26 @@ class GUILayout:
     output_widget_width = 400
 
 
+def create_db(
+    user: str = "joerg",
+    password: str = "none",
+    host: str = "localhost",
+    port: int = 5432,
+    database: str = "none",
+):
+    import pyiron_database.instance_database as idb
+
+    if database == "none":
+        database = user
+
+    connection_str = f"postgresql://{user}:{password}@{host}:{port}/{database}"
+
+    db = idb.PostgreSQLInstanceDatabase(connection_str)
+    db.init()
+
+    return db
+
+
 """
 Connect graph with ReactflowWidget and other GUI elements for interactive graph/workflow visualization
 """
@@ -45,7 +65,7 @@ class PyironFlowWidget:
         wf: Optional[Union[simple_workflow.Workflow, base.Graph]] = None,
         gui_layout: GUILayout = GUILayout(),
         main_widget=None,
-        hash_nodes=False,
+        db = None,
     ):
 
         if wf is None:
@@ -59,12 +79,7 @@ class PyironFlowWidget:
 
         self.graph = graph
         self.main_widget = main_widget
-
-        # if hash_nodes:
-        #     self.db = hs.create_nodes_table(echo=False)
-        # else:
-        self.db = None
-        self.hash_nodes = hash_nodes
+        self.db = db
 
         self.flow_widget = pyironflow.reactflow.ReactFlowWidget(
             layout={
@@ -145,7 +160,7 @@ class PyironFlowWidget:
                 print("command: ", change["new"])
                 command, node_name = change["new"].split(":", 1)
                 command = command.strip()
-                node_name = node_name.split("-")[0].strip()
+                node_name = node_name.rsplit("-", 1)[0].strip()
                 print("node_name: ", node_name, command)
 
                 if command == "refreshGraphView":
@@ -214,8 +229,6 @@ class PyironFlowWidget:
                         self.accordion_widget.selected_index = 1
                         node = self.graph.nodes[node_name].node
 
-                        # get node hash
-                        print("node hash: ", idb_node.get_hash(node))
                         if node.node_type == "graph":
                             code = base.get_code_from_graph(
                                 node.graph,
@@ -235,13 +248,10 @@ class PyironFlowWidget:
                     elif command == "run":
                         self.accordion_widget.selected_index = 1
                         self.out_widget.clear_output()
-                        if self.db is None:
-                            out = run.pull_node(
-                                base.get_updated_graph(self.graph), node.label
-                            )
-                        else:
-                            pass
-                            # out = hs.run_node(node, self.db).outputs.to_value_dict()
+
+                        out = run.pull_node(
+                            base.get_updated_graph(self.graph), node.label, db=self.db
+                        )
 
                         display(out)
                     elif command == "expand":
@@ -305,7 +315,7 @@ class PyironFlowWidget:
 
 class PyironFlow:
     def __init__(
-        self, wf_list=None, hash_nodes=False, gui_layout: GUILayout = GUILayout()
+        self, wf_list=None, hash_nodes=False, gui_layout: GUILayout = GUILayout(), db: idb.PostgreSQLInstanceDatabase | None = None,
     ):
 
         if wf_list is None:
@@ -313,6 +323,13 @@ class PyironFlow:
 
         # self._gui_layout = gui_layout
         self.hash_nodes = hash_nodes
+        if hash_nodes:
+            # self.db = hs.create_nodes_table(echo=False)
+            self.db = create_db() if db is None else db
+            print(f"Database created: {self.db}")
+        else:
+            self.db = None
+
         self.gui_layout = gui_layout
 
         self.wf_widgets = list()  # list of PyironFlowWidget objects
@@ -320,7 +337,9 @@ class PyironFlow:
             if isinstance(wf, str):
                 wf = graph_json._load_graph(wf)
             self.wf_widgets.append(
-                PyironFlowWidget(wf, gui_layout=gui_layout, main_widget=self)
+                PyironFlowWidget(
+                    wf, gui_layout=gui_layout, main_widget=self, db=self.db
+                )
             )
 
         self.set_tab_widget()
@@ -522,7 +541,11 @@ def gui_data(
         return GuiData(label=label)
 
     target_values = [
-        _to_jsonifyable(v) if not isinstance(v, simple_workflow.Node) else not_data.NotData
+        (
+            _to_jsonifyable(v)
+            if not isinstance(v, simple_workflow.Node)
+            else not_data.NotData
+        )
         for v in node.inputs.data["value"]
     ]
     is_connected = [
@@ -559,7 +582,7 @@ def _get_node_height(node: simple_workflow.Node) -> int | float:
 
 
 def _nodes_to_gui(graph: base.Graph, remove_none=True) -> decorators.NestedList:
-    node_width = 200
+    node_width = 280
 
     nodes = decorators.NestedList()
     active_nodes = _get_active_nodes(graph)

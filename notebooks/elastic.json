@@ -1,203 +1,6 @@
 {
     "label": "elastic",
     "nodes": {
-        "CubicBulkCell": {
-            "id": "CubicBulkCell",
-            "import_path": "pyiron_nodes.atomistic.structure.build.CubicBulkCell",
-            "label": "CubicBulkCell",
-            "parent_id": null,
-            "level": 0,
-            "graph": {
-                "label": "CubicBulkCell",
-                "nodes": {
-                    "va_i_CubicBulkCell__element": null,
-                    "va_i_CubicBulkCell__cell_size": null,
-                    "va_i_CubicBulkCell__vacancy_index": null,
-                    "bulk": null,
-                    "repeat": null,
-                    "vacancy": null,
-                    "va_o_CubicBulkCell__structure": null
-                },
-                "edges": {
-                    "values": [
-                        {
-                            "source": "va_i_CubicBulkCell__element",
-                            "target": "bulk",
-                            "sourceHandle": "x",
-                            "targetHandle": "name"
-                        },
-                        {
-                            "source": "va_i_CubicBulkCell__cell_size",
-                            "target": "repeat",
-                            "sourceHandle": "x",
-                            "targetHandle": "repeat_scalar"
-                        },
-                        {
-                            "source": "va_i_CubicBulkCell__vacancy_index",
-                            "target": "vacancy",
-                            "sourceHandle": "x",
-                            "targetHandle": "index"
-                        },
-                        {
-                            "source": "bulk",
-                            "target": "repeat",
-                            "sourceHandle": "structure",
-                            "targetHandle": "structure"
-                        },
-                        {
-                            "source": "repeat",
-                            "target": "vacancy",
-                            "sourceHandle": "structure",
-                            "targetHandle": "structure"
-                        },
-                        {
-                            "source": "vacancy",
-                            "target": "va_o_CubicBulkCell__structure",
-                            "sourceHandle": "structure",
-                            "targetHandle": "x"
-                        }
-                    ],
-                    "obj_type": "pyiron_workflow.graph.base.GraphEdge"
-                }
-            },
-            "node_type": "graph",
-            "widget_type": "customNode",
-            "expanded": false,
-            "node": {
-                "label": "CubicBulkCell",
-                "function": "pyiron_nodes.atomistic.structure.build.CubicBulkCell",
-                "inputs": {
-                    "element": "Al"
-                }
-            }
-        },
-        "va_i_CubicBulkCell__element": {
-            "id": "va_i_CubicBulkCell__element",
-            "import_path": "pyiron_workflow.graph.base.identity",
-            "label": "va_i_CubicBulkCell__element",
-            "parent_id": "CubicBulkCell",
-            "level": 1,
-            "graph": null,
-            "node_type": "node",
-            "widget_type": "customNode",
-            "expanded": false,
-            "node": {
-                "label": "va_i_CubicBulkCell__element",
-                "function": "pyiron_workflow.graph.base.identity",
-                "inputs": {
-                    "x": "NotData"
-                }
-            }
-        },
-        "va_i_CubicBulkCell__cell_size": {
-            "id": "va_i_CubicBulkCell__cell_size",
-            "import_path": "pyiron_workflow.graph.base.identity",
-            "label": "va_i_CubicBulkCell__cell_size",
-            "parent_id": "CubicBulkCell",
-            "level": 1,
-            "graph": null,
-            "node_type": "node",
-            "widget_type": "customNode",
-            "expanded": false,
-            "node": {
-                "label": "va_i_CubicBulkCell__cell_size",
-                "function": "pyiron_workflow.graph.base.identity",
-                "inputs": {
-                    "x": "NotData"
-                }
-            }
-        },
-        "va_i_CubicBulkCell__vacancy_index": {
-            "id": "va_i_CubicBulkCell__vacancy_index",
-            "import_path": "pyiron_workflow.graph.base.identity",
-            "label": "va_i_CubicBulkCell__vacancy_index",
-            "parent_id": "CubicBulkCell",
-            "level": 1,
-            "graph": null,
-            "node_type": "node",
-            "widget_type": "customNode",
-            "expanded": false,
-            "node": {
-                "label": "va_i_CubicBulkCell__vacancy_index",
-                "function": "pyiron_workflow.graph.base.identity",
-                "inputs": {
-                    "x": "NotData"
-                }
-            }
-        },
-        "bulk": {
-            "id": "bulk",
-            "import_path": "pyiron_nodes.atomistic.structure.build.Bulk",
-            "label": "bulk",
-            "parent_id": "CubicBulkCell",
-            "level": 1,
-            "graph": null,
-            "node_type": "node",
-            "widget_type": "customNode",
-            "expanded": false,
-            "node": {
-                "label": "bulk",
-                "function": "pyiron_nodes.atomistic.structure.build.Bulk",
-                "inputs": {
-                    "name": "NotData",
-                    "cubic": true
-                }
-            }
-        },
-        "repeat": {
-            "id": "repeat",
-            "import_path": "pyiron_nodes.atomistic.structure.transform.Repeat",
-            "label": "repeat",
-            "parent_id": "CubicBulkCell",
-            "level": 1,
-            "graph": null,
-            "node_type": "node",
-            "widget_type": "customNode",
-            "expanded": false,
-            "node": {
-                "label": "repeat",
-                "function": "pyiron_nodes.atomistic.structure.transform.Repeat",
-                "inputs": {
-                    "structure": "NotData"
-                }
-            }
-        },
-        "vacancy": {
-            "id": "vacancy",
-            "import_path": "pyiron_nodes.atomistic.structure.transform.CreateVacancy",
-            "label": "vacancy",
-            "parent_id": "CubicBulkCell",
-            "level": 1,
-            "graph": null,
-            "node_type": "node",
-            "widget_type": "customNode",
-            "expanded": false,
-            "node": {
-                "label": "vacancy",
-                "function": "pyiron_nodes.atomistic.structure.transform.CreateVacancy",
-                "inputs": {
-                    "structure": "NotData"
-                }
-            }
-        },
-        "va_o_CubicBulkCell__structure": {
-            "id": "va_o_CubicBulkCell__structure",
-            "import_path": "pyiron_workflow.graph.base.identity",
-            "label": "va_o_CubicBulkCell__structure",
-            "parent_id": "CubicBulkCell",
-            "level": 1,
-            "graph": null,
-            "node_type": "node",
-            "widget_type": "customNode",
-            "expanded": false,
-            "node": {
-                "label": "va_o_CubicBulkCell__structure",
-                "function": "pyiron_workflow.graph.base.identity",
-                "inputs": {
-                    "x": "NotData"
-                }
-            }
-        },
         "SymmetryAnalysis": {
             "id": "SymmetryAnalysis",
             "import_path": "pyiron_nodes.atomistic.property.elastic.SymmetryAnalysis",
@@ -211,22 +14,6 @@
             "node": {
                 "label": "SymmetryAnalysis",
                 "function": "pyiron_nodes.atomistic.property.elastic.SymmetryAnalysis",
-                "inputs": {}
-            }
-        },
-        "InputElasticTensor": {
-            "id": "InputElasticTensor",
-            "import_path": "pyiron_nodes.atomistic.property.elastic.InputElasticTensor",
-            "label": "InputElasticTensor",
-            "parent_id": null,
-            "level": 0,
-            "graph": null,
-            "node_type": "node",
-            "widget_type": "customNode",
-            "expanded": false,
-            "node": {
-                "label": "InputElasticTensor",
-                "function": "pyiron_nodes.atomistic.property.elastic.InputElasticTensor",
                 "inputs": {}
             }
         },
@@ -246,10 +33,10 @@
                 "inputs": {}
             }
         },
-        "AddEnergies": {
-            "id": "AddEnergies",
-            "import_path": "pyiron_nodes.atomistic.property.elastic.AddEnergies",
-            "label": "AddEnergies",
+        "InputElasticTensor": {
+            "id": "InputElasticTensor",
+            "import_path": "pyiron_nodes.atomistic.property.elastic.InputElasticTensor",
+            "label": "InputElasticTensor",
             "parent_id": null,
             "level": 0,
             "graph": null,
@@ -257,332 +44,15 @@
             "widget_type": "customNode",
             "expanded": false,
             "node": {
-                "label": "AddEnergies",
-                "function": "pyiron_nodes.atomistic.property.elastic.AddEnergies",
+                "label": "InputElasticTensor",
+                "function": "pyiron_nodes.atomistic.property.elastic.InputElasticTensor",
                 "inputs": {}
             }
         },
-        "Shell": {
-            "id": "Shell",
-            "import_path": "pyiron_nodes.atomistic.engine.lammps.Shell",
-            "label": "Shell",
-            "parent_id": "Lammps",
-            "level": 1,
-            "graph": null,
-            "node_type": "node",
-            "widget_type": "customNode",
-            "expanded": false,
-            "node": {
-                "label": "Shell",
-                "function": "pyiron_nodes.atomistic.engine.lammps.Shell",
-                "inputs": {}
-            }
-        },
-        "Lammps": {
-            "id": "Lammps",
-            "import_path": "pyiron_nodes.atomistic.engine.lammps.Lammps",
-            "label": "Lammps",
-            "parent_id": null,
-            "level": 0,
-            "graph": {
-                "label": "Lammps",
-                "nodes": {
-                    "va_i_Lammps__structure": null,
-                    "va_i_Lammps__potential": null,
-                    "va_i_Lammps__calculator": null,
-                    "va_i_Lammps__working_dir": null,
-                    "ListPotentials": null,
-                    "Potential": null,
-                    "InitLammps": null,
-                    "Shell": null,
-                    "ParseLogFile": null,
-                    "ParseDumpFile": null,
-                    "Collect": null,
-                    "va_o_Lammps__generic": null
-                },
-                "edges": {
-                    "values": [
-                        {
-                            "source": "va_i_Lammps__structure",
-                            "target": "Potential",
-                            "sourceHandle": "x",
-                            "targetHandle": "structure"
-                        },
-                        {
-                            "source": "va_i_Lammps__potential",
-                            "target": "Potential",
-                            "sourceHandle": "x",
-                            "targetHandle": "name"
-                        },
-                        {
-                            "source": "va_i_Lammps__structure",
-                            "target": "ListPotentials",
-                            "sourceHandle": "x",
-                            "targetHandle": "structure"
-                        },
-                        {
-                            "source": "va_i_Lammps__structure",
-                            "target": "InitLammps",
-                            "sourceHandle": "x",
-                            "targetHandle": "structure"
-                        },
-                        {
-                            "source": "va_i_Lammps__calculator",
-                            "target": "InitLammps",
-                            "sourceHandle": "x",
-                            "targetHandle": "calculator"
-                        },
-                        {
-                            "source": "va_i_Lammps__working_dir",
-                            "target": "InitLammps",
-                            "sourceHandle": "x",
-                            "targetHandle": "working_directory"
-                        },
-                        {
-                            "source": "Potential",
-                            "target": "InitLammps",
-                            "sourceHandle": "pot",
-                            "targetHandle": "potential"
-                        },
-                        {
-                            "source": "InitLammps",
-                            "target": "Shell",
-                            "sourceHandle": "path",
-                            "targetHandle": "working_directory"
-                        },
-                        {
-                            "source": "Shell",
-                            "target": "ParseLogFile",
-                            "sourceHandle": "log",
-                            "targetHandle": "log_file"
-                        },
-                        {
-                            "source": "Shell",
-                            "target": "ParseDumpFile",
-                            "sourceHandle": "dump",
-                            "targetHandle": "dump_file"
-                        },
-                        {
-                            "source": "ParseDumpFile",
-                            "target": "Collect",
-                            "sourceHandle": "dump",
-                            "targetHandle": "out_dump"
-                        },
-                        {
-                            "source": "ParseLogFile",
-                            "target": "Collect",
-                            "sourceHandle": "log",
-                            "targetHandle": "out_log"
-                        },
-                        {
-                            "source": "Collect",
-                            "target": "va_o_Lammps__generic",
-                            "sourceHandle": "generic",
-                            "targetHandle": "x"
-                        }
-                    ],
-                    "obj_type": "pyiron_workflow.graph.base.GraphEdge"
-                }
-            },
-            "node_type": "graph",
-            "widget_type": "customNode",
-            "expanded": false,
-            "node": {
-                "label": "Lammps",
-                "function": "pyiron_nodes.atomistic.engine.lammps.Lammps",
-                "inputs": {}
-            }
-        },
-        "va_i_Lammps__structure": {
-            "id": "va_i_Lammps__structure",
-            "import_path": "pyiron_workflow.graph.base.identity",
-            "label": "va_i_Lammps__structure",
-            "parent_id": "Lammps",
-            "level": 1,
-            "graph": null,
-            "node_type": "node",
-            "widget_type": "customNode",
-            "expanded": false,
-            "node": {
-                "label": "va_i_Lammps__structure",
-                "function": "pyiron_workflow.graph.base.identity",
-                "inputs": {}
-            }
-        },
-        "va_i_Lammps__potential": {
-            "id": "va_i_Lammps__potential",
-            "import_path": "pyiron_workflow.graph.base.identity",
-            "label": "va_i_Lammps__potential",
-            "parent_id": "Lammps",
-            "level": 1,
-            "graph": null,
-            "node_type": "node",
-            "widget_type": "customNode",
-            "expanded": false,
-            "node": {
-                "label": "va_i_Lammps__potential",
-                "function": "pyiron_workflow.graph.base.identity",
-                "inputs": {
-                    "x": "NotData"
-                }
-            }
-        },
-        "va_i_Lammps__calculator": {
-            "id": "va_i_Lammps__calculator",
-            "import_path": "pyiron_workflow.graph.base.identity",
-            "label": "va_i_Lammps__calculator",
-            "parent_id": "Lammps",
-            "level": 1,
-            "graph": null,
-            "node_type": "node",
-            "widget_type": "customNode",
-            "expanded": false,
-            "node": {
-                "label": "va_i_Lammps__calculator",
-                "function": "pyiron_workflow.graph.base.identity",
-                "inputs": {}
-            }
-        },
-        "va_i_Lammps__working_dir": {
-            "id": "va_i_Lammps__working_dir",
-            "import_path": "pyiron_workflow.graph.base.identity",
-            "label": "va_i_Lammps__working_dir",
-            "parent_id": "Lammps",
-            "level": 1,
-            "graph": null,
-            "node_type": "node",
-            "widget_type": "customNode",
-            "expanded": false,
-            "node": {
-                "label": "va_i_Lammps__working_dir",
-                "function": "pyiron_workflow.graph.base.identity",
-                "inputs": {
-                    "x": "NotData"
-                }
-            }
-        },
-        "ListPotentials": {
-            "id": "ListPotentials",
-            "import_path": "pyiron_nodes.atomistic.engine.lammps.ListPotentials",
-            "label": "ListPotentials",
-            "parent_id": "Lammps",
-            "level": 1,
-            "graph": null,
-            "node_type": "node",
-            "widget_type": "customNode",
-            "expanded": false,
-            "node": {
-                "label": "ListPotentials",
-                "function": "pyiron_nodes.atomistic.engine.lammps.ListPotentials",
-                "inputs": {}
-            }
-        },
-        "Potential": {
-            "id": "Potential",
-            "import_path": "pyiron_nodes.atomistic.engine.lammps.Potential",
-            "label": "Potential",
-            "parent_id": "Lammps",
-            "level": 1,
-            "graph": null,
-            "node_type": "node",
-            "widget_type": "customNode",
-            "expanded": false,
-            "node": {
-                "label": "Potential",
-                "function": "pyiron_nodes.atomistic.engine.lammps.Potential",
-                "inputs": {}
-            }
-        },
-        "InitLammps": {
-            "id": "InitLammps",
-            "import_path": "pyiron_nodes.atomistic.engine.lammps.InitLammps",
-            "label": "InitLammps",
-            "parent_id": "Lammps",
-            "level": 1,
-            "graph": null,
-            "node_type": "node",
-            "widget_type": "customNode",
-            "expanded": false,
-            "node": {
-                "label": "InitLammps",
-                "function": "pyiron_nodes.atomistic.engine.lammps.InitLammps",
-                "inputs": {
-                    "working_directory": "NotData"
-                }
-            }
-        },
-        "ParseLogFile": {
-            "id": "ParseLogFile",
-            "import_path": "pyiron_nodes.atomistic.engine.lammps.ParseLogFile",
-            "label": "ParseLogFile",
-            "parent_id": "Lammps",
-            "level": 1,
-            "graph": null,
-            "node_type": "node",
-            "widget_type": "customNode",
-            "expanded": false,
-            "node": {
-                "label": "ParseLogFile",
-                "function": "pyiron_nodes.atomistic.engine.lammps.ParseLogFile",
-                "inputs": {}
-            }
-        },
-        "ParseDumpFile": {
-            "id": "ParseDumpFile",
-            "import_path": "pyiron_nodes.atomistic.engine.lammps.ParseDumpFile",
-            "label": "ParseDumpFile",
-            "parent_id": "Lammps",
-            "level": 1,
-            "graph": null,
-            "node_type": "node",
-            "widget_type": "customNode",
-            "expanded": false,
-            "node": {
-                "label": "ParseDumpFile",
-                "function": "pyiron_nodes.atomistic.engine.lammps.ParseDumpFile",
-                "inputs": {}
-            }
-        },
-        "Collect": {
-            "id": "Collect",
-            "import_path": "pyiron_nodes.atomistic.engine.lammps.Collect",
-            "label": "Collect",
-            "parent_id": "Lammps",
-            "level": 1,
-            "graph": null,
-            "node_type": "node",
-            "widget_type": "customNode",
-            "expanded": false,
-            "node": {
-                "label": "Collect",
-                "function": "pyiron_nodes.atomistic.engine.lammps.Collect",
-                "inputs": {
-                    "calc_mode": "md"
-                }
-            }
-        },
-        "va_o_Lammps__generic": {
-            "id": "va_o_Lammps__generic",
-            "import_path": "pyiron_workflow.graph.base.identity",
-            "label": "va_o_Lammps__generic",
-            "parent_id": "Lammps",
-            "level": 1,
-            "graph": null,
-            "node_type": "node",
-            "widget_type": "customNode",
-            "expanded": false,
-            "node": {
-                "label": "va_o_Lammps__generic",
-                "function": "pyiron_workflow.graph.base.identity",
-                "inputs": {
-                    "x": "NotData"
-                }
-            }
-        },
-        "CalcStatic": {
-            "id": "CalcStatic",
-            "import_path": "pyiron_nodes.atomistic.engine.lammps.CalcStatic",
-            "label": "CalcStatic",
+        "Bulk": {
+            "id": "Bulk",
+            "import_path": "pyiron_nodes.atomistic.structure.build.Bulk",
+            "label": "Bulk",
             "parent_id": null,
             "level": 0,
             "graph": null,
@@ -590,15 +60,18 @@
             "widget_type": "customNode",
             "expanded": false,
             "node": {
-                "label": "CalcStatic",
-                "function": "pyiron_nodes.atomistic.engine.lammps.CalcStatic",
-                "inputs": {}
+                "label": "Bulk",
+                "function": "pyiron_nodes.atomistic.structure.build.Bulk",
+                "inputs": {
+                    "name": "Al",
+                    "orthorhombic": true
+                }
             }
         },
-        "DataStructureContainer": {
-            "id": "DataStructureContainer",
-            "import_path": "pyiron_workflow.simple_workflow.func_dataclass",
-            "label": "DataStructureContainer",
+        "M3GNet": {
+            "id": "M3GNet",
+            "import_path": "pyiron_nodes.atomistic.engine.ase.M3GNet",
+            "label": "M3GNet",
             "parent_id": null,
             "level": 0,
             "graph": null,
@@ -606,15 +79,15 @@
             "widget_type": "customNode",
             "expanded": false,
             "node": {
-                "label": "DataStructureContainer",
-                "function": "pyiron_nodes.atomistic.property.elastic.DataStructureContainer",
+                "label": "M3GNet",
+                "function": "pyiron_nodes.atomistic.engine.ase.M3GNet",
                 "inputs": {}
             }
         },
-        "Plot": {
-            "id": "Plot",
-            "import_path": "pyiron_nodes.plotting.Plot",
-            "label": "Plot",
+        "IterToDataFrame": {
+            "id": "IterToDataFrame",
+            "import_path": "pyiron_nodes.controls.IterToDataFrame",
+            "label": "IterToDataFrame",
             "parent_id": null,
             "level": 0,
             "graph": null,
@@ -622,9 +95,29 @@
             "widget_type": "customNode",
             "expanded": false,
             "node": {
-                "label": "Plot",
-                "function": "pyiron_nodes.plotting.Plot",
-                "inputs": {}
+                "label": "IterToDataFrame",
+                "function": "pyiron_nodes.controls.IterToDataFrame",
+                "inputs": {
+                    "input_label": "structure"
+                }
+            }
+        },
+        "StaticEnergy": {
+            "id": "StaticEnergy",
+            "import_path": "pyiron_nodes.atomistic.calculator.ase.StaticEnergy",
+            "label": "StaticEnergy",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "StaticEnergy",
+                "function": "pyiron_nodes.atomistic.calculator.ase.StaticEnergy",
+                "inputs": {
+                    "structure": "NotData"
+                }
             }
         },
         "AnalyseStructures": {
@@ -643,10 +136,10 @@
                 "inputs": {}
             }
         },
-        "OutputElasticAnalysis": {
-            "id": "OutputElasticAnalysis",
-            "import_path": "pyiron_workflow.simple_workflow.func_dataclass",
-            "label": "OutputElasticAnalysis",
+        "GetColumnFromDataFrame": {
+            "id": "GetColumnFromDataFrame",
+            "import_path": "pyiron_nodes.dataframe.GetColumnFromDataFrame",
+            "label": "GetColumnFromDataFrame",
             "parent_id": null,
             "level": 0,
             "graph": null,
@@ -654,50 +147,29 @@
             "widget_type": "customNode",
             "expanded": false,
             "node": {
-                "label": "OutputElasticAnalysis",
-                "function": "pyiron_nodes.atomistic.property.elastic.OutputElasticAnalysis",
-                "inputs": {}
+                "label": "GetColumnFromDataFrame",
+                "function": "pyiron_nodes.dataframe.GetColumnFromDataFrame",
+                "inputs": {
+                    "column_name": "energy",
+                    "as_array": true
+                }
             }
         },
-        "_obj_type": "pyiron_workflow.graph.base.GraphNode"
+        "_obj_type": "pyiron_workflow.api.serial.GraphNode"
     },
     "edges": {
         "values": [
             {
-                "source": "va_i_CubicBulkCell__element",
-                "target": "bulk",
-                "sourceHandle": "x",
-                "targetHandle": "name"
-            },
-            {
-                "source": "va_i_CubicBulkCell__cell_size",
-                "target": "repeat",
-                "sourceHandle": "x",
-                "targetHandle": "repeat_scalar"
-            },
-            {
-                "source": "va_i_CubicBulkCell__vacancy_index",
-                "target": "vacancy",
-                "sourceHandle": "x",
-                "targetHandle": "index"
-            },
-            {
-                "source": "bulk",
-                "target": "repeat",
+                "source": "Bulk",
+                "target": "SymmetryAnalysis",
                 "sourceHandle": "structure",
                 "targetHandle": "structure"
             },
             {
-                "source": "repeat",
-                "target": "vacancy",
+                "source": "Bulk",
+                "target": "GenerateStructures",
                 "sourceHandle": "structure",
                 "targetHandle": "structure"
-            },
-            {
-                "source": "vacancy",
-                "target": "va_o_CubicBulkCell__structure",
-                "sourceHandle": "structure",
-                "targetHandle": "x"
             },
             {
                 "source": "InputElasticTensor",
@@ -706,22 +178,10 @@
                 "targetHandle": "parameters"
             },
             {
-                "source": "va_o_CubicBulkCell__structure",
-                "target": "SymmetryAnalysis",
-                "sourceHandle": "x",
-                "targetHandle": "structure"
-            },
-            {
                 "source": "SymmetryAnalysis",
                 "target": "GenerateStructures",
                 "sourceHandle": "out",
                 "targetHandle": "analysis"
-            },
-            {
-                "source": "va_o_CubicBulkCell__structure",
-                "target": "GenerateStructures",
-                "sourceHandle": "x",
-                "targetHandle": "structure"
             },
             {
                 "source": "InputElasticTensor",
@@ -731,123 +191,33 @@
             },
             {
                 "source": "GenerateStructures",
-                "target": "AddEnergies",
-                "sourceHandle": "structure_container",
-                "targetHandle": "structure_container"
+                "target": "IterToDataFrame",
+                "sourceHandle": "structures",
+                "targetHandle": "values"
             },
             {
-                "source": "va_i_Lammps__structure",
-                "target": "Potential",
-                "sourceHandle": "x",
-                "targetHandle": "structure"
-            },
-            {
-                "source": "va_i_Lammps__potential",
-                "target": "Potential",
-                "sourceHandle": "x",
-                "targetHandle": "name"
-            },
-            {
-                "source": "va_i_Lammps__structure",
-                "target": "ListPotentials",
-                "sourceHandle": "x",
-                "targetHandle": "structure"
-            },
-            {
-                "source": "va_i_Lammps__structure",
-                "target": "InitLammps",
-                "sourceHandle": "x",
-                "targetHandle": "structure"
-            },
-            {
-                "source": "va_i_Lammps__calculator",
-                "target": "InitLammps",
-                "sourceHandle": "x",
-                "targetHandle": "calculator"
-            },
-            {
-                "source": "va_i_Lammps__working_dir",
-                "target": "InitLammps",
-                "sourceHandle": "x",
-                "targetHandle": "working_directory"
-            },
-            {
-                "source": "Potential",
-                "target": "InitLammps",
-                "sourceHandle": "pot",
-                "targetHandle": "potential"
-            },
-            {
-                "source": "InitLammps",
-                "target": "Shell",
-                "sourceHandle": "path",
-                "targetHandle": "working_directory"
-            },
-            {
-                "source": "Shell",
-                "target": "ParseLogFile",
-                "sourceHandle": "log",
-                "targetHandle": "log_file"
-            },
-            {
-                "source": "Shell",
-                "target": "ParseDumpFile",
-                "sourceHandle": "dump",
-                "targetHandle": "dump_file"
-            },
-            {
-                "source": "ParseDumpFile",
-                "target": "Collect",
-                "sourceHandle": "dump",
-                "targetHandle": "out_dump"
-            },
-            {
-                "source": "ParseLogFile",
-                "target": "Collect",
-                "sourceHandle": "log",
-                "targetHandle": "out_log"
-            },
-            {
-                "source": "Collect",
-                "target": "va_o_Lammps__generic",
-                "sourceHandle": "generic",
-                "targetHandle": "x"
-            },
-            {
-                "source": "va_o_Lammps__generic",
-                "target": "AddEnergies",
-                "sourceHandle": "x",
+                "source": "M3GNet",
+                "target": "StaticEnergy",
+                "sourceHandle": "out",
                 "targetHandle": "engine"
             },
             {
-                "source": "CalcStatic",
-                "target": "va_i_Lammps__calculator",
-                "sourceHandle": "calculator",
-                "targetHandle": "x"
-            },
-            {
-                "source": "va_o_CubicBulkCell__structure",
-                "target": "va_i_Lammps__structure",
-                "sourceHandle": "x",
-                "targetHandle": "x"
-            },
-            {
-                "source": "AddEnergies",
-                "target": "DataStructureContainer",
-                "sourceHandle": "structure_container",
-                "targetHandle": "dataclass"
-            },
-            {
-                "source": "DataStructureContainer",
-                "target": "Plot",
+                "source": "StaticEnergy",
+                "target": "IterToDataFrame",
                 "sourceHandle": "energy",
-                "targetHandle": "y"
+                "targetHandle": "node"
             },
             {
-                "source": "AddEnergies",
+                "source": "IterToDataFrame",
+                "target": "GetColumnFromDataFrame",
+                "sourceHandle": "df",
+                "targetHandle": "df"
+            },
+            {
+                "source": "GetColumnFromDataFrame",
                 "target": "AnalyseStructures",
-                "sourceHandle": "structure_container",
-                "targetHandle": "data_df"
+                "sourceHandle": "column",
+                "targetHandle": "energies"
             },
             {
                 "source": "SymmetryAnalysis",
@@ -862,12 +232,12 @@
                 "targetHandle": "parameters"
             },
             {
-                "source": "AnalyseStructures",
-                "target": "OutputElasticAnalysis",
-                "sourceHandle": "out",
-                "targetHandle": "dataclass"
+                "source": "GenerateStructures",
+                "target": "AnalyseStructures",
+                "sourceHandle": "job_names",
+                "targetHandle": "job_names"
             }
         ],
-        "obj_type": "pyiron_workflow.graph.base.GraphEdge"
+        "obj_type": "pyiron_workflow.api.serial.GraphEdge"
     }
 }

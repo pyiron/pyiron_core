@@ -2,21 +2,20 @@
 
 from dataclasses import asdict
 from typing import Optional
+import numpy as np
 
 from ase import Atoms
 from phonopy.api_phonopy import Phonopy
 from pyiron_workflow import (
-    as_dataclass_node,
+    as_inp_dataclass_node,
+    as_out_dataclass_node,
     as_function_node,
     as_macro_node,
-    for_node,
-    standard_nodes as standard,
 )
 from structuretoolkit.common import atoms_to_phonopy, phonopy_to_atoms
 
 from pyiron_nodes.atomistic.calculator.ase import Static
 from pyiron_nodes.atomistic.engine.generic import OutputEngine
-from pyiron_nodes.development.settings import Storage
 
 
 @as_function_node("phonopy")
@@ -24,7 +23,7 @@ def PhonopyObject(structure):
     return Phonopy(unitcell=atoms_to_phonopy(structure))
 
 
-@as_dataclass_node
+@as_inp_dataclass_node
 class PhonopyParameters:
     distance: float = 0.01
     is_plusminus: str | bool = "auto"
@@ -38,39 +37,105 @@ class PhonopyParameters:
 
 
 @as_function_node
-def GenerateSupercells(
-    phonopy: Phonopy, parameters: PhonopyParameters.dataclass | None
-) -> list[Atoms]:
-    parameters = PhonopyParameters.dataclass() if parameters is None else parameters
+def GenerateSupercells(phonopy: Phonopy, parameters: PhonopyParameters) -> list[Atoms]:
+    from dataclasses import asdict
+
+    parameters = PhonopyParameters() if parameters is None else parameters
     phonopy.generate_displacements(**asdict(parameters))
 
     supercells = [phonopy_to_atoms(s) for s in phonopy.supercells_with_displacements]
     return supercells
 
 
-@as_macro_node("phonopy", "calculations")
-def CreatePhonopy(
-    self,
+@as_macro_node("phonopy", "thermal_properties")
+def phonopy(
     structure: Atoms,
-    engine: OutputEngine | None = None,
-    parameters: PhonopyParameters.dataclass | None = None,
+    engine: OutputEngine,
+    phonopy_parameters: PhonopyParameters = None,
+    GetThermalProperties__mesh="10",
 ):
-    import warnings
 
-    warnings.simplefilter(action="ignore", category=(DeprecationWarning, UserWarning))
+    from pyiron_workflow import Workflow
+    from pyiron_nodes.atomistic.calculator.ase import Static
+    from pyiron_nodes.atomistic.property.phonons import PhonopyObject
+    from pyiron_nodes.atomistic.property.phonons import GenerateSupercells
+    from pyiron_nodes.controls import iterate
+    from pyiron_nodes.controls import GetAttribute
+    from pyiron_nodes.controls import SetAttribute
+    from pyiron_nodes.atomistic.property.phonons import GetDynamicalMatrix
+    from pyiron_nodes.atomistic.property.phonons import GetThermalProperties
 
-    self.phonopy = PhonopyObject(structure)
-    self.cells = GenerateSupercells(self.phonopy, parameters=parameters)
-    self.calculations = for_node(
-        body_node_class=Static,
-        iter_on=("structure",),
-        engine=engine,
-        structure=self.cells,
+    if phonopy_parameters is None:
+        phonopy_parameters = PhonopyParameters()
+
+    wf = Workflow(phonopy)
+
+    wf.PhonopyObject = PhonopyObject(structure=structure)
+    wf.GenerateSupercells = GenerateSupercells(
+        phonopy=wf.PhonopyObject, parameters=phonopy_parameters
     )
-    self.forces = ExtractFinalForces(self.calculations)
-    self.phonopy_with_forces = standard.SetAttr(self.phonopy, "forces", self.forces)
+    wf.Static = Static(engine=engine, structure=structure)
+    wf.iterate = iterate(
+        values=wf.GenerateSupercells, node=wf.Static, input_label="structure"
+    )
+    wf.GetForces = GetAttribute(obj=wf.iterate, attr="forces")
+    wf.SetForces = SetAttribute(val=wf.GetForces, obj=wf.PhonopyObject, attr="forces")
+    wf.GetDynamicalMatrix = GetDynamicalMatrix(phonopy=wf.SetForces)
+    wf.GetThermalProperties = GetThermalProperties(
+        phonopy=wf.GetDynamicalMatrix.outputs.phonopy, mesh=GetThermalProperties__mesh
+    )
 
-    return self.phonopy_with_forces, self.calculations
+    return (
+        wf.PhonopyObject,
+        wf.GetThermalProperties,
+    )
+
+
+@as_function_node
+def GetFreeEnergy(
+    structure: Atoms,
+    engine: OutputEngine,
+    temperature: float = 300,
+    mesh: int = 10,
+    parameters: Optional[PhonopyParameters] = None,
+):
+    """
+    Calculate the free energy of a structure in the Harmonic approximation
+    at a given temperature using phonopy.
+    """
+    from dataclasses import asdict
+
+    print(f"Calculating free energy at {temperature} K")
+
+    phonopy = Phonopy(unitcell=atoms_to_phonopy(structure))
+
+    parameters = PhonopyParameters().run() if parameters is None else parameters
+    phonopy.generate_displacements(**asdict(parameters))
+
+    supercells = [phonopy_to_atoms(s) for s in phonopy.supercells_with_displacements]
+    forces = []
+    for sc in supercells:
+        sc.calc = engine.calculator
+        forces.append(sc.get_forces())
+    phonopy.forces = forces
+    phonopy.produce_force_constants()
+    phonopy.dynamical_matrix.run(q=[0, 0, 0])
+
+    phonopy.run_mesh([mesh, mesh, mesh])
+    phonopy.run_thermal_properties(
+        t_min=temperature,
+        t_max=temperature,
+        t_step=1,
+    )
+
+    print(
+        f"Free energy calculated for temperature: {temperature} K: ",
+        phonopy.get_thermal_properties_dict(),
+    )
+    free_energy = phonopy.get_thermal_properties_dict()["free_energy"][-1]
+    print(f"Free energy: {free_energy} eV")
+
+    return free_energy
 
 
 @as_function_node("forces")
@@ -88,7 +153,7 @@ def GetDynamicalMatrix(phonopy, q=None):
         phonopy.dynamical_matrix.run(q=q)
     dynamical_matrix = np.real_if_close(phonopy.dynamical_matrix.dynamical_matrix)
     # print (dynamical_matrix)
-    return dynamical_matrix
+    return dynamical_matrix, phonopy
 
 
 @as_function_node
@@ -110,8 +175,8 @@ def CheckConsistency(self, phonopy: Phonopy, tolerance: float = 1e-10):
 @as_function_node
 def GetTotalDos(
     phonopy,
-    mesh=None,
-    storage: Optional[Storage.dataclass] = Storage.dataclass(hash_output=True),
+    mesh: int = None,
+    store: bool = False,
 ):
     from pandas import DataFrame
 
@@ -133,3 +198,40 @@ def HasImaginaryModes(eigenvalues, tolerance: float = 1e-10) -> bool:
     else:
         has_imaginary_modes = False
     return has_imaginary_modes
+
+
+@as_out_dataclass_node
+class ThermalProperties:
+    from pyiron_workflow.data_fields import DataArray, EmptyArrayField
+
+    temperatures: DataArray = EmptyArrayField()
+    free_energy: DataArray = EmptyArrayField()
+    entropy: DataArray = EmptyArrayField()
+    heat_capacity: DataArray = EmptyArrayField()
+
+
+@as_function_node
+def GetThermalProperties(
+    phonopy: Phonopy,
+    t_min: float = 0,
+    t_max: float = 1000,
+    t_step: int = 10,
+    mesh=20,
+    store: bool = False,
+):
+    """Get thermal properties from phonopy."""
+
+    _, phonopy_new = GetDynamicalMatrix(phonopy).run()
+    phonopy_new.run_mesh([mesh, mesh, mesh])
+    phonopy_new.run_thermal_properties(
+        t_min=t_min,
+        t_max=t_max,
+        t_step=t_step,
+    )
+
+    tp_dict = phonopy_new.get_thermal_properties_dict()
+    # print(f"Thermal properties calculated for temperatures: {tp_dict['temperatures']}")
+    # Convert the dictionary to a ThermalProperties dataclass
+    thermal_properties = ThermalProperties().dataclass(**tp_dict)
+
+    return thermal_properties

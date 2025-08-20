@@ -4,10 +4,15 @@
 .storage/
 .vscode/
 node_modules/
-./static/
+static/
 .coverage
 .DS_Store
 *.pyc
+*.dat
+*.data
+*.gz
+*.log
+*.yaml
 package-lock.json
 pyiron.log
 tests/integration/test_notebooks.py

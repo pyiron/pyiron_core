@@ -1,4 +1,5 @@
 from typing import Optional, TYPE_CHECKING
+from pyiron_workflow.api.graph import Graph, GraphNode
 
 # import numpy as np
 # import pandas as pd
@@ -18,27 +19,27 @@ def LoadGraph(path: str):
 
 
 @as_function_node
-def Display(graph, optimize: bool = True):
+def Display(graph: Graph, full_graph: bool = True):
     from pyiron_workflow.api.gui import GuiGraph
 
-    plot = GuiGraph(graph, optimze=optimize)
+    plot = GuiGraph(graph, full_graph=full_graph)
     return plot
 
 
 @as_function_node
-def DisplayNodes(graph):
+def DisplayNodes(graph: Graph):
     nodes = graph.nodes
     return nodes
 
 
 @as_function_node
-def DisplayEdges(graph):
+def DisplayEdges(graph: Graph):
     edges = graph.edges
     return edges
 
 
 @as_function_node
-def DisplayNodeData(graph):
+def DisplayNodeData(graph: Graph):
     from pyiron_workflow.api.gui import display_gui_data
 
     data = display_gui_data(graph)
@@ -46,7 +47,7 @@ def DisplayNodeData(graph):
 
 
 @as_function_node
-def DisplayNodeStyle(graph):
+def DisplayNodeStyle(graph: Graph):
     from pyiron_workflow.api.gui import display_gui_style
 
     style = display_gui_style(graph)
@@ -54,14 +55,15 @@ def DisplayNodeStyle(graph):
 
 
 @as_function_node
-def NodesToGui(graph, remove_none: Optional[bool] = False):
+def NodesToGui(graph: Graph, remove_none: Optional[bool] = False):
     from pyiron_workflow.api.gui import _nodes_to_gui
+
     nodes = _nodes_to_gui(graph, remove_none=False)
     return nodes
 
 
 @as_function_node
-def EdgesToGui(graph):
+def EdgesToGui(graph: Graph):
     from pyiron_workflow.api.gui import _edges_to_gui
 
     edges = _edges_to_gui(graph, remove_none=False)
@@ -69,19 +71,19 @@ def EdgesToGui(graph):
 
 
 @as_function_node(labels=["GraphNode", "Node"])
-def ExtractNode(node_label: str, graph):
+def ExtractNode(node_label: str, graph: Graph):
     node = graph.nodes[node_label]
     return node, node.node
 
 
 @as_function_node
-def NodeInput(node):
+def NodeInput(node: GraphNode):
     inputs = node.node.inputs
     return inputs
 
 
 @as_function_node
-def DisplayGraphAsJson(graph):
+def DisplayGraphAsJson(graph: Graph):
     import json
     from IPython.display import display, JSON
 
@@ -91,7 +93,7 @@ def DisplayGraphAsJson(graph):
 
 
 @as_function_node
-def OptimizeGraphConnections(graph):
+def OptimizeGraphConnections(graph: Graph):
     raise NotImplementedError(
         "pyiron_workflow.graph.base._optimize_graph_connections did not exist at time of refactoring"
     )
@@ -100,7 +102,7 @@ def OptimizeGraphConnections(graph):
 
 
 @as_function_node
-def MarkNodeAsExpanded(graph, node_label: str, expanded: Optional[bool] = True):
+def MarkNodeAsExpanded(graph: Graph, node_label: str, expanded: Optional[bool] = True):
     from pyiron_workflow.api.gui import _mark_node_as_collapsed, _mark_node_as_expanded
 
     if expanded:
@@ -114,14 +116,16 @@ def MarkNodeAsExpanded(graph, node_label: str, expanded: Optional[bool] = True):
 # def get_graph_from_macro(macro_node: Node) -> Graph:
 @as_function_node
 def GetGraphFromMacro(macro_node):
-    raise NotImplementedError("pyiron_workflow.graph.base._get_graph_from_macro did not exist at time of refactoring")
+    raise NotImplementedError(
+        "pyiron_workflow.graph.base._get_graph_from_macro did not exist at time of refactoring"
+    )
     # graph = base.get_graph_from_macro(macro_node)
     # return graph
 
 
 # def _get_active_nodes(graph: Graph) -> Nodes:
 @as_function_node
-def GetActiveNodes(graph):
+def GetActiveNodes(graph: Graph):
     from pyiron_workflow.api.gui import _get_active_nodes
 
     nodes = _get_active_nodes(graph)
@@ -129,10 +133,20 @@ def GetActiveNodes(graph):
 
 
 @as_function_node
-def GetCodeFromGraph(graph):
+def GetCodeFromGraph(
+    graph: Graph,
+    sort_graph: bool = True,
+    use_node_default: bool = False,
+    scope_inputs: bool = True,
+):
     from pyiron_workflow.api.graph import get_code_from_graph
 
-    code = get_code_from_graph(graph)
+    code = get_code_from_graph(
+        graph,
+        sort_graph=sort_graph,
+        use_node_default=use_node_default,
+        scope_inputs=scope_inputs,
+    )
     return code
 
 
@@ -178,7 +192,7 @@ def GetUpdatedGraph(full_graph, level: Optional[int] = 0):
 
 
 @as_function_node
-def TopologicalSort(graph):
+def TopologicalSort(graph: Graph):
     from pyiron_workflow.api.graph import topological_sort
 
     graph = topological_sort(graph)

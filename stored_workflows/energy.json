@@ -64,7 +64,9 @@
             "node": {
                 "label": "GetEnergyLast",
                 "function": "pyiron_nodes.atomistic.calculator.output.GetEnergyLast",
-                "inputs": {}
+                "inputs": {
+                  "store": true
+                }
             }
         },
         "CreateDB": {

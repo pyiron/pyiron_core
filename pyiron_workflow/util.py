@@ -14,6 +14,8 @@ class LocalPostgres:
         self.port = str(5432)
         self.user = "localuser"
         self.db = "localdb"
+        self.password = "none"
+        self.host = "localhost"
 
     def _run(self, *args, check=True, capture_output=False):
         if pathlib.Path(self.dbdir).exists():
@@ -67,6 +69,10 @@ class LocalPostgres:
         except subprocess.CalledProcessError:
             pass
         shutil.rmtree(self.dbdir, ignore_errors=True)
+
+    @property
+    def connection_string(self):
+        return f"postgresql://{self.user}:{self.password}@{self.host}:{self.port}/{self.db}"
 
 
 def copy_stored_workflows(destination: str | pathlib.Path) -> list[str]:

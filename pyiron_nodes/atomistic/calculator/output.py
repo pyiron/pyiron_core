@@ -14,6 +14,7 @@ from pyiron_nodes.atomistic.calculator.data import (
 def GetEnergyLast(
     # calculator: Optional[OutputCalcMinimize | OutputCalcStatic] = None,
     calculator=None,
+    store: bool = False,
     _db=None,
 ) -> float:
     # print("GetEnergyLast", type(calculator))

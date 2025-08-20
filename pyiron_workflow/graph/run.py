@@ -41,7 +41,7 @@ def run_node(node: simple_workflow.Node | base.GraphNode, **kwargs):
     return result
 
 
-def pull_node(graph: base.Graph, node_label: str):
+def pull_node(graph: base.Graph, node_label: str, db=None):
     """
     Pull a node from the workflow graph and run it. Execute only nodes that
     are required as input to run the node.
@@ -65,7 +65,7 @@ def pull_node(graph: base.Graph, node_label: str):
 
     for input_node_label in input_nodes_labels:
         print(f"Running node {input_node_label}")
-        out = opt_graph.nodes[input_node_label].node.run()
+        out = opt_graph.nodes[input_node_label].node.run(db=db)
     return out
 
 

@@ -117,7 +117,7 @@ def DataPlot(
     from matplotlib import pyplot as plt
 
     if title is not None:
-        plt.title = title
+        plt.title(title)
     plt.plot(data_1.temperature.value, data_1.gibbs_energy.value, label=data_1.label)
     plt.xlabel = f"{data_1.temperature.label} [{data_1.temperature.unit}]"
     plt.ylabel = data_1.gibbs_energy.label
@@ -132,7 +132,7 @@ def DataPlot(
         )
 
     plt.legend()
-    plt.title = title
+    plt.title(title)
 
     return plt.show()
 
@@ -147,7 +147,7 @@ def DataPlotCp(
     from matplotlib import pyplot as plt
 
     if title is not None:
-        plt.title = title
+        plt.title(title)
     plt.plot(data_1.temperature.value, data_1.cp.value, label=data_1.label)
     plt.xlabel = f"{data_1.temperature.label} [{data_1.temperature.unit}]"
     plt.ylabel = data_1.cp.label
@@ -158,7 +158,7 @@ def DataPlotCp(
         plt.plot(data_3.temperature.value, data_3.cp.value, label=data_3.label)
 
     plt.legend()
-    plt.title = title
+    plt.title(title)
 
     return plt.show()
 

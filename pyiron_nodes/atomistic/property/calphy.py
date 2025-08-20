@@ -169,11 +169,7 @@ def _generate_random_string(length: str) -> str:
 
 def _prepare_potential_and_structure(potential, structure):
     from pyiron_atomistics.lammps.potential import LammpsPotential, LammpsPotentialFile
-    from pyiron_atomistics.lammps.structure import (
-        LammpsStructure,
-        UnfoldingPrism,
-        structure_to_lammps,
-    )
+    from pyiron_lammps.structure import LammpsStructure, UnfoldingPrism, structure_to_lammps
 
     potential_df = LammpsPotentialFile().find_by_name(potential)
     potential = LammpsPotential()
