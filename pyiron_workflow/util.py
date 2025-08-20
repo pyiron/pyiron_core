@@ -99,9 +99,4 @@ class LocalPostgres:
         return f"postgresql://{self.user}:{self.password}@{self.host}:{self.port}/{self.db}"
 
 
-def copy_stored_workflows(destination: str | pathlib.Path) -> list[str]:
-    source = pathlib.Path(__file__).parent.parent / "stored_workflows"
-    json_files = [f.name for f in source.glob("*.json")]
-    for f in json_files:
-        shutil.copy(source / f, pathlib.Path(destination))
-    return json_files
+STORED_WORKFLOW_DIR = pathlib.Path(__file__).parent.parent / "stored_workflows"
