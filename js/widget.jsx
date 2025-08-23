@@ -147,11 +147,11 @@ const render = createRender(() => {
         getLayoutedNodes(newNodes, newEdges, newGraph).then((layoutedNodes) => {
           setNodes(layoutedNodes);
           setEdges(newEdges);
-          globalStatusRef.current = "finished";
+          // globalStatusRef.current = "finished";
         });
       } catch {
         console.error("Failed to parse mydata from model.");
-        globalStatusRef.current = "finished";
+        // globalStatusRef.current = "finished";
       }
     };
 

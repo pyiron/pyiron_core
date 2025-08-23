@@ -593,7 +593,7 @@ def _get_node_height(node: simple_workflow.Node) -> int | float:
         height = 250
     else:
         n_max_ports = max(node.n_out_labels, node.n_inp_labels)
-        height = 30 + 16 * n_max_ports
+        height = 30 + 20 * n_max_ports
     return height
 
 

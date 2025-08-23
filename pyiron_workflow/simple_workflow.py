@@ -12,7 +12,7 @@ import importlib
 import inspect
 import logging
 import types
-from typing import Any, Literal, TypeAlias, Union, get_type_hints
+from typing import Any, Literal, TypeAlias, Union, get_type_hints, get_args, get_origin
 
 import pandas as pd
 from pyiron_workflow import wf_graph_tools
@@ -167,34 +167,83 @@ PortTypeValue: TypeAlias = Literal[
 ]
 
 
-def type_hint_to_string(type_hint: Any) -> PortTypeValue:
-    """Convert a Python type hint to its string representation."""
+# from typing import Any, Literal, Union, Type, get_origin, get_args
 
-    # Handling basic types
+# ----------------------------------------------------------------------
+# Helper that turns a literal value into the identifier string we want.
+# ----------------------------------------------------------------------
+def _clean_literal_value(val: Any) -> str:
+    """
+    Convert a value that appears inside ``Literal[…]`` to the string that
+    should be shown in the type‑hint.
+
+    * If the user wrote ``Literal["fcc"]`` the value is the string ``"fcc"``,
+      we strip the surrounding quotes → ``fcc``.
+    * If the user wrote ``Literal[fcc]`` Python already stores the identifier
+      as the string ``"fcc"``, so the same stripping works.
+    * Numbers, bools, ``None`` etc. are returned via ``repr``.
+    """
+    if isinstance(val, str):
+        return val.strip('\'"')
+    return repr(val)
+
+
+# ----------------------------------------------------------------------
+# Main conversion routine (drop‑in replacement for the original one)
+# ----------------------------------------------------------------------
+def type_hint_to_string(type_hint: Any) -> str:   # PortTypeValue is assumed to be ``str``
+    """Convert a Python type hint to the string representation used by pyiron‑workflow.
+
+    The function recognises primitive types, ``Node``/``_NotHinted``,
+    ``Optional``/``Union`` and ``Literal`` (with or without quoted items).
+    Anything else is reported as ``"NonPrimitive"``.
+    """
+    # ------------------------------------------------------------------
+    # Primitive / special‑case types
+    # ------------------------------------------------------------------
     if type_hint is int:
         return "int"
-    elif type_hint is float:
+    if type_hint is float:
         return "float"
-    elif type_hint is str:
+    if type_hint is str:
         return "str"
-    elif type_hint is bool:
+    if type_hint is bool:
         return "bool"
-    elif type_hint is None or type_hint is type(None):
+    if type_hint is None or type_hint is type(None):
         return "None"
-    elif type_hint is Node:
+    if type_hint is Node:                     # type: ignore[name-defined]
         return "Node"
-    elif type_hint is _NotHinted:
+    if type_hint is _NotHinted:               # type: ignore[name-defined]
+        print("Not hinted: ", type_hint)
         return "NotHinted"
 
-    # Handling Optional and Union types (e.g. Optional[int], Union[int, float])
-    if hasattr(type_hint, "__origin__") and (type_hint.__origin__ is Union):
-        args = type_hint.__args__
+    # ------------------------------------------------------------------
+    # Union / Optional handling
+    # ------------------------------------------------------------------
+    origin = get_origin(type_hint)
+    if origin is Union:
+        args = get_args(type_hint)
 
-        # If it contains NoneType, return the last non-NoneType element
-        for arg in args[::-1]:
-            if arg is not type(None):
-                return type_hint_to_string(arg)
+        # Detect the ``Optional[T]`` pattern (Union[T, None])
+        if len(args) == 2 and type(None) in args:
+            non_none = args[0] if args[1] is type(None) else args[1]
+            return f"Optional[{type_hint_to_string(non_none)}]"
 
+        # Generic Union – recurse on each argument
+        inner = ", ".join(type_hint_to_string(a) for a in args)
+        return f"Union[{inner}]"
+
+    # ------------------------------------------------------------------
+    # Literal handling (with or without quotes)
+    # ------------------------------------------------------------------
+    if origin is Literal:
+        raw_vals = get_args(type_hint)               # e.g. (fcc, bcc, "hcp")
+        cleaned = [_clean_literal_value(v) for v in raw_vals]
+        return f"Literal[{', '.join(cleaned)}]"
+
+    # ------------------------------------------------------------------
+    # Fallback for everything else
+    # ------------------------------------------------------------------
     return "NonPrimitive"
 
 
@@ -228,7 +277,7 @@ def extract_input_parameters_from_function(function: callable) -> dict:
         type_hint = type_hints.get(
             name, _NotHinted
         )  # TODO: keep here the full type info (use type_hint_to_string only when converting to gui)
-        # print("type_hint: ", type_hint)
+        print("type_hint: ", type_hint)
         labels.append(name)
         types.append(type_hint_to_string(type_hint))
 
@@ -683,7 +732,7 @@ class Node:
                         store_outputs=True,
                         store_input_nodes_recursively=True,
                     )
-                else: # explicitly store node if there is no database 
+                else:  # explicitly store node if there is no database
                     path = idb.store_node_outputs(self)
                     print("stored: ", self.label, path)
 
@@ -1048,7 +1097,6 @@ as_macro_node = make_node_decorator(_return_as_macro_node, "_postfix", "macro_no
 
 
 WORKFLOW_DIR = "../pyiron_nodes/local_workflows"
-
 
 
 class Workflow:
