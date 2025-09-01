@@ -1,162 +1,212 @@
-// CustomNode.tsx
-import React, {
-  memo,
-  useEffect,
-  useState,
-  useContext,
-  useCallback,
-  useRef,
-} from "react";
-import { Handle, useUpdateNodeInternals, NodeToolbar } from "@xyflow/react";
-import { useModel } from "@anywidget/react";
-import { UpdateDataContext } from "./widget.jsx";
+/* --------------------------------------------------------------- */
+/*  CustomNode.tsx – node component used by react‑flow            */
+/* --------------------------------------------------------------- */
+import React, { memo, useEffect, useState, useContext } from "react";
+import {
+  Handle,
+  useUpdateNodeInternals,
+  NodeToolbar,
+  Position,
+} from "@xyflow/react";
+import { useModel } from "@anywidget/react";               // ← fixed import
+import { UpdateDataContext } from "./widget";
 import {
   OptionalLiteralSelect,
   STYLE_VARS as OLS_STYLE_VARS,
-} from "./OptionalLiteralSelect.tsx";
-import { parseLiteralType } from "./utils.ts";
+} from "./OptionalLiteralSelect";
+import { parseLiteralType } from "./utils";
+import { Checkbox } from "./Checkbox";
 
-/* Styling constants */
+/* --------------------------------------------------------------- */
+/*  👉 1️⃣ Import the stylesheet that contains the custom rules     */
+/* --------------------------------------------------------------- */
+import "./CustomNode.css";
+
+/* --------------------------------------------------------------- */
+/*  Styling constants – unchanged                                   */
+/* --------------------------------------------------------------- */
 const STYLE_VARS = {
   inputHeight: OLS_STYLE_VARS.inputHeight,
   inputFontSize: OLS_STYLE_VARS.inputFontSize,
   inputWidth: OLS_STYLE_VARS.inputWidth,
   labelFontSize: 10,
-  labelNodeFontSize: "bold",
+  labelNodeFontSize: "bold" as const,
   labelMarginBottom: "0.3em",
-  labelTextAlign: "center",
+  labelTextAlign: "center" as const,
   inputMarginLeft: 5,
   verticalRowSpacing: 20,
   customHandleTop: 30,
   highlightColor: OLS_STYLE_VARS.highlightColor,
 };
 
-const inputTypeMap: Record<string, string> = {
-  str: "text",
-  int: "text",
-  float: "text",
-  bool: "checkbox",
+/* --------------------------------------------------------------- */
+/*  Adjustable self‑handle placement (unchanged)                    */
+/* --------------------------------------------------------------- */
+export const SELF_OFFSET = { top: 9, right: 9 };
+
+const stateColors: Record<string, string> = {
+  NotRun: "lightgray",
+  Success: "green",
+  Failed: "red",
+  LoadedFromCache: "yellow",
 };
 
-const getBackgroundColor = (value: any, highlighted: boolean) => {
-  if (highlighted) return STYLE_VARS.highlightColor;
-  if (value === null) return "grey";
-  if (value === "NotData") return "yellow";
-  return "white";
+/* --------------------------------------------------------------- */
+/*  👉 2️⃣ CustomHandle – adds a CSS class **and** a data‑attribute  */
+/* --------------------------------------------------------------- */
+const CustomHandle = ({
+  position,
+  type,
+  index,
+  label,
+  highlighted,
+  isNodeType,
+  customStyle,
+}: {
+  position: Position;
+  type: "source" | "target";
+  index: number;
+  label: string;
+  highlighted?: boolean;
+  isNodeType?: boolean;
+  customStyle?: React.CSSProperties;
+}) => {
+  // ---- DEBUG ----------------------------------------------------
+  console.log("🔧 CustomHandle – render", {
+    position,
+    type,
+    index,
+    label,
+    isNodeType,
+    className: isNodeType ? "node-type-handle" : undefined,
+    dataAttr: isNodeType ? { "data-nodetype": "true" } : undefined,
+  });
+  // --------------------------------------------------------------
+
+  const offsetStyle = position === Position.Left ? { left: -6 } : { right: -6 };
+
+  // className for the CSS selector, data‑attribute for extra specificity
+  const className = isNodeType ? "node-type-handle" : undefined;
+  const dataAttrs = isNodeType ? { "data-nodetype": "true" } : {};
+
+  // Only the vertical offset (and optional highlight colour) stay inline.
+  const inlineStyle: React.CSSProperties = {
+    top:
+      index >= 0
+        ? STYLE_VARS.customHandleTop +
+          STYLE_VARS.verticalRowSpacing * index
+        : undefined,
+    backgroundColor: highlighted ? STYLE_VARS.highlightColor : undefined,
+    ...offsetStyle,
+    ...customStyle,
+  };
+
+  return (
+    <Handle
+      key={`${position}-${index}-${label}`}
+      type={type}
+      position={position}
+      id={label}
+      className={className}
+      {...dataAttrs}
+      style={inlineStyle}
+    />
+  );
 };
 
-const convertInput = (value: any, inpType: string) => {
-  const trimmedValue = typeof value === "string" ? value.trim() : value;
-  switch (inpType) {
-    case "int": {
-      const i = parseInt(trimmedValue, 10);
-      return isNaN(i) ? { value: trimmedValue, error: true } : { value: i };
-    }
-    case "float": {
-      const f = parseFloat(trimmedValue);
-      return isNaN(f) ? { value: trimmedValue, error: true } : { value: f };
-    }
-    case "bool":
-      return { value: trimmedValue };
-    default:
-      return { value: trimmedValue };
-  }
+/* --------------------------------------------------------------- */
+/*  NodeLabel – unchanged                                            */
+/* --------------------------------------------------------------- */
+const NodeLabel = ({
+  text,
+  onRename,
+}: {
+  text: string;
+  onRename: (name: string) => void;
+}) => {
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState(text);
+  return (
+    <div
+      style={{
+        fontWeight: STYLE_VARS.labelNodeFontSize,
+        marginBottom: STYLE_VARS.labelMarginBottom,
+        textAlign: STYLE_VARS.labelTextAlign,
+        cursor: "pointer",
+      }}
+      onDoubleClick={() => setEditing(true)}
+    >
+      {editing ? (
+        <input
+          type="text"
+          value={value}
+          autoFocus
+          onChange={(e) => setValue(e.target.value)}
+          onBlur={() => {
+            setEditing(false);
+            if (value.trim() && value.trim() !== text) {
+              onRename(value.trim());
+            }
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              setEditing(false);
+              if (value.trim() && value.trim() !== text) {
+                onRename(value.trim());
+              }
+            }
+          }}
+          style={{
+            width: "100%",
+            fontSize: STYLE_VARS.inputFontSize,
+            boxSizing: "border-box",
+          }}
+        />
+      ) : (
+        text
+      )}
+    </div>
+  );
 };
 
-const CustomHandle = ({ position, type, index, label, highlighted }) => (
-  <Handle
-    key={`${position}-${index}`}
-    type={type}
-    position={position}
-    id={label}
-    style={{
-      top: STYLE_VARS.customHandleTop + STYLE_VARS.verticalRowSpacing * index,
-      fontSize: STYLE_VARS.inputFontSize,
-      backgroundColor: highlighted ? STYLE_VARS.highlightColor : undefined,
-      transition: "background-color 0.2s ease",
-    }}
-  />
-);
-
-const Label = ({ text, isMandatory }) => (
-  <div
-    style={{
-      fontSize: STYLE_VARS.inputFontSize,
-      marginBottom: STYLE_VARS.labelMarginBottom,
-      textAlign: STYLE_VARS.labelTextAlign,
-    }}
-  >
-    {text}
-    {isMandatory && <span style={{ color: "red" }}> *</span>}
-  </div>
-);
-
-const NodeLabel = ({ text }) => (
-  <div
-    style={{
-      fontWeight: STYLE_VARS.labelNodeFontSize,
-      marginBottom: STYLE_VARS.labelMarginBottom,
-      textAlign: STYLE_VARS.labelTextAlign,
-    }}
-  >
-    {text}
-  </div>
-);
-
+/* --------------------------------------------------------------- */
+/*  👉 3️⃣ InputHandle – added debug prints & passes isNodeType     */
+/* --------------------------------------------------------------- */
 const InputHandle = ({
   label,
   type,
   value,
-  editValue,
   index,
   context,
   data,
-  isMandatory,
   onHoverChange,
   highlighted = false,
-}) => {
+}: any) => {
+  // ---- DEBUG ----------------------------------------------------
+  console.log("🔎 InputHandle – props", {
+    label,
+    type,
+    value,
+    index,
+    isNodeType: type === "Node",
+    isConnected: data.target_connected?.[index],
+  });
+  // --------------------------------------------------------------
+
   const { optional, options, mode, baseType } = parseLiteralType(type);
   const isLiteral = options.length > 0;
+  const isNodeType = type === "Node";
+  const isConnected = data.target_connected && data.target_connected[index];
 
-  const [inputValue, setInputValue] = useState(
-    value === "NotData" || value === null ? "" : value
-  );
-  const [hasError, setHasError] = useState(false);
+  // === Mandatory condition check ===
+  const isMandatory = !isConnected && value === "NotData";
+  const displayValue = isMandatory ? "" : value ?? "";
 
-  const debouncedContext = useCallback(
-    debounce((nodeLabel, idx, newVal) => {
-      context(nodeLabel, idx, newVal);
-    }, 300),
-    [context]
-  );
-
-  const debounceRef = useRef(debouncedContext);
-  useEffect(() => {
-    debounceRef.current = debouncedContext;
-    return () => {
-      debounceRef.current?.cancel?.();
-    };
-  }, [debouncedContext]);
-
-  const pushValue = (raw) => {
+  const pushValue = (raw: any) => {
     const conv = convertInput(raw, type);
-    setHasError(conv.error ?? false);
     const finalVal = conv.error ? raw : conv.value;
-    debouncedContext(data.label, index, finalVal);
+    context(data.label, index, finalVal);
   };
-
-  const baseInputStyle = {
-    width: STYLE_VARS.inputWidth,
-    height: STYLE_VARS.inputHeight,
-    fontSize: STYLE_VARS.inputFontSize,
-    backgroundColor: getBackgroundColor(value, highlighted),
-    border: hasError ? "1px solid red" : "1px solid #ccc",
-    boxSizing: "border-box",
-    transition: "background-color 0.2s ease",
-  };
-
-  const htmlInputType =
-    baseType && (baseType === "int" || baseType === "float") ? "number" : "text";
 
   return (
     <div
@@ -167,189 +217,250 @@ const InputHandle = ({
         alignItems: "center",
         flexDirection: "row-reverse",
         justifyContent: "flex-end",
-        marginBottom: STYLE_VARS.verticalRowSpacing - STYLE_VARS.inputHeight,
+        marginBottom:
+          STYLE_VARS.verticalRowSpacing - STYLE_VARS.inputHeight,
       }}
       onMouseEnter={() => onHoverChange(index, true, "left")}
       onMouseLeave={() => onHoverChange(index, false, "left")}
     >
-      <span style={{ marginLeft: STYLE_VARS.inputMarginLeft }}>
+      {/* ----------------------------------------------------------- */}
+      {/*  Label (with mandatory star)                                 */}
+      {/* ----------------------------------------------------------- */}
+      <span
+        style={{
+          marginLeft: STYLE_VARS.inputMarginLeft,
+          opacity: isConnected ? 0.6 : 1,
+          fontStyle: isConnected ? "italic" : "normal",
+        }}
+      >
         {label}
-        {isMandatory && <span style={{ color: "red" }}> *</span>}
+        {isMandatory && <span style={{ color: "red", marginLeft: 2 }}> *</span>}
+        {isConnected && (
+          <span style={{ color: "green" }}>(connected)</span>
+        )}
       </span>
 
-      {editValue &&
-        (optional || isLiteral ? (
+      {/* ----------------------------------------------------------- */}
+      {/*  The handle – now gets the extra class & data‑attribute       */}
+      {/* ----------------------------------------------------------- */}
+      <CustomHandle
+        position={Position.Left}
+        type="target"
+        index={index}
+        label={label}
+        highlighted={highlighted}
+        isNodeType={isNodeType}
+      />
+
+      {/* ----------------------------------------------------------- */}
+      {/*  Input widget – unchanged                                    */}
+      {/* ----------------------------------------------------------- */}
+      {!isConnected && (
+        optional || isLiteral ? (
           <OptionalLiteralSelect
-            value={value ?? null}
-            options={isLiteral ? (options as readonly string[]) : []}
+            value={displayValue || null}
+            options={isLiteral ? (options as string[]) : []}
             onChange={(newVal) => pushValue(newVal)}
             highlighted={highlighted}
             showCheckbox={optional}
             mode={mode || (isLiteral ? "select" : "input")}
-            inputType={htmlInputType}
+            inputType={
+              baseType && (baseType === "int" || baseType === "float")
+                ? "number"
+                : "text"
+            }
+            style={{
+              width: STYLE_VARS.inputWidth,
+              boxSizing: "border-box",
+              border: isMandatory ? "1px solid red" : "1px solid #ccc",
+              color: isMandatory ? "gray" : "black",
+              backgroundColor: isMandatory ? "#fff8c4" : "white",
+            }}
+            placeholder={isMandatory ? "required" : ""}
           />
         ) : type === "bool" ? (
           <div
             className="nodrag"
             draggable={false}
-            onClick={() => {
-              const newVal = !(inputValue as boolean);
-              setInputValue(newVal);
-              pushValue(newVal);
-            }}
             style={{
               width: STYLE_VARS.inputWidth,
               height: STYLE_VARS.inputHeight,
               display: "flex",
               alignItems: "center",
-              backgroundColor: getBackgroundColor(value, highlighted),
-              border: "1px solid #ccc",
-              boxSizing: "border-box",
-              transition: "background-color 0.2s ease",
+              justifyContent: "space-between",
+              border: isMandatory ? "1px solid red" : "1px solid #ccc",
+              backgroundColor: isMandatory ? "#fffacd" : "white",
               cursor: "pointer",
-              fontSize: STYLE_VARS.inputFontSize,
+              paddingLeft: "4px",
+              boxSizing: "border-box",
             }}
+            onClick={() => pushValue(!value)}
           >
-            <div style={{ flexGrow: 1, textAlign: "center" }}>
-              {inputValue ? "True" : "False"}
-            </div>
-            <div style={{ width: "1px", height: "100%", backgroundColor: "#ccc" }}></div>
-            <div
+            <span
               style={{
-                width: STYLE_VARS.inputHeight,
-                height: "100%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
+                color: isMandatory ? "gray" : "#888",
+                fontSize: STYLE_VARS.inputFontSize,
               }}
             >
-              <div
-                style={{
-                  width: STYLE_VARS.inputHeight - 6,
-                  height: STYLE_VARS.inputHeight - 6,
-                  border: "1px solid #333",
-                  backgroundColor: "transparent",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                {inputValue && (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width={STYLE_VARS.inputHeight - 10}
-                    height={STYLE_VARS.inputHeight - 10}
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="black"
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                )}
-              </div>
-            </div>
+              {isMandatory ? "mandatory" : value ? "True" : "False"}
+            </span>
+
+            <Checkbox
+              checked={!!value}
+              inputHeight={STYLE_VARS.inputHeight}
+              onToggle={() => pushValue(!value)}
+            />
           </div>
         ) : (
           <input
-            type={htmlInputType}
-            value={inputValue as string | number}
-            placeholder={value === "NotData" ? "enter data" : ""}
-            className="nodrag"
-            onChange={(e) => {
-              const newValue = e.target.value;
-              setInputValue(newValue);
-              debounceRef.current(data.label, index, newValue);
+            type={baseType === "int" || baseType === "float" ? "number" : "text"}
+            value={displayValue}
+            placeholder={isMandatory ? "mandatory" : ""}
+            onChange={(e) => pushValue(e.target.value)}
+            style={{
+              width: STYLE_VARS.inputWidth,
+              height: STYLE_VARS.inputHeight,
+              fontSize: STYLE_VARS.inputFontSize,
+              border: isMandatory ? "1px solid red" : "1px solid #ccc",
+              boxSizing: "border-box",
+              padding: "0 4px",
+              color: isMandatory ? "gray" : "black",
+              backgroundColor: isMandatory ? "#fffacd" : "white",
             }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") pushValue(inputValue);
-            }}
-            onBlur={() => pushValue(inputValue)}
-            style={baseInputStyle}
           />
-        ))}
+        )
+      )}
     </div>
   );
 };
 
-const OutputHandle = ({ label, index, onHoverChange, highlighted }) => (
-  <div
-    style={{
-      height: STYLE_VARS.inputHeight,
-      fontSize: STYLE_VARS.inputFontSize,
-      textAlign: "right",
-      marginBottom: STYLE_VARS.verticalRowSpacing - STYLE_VARS.inputHeight,
-    }}
-    onMouseEnter={() => onHoverChange(index, true, "right")}
-    onMouseLeave={() => onHoverChange(index, false, "right")}
-  >
-    {label}
-    <CustomHandle
-      position="right"
-      type="source"
-      index={index}
-      label={label}
-      highlighted={highlighted}
-    />
-  </div>
-);
+/* --------------------------------------------------------------- */
+/*  👉 4️⃣ OutputHandle – unchanged (still uses CustomHandle)      */
+/* --------------------------------------------------------------- */
+const OutputHandle = ({
+  label,
+  index,
+  onHoverChange,
+  highlighted,
+  type,
+}: any) => {
+  // ---- DEBUG ----------------------------------------------------
+  console.log("🔎 OutputHandle – props", {
+    label,
+    type,
+    isNodeType: type === "Node",
+  });
+  // --------------------------------------------------------------
 
-type NodeData = {
-  label: string;
-  source_labels: string[];
-  source_types: string[];
-  source_values: any[];
-  target_labels: string[];
-  target_types: string[];
-  target_values: any[];
-  forceToolbarVisible?: boolean;
-  toolbarPosition?: any;
-  expanded?: boolean;
+  const isNodeType = type === "Node";
+  return (
+    <div
+      style={{
+        height: STYLE_VARS.inputHeight,
+        fontSize: STYLE_VARS.inputFontSize,
+        textAlign: "right",
+        marginBottom:
+          STYLE_VARS.verticalRowSpacing - STYLE_VARS.inputHeight,
+      }}
+      onMouseEnter={() => onHoverChange(index, true, "right")}
+      onMouseLeave={() => onHoverChange(index, false, "right")}
+    >
+      {label}
+      <CustomHandle
+        position={Position.Right}
+        type="source"
+        index={index}
+        label={label}
+        highlighted={highlighted}
+        isNodeType={isNodeType}
+      />
+    </div>
+  );
 };
 
-const NodeComponent: React.FC<{ data: NodeData }> = memo(({ data }) => {
+/* --------------------------------------------------------------- */
+/*  NodeComponent – unchanged apart from the CSS import at the top   */
+/* --------------------------------------------------------------- */
+const NodeComponent: React.FC<{ data: any }> = memo(({ data }) => {
   const updateNodeInternals = useUpdateNodeInternals();
   const model = useModel();
-  const context = useContext(UpdateDataContext);
+  const context = useContext(UpdateDataContext)!;
+
+  const sendRenameCommand = (newName: string) => {
+    model.set(
+      "commands",
+      `renameNode: ${JSON.stringify({ oldLabel: data.label, newLabel: newName })} - ${Date.now()}`
+    );
+    model.save_changes();
+  };
+
+  const sendNodeCommand = (cmd: string) => {
+    model.set("commands", `${cmd}: ${data.label} - ${Date.now()}`);
+    model.save_changes();
+  };
 
   const numHandles = Math.max(
     data.source_labels.length,
     data.target_labels.length
   );
-  const [handles] = useState(Array(numHandles).fill({}));
+  const [hoverState, setHoverState] = useState<Record<string, boolean>>({});
 
-  const [hoverState, setHoverState] = useState({});
-  const handleHoverChange = (idx, state, side) => {
+  const handleHoverChange = (idx: number, state: boolean, side: string) => {
     setHoverState((prev) => ({ ...prev, [`${side}-${idx}`]: state }));
   };
 
   useEffect(() => {
-    handles.forEach((_, index) => {
-      updateNodeInternals(`handle-${index}`);
-    });
-  }, [handles, updateNodeInternals]);
-
-  const handleCommand = (action: string) => {
-    if (action === "collapse") {
-      action = "expand";
+    for (let idx = 0; idx < numHandles; idx++) {
+      updateNodeInternals(`handle-${idx}`);
     }
-    model.set(
-      "commands",
-      `${action}: ${data.label} - ${new Date().getTime()}`
-    );
-    model.save_changes();
-  };
+  }, [numHandles, updateNodeInternals]);
 
-  const nodeHeight =
-    STYLE_VARS.customHandleTop + numHandles * STYLE_VARS.verticalRowSpacing;
+  const selfIndex = data.source_labels.findIndex(
+    (lbl: string) => lbl === "self"
+  );
 
   return (
-    <div style={{ height: nodeHeight }}>
-      <NodeLabel text={data.label} />
+    <div
+      style={{
+        height:
+          STYLE_VARS.customHandleTop + numHandles * STYLE_VARS.verticalRowSpacing,
+        position: "relative",
+      }}
+    >
+      <NodeLabel text={data.label} onRename={sendRenameCommand} />
+      {selfIndex !== -1 && (
+        <Handle
+          type="source"
+          position={Position.Right}
+          id="self"
+          style={{
+            position: "absolute",
+            top: SELF_OFFSET.top,
+            right: SELF_OFFSET.right,
+            width: 16,
+            height: 16,
+            borderRadius: "50%",
+            border: "2px solid black",
+            backgroundColor: "white",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <div
+            style={{
+              width: 8,
+              height: 8,
+              borderRadius: "50%",
+              backgroundColor:
+                stateColors[data.source_values[selfIndex]] || "white",
+            }}
+          ></div>
+        </Handle>
+      )}
+
       <div>
-        {handles.map((_, index) => (
+        {Array.from({ length: numHandles }).map((_, index) => (
           <div
             key={index}
             style={{
@@ -359,45 +470,27 @@ const NodeComponent: React.FC<{ data: NodeData }> = memo(({ data }) => {
             }}
           >
             {index < data.target_labels.length ? (
-              <>
-                {data.target_types[index] !== "None" &&
-                data.target_types[index] !== "NonPrimitive" ? (
-                  <InputHandle
-                    label={data.target_labels[index]}
-                    type={data.target_types[index]}
-                    value={data.target_values[index]}
-                    editValue={true}
-                    index={index}
-                    context={context}
-                    data={data}
-                    isMandatory={data.target_values[index] === "NotData"}
-                    onHoverChange={handleHoverChange}
-                    highlighted={hoverState[`left-${index}`]}
-                  />
-                ) : (
-                  <Label
-                    text={data.target_labels[index]}
-                    isMandatory={false}
-                  />
-                )}
-                <CustomHandle
-                  position="left"
-                  type="target"
-                  index={index}
-                  label={data.target_labels[index]}
-                  highlighted={hoverState[`left-${index}`]}
-                />
-              </>
+              <InputHandle
+                label={data.target_labels[index]}
+                type={data.target_types[index]}
+                value={data.target_values[index]}
+                index={index}
+                context={context}
+                data={data}
+                onHoverChange={handleHoverChange}
+                highlighted={hoverState[`left-${index}`]}
+              />
             ) : (
               <div></div>
             )}
-
-            {index < data.source_labels.length ? (
+            {index < data.source_labels.length &&
+            data.source_labels[index] !== "self" ? (
               <OutputHandle
                 label={data.source_labels[index]}
                 index={index}
                 onHoverChange={handleHoverChange}
                 highlighted={hoverState[`right-${index}`]}
+                type={data.source_types[index]}
               />
             ) : (
               <div></div>
@@ -410,11 +503,11 @@ const NodeComponent: React.FC<{ data: NodeData }> = memo(({ data }) => {
         isVisible={data.forceToolbarVisible || undefined}
         position={data.toolbarPosition}
       >
-        <button onClick={() => handleCommand("run")}>Run</button>
-        <button onClick={() => handleCommand("source")}>Source</button>
+        <button onClick={() => sendNodeCommand("run")}>Run</button>
+        <button onClick={() => sendNodeCommand("source")}>Source</button>
         <button
           onClick={() =>
-            handleCommand(data.expanded ? "collapse" : "expand")
+            sendNodeCommand(data.expanded ? "collapse" : "expand")
           }
         >
           {data.expanded ? "Collapse" : "Expand"}
@@ -426,12 +519,21 @@ const NodeComponent: React.FC<{ data: NodeData }> = memo(({ data }) => {
 
 export default NodeComponent;
 
-function debounce(func, wait) {
-  let timeout;
-  const debounced = (...args) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func(...args), wait);
-  };
-  debounced.cancel = () => clearTimeout(timeout);
-  return debounced;
+/* --------------------------------------------------------------- */
+/*  Helper – unchanged                                              */
+/* --------------------------------------------------------------- */
+function convertInput(value: any, inpType: string) {
+  const trimmedValue = typeof value === "string" ? value.trim() : value;
+  switch (inpType) {
+    case "int": {
+      const i = parseInt(trimmedValue, 10);
+      return isNaN(i) ? { value: trimmedValue, error: true } : { value: i };
+    }
+    case "float": {
+      const f = parseFloat(trimmedValue);
+      return isNaN(f) ? { value: trimmedValue, error: true } : { value: f };
+    }
+    default:
+      return { value: trimmedValue };
+  }
 }

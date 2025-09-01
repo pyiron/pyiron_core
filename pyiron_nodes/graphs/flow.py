@@ -223,3 +223,11 @@ def TopologicalSort(graph: Graph):
 
     graph = topological_sort(graph)
     return graph
+
+
+@as_function_node
+def RemoveNode(graph: Graph, node_label: str):
+    from pyiron_workflow.graph.base import remove_node
+
+    graph = remove_node(graph, node_label)
+    return graph

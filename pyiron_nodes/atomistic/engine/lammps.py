@@ -3,10 +3,10 @@ from __future__ import annotations
 from typing import Optional, TYPE_CHECKING
 
 from pyiron_atomistics.lammps.control import LammpsControl
-from pyiron_workflow import as_function_node, as_out_dataclass_node, as_macro_node
+from pyiron_workflow import as_function_node, as_out_dataclass_node, as_macro_node, as_inp_dataclass_node
 
 from pyiron_nodes.atomistic.calculator.data import (
-    InputCalcMinimize,
+    # InputCalcMinimize,
     InputCalcMD,
     InputCalcStatic,
     OutputCalcMD,
@@ -17,6 +17,19 @@ from dataclasses import asdict
 # if TYPE_CHECKING:
 from ase import Atoms
 
+as_inp_dataclass_node()
+
+
+@as_inp_dataclass_node
+class InputCalcMinimizeLammps:
+    ionic_energy_tolerance: float = 0.0
+    ionic_force_tolerance: float = 0.0001
+    max_iter: float = 100000
+    pressure: float = None
+    n_print: float = 100
+    style: float = "cg"
+    rotation_matrix = None
+
 
 @as_function_node("calculator")
 def Calc(parameters):
@@ -24,10 +37,10 @@ def Calc(parameters):
 
     calculator = LammpsControl()
 
-    if isinstance(parameters, InputCalcMD.dataclass):
+    if isinstance(parameters, InputCalcMD().dataclass):
         calculator.calc_md(**asdict(parameters))
         calculator.mode = "md"
-    elif isinstance(parameters, InputCalcMinimize):
+    elif isinstance(parameters, InputCalcMinimizeLammps):
         calculator.calc_minimize(**parameters)
         calculator.mode = "minimize"
     elif isinstance(parameters, InputCalcStatic):
@@ -49,20 +62,22 @@ def CalcStatic(calculator_input: Optional[InputCalcStatic] = None):
     calculator = LammpsControl()
     calculator.calc_static(**calculator_kwargs)
     calculator.mode = "static"
+    calculator["dump___1"] = calculator["dump___1"].replace("su", "u")
 
     return calculator
 
 
 @as_function_node("calculator")
-def CalcMinimize(calculator_input: Optional[InputCalcMinimize] = None):
+def CalcMinimize(calculator_input: Optional[InputCalcMinimizeLammps] = None):
     if calculator_input is None:
-        calculator_input = InputCalcMinimize().run()
+        calculator_input = InputCalcMinimizeLammps().run()
 
     # print('calculator_input: ', calculator_input.run())
     calculator_kwargs = asdict(calculator_input)
     calculator = LammpsControl()
     calculator.calc_minimize(**calculator_kwargs)
     calculator.mode = "static"
+    calculator["dump___1"] = calculator["dump___1"].replace("su", "u")
 
     return calculator
 
@@ -81,6 +96,8 @@ def CalcMD(calculator_input: Optional[InputCalcMD] = None):
     calculator = LammpsControl()
     calculator.calc_md(**calculator_kwargs)
     calculator.mode = "md"
+    # use absolute coordinates rather than relative ones
+    calculator["dump___1"] = calculator["dump___1"].replace("su", "u")
 
     return calculator
 
@@ -201,7 +218,7 @@ class GenericOutput:
 def Collect(
     out_dump,
     out_log,
-    calc_mode,  # : str | LammpsControl | InputCalcMinimize | InputCalcMD | InputCalcStatic,
+    calc_mode,  # : str | LammpsControl | InputCalcMinimizeLammps | InputCalcMD | InputCalcStatic,
 ):
     import numpy as np
 
@@ -215,7 +232,7 @@ def Collect(
 
     if isinstance(calc_mode, str) and calc_mode in ["static", "minimize", "md"]:
         pass
-    elif isinstance(calc_mode, (InputCalcMinimize, InputCalcMD, InputCalcStatic)):
+    elif isinstance(calc_mode, (InputCalcMinimizeLammps, InputCalcMD, InputCalcStatic)):
         calc_mode = calc_mode.__class__.__name__.replace("InputCalc", "").lower()
     elif isinstance(calc_mode, LammpsControl):
         calc_mode = calc_mode.mode
@@ -234,9 +251,24 @@ def Collect(
 
     elif calc_mode == "md":
         generic = OutputCalcMD().dataclass()
+        generic.energies_tot = log["TotEng"].values
         generic.energies_pot = log["PotEng"].values
-        generic.energies_kin = log["TotEng"].values - generic.energies_pot
+        generic.steps = log["Step"].values
+        generic.temperatures = log["Temp"].values
+        generic.volumes = log["Volume"].values
+        # read Pxx, Pxy, Pxz etc. and construct pressures array of 3x3 matrices
+        Pxx = log["Pxx"].values
+        Pyy = log["Pyy"].values
+        Pzz = log["Pzz"].values
+        Pxy = log["Pxy"].values
+        Pxz = log["Pxz"].values
+        Pyz = log["Pyz"].values
+        pressures = np.array([Pxx, Pxy, Pxz, Pxy, Pyy, Pyz, Pxz, Pyz, Pzz])
+        generic.pressures = pressures.reshape(-1, 3, 3)
+
+        # generic.energies_kin = log["TotEng"].values - generic.energies_pot
         generic.forces = np.array([o.data[["fx", "fy", "fz"]] for o in out_dump])
+        generic.positions = np.array([o.data[["xu", "yu", "zu"]] for o in out_dump])
 
     return generic
 

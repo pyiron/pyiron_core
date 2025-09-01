@@ -1,0 +1,29 @@
+/* --------------------------------------------------------------- */
+/*  1️⃣ Tiny yellow tint – confirms the stylesheet is loaded        */
+/* --------------------------------------------------------------- */
+body {
+  background-color: rgba(255, 255, 0, 0.03);
+}
+
+/* --------------------------------------------------------------- */
+/*  2️⃣ Unconnected node‑type handle                               */
+/* --------------------------------------------------------------- */
+.react-flow__handle.node-type-handle[data-nodetype="true"] {
+  width: 14px !important;
+  height: 14px !important;
+  background: #4a90e2 !important;          /* blue */
+  border: 2px solid #1c5d99 !important;    /* darker blue */
+  border-radius: 50% !important;
+}
+
+/* --------------------------------------------------------------- */
+/*  3️⃣ Connected node‑type handle – React‑Flow adds .connected    */
+/* --------------------------------------------------------------- */
+.react-flow__handle.node-type-handle[data-nodetype="true"].connected,
+.react-flow__handle.connected.node-type-handle[data-nodetype="true"] {
+  /* exactly the same rules – the selector order does not matter */
+  width: 14px !important;
+  height: 14px !important;
+  background: #4a90e2 !important;
+  border: 2px solid #1c5d99 !important;
+}

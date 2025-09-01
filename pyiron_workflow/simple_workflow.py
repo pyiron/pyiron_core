@@ -214,7 +214,7 @@ def type_hint_to_string(type_hint: Any) -> str:   # PortTypeValue is assumed to 
     if type_hint is Node:                     # type: ignore[name-defined]
         return "Node"
     if type_hint is _NotHinted:               # type: ignore[name-defined]
-        print("Not hinted: ", type_hint)
+        # print("Not hinted: ", type_hint)
         return "NotHinted"
 
     # ------------------------------------------------------------------
@@ -277,7 +277,7 @@ def extract_input_parameters_from_function(function: callable) -> dict:
         type_hint = type_hints.get(
             name, _NotHinted
         )  # TODO: keep here the full type info (use type_hint_to_string only when converting to gui)
-        print("type_hint: ", type_hint)
+        # print("type_hint: ", type_hint)
         labels.append(name)
         types.append(type_hint_to_string(type_hint))
 

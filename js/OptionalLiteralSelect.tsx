@@ -1,5 +1,6 @@
 // OptionalLiteralSelect.tsx
 import React, { useState, useEffect } from "react";
+import { Checkbox } from "./Checkbox"; // at top
 
 export interface OptionalLiteralSelectProps {
   value: string | null;
@@ -154,49 +155,12 @@ export const OptionalLiteralSelect: React.FC<OptionalLiteralSelectProps> = ({
 
       {showCheckbox && (
         <>
-          <div style={{ width: "1px", height: "100%", backgroundColor: "#ccc" }}></div>
-          <div
-            className="nodrag"
-            draggable={false}
-            onClick={handleToggle}
-            style={{
-              width: STYLE_VARS.inputHeight,
-              height: "100%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              cursor: "pointer",
-              userSelect: "none",
-            }}
-          >
-            <div
-              style={{
-                width: STYLE_VARS.inputHeight - 6,
-                height: STYLE_VARS.inputHeight - 6,
-                border: "1px solid #333",
-                backgroundColor: "transparent",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              {useValue && (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width={STYLE_VARS.inputHeight - 10}
-                  height={STYLE_VARS.inputHeight - 10}
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="black"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-              )}
-            </div>
-          </div>
+        <div style={{ width: "1px", height: "100%", backgroundColor: "#ccc" }}></div>
+        <Checkbox
+          checked={useValue}
+          inputHeight={STYLE_VARS.inputHeight}
+          onToggle={handleToggle}
+        />
         </>
       )}
     </div>

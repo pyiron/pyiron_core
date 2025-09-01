@@ -7,31 +7,48 @@ export function parseLiteralType(typeString: string): {
 } {
   const trimmed = typeString.trim();
 
+  // Remove all whitespace for detection
+  const compact = trimmed.replace(/\s+/g, "");
+
   // Optional[Literal[…]]
-  if (trimmed.startsWith("Optional[Literal[")) {
-    const optionsString = trimmed.split("Optional[Literal[")[1].split("]")[0];
-    const options = optionsString.split(",").map(o => o.trim());
-    return {
-      optional: true,
-      options,
-      mode: "select",
-    };
+  if (compact.startsWith("Optional[Literal[")) {
+    const inside = compact.substring("Optional[Literal[".length);
+    const closeIndex = inside.indexOf("]]");
+    if (closeIndex >= 0) {
+      const options = inside.substring(0, closeIndex)
+        .split(",")
+        .map(o => o.trim())
+        .filter(o => o.length > 0);
+      return {
+        optional: true,
+        options,
+        mode: "select",
+      };
+    }
+    return { optional: true, options: [], mode: "select" };
   }
 
   // Literal[…]
-  if (trimmed.startsWith("Literal[")) {
-    const optionsString = trimmed.split("Literal[")[1].split("]")[0];
-    const options = optionsString.split(",").map(o => o.trim());
-    return {
-      optional: false,
-      options,
-      mode: "select",
-    };
+  if (compact.startsWith("Literal[")) {
+    const inside = compact.substring("Literal[".length);
+    const closeIndex = inside.indexOf("]");
+    if (closeIndex >= 0) {
+      const options = inside.substring(0, closeIndex)
+        .split(",")
+        .map(o => o.trim())
+        .filter(o => o.length > 0);
+      return {
+        optional: false,
+        options,
+        mode: "select",
+      };
+    }
+    return { optional: false, options: [], mode: "select" };
   }
 
   // Optional[…primitive…]
-  if (trimmed.startsWith("Optional[") && trimmed.endsWith("]")) {
-    const inner = trimmed.slice(9, -1).trim().toLowerCase();
+  if (compact.startsWith("Optional[") && compact.endsWith("]")) {
+    const inner = compact.slice(9, -1).trim().toLowerCase();
     return {
       optional: true,
       options: [],
@@ -45,6 +62,6 @@ export function parseLiteralType(typeString: string): {
     optional: false,
     options: [],
     mode: "input",
-    baseType: trimmed.toLowerCase(),
+    baseType: compact.toLowerCase(),
   };
 }
