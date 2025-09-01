@@ -303,6 +303,7 @@ class PyironFlowWidget:
                         self.main_widget.redraw()
 
         if out is not None:
+            self.out_widget.clear_output()
             with self.out_widget:
                 if command == "run":
                     display(out)
