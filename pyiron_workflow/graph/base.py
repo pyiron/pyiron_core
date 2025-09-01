@@ -219,7 +219,7 @@ def add_node(
 
     if isinstance(node, Node):
         if node.node_type == "macro_node":
-            print(f"Adding macro node {label}")
+            # print(f"Adding macro node {label}")
             macro_graph = get_graph_from_macro_node(node)
             new_graph = _add_graph_instance(
                 graph,
