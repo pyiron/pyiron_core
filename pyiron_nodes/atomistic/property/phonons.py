@@ -241,16 +241,15 @@ def GetThermalProperties(
 
 
 @as_function_node
-def get_analytical_free_energy(nu, 
+def GetAnalyticalFreeEnergy(nu, 
                                dos,
-                                n_atoms,
-                                temperatures, 
+                                temperatures,
+                                n_atoms: int = None, 
                                 quantum: bool =True):
     from scipy.integrate import simpson
     from scipy.constants import physical_constants
     KB = physical_constants['Boltzmann constant in eV/K'][0]
     H = physical_constants['Planck constant in eV/Hz'][0]
-
 
     sel = nu > 0.
     nu_sel  = nu[sel]*1e12
