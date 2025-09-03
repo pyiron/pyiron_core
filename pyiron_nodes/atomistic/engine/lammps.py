@@ -16,6 +16,7 @@ from dataclasses import asdict
 
 # if TYPE_CHECKING:
 from ase import Atoms
+from pandas import DataFrame
 
 as_inp_dataclass_node()
 
@@ -105,7 +106,7 @@ def CalcMD(calculator_input: Optional[InputCalcMD] = None):
 @as_function_node("path")
 def InitLammps(
     structure: Atoms,
-    potential: str,
+    potential: str | DataFrame,
     calculator,
     working_directory: str,
     create_dir: bool = True,
@@ -123,7 +124,11 @@ def InitLammps(
         ), f"working directory {working_directory} is missing, create it!"
 
     pot = LammpsPotential()
-    pot.df = LammpsPotentialFile().find_by_name(potential)
+    if isinstance(potential, str):
+        pot.df = LammpsPotentialFile().find_by_name(potential)
+    elif isinstance(potential, DataFrame):
+        pot.df = potential
+    print('Potential: ', pot.df)    
     pot.write_file(file_name="potential.inp", cwd=working_directory)
     pot.copy_pot_files(working_directory)
 
@@ -280,6 +285,8 @@ def Potential(structure, name: Optional[str] = None, index: int = 0):
     potentials = lp(structure)
     if name is None:
         pot = potentials[index]
+    elif isinstance(name, DataFrame):
+        pot = name
     else:
         if name in potentials:
             pot = name

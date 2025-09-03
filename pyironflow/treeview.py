@@ -40,7 +40,7 @@ def get_rel_path_for_last_occurrence(path: Path, relpath_start: str) -> int:
         last_occurrence = len(path.parts) - 1 - reversed_parts.index(relpath_start)
 
         rel_path = Path(*path.parts[last_occurrence:])
-        rel_path_no_ext = rel_path.with_suffix('')
+        rel_path_no_ext = rel_path.with_suffix("")
         return rel_path_no_ext
 
 
@@ -65,6 +65,7 @@ class TreeView:
 
         if root_path is None:
             import pyiron_nodes
+
             root_path = pyiron_nodes.__path__[0]
 
         self.path = copy.copy(root_path)
@@ -76,7 +77,7 @@ class TreeView:
         self.log = log  # logging widget
 
         if layout is None:
-            layout = {'width': '400px'}
+            layout = {"width": "400px"}
         self.gui = Tree(stripes=True, layout=layout)
         self.add_nodes(self.gui, parent_node=self.path)
         # the following flag is needed since handle click sends two signals, the first repeats the last one from the
@@ -102,21 +103,24 @@ class TreeView:
             return None
         self._handle_click_is_last_event = False
 
-        selected_node = event['owner']
+        selected_node = event["owner"]
         # self.log.append_stdout(f'handle_click ({selected_node.path}, {selected_node.name}) \n')
 
-        if selected_node.icon in ['codepen', 'table']:
+        if selected_node.icon in ["codepen", "table"]:
             selected_node.on_click(selected_node)
         elif (len(selected_node.nodes)) == 0:
             self.add_nodes(selected_node, selected_node.path)
 
     def on_click(self, node):
         # self.log.append_stdout(f'on_click.add_node_init ({node.path}, {node.path.name}) \n')
-        path = get_rel_path_for_last_occurrence(node.path.path, 'pyiron_nodes') / node.path.name
-        path_str = str(path).replace('/', '.')
+        path = (
+            get_rel_path_for_last_occurrence(node.path.path, "pyiron_nodes")
+            / node.path.name
+        )
+        path_str = str(path).replace("/", ".")
         if self.flow_widget is not None:
             # self.log.append_stdout(f'on_click.add_node ({str(path_str)}, {node.path.name}) \n')
-            print(f'on_click.add_node ({str(path_str)}, {node.path.name})')
+            print(f"on_click.add_node ({str(path_str)}, {node.path.name})")
             self.flow_widget.add_node(str(path_str), node.path.name)
 
     def add_nodes(self, tree, parent_node):
@@ -137,32 +141,32 @@ class TreeView:
         """
 
         for node in self.list_nodes(parent_node):
-            name_lst = node.name.split('.')
+            name_lst = node.name.split(".")
             if len(name_lst) > 1:
-                if 'py' == name_lst[-1]:
+                if "py" == name_lst[-1]:
                     node_tree = Node(name_lst[0])
-                    node_tree.icon = 'archive'  # 'file'
-                    node_tree.icon_style = 'success'
+                    node_tree.icon = "archive"  # 'file'
+                    node_tree.icon_style = "success"
                 else:
                     continue
             else:
                 node_tree = Node(node.name)
                 if isinstance(node, FunctionNode):
-                    node_tree.icon = 'codepen'  # 'file-code' # 'code'
-                    node_tree.icon_style = 'danger'
+                    node_tree.icon = "codepen"  # 'file-code' # 'code'
+                    node_tree.icon_style = "danger"
                 elif isinstance(node, DataClassNode):
-                    node_tree.icon = 'table'  # 'file-code' # 'code'
-                    node_tree.icon_style = 'success'
+                    node_tree.icon = "table"  # 'file-code' # 'code'
+                    node_tree.icon_style = "success"
                 else:
-                    node_tree.icon = 'folder'  # 'info', 'copy', 'archive'
-                    node_tree.icon_style = 'warning'
+                    node_tree.icon = "folder"  # 'info', 'copy', 'archive'
+                    node_tree.icon_style = "warning"
 
             node_tree.path = node
             tree.add_node(node_tree)
             if self.on_click is not None:
                 node_tree.on_click = self.on_click
 
-            node_tree.observe(self.handle_click, 'selected')
+            node_tree.observe(self.handle_click, "selected")
 
     def list_nodes(self, node: Path):
         """
@@ -181,11 +185,15 @@ class TreeView:
         nodes = []
         if node.is_dir():
             for child in node_path.iterdir():
-                if child.is_dir() and not child.name.startswith('.') and not child.name.startswith('_'):
+                if (
+                    child.is_dir()
+                    and not child.name.startswith(".")
+                    and not child.name.startswith("_")
+                ):
                     nodes.append(child)
 
-            for child in node_path.glob('*.py'):
-                if not child.name.startswith('.') and not child.name.startswith('_'):
+            for child in node_path.glob("*.py"):
+                if not child.name.startswith(".") and not child.name.startswith("_"):
                     nodes.append(child)
 
         elif node.is_file():
@@ -195,8 +203,15 @@ class TreeView:
         return nodes
 
     @staticmethod
-    def list_pyiron_nodes(file_name, decorators=['as_function_node', 'as_macro_node',
-                                                 'as_inp_dataclass_node', 'as_out_dataclass_node']):
+    def list_pyiron_nodes(
+        file_name,
+        decorators=[
+            "as_function_node",
+            "as_macro_node",
+            "as_inp_dataclass_node",
+            "as_out_dataclass_node",
+        ],
+    ):
         """
         This function reads a Python code file and looks for any assignments
         to a list variable named 'nodes'. It then creates FunctionNode objects
@@ -212,7 +227,7 @@ class TreeView:
         nodes : list of FunctionNode
             List of FunctionNodes extracted from the Python file
         """
-        with open(file_name, 'r') as file:
+        with open(file_name, "r") as file:
             tree = ast.parse(file.read())
 
         nodes = []
@@ -222,25 +237,38 @@ class TreeView:
                 # print('node: ', node, isinstance(node, ast.FunctionDef), isinstance(node, ast.ClassDef))
                 for decorator in node.decorator_list:
                     # check if decorator is a function call like @as_function_node()
-                    if isinstance(decorator, ast.Call) and hasattr(decorator.func,
-                                                                   'id') and decorator.func.id in decorators:
+                    if (
+                        isinstance(decorator, ast.Call)
+                        and hasattr(decorator.func, "id")
+                        and decorator.func.id in decorators
+                    ):
                         # print('decorator.func.id: ', decorator.func.id, node.name)
                         node_name = node.name
                         if isinstance(node, ast.ClassDef):
-                            func_node = DataClassNode(name=node_name, path=Path(file_name))
+                            func_node = DataClassNode(
+                                name=node_name, path=Path(file_name)
+                            )
                         else:
-                            func_node = FunctionNode(name=node_name, path=Path(file_name))
+                            func_node = FunctionNode(
+                                name=node_name, path=Path(file_name)
+                            )
                         nodes.append(func_node)
                     # check if decorator is a simple attribute like @as_function_node
-                    elif hasattr(decorator, 'id') and decorator.id in decorators:
+                    elif hasattr(decorator, "id") and decorator.id in decorators:
                         # print('decorator.class.id: ', decorator.id, node.name)
                         node_name = node.name
                         if isinstance(node, ast.ClassDef):
-                            func_node = DataClassNode(name=node_name, path=Path(file_name))
+                            func_node = DataClassNode(
+                                name=node_name, path=Path(file_name)
+                            )
                         else:
-                            func_node = FunctionNode(name=node_name, path=Path(file_name))
+                            func_node = FunctionNode(
+                                name=node_name, path=Path(file_name)
+                            )
                         nodes.append(func_node)
                     else:
-                        print('Unknown decorator! Add it to list of supported decorators in list_pyiron_nodes')
+                        print(
+                            "Unknown decorator! Add it to list of supported decorators in list_pyiron_nodes"
+                        )
 
         return nodes
