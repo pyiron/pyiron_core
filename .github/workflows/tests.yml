@@ -41,7 +41,7 @@ jobs:
         shell: bash -l {0}
         run: |
           pip install . --no-deps --no-build-isolation
-        timeout-minutes: 3
+        timeout-minutes: 4
 
       - name: Run unit tests
         shell: bash -l {0}
