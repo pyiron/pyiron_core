@@ -4,7 +4,7 @@
  "private": true,
  "scripts": {
   "dev": "npm run build -- --sourcemap=inline --watch",
-  "build": "esbuild js/widget.jsx --minify --format=esm --bundle --outdir=static",
+  "build": "esbuild js/widget.tsx --minify --format=esm --bundle --outdir=static",
   "test": "jest",
   "test:watch": "jest --watch",
   "test:coverage": "jest --coverage"
