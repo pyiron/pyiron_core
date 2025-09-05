@@ -14,7 +14,7 @@ import dataclasses
 import importlib
 import textwrap
 from collections import defaultdict
-from typing import List, Tuple, Union
+from typing import List, Tuple, Union, Optional
 
 from pyiron_workflow import simple_workflow
 from pyiron_workflow.graph.decorators import (
