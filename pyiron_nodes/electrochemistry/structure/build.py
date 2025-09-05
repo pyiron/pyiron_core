@@ -6,6 +6,7 @@ import ase.units as units
 def build_water(project, n_mols: int = 10):
 
     import numpy as np
+    from pyiron_atomistics import Project
 
     density = 1.0e-24  # g/A^3
     mol_mass_water = 18.015  # g/mol
@@ -23,6 +24,10 @@ def build_water(project, n_mols: int = 10):
     r_H1 = [dx, dx, 0]
     r_H2 = [-dx, dx, 0]
     unit_cell = (a / n) * np.eye(3)
+
+    if isinstance(project, str):
+        project = Project(project)
+        
     water = project.create_atoms(
         elements=["H", "H", "O"], positions=[r_H1, r_H2, r_O], cell=unit_cell, pbc=True
     )
