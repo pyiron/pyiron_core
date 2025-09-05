@@ -25,7 +25,7 @@ def M3GNet(model: str = "M3GNet-MP-2021.2.8-PES"):
 
 
 @as_function_node("engine")
-def GRACE(model: str = "GRACE-1L-OAM_2Feb25"):
+def GRACE(model: str = "GRACE-1L-MP-r6"):
     """Universal Graph Atomic Cluster Expansion models."""
     from pyiron_nodes.atomistic.engine.generic import OutputEngine
     from tensorpotential.calculator import grace_fm

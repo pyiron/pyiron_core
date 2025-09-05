@@ -60,6 +60,41 @@ Connect graph with ReactflowWidget and other GUI elements for interactive graph/
 """
 
 
+### ADDED FOR CUSTOM FEATURES
+def rename_node(graph: base.Graph, old_label: str, new_label: str):
+    """Rename node in graph and update edges that reference it"""
+    new_graph = base.copy_graph(graph)
+    if old_label not in new_graph.nodes:
+        return new_graph
+    node_obj = new_graph.nodes.pop(old_label)
+    # TODO: too many label-like attributes (reduce to a single one!)
+    node_obj.label = new_label
+    node_obj.id = new_label
+    node_obj.node.label = new_label
+    new_graph.nodes[new_label] = node_obj
+    # handle macro nodes
+    for node in new_graph.nodes.values():
+        if node.parent_id == old_label:
+            node.parent_id = new_label
+        # if node.label.startswith("va_"):
+        #     label = node.label.split("__")[0][len("va_i_"):]
+        #     param = node.label.split("__")[1:]
+        #     print("label:", label, "param:", param)
+
+    # updated_edges = []
+    for e in new_graph.edges:
+        if e.source == old_label:
+            e.source = new_label
+        if e.target == old_label:
+            e.target = new_label
+        # updated_edges.append(e)
+    # new_graph.edges = updated_edges
+    return new_graph
+
+
+### END ADD
+
+
 class PyironFlowWidget:
     def __init__(
         self,
@@ -67,7 +102,7 @@ class PyironFlowWidget:
         wf: Optional[Union[simple_workflow.Workflow, base.Graph]] = None,
         gui_layout: GUILayout = GUILayout(),
         main_widget=None,
-        db = None,
+        db=None,
     ):
 
         if wf is None:
@@ -142,45 +177,45 @@ class PyironFlowWidget:
 
     # handle the commands from the ReactFlowWidget
     def on_value_change(self, change):
-        # from pyiron_database.instance_database import node as idb_node
-        # gui module is exposed in the API
-        # pyiron_database leverages the API
-        # This is cyclic, but at time of writing pyiron_database exclusively imports
-        # back-end model elements of the API, so if we separate the back-end and
-        # front-end to separate modules, this will resolve itself.
-        # We are also using a customized version of pyiron_database, so it's possible
-        # a resolution is also available there.
-
         print("on_value_change: ", change["new"], change["old"], change["name"])
 
-        self.out_widget.clear_output()
+        import logging
 
-        with self.out_widget:
-
+        # self.out_widget.clear_output()
+        out = None
+        with self.log_widget:
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
 
-                print("command: ", change["new"])
+                # Suppress DEBUG messages from pyiron_log
+                logging.getLogger("pyiron_log").setLevel(logging.WARNING)
+
+                # print("command: ", change["new"])
                 command, node_name = change["new"].split(":", 1)
                 command = command.strip()
                 node_name = node_name.rsplit("-", 1)[0].strip()
-                print("node_name: ", node_name, command)
 
-                if command == "refreshGraphView":
+                ### ADDED FOR CUSTOM FEATURES
+                if command == "renameNode":
+                    payload = json.loads(node_name)
+                    self.graph = rename_node(
+                        self.graph, payload["oldLabel"], payload["newLabel"]
+                    )
+                    self.update_gui()
+                ### END ADD
+
+                elif command == "refreshGraphView":
                     print("refreshGraphView")
                     self.update_gui()
                 elif command == "saveFlow":
                     print("saveFlow")
                     graph_json._save_graph(
-                        self.graph,
-                        overwrite=True,
-                        workflow_dir=self.workflow_path,
+                        self.graph, overwrite=True, workflow_dir=self.workflow_path
                     )
                 elif command == "restoreFlow":
                     print("restoreFlow")
                     self.graph = graph_json._load_graph(
-                        f"{self.graph.label}.json",
-                        workflow_dir=self.workflow_path
+                        f"{self.graph.label}.json", workflow_dir=self.workflow_path
                     )
                     self.update_gui()
                 elif command == "clearFlow":
@@ -198,12 +233,10 @@ class PyironFlowWidget:
                     self.update_gui()  # ???
                 elif command == "selected_nodes":
                     self._selected_nodes = node_name.split(",")
-                    print("selected_nodes: ", self._selected_nodes)
+                    # print("selected_nodes: ", self._selected_nodes)
                 elif command == "groupSelectedNodes":
                     print("group_nodes: ", self._selected_nodes)
                     self.graph = group.create_group(self.graph, self._selected_nodes)
-                    # self.graph = base.create_group(self.graph, node_ids)
-                    # self.graph = base.get_updated_graph(self.graph)
                     self.update_gui()
 
                 elif command == "add_node":
@@ -212,9 +245,12 @@ class PyironFlowWidget:
                 elif command == "add_edge":
                     print("add_edge: ", node_name)
                     self.graph += self._parse_edge_string(node_name)
+                    # self.update_gui()
+                    self.main_widget.redraw()
                 elif command == "delete_node":
                     print("delete_node: ", node_name)
                     self.graph = base.remove_node(self.graph, node_name)
+                    self.update_gui()
                 elif command == "delete_edge":
                     print("delete_edge: ", node_name)
                     edge = self._parse_edge_string(node_name)
@@ -235,12 +271,7 @@ class PyironFlowWidget:
                 elif node_name in self.graph.nodes.keys():
                     node = self.graph.nodes[node_name].node
                     if command == "source":
-
                         self.accordion_widget.selected_index = 1
-                        node = self.graph.nodes[node_name].node
-
-                        # get node hash
-                        # print("node hash: ", idb_node.get_hash(node))
                         if node.node_type == "graph":
                             code = base.get_code_from_graph(
                                 node.graph,
@@ -249,54 +280,43 @@ class PyironFlowWidget:
                         else:
                             code = inspect.getsource(node._func)
 
-                        print(
-                            pygments.highlight(
-                                code,
-                                pygments.lexers.Python2Lexer(),
-                                pygments.formatters.TerminalFormatter(),
-                            )
+                        out = pygments.highlight(
+                            code,
+                            pygments.lexers.Python2Lexer(),
+                            pygments.formatters.TerminalFormatter(),
                         )
 
                     elif command == "run":
                         self.accordion_widget.selected_index = 1
                         self.out_widget.clear_output()
-
+                        print("Running node:", node.label)
                         out = run.pull_node(
                             base.get_updated_graph(self.graph), node.label, db=self.db
                         )
 
-                        display(out)
-                    elif command == "expand":
-                        print(
-                            "expand: ", node_name, self.graph.nodes[node_name].expanded
-                        )
+                        # display(out)
+                    elif command in ["expand", "collapse"]:
                         if self.graph.nodes[node_name].expanded:
                             self.graph = _mark_node_as_collapsed(self.graph, node_name)
-                            print("collapsed")
                         else:
                             self.graph = _mark_node_as_expanded(self.graph, node_name)
-                            print("expanded")
-                        print(
-                            "expanded: ",
-                            node_name,
-                            self.graph.nodes[node_name].expanded,
-                        )
                         self.main_widget.redraw()
 
-                    else:
-                        print("node command not recognized")
-
-                else:
-                    print("graph command not recognized")
+        if out is not None:
+            self.out_widget.clear_output()
+            with self.out_widget:
+                if command == "run":
+                    display(out)
+                elif command == "source":
+                    print(out)
 
     def update_gui(self, export_data=True, sleep_time=0.2):
         opt_graph = base.get_updated_graph(self.graph)
         data = dict(
-            #    label=graph.label,
             nodes=_nodes_to_gui(opt_graph),
             edges=_edges_to_gui(opt_graph),
             graph=_graph_to_gui(opt_graph),
-            date=str(self._counter),  # unique value to activate traitlets
+            date=str(self._counter),
         )
         self._counter += 1
 
@@ -315,8 +335,16 @@ class PyironFlowWidget:
             self._thread.start()
 
     def add_node(self, node_path, label):
+        print(f"Adding node {label} from {node_path}")
         node = base.get_node_from_path(node_path)(label=label)
         self.graph += node
+        if self.graph.nodes[label].expanded:
+            self.graph = _mark_node_as_collapsed(self.graph, label)
+        ### ADDED FOR CUSTOM FEATURES - track newly added nodes
+        if not hasattr(self.graph, "_new_nodes"):
+            self.graph._new_nodes = set()
+        self.graph._new_nodes.add(label)
+        ### END ADD
         self.update_gui()
 
 
@@ -455,7 +483,7 @@ class PyironFlow:
                         workflow_path=self.workflow_path,
                         wf=new_wf,
                         gui_layout=self.gui_layout,
-                        main_widget=self
+                        main_widget=self,
                     )
                 )
 
@@ -527,6 +555,7 @@ class GuiData:
     source_values: list = dataclasses.field(default_factory=lambda: [])
     source_types: list = dataclasses.field(default_factory=lambda: [])
     expanded: bool = False
+    target_connected: list = dataclasses.field(default_factory=lambda: [])
 
 
 @decorators.as_dotdict_dataclass()
@@ -560,12 +589,7 @@ def _to_jsonifyable(obj):
 def gui_data(
     node: simple_workflow.Node, key: str = None, expanded: bool = False
 ) -> GuiData:
-
-    label = key  # node.label
-    # The following does not work since the label change is not reflected in the edges
-    # if (node.label != key) and (key is not None):
-    #     label = f"{node.label}_{key}"
-
+    label = key
     if node is None:
         return GuiData(label=label)
 
@@ -581,49 +605,53 @@ def gui_data(
         isinstance(v, (simple_workflow.Port, simple_workflow.Node))
         for v in node.inputs.data["value"]
     ]
-
-    # TODO: set to None if it contains an edge (include connected parameter)
     target_types = [
         "None" if (t == "builtins.NoneType") or connected else t
         for t, connected in zip(node.inputs.data["type"], is_connected)
     ]
 
+    is_connected = [
+        isinstance(v, (simple_workflow.Port, simple_workflow.Node))
+        for v in node.inputs.data["value"]
+    ]
+
+    status = getattr(node, "last_run_status", "NotRun")
+
     return GuiData(
         label=label,
-        source_labels=node.outputs.data["label"],
+        source_labels=node.outputs.data["label"] + ["self"],
         target_labels=node.inputs.data["label"],
         import_path=node.function["import_path"],
         target_values=target_values,
         target_types=target_types,
-        source_values=[not_data.NotData for _ in node.outputs.data["value"]],
-        source_types=node.outputs.data["type"],
+        source_values=[not_data.NotData for _ in node.outputs.data["value"]] + [status],
+        source_types=node.outputs.data["type"] + ["Node"],
         expanded=expanded,
+        target_connected=is_connected,  # NEW
     )
-
-
-def _get_node_height(node: simple_workflow.Node) -> int | float:
-    if isinstance(node, base.Graph) or node is None:
-        height = 250
-    else:
-        n_max_ports = max(node.n_out_labels, node.n_inp_labels)
-        height = 30 + 16 * n_max_ports
-    return height
 
 
 def _nodes_to_gui(graph: base.Graph, remove_none=True) -> decorators.NestedList:
     node_width = 280
-
     nodes = decorators.NestedList()
     active_nodes = _get_active_nodes(graph)
+    # determine max_x pos
+    max_x = max(
+        (getattr(v, "position", {}).get("x", 0) for v in active_nodes.values()),
+        default=0,
+    )
+
     for i, (k, v) in enumerate(active_nodes.items()):
-        # print("gui node: ", k, v.label, v.expanded)
-        # print('node: ', k, v.label, v.node.label)
+        pos_x = i * (node_width + 20)
+        ### ADDED: place new nodes far right
+        if hasattr(graph, "_new_nodes") and k in graph._new_nodes:
+            pos_x = max_x + node_width + 100
         node_dict = GuiNode(
             id=k,
             data=gui_data(v.node, key=k, expanded=v.expanded).asdict(
                 remove_none=remove_none
             ),
-            position=dict(x=i * (node_width + 20), y=0),
+            position=dict(x=pos_x, y=0),
             style=GuiStyle(width=node_width, height=_get_node_height(v.node)).asdict(
                 remove_none=remove_none
             ),
@@ -656,8 +684,66 @@ def _nodes_to_gui(graph: base.Graph, remove_none=True) -> decorators.NestedList:
 
         # if not v.expanded:  # for testing automated layout
         nodes.append(node_dict.asdict(remove_none=remove_none))
-
     return nodes
+
+
+def _get_node_height(node: simple_workflow.Node) -> int | float:
+    if isinstance(node, base.Graph) or node is None:
+        height = 250
+    else:
+        n_max_ports = max(node.n_out_labels, node.n_inp_labels)
+        height = 30 + 20 * n_max_ports
+    return height
+
+
+# def _nodes_to_gui(graph: base.Graph, remove_none=True) -> decorators.NestedList:
+#     node_width = 280
+
+#     nodes = decorators.NestedList()
+#     active_nodes = _get_active_nodes(graph)
+#     for i, (k, v) in enumerate(active_nodes.items()):
+#         # print("gui node: ", k, v.label, v.expanded)
+#         # print('node: ', k, v.label, v.node.label)
+#         node_dict = GuiNode(
+#             id=k,
+#             data=gui_data(v.node, key=k, expanded=v.expanded).asdict(
+#                 remove_none=remove_none
+#             ),
+#             position=dict(x=i * (node_width + 20), y=0),
+#             style=GuiStyle(width=node_width, height=_get_node_height(v.node)).asdict(
+#                 remove_none=remove_none
+#             ),
+#             targetPosition="left",
+#             sourcePosition="right",
+#             type=v.widget_type,
+#             expanded=v.expanded,
+#         )
+#         if v.expanded:
+#             node_dict["type"] = "customNode"
+#             node_dict["data"] = GuiData(label=v.label, expanded=True).asdict(
+#                 remove_none=remove_none
+#             )
+#         if v.parent_id is not None:
+#             node_dict.parentId = v.parent_id
+#             node_dict.extent = "parent"
+
+#         if v.node_type == "graph":
+#             node_dict.type = "customNode"  # None
+#             node_dict.style["backgroundColor"] = "rgba(255, 165, 0, 0.3)"
+#         elif labelling.is_virtual(v.label):
+#             node_dict.style["border"] = "1px black dashed"
+#             node_dict.style["backgroundColor"] = "rgba(50, 50, 50, 0.1)"
+#         elif v.node.node_type == "out_dataclass_node":
+#             # light purple
+#             node_dict.style["backgroundColor"] = "rgba(200, 200, 255, 0.3)"
+#         elif v.node.node_type == "inp_dataclass_node":
+#             # light blue
+#             node_dict.style["backgroundColor"] = "rgba(100, 100, 255, 0.3)"
+
+#         # if not v.expanded:  # for testing automated layout
+#         nodes.append(node_dict.asdict(remove_none=remove_none))
+
+#     return nodes
 
 
 def _get_child_dict(graph, node):

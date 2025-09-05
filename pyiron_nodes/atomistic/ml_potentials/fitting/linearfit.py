@@ -2,8 +2,130 @@ from pyiron_workflow import Workflow, as_function_node
 import pandas as pd
 import numpy as np
 from dataclasses import dataclass, field, asdict
-from typing import Optional
+from typing import Optional, List, Union
 import matplotlib.pyplot as plt
+
+
+@as_function_node
+def ListDataSets(
+    path: str = ".",
+    rel_to_module: bool = True,
+    index: int | None = None,
+    exclude_exts: str = ".py, .ipynb",
+) -> Union[List[str], str]:
+    """
+    List files in a directory (or a single element by index) with optional
+    extension filtering.
+
+    Parameters
+    ----------
+    path : str, optional
+        Directory to inspect.  If ``rel_to_module`` is ``True`` the path is
+        interpreted **relative to the directory that holds this source file**;
+        otherwise it is interpreted **relative to the current working directory**.
+        Default is ``"."`` (the current directory).
+
+    rel_to_module : bool, optional
+        When ``True`` resolve ``path`` against the module’s location,
+        otherwise resolve it against ``os.getcwd()``.  Default ``True``.
+
+    index : int | None, keyword‑only, optional
+        If supplied, return **only** the element at this position in the
+        sorted list (negative indices are allowed).  When ``None`` (default)
+        the full (relative) list is returned.  When an index is given the
+        **absolute path** of the selected file is returned.
+
+    exclude_exts : Sequence[str], keyword‑only, optional
+        A sequence of file extensions to *exclude* from the result.
+        Extensions may be supplied with or without the leading dot
+        (e.g. ``".py"``, ``"ipynb"``).  Matching is case‑insensitive.
+        Default is an empty tuple → no files are excluded.
+
+    Returns
+    -------
+    Union[List[str], str]
+        * ``list[str]`` – sorted list of file names **relative to the inspected
+          directory** (default behaviour).
+        * ``str`` – the **absolute path** of the file selected via ``index``.
+
+    Raises
+    ------
+    ValueError
+        If ``path`` does not resolve to an existing directory.
+    IndexError
+        If ``index`` is supplied but is out of range.
+    """
+    import pathlib
+
+    exclude_exts = [e.strip() for e in exclude_exts.split(",")]
+
+    # ----------------------------------------------------------------------
+    # 1️⃣ Resolve the directory we are going to list
+    # ----------------------------------------------------------------------
+    MODULE_ROOT = pathlib.Path(__file__).resolve().parent
+
+    target_dir = (
+        (MODULE_ROOT / path).resolve()
+        if rel_to_module
+        else pathlib.Path(path).expanduser().resolve()
+    )
+
+    # ----------------------------------------------------------------------
+    # 2️⃣ Validate that the target exists and is a directory
+    # ----------------------------------------------------------------------
+    if not target_dir.exists():
+        raise ValueError(f"The directory '{target_dir}' does not exist.")
+    if not target_dir.is_dir():
+        raise ValueError(f"The path '{target_dir}' exists but is not a directory.")
+
+    # ----------------------------------------------------------------------
+    # 3️⃣ Normalise the extensions to exclude (case‑insensitive, ensure leading dot)
+    # ----------------------------------------------------------------------
+    excl: set[str] = {
+        (e if e.startswith(".") else f".{e}").lower() for e in exclude_exts
+    }
+
+    # ----------------------------------------------------------------------
+    # 4️⃣ Gather file entries (non‑recursive, skip hidden files & excluded extensions)
+    # ----------------------------------------------------------------------
+    entries: List[pathlib.Path] = [
+        p
+        for p in target_dir.iterdir()
+        if p.is_file()
+        and not p.name.startswith(".")
+        and (p.suffix.lower() not in excl)  # <-- extension filter
+    ]
+
+    # ----------------------------------------------------------------------
+    # 5️⃣ Build a sorted list of *relative* POSIX strings (used when no index)
+    # ----------------------------------------------------------------------
+    sorted_rel_names = sorted(p.relative_to(target_dir).as_posix() for p in entries)
+
+    # ----------------------------------------------------------------------
+    # 6️⃣ Decide what to return – either the whole list (relative) or a single
+    #    absolute path when an index is supplied.
+    # ----------------------------------------------------------------------
+    result: Union[List[str], str]
+
+    if index is None:
+        # No index → return the full (relative) list, exactly as before.
+        result = sorted_rel_names
+    else:
+        # Index supplied → we need the absolute path of the chosen entry.
+        index = int(index)
+        try:
+            chosen_path = (target_dir / sorted_rel_names[index]).resolve()
+        except IndexError as exc:
+            raise IndexError(
+                f"Requested index {index} is out of range for the directory "
+                f"'{target_dir}' (contains {len(sorted_rel_names)} files)."
+            ) from exc
+        result = str(chosen_path)  # absolute path as a string
+
+    # ----------------------------------------------------------------------
+    # 7️⃣ **Single return point**
+    # ----------------------------------------------------------------------
+    return result
 
 
 @dataclass
@@ -398,45 +520,105 @@ def make_linearfit(
 
 # HISTOGRAM FOR ENERGY DISTRIBUTION
 @as_function_node("plot")
-def PlotEnergyHistogram(df: pd.DataFrame, bins: int = 100, log_scale: bool = True):
+def PlotEnergyHistogram(df: "pd.DataFrame", bins: int = 100, log_scale: bool = True):
+    """
+    Plot histogram of the per-atom energies.
 
-    # Calculate energy_per_atom
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        Must contain 'energy_corrected' and 'NUMBER_OF_ATOMS' columns.
+    bins : int
+        Number of histogram bins.
+    log_scale : bool
+        Whether to use a logarithmic scale on the y-axis.
+
+    Returns
+    -------
+    fig : matplotlib.figure.Figure
+        The generated histogram figure.
+    """
+    import matplotlib.pyplot as plt
+
+    # Calculate energy per atom (convert to meV/atom if desired)
     df["energy_per_atom"] = df["energy_corrected"] / df["NUMBER_OF_ATOMS"]
 
-    plt.hist(df["energy_per_atom"], bins=bins, log=log_scale)
-    plt.ylabel("Count")
-    plt.xlabel("Energy per atom (meV/atom)")
-    return plt.show()
+    fig, ax = plt.subplots()
+    ax.hist(df["energy_per_atom"], bins=bins, log=log_scale)
+
+    ax.set_ylabel("Count")
+    ax.set_xlabel("Energy per atom (meV/atom)")
+    return fig
 
 
 # HISTOGRAM FOR FORCE DISTRIBUTION
 @as_function_node("plot")
-def PlotForcesHistogram(df: pd.DataFrame, bins: int = 100, log_scale: bool = True):
+def PlotForcesHistogram(df: "pd.DataFrame", bins: int = 100, log_scale: bool = True):
+    """
+    Plot histogram of atomic force magnitudes.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        Must contain a 'forces' column with per-atom force arrays.
+    bins : int
+        Number of histogram bins.
+    log_scale : bool
+        Whether to use a logarithmic scale on the y-axis.
+
+    Returns
+    -------
+    fig : matplotlib.figure.Figure
+        The generated histogram figure.
+    """
+    import numpy as np
+    import matplotlib.pyplot as plt
 
     array = np.concatenate(df.forces.values).flatten()
 
-    plt.hist(array, bins=bins, log=log_scale)
-    plt.ylabel("Count")
-    plt.xlabel(r"Force (eV/$\mathrm{\AA}$)")
-    return plt.show()
+    fig, ax = plt.subplots()
+    ax.hist(array, bins=bins, log=log_scale)
+
+    ax.set_ylabel("Count")
+    ax.set_xlabel(r"Force (eV/$\mathrm{\AA}$)")
+    return fig
 
 
 @as_function_node("plot")
 def PlotEnergyFittingCurve(data_dict: dict):
+    """
+    Plot predicted vs reference energies for training and optional testing datasets.
 
-    fig, axe = plt.subplots()
+    Parameters
+    ----------
+    data_dict : dict
+        Dictionary with keys:
+        - 'reference_training_epa', 'predicted_training_epa'
+        - optional: 'reference_testing_epa', 'predicted_testing_epa'
+        All arrays are in eV/atom.
 
+    Returns
+    -------
+    fig : matplotlib.figure.Figure
+        The generated figure for display.
+    """
+    import matplotlib.pyplot as plt
+
+    fig, ax = plt.subplots()
+
+    # Plot y=x dashed reference line
     lims = [
         data_dict["reference_training_epa"].min(),
         data_dict["reference_training_epa"].max(),
     ]
-    axe.plot(lims, lims, ls="--", color="C0")
+    ax.plot(lims, lims, ls="--", color="C0")
 
-    if "reference_testing_epa" in data_dict.keys():
+    # Optional testing set
+    if "reference_testing_epa" in data_dict and "predicted_testing_epa" in data_dict:
         rmse_testing = _calc_rmse(
-            data_dict["reference_testing_epa"], data_dict[f"predicted_testing_epa"]
+            data_dict["reference_testing_epa"], data_dict["predicted_testing_epa"]
         )
-        axe.scatter(
+        ax.scatter(
             data_dict["reference_testing_epa"],
             data_dict["predicted_testing_epa"],
             color="black",
@@ -445,10 +627,11 @@ def PlotEnergyFittingCurve(data_dict: dict):
             label=f"Testing RMSE = {rmse_testing:.2f} (meV/atom)",
         )
 
+    # Training set
     rmse_training = _calc_rmse(
         data_dict["reference_training_epa"], data_dict["predicted_training_epa"]
     )
-    axe.scatter(
+    ax.scatter(
         data_dict["reference_training_epa"],
         data_dict["predicted_training_epa"],
         color="C0",
@@ -456,55 +639,77 @@ def PlotEnergyFittingCurve(data_dict: dict):
         label=f"Training RMSE = {rmse_training:.2f} (meV/atom)",
     )
 
-    axe.set_xlabel("DFT E (eV/atom)")
-    axe.set_ylabel("Predicted E (eV/atom)")
-    axe.set_title("Predicted Energy Vs Reference Energy")
-    axe.legend()
+    # Labels and title
+    ax.set_xlabel("DFT E (eV/atom)")
+    ax.set_ylabel("Predicted E (eV/atom)")
+    ax.set_title("Predicted Energy Vs Reference Energy")
+    ax.legend()
 
-    return plt.show()
+    return fig
 
 
 @as_function_node("plot")
 def PlotForcesFittingCurve(data_dict: dict):
+    """
+    Plot predicted vs reference atomic forces for training and optional testing datasets.
 
-    fig, axe = plt.subplots()
+    Parameters
+    ----------
+    data_dict : dict
+        Dictionary with keys:
+        - 'reference_training_fpa', 'predicted_training_fpa'
+        - optional: 'reference_testing_fpa', 'predicted_testing_fpa'
+        All arrays are in eV/Å.
 
+    Returns
+    -------
+    fig : matplotlib.figure.Figure
+        The generated figure for display.
+    """
+    import matplotlib.pyplot as plt
+
+    fig, ax = plt.subplots()
+
+    # 1:1 reference line
     lims = [
         data_dict["reference_training_fpa"].min(),
         data_dict["reference_training_fpa"].max(),
     ]
-    axe.plot(lims, lims, ls="--", color=f"C1")
+    ax.plot(lims, lims, ls="--", color="C1")
 
-    if "reference_testing_epa" in data_dict.keys():
+    # Optional testing set
+    if "reference_testing_fpa" in data_dict and "predicted_testing_fpa" in data_dict:
         rmse_testing = _calc_rmse(
             data_dict["reference_testing_fpa"], data_dict["predicted_testing_fpa"]
         )
-        axe.scatter(
+        ax.scatter(
             data_dict["reference_testing_fpa"],
             data_dict["predicted_testing_fpa"],
             color="black",
             s=30,
             marker="+",
-            label=f"Testing RMSE = {rmse_testing:.2f}" + r"(meV/$\AA$)",
+            label=f"Testing RMSE = {rmse_testing:.2f}" + r" (meV/$\AA$)",
         )
 
+    # Training set
     rmse_training = _calc_rmse(
         data_dict["reference_training_fpa"], data_dict["predicted_training_fpa"]
     )
-    axe.scatter(
+    ax.scatter(
         data_dict["reference_training_fpa"],
         data_dict["predicted_training_fpa"],
         color="C1",
         s=30,
-        label=f"Training RMSE = {rmse_training:.2f}" + r"(meV/$\AA$)",
+        label=f"Training RMSE = {rmse_training:.2f}" + r" (meV/$\AA$)",
     )
 
-    axe.set_xlabel("DFT $F_i$" + r"(eV/$\AA$)")
-    axe.set_ylabel("Predicted $F_i$" + r"(eV/$\AA$)")
-    axe.set_title("Predicted Force Vs Reference Force")
-    axe.legend()
+    # Labels and title
+    ax.set_xlabel(r"DFT $F_i$ (eV/$\AA$)")
+    ax.set_ylabel(r"Predicted $F_i$ (eV/$\AA$)")
+    ax.set_title("Predicted Force Vs Reference Force")
+    ax.legend()
 
-    return plt.show()
+    return fig
 
 
 @as_function_node("design_matrix")

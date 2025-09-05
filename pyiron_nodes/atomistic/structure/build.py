@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pyiron_workflow import as_function_node, as_macro_node
-from typing import Optional
+from typing import Optional, Literal
 from ase.atoms import Atoms
 
 # from pyiron_workflow.workflow import Workflow
@@ -10,11 +10,13 @@ from ase.atoms import Atoms
 @as_function_node("structure")
 def Bulk(
     name: str,
-    crystalstructure: Optional[str] = None,
-    a: Optional[float | int] = None,
-    c: Optional[float | int] = None,
-    c_over_a: Optional[float] | int = None,
-    u: Optional[float | int] = None,
+    crystalstructure: Optional[
+        Literal["fcc", "bcc", "hcp", "diamond", "rocksalt"]
+    ] = None,
+    a: Optional[float] = None,
+    c: Optional[float] = None,
+    c_over_a: Optional[float] = None,
+    u: Optional[float] = None,
     orthorhombic: bool = False,
     cubic: bool = False,
 ):
@@ -107,6 +109,9 @@ def CubicBulkCell(
     )
     from pyiron_workflow import Workflow
 
+    if vacancy_index is not None and "va_i_" not in vacancy_index:
+        print("Vacancy Index: ", vacancy_index, type(vacancy_index))
+        vacancy_index = int(vacancy_index)
     wf = Workflow("macro")
 
     wf.bulk = Bulk(name=element, cubic=True)

@@ -215,7 +215,7 @@ def add_node(
 
     if isinstance(node, Node):
         if node.node_type == "macro_node":
-            print(f"Adding macro node {label}")
+            # print(f"Adding macro node {label}")
             macro_graph = get_graph_from_macro_node(node)
             new_graph = _add_graph_instance(
                 graph,
@@ -231,7 +231,7 @@ def add_node(
         if node.node is None:
             # should be done on GraphNode creation
             if label is None:
-                label = node.id
+                label = node.label
             node.node = get_node_from_path(node.import_path)(label=label)
 
         new_graph = copy_graph(graph)
@@ -254,12 +254,14 @@ def remove_node(graph: Graph, label: str) -> Graph:
         Graph: The updated graph with the node and its edges removed.
     """
     new_graph = copy_graph(graph)
+    print(f"Removing node {label}", new_graph.nodes.keys(), label in graph.nodes.keys())
     if label in graph.nodes.keys():
         if graph.nodes[label].node_type == "graph":
             # remove all child nodes of this macro node
             for node_label in graph.nodes.keys():
                 if graph.nodes[node_label].parent_id == label:
                     new_graph = remove_node(new_graph, node_label)
+        print(f"Removing node {label}")
         del new_graph.nodes[label]
 
     edges_to_remove = [
@@ -268,6 +270,7 @@ def remove_node(graph: Graph, label: str) -> Graph:
     for edge in edges_to_remove:
         new_graph.edges.remove(edge)
 
+    print(f"Removed node {label} and its edges", new_graph.nodes.keys())
     # TODO: remove node from connected ports?
 
     return new_graph
@@ -318,8 +321,8 @@ def _add_node_instance(graph: Graph, node, label):
 
 def _add_graph_instance(graph: Graph, sub_graph: Graph, label: str = None, node=None):
     new_graph = copy_graph(graph)
-    sub_graph.id = label
-    # print('sub_graph: ', sub_graph.id, sub_graph.label)
+    sub_graph.label = label
+    # print('sub_graph: ', sub_graph.label, sub_graph.label)
 
     if node is None:
         if sub_graph.root_node is None:
@@ -376,8 +379,14 @@ def add_edge(
 
 
 def _update_target_port(graph: Graph, edge: GraphEdge):
-    source_port = graph.nodes[edge.source].node.outputs.__getattr__(edge.sourceHandle)
-    graph.nodes[edge.target].node.inputs.__setattr__(edge.targetHandle, source_port)
+    if edge.sourceHandle == "self":
+        print("implement connect to self")
+        pass
+    else:
+        source_port = graph.nodes[edge.source].node.outputs.__getattr__(
+            edge.sourceHandle
+        )
+        graph.nodes[edge.target].node.inputs.__setattr__(edge.targetHandle, source_port)
     # print(f"updated target port {edge.targetHandle} in node {edge.target}, {source_port}")
     return graph
 
@@ -1056,12 +1065,21 @@ def update_execution_graph(graph: Graph, debug=False) -> Graph:
                 id(source_node.node.outputs.data["node"][0]),
             )
 
-        graph = update_input_value(
-            graph,
-            edge.target,
-            edge.targetHandle,
-            source_node.node.outputs.__getattr__(edge.sourceHandle),
-        )
+        if edge.sourceHandle != "self":
+            graph = update_input_value(
+                graph,
+                edge.target,
+                edge.targetHandle,
+                source_node.node.outputs.__getattr__(edge.sourceHandle),
+            )
+        else:
+            graph = update_input_value(
+                graph,
+                edge.target,
+                edge.targetHandle,
+                source_node.node,
+            )
+            print("connected to node (self)")
         # print(f"Updated input {graph.nodes[edge.target].label} in node {edge.target}", graph.nodes[edge.target].node.inputs)
 
     return graph

@@ -40,8 +40,10 @@ def _iterate_node(
         # Sequential execution
         for value in values:
             # out = node(**{input_label: value})
-            node.inputs[input_label].value = value
-            out = node.pull()
+            # node.inputs[input_label].value = value
+            node.inputs.__setattr__(input_label, value)
+            # print(f"Setting {input_label} = {value}", node.inputs[input_label].value)
+            out = node.run()
             if copy_results:
                 out = copy(out)
             out_lst.append(out)
