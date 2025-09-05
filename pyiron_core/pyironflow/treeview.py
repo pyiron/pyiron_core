@@ -114,7 +114,7 @@ class TreeView:
     def on_click(self, node):
         # self.log.append_stdout(f'on_click.add_node_init ({node.path}, {node.path.name}) \n')
         path = (
-            get_rel_path_for_last_occurrence(node.path.path, "pyiron_nodes")
+            get_rel_path_for_last_occurrence(node.path.path, "pyiron_core")
             / node.path.name
         )
         path_str = str(path).replace("/", ".")
