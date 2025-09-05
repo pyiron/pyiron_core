@@ -63,7 +63,13 @@ def Equilibrate(
 
 
 @as_function_node
-def WaterPotential(metal: str = "Al", epsilon=0.102, sigma=3.188):
+def WaterPotential(
+    metal: str = "Al",
+    metal_charge: float = 0.0,
+    neon_charge: float = 0.0,
+    epsilon: float = 0.102,
+    sigma: float = 3.188,
+):
     import pandas
 
     water_potential = pandas.DataFrame(
@@ -71,7 +77,7 @@ def WaterPotential(metal: str = "Al", epsilon=0.102, sigma=3.188):
             "Name": ["H2O_tip3p"],
             "Filename": [[]],
             "Model": ["TIP3P"],
-            "Species": [["H", "O", metal]],
+            "Species": [["H", "O", metal, "Ne"]],
             "Config": [
                 [
                     "# @potential_species H_O  ### species in potential\n",
@@ -88,17 +94,20 @@ def WaterPotential(metal: str = "Al", epsilon=0.102, sigma=3.188):
                     "group O type 2\n",
                     "group H type 1\n",
                     f"group {metal} type 3\n",
+                    "group Ne type 4\n",
                     "\n",
                     "## set charges - beside manually ###\n",
                     "set group O charge -0.830\n",
                     "set group H charge 0.415\n",
-                    f"set group {metal} charge 0.2\n",
+                    f"set group {metal} charge {metal_charge}\n",
+                    f"set group Ne charge {neon_charge}\n",
                     "\n",
                     "### TIP3P Potential Parameters ###\n",
                     "pair_style lj/cut/coul/long 10.0\n",
                     "pair_coeff * * 0.000 0.000 \n",
                     "pair_coeff 2 2 0.102 3.188 \n",
                     "pair_coeff 2 3 {:.4} {:.4} \n".format(epsilon, sigma),
+                    "pair_coeff 2 4 {:.4} {:.4} \n".format(epsilon, sigma),
                     "bond_style  harmonic\n",
                     "bond_coeff  1 450 0.9572\n",
                     "angle_style harmonic\n",
@@ -114,5 +123,8 @@ def WaterPotential(metal: str = "Al", epsilon=0.102, sigma=3.188):
 
 
 @as_function_node("animate")
-def Animate(job):
-    return job.animate_structures()
+def Animate(trajectory, initial_structure):
+    from pyiron_atomistics.atomistics.job.atomistic import Trajectory
+
+    traj = Trajectory(positions=trajectory.positions, structure=initial_structure)
+    return traj.animate_structures()

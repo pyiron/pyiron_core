@@ -21,6 +21,9 @@ from .InstanceDatabase import InstanceDatabase
 
 
 PyironStoragePath: str = os.path.expanduser("~/.storage")
+# create storage path if it does not exist
+if not os.path.exists(PyironStoragePath):
+    os.makedirs(PyironStoragePath)
 
 
 def store_node_outputs(node: Node, storage_path: str = PyironStoragePath) -> str:
