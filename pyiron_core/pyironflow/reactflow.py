@@ -9,31 +9,21 @@ __email__ = ""
 __status__ = "development"
 __date__ = "Aug 1, 2024"
 
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from pyiron_workflow import Workflow
-
-from pyiron_workflow import hash_based_storage as hs
-from pyironflow.wf_extensions import (
-    get_nodes,
-    get_edges,
-    get_node_from_path,
-    dict_to_node,
-    dict_to_edge,
-)
+    pass
 
 import anywidget
 import pathlib
 import traitlets
 
 # import os
-import json
 
 
 class ReactFlowWidget(anywidget.AnyWidget):
     # path = pathlib.Path(os.getcwd()) / 'static'
-    path = pathlib.Path(__file__).parent.parent / "static"
+    path = pathlib.Path(__file__).parent.parent.parent / "static"
     _esm = path / "widget.js"
     _css = path / "widget.css"
     nodes = traitlets.Unicode("[]").tag(sync=True)

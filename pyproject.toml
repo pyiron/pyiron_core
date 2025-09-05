@@ -59,7 +59,6 @@ only-packages = true
 artifacts = [
     "pyiron_core/*",
     "pyiron_workflow/*",
-    "pyironflow/*",
     "static/*",
 ]
 

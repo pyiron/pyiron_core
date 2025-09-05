@@ -67,9 +67,9 @@ import pathlib
 import json
 
 
-from pyironflow.wf_extensions import get_edges as _get_edges
-from pyironflow.wf_extensions import get_nodes as _get_nodes
-from pyironflow.wf_extensions import get_node_from_path
+from pyiron_core.pyironflow.wf_extensions import get_edges as _get_edges
+from pyiron_core.pyironflow.wf_extensions import get_nodes as _get_nodes
+from pyiron_core.pyironflow.wf_extensions import get_node_from_path
 
 from typing import TYPE_CHECKING, List, Tuple
 

@@ -12,9 +12,9 @@ import numpy as np
 import pandas as pd
 import pygments
 
-import pyironflow
 from IPython.display import display
 from pyiron_core.pyiron_database import instance_database as idb
+from pyiron_core import pyironflow
 
 from pyiron_workflow import simple_workflow
 from pyiron_workflow.graph import (

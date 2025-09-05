@@ -54,7 +54,7 @@ class TreeView:
         ------
         root_path : str or Path, optional
             The root directory path from which the tree starts.
-            Defaults to '../pyiron_nodes/pyiron_nodes'.
+            Defaults to '../pyiron_core/pyiron_nodes'.
 
         Return:
         ------

@@ -3,7 +3,7 @@ Provide functions that are needed for pyironFlow, but that should be provided by
 pyiron_workflows in the end.
 """
 
-from pyironflow.themes import get_color
+from pyiron_core.pyironflow.themes import get_color
 import importlib
 import typing
 import numpy as np
