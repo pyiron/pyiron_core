@@ -14,7 +14,7 @@ import pygments
 
 import pyironflow
 from IPython.display import display
-from pyiron_database import instance_database as idb
+from pyiron_core.pyiron_database import instance_database as idb
 
 from pyiron_workflow import simple_workflow
 from pyiron_workflow.graph import (
@@ -42,7 +42,7 @@ def create_db(
     port: int = 5432,
     database: str = "none",
 ):
-    import pyiron_database.instance_database as idb
+    import pyiron_core.pyiron_database.instance_database as idb
 
     if database == "none":
         database = user

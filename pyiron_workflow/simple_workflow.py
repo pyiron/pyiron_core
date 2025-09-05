@@ -11,7 +11,6 @@ import functools
 import importlib
 import inspect
 import logging
-import types
 from typing import Any, Literal, TypeAlias, Union, get_type_hints, get_args, get_origin
 
 import pandas as pd
@@ -428,9 +427,6 @@ class DataElement:
         return [Connection(upstream_node, upstream_port_label)]
 
     def type_hint(self, v):
-        import numpy
-        import ase
-        import pyiron_core.pyiron_nodes as pyiron_nodes
 
         if isinstance(self.type, str):
             # print('type: ', self.type, v)
@@ -604,7 +600,7 @@ class Node:
             if inp_type == "Node":  # node_type_as_str:
                 val = inp_port.copy()
                 # add hash to closure node
-                import pyiron_database.instance_database as idb
+                import pyiron_core.pyiron_database.instance_database as idb
 
                 try:
                     hash = idb.get_hash(inp_port)
@@ -623,7 +619,7 @@ class Node:
             ):  # should be used only as quick fix (node rather than port should be provided)
                 val = inp_port.node.copy()
                 # add hash to closure node
-                import pyiron_database.instance_database as idb
+                import pyiron_core.pyiron_database.instance_database as idb
 
                 hash = idb.get_hash(val)
                 val._hash_parent = hash
@@ -663,7 +659,7 @@ class Node:
         pass
 
     def run(self, db=None):
-        import pyiron_database.instance_database as idb
+        import pyiron_core.pyiron_database.instance_database as idb
         from datetime import datetime
         import getpass
 

@@ -6,7 +6,7 @@ from pathlib import Path
 from types import TracebackType
 from typing import Any
 
-from pyiron_database.generic_storage.interface import StorageGroup
+from pyiron_core.pyiron_database.generic_storage.interface import StorageGroup
 
 
 class PickleGroup(StorageGroup):

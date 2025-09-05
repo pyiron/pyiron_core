@@ -7,7 +7,7 @@ if TYPE_CHECKING:
 
 from dataclasses import fields
 
-from pyiron_database.generic_storage.interface import StorageGroup
+from pyiron_core.pyiron_database.generic_storage.interface import StorageGroup
 
 
 def unwrap_dataclass(storage_group: StorageGroup, dataclass: DataclassInstance) -> None:

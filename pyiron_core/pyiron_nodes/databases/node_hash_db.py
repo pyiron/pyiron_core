@@ -1,5 +1,4 @@
 from pyiron_workflow import as_function_node, Node
-from typing import Optional
 
 
 @as_function_node
@@ -10,7 +9,7 @@ def CreateDB(
     port: int = 5432,
     database: str = "none",
 ):
-    import pyiron_database.instance_database as idb
+    import pyiron_core.pyiron_database.instance_database as idb
 
     if database == "none":
         database = user
@@ -71,7 +70,7 @@ def GetGraph(db, node_id: int):
     """
     Get the graph of a node with id *node_id from the database.
     """
-    import pyiron_database.instance_database as idb
+    import pyiron_core.pyiron_database.instance_database as idb
     from pyiron_workflow.api.gui import GuiGraph
     from sqlalchemy.orm import sessionmaker
     import pandas as pd
@@ -95,7 +94,7 @@ def GetHash(node: Node):
     """
     Get the hash of a node
     """
-    import pyiron_database.instance_database as idb
+    import pyiron_core.pyiron_database.instance_database as idb
 
     print("inputs: ", node.inputs)
     hash = idb.get_hash(node)

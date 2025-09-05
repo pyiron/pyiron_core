@@ -4,7 +4,7 @@ import abc
 from collections.abc import MutableMapping
 from typing import Any
 
-from pyiron_database.obj_reconstruction.util import recreate_type
+from pyiron_core.pyiron_database.obj_reconstruction.util import recreate_type
 
 
 def _save_join(separator, items):

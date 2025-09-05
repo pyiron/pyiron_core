@@ -7,8 +7,8 @@ from typing import Any
 from pyiron_workflow import NOT_DATA, Node
 from pyiron_workflow.api.graph import Graph, GraphEdge
 
-from pyiron_database.generic_storage import HDF5Storage, JSONGroup
-from pyiron_database.obj_reconstruction.util import (
+from pyiron_core.pyiron_database.generic_storage import HDF5Storage, JSONGroup
+from pyiron_core.pyiron_database.obj_reconstruction.util import (
     get_type,
     recreate_obj,
     serialize_obj,

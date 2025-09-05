@@ -58,7 +58,6 @@ Repository = "https://github.com/pyiron/pyiron_core"
 only-packages = true
 artifacts = [
     "pyiron_core/*",
-    "pyiron_database/*",
     "pyiron_workflow/*",
     "pyironflow/*",
     "static/*",

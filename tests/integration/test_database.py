@@ -4,7 +4,7 @@ Tests for tools in the local version of `pyiron_database`
 
 import unittest
 
-import pyiron_database.instance_database as idb
+from pyiron_core import pyiron_database
 import pyiron_workflow as pwf
 
 from static import nodes
@@ -24,8 +24,8 @@ class TestDatabase(unittest.TestCase):
         wf_node.run()
 
         self.assertEqual(
-            idb.node.node_inputs_to_jsongroup(wf_port.n2).data["x"],
-            idb.node.node_inputs_to_jsongroup(wf_node.n2).data["x"],
+            pyiron_database.instance_database.node.node_inputs_to_jsongroup(wf_port.n2).data["x"],
+            pyiron_database.instance_database.node.node_inputs_to_jsongroup(wf_node.n2).data["x"],
             msg="The hash should be accessible and the same regardless of whether we "
             "exploit the connect-directly-to-(single-output)-node shortcut",
         )
