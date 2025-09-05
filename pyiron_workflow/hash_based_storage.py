@@ -994,7 +994,7 @@ def eval_db_value(value, db):
     else:
         # If the value is not a hash, simply evaluate it
         try:
-            from pyiron_nodes.atomistic.property.elastic import DataStructureContainer
+            from pyiron_core.pyiron_nodes.atomistic.property.elastic import DataStructureContainer
 
             val = eval(value)
         except Exception as e:

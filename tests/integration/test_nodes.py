@@ -4,9 +4,9 @@ Tests for specific nodes in `pyiron_nodes`
 
 import unittest
 
-import pyiron_nodes as pn
+import pyiron_core.pyiron_nodes as pn
 import pyiron_workflow as pwf
-from pyiron_nodes import controls
+from pyiron_core.pyiron_nodes import controls
 
 
 @pwf.as_function_node

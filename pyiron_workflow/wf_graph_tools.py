@@ -39,7 +39,7 @@ To use this module, simply import it and access the various functions and tools 
 
 # Convert a workflow to execteable code
     from pyiron_workflow import Workflow
-    import pyiron_nodes
+    import pyiron_core.pyiron_nodes as pyiron_nodes
 
     wf = Workflow("compute_elastic_constants")
 

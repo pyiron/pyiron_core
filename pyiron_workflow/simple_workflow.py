@@ -430,7 +430,7 @@ class DataElement:
     def type_hint(self, v):
         import numpy
         import ase
-        import pyiron_nodes
+        import pyiron_core.pyiron_nodes as pyiron_nodes
 
         if isinstance(self.type, str):
             # print('type: ', self.type, v)

@@ -64,7 +64,7 @@ class TreeView:
         import copy
 
         if root_path is None:
-            import pyiron_nodes
+            import pyiron_core.pyiron_nodes as pyiron_nodes
 
             root_path = pyiron_nodes.__path__[0]
 

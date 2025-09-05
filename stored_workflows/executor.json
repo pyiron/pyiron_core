@@ -3,7 +3,7 @@
     "nodes": {
         "Bulk": {
             "id": "Bulk",
-            "import_path": "pyiron_nodes.atomistic.structure.build.Bulk",
+            "import_path": "pyiron_core.pyiron_nodes.atomistic.structure.build.Bulk",
             "label": "Bulk",
             "parent_id": null,
             "level": 0,
@@ -13,7 +13,7 @@
             "expanded": false,
             "node": {
                 "label": "Bulk",
-                "function": "pyiron_nodes.atomistic.structure.build.Bulk",
+                "function": "pyiron_core.pyiron_nodes.atomistic.structure.build.Bulk",
                 "inputs": {
                     "name": "Ni"
                 }
@@ -21,7 +21,7 @@
         },
         "fcc_metals": {
             "id": "fcc_metals",
-            "import_path": "pyiron_nodes.executors.fcc_metals",
+            "import_path": "pyiron_core.pyiron_nodes.executors.fcc_metals",
             "label": "fcc_metals",
             "parent_id": null,
             "level": 0,
@@ -31,13 +31,13 @@
             "expanded": false,
             "node": {
                 "label": "fcc_metals",
-                "function": "pyiron_nodes.executors.fcc_metals",
+                "function": "pyiron_core.pyiron_nodes.executors.fcc_metals",
                 "inputs": {}
             }
         },
         "IterNode": {
             "id": "IterNode",
-            "import_path": "pyiron_nodes.executors.IterNode",
+            "import_path": "pyiron_core.pyiron_nodes.executors.IterNode",
             "label": "IterNode",
             "parent_id": null,
             "level": 0,
@@ -47,7 +47,7 @@
             "expanded": false,
             "node": {
                 "label": "IterNode",
-                "function": "pyiron_nodes.executors.IterNode",
+                "function": "pyiron_core.pyiron_nodes.executors.IterNode",
                 "inputs": {
                     "kwarg_name": "name",
                     "max_workers": 2
@@ -56,7 +56,7 @@
         },
         "ThreadPoolExecutor": {
             "id": "ThreadPoolExecutor",
-            "import_path": "pyiron_nodes.executors.ThreadPoolExecutor",
+            "import_path": "pyiron_core.pyiron_nodes.executors.ThreadPoolExecutor",
             "label": "ThreadPoolExecutor",
             "parent_id": null,
             "level": 0,
@@ -66,13 +66,13 @@
             "expanded": false,
             "node": {
                 "label": "ThreadPoolExecutor",
-                "function": "pyiron_nodes.executors.ThreadPoolExecutor",
+                "function": "pyiron_core.pyiron_nodes.executors.ThreadPoolExecutor",
                 "inputs": {}
             }
         },
         "SingleNodeExecutor": {
             "id": "SingleNodeExecutor",
-            "import_path": "pyiron_nodes.executors.SingleNodeExecutor",
+            "import_path": "pyiron_core.pyiron_nodes.executors.SingleNodeExecutor",
             "label": "SingleNodeExecutor",
             "parent_id": null,
             "level": 0,
@@ -82,7 +82,7 @@
             "expanded": false,
             "node": {
                 "label": "SingleNodeExecutor",
-                "function": "pyiron_nodes.executors.SingleNodeExecutor",
+                "function": "pyiron_core.pyiron_nodes.executors.SingleNodeExecutor",
                 "inputs": {}
             }
         },

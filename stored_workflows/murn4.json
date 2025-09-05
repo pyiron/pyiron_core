@@ -3,7 +3,7 @@
     "nodes": {
         "BulkStaticEnergyF": {
             "id": "BulkStaticEnergyF",
-            "import_path": "pyiron_nodes.local_workflows.test.BulkStaticEnergyF",
+            "import_path": "pyiron_core.pyiron_nodes.local_workflows.test.BulkStaticEnergyF",
             "label": "BulkStaticEnergyF",
             "parent_id": null,
             "level": 0,
@@ -13,7 +13,7 @@
             "expanded": false,
             "node": {
                 "label": "BulkStaticEnergyF",
-                "function": "pyiron_nodes.local_workflows.test.BulkStaticEnergyF",
+                "function": "pyiron_core.pyiron_nodes.local_workflows.test.BulkStaticEnergyF",
                 "inputs": {
                     "name": "Al"
                 }
@@ -21,7 +21,7 @@
         },
         "IterNode": {
             "id": "IterNode",
-            "import_path": "pyiron_nodes.executors.IterNode",
+            "import_path": "pyiron_core.pyiron_nodes.executors.IterNode",
             "label": "IterNode",
             "parent_id": null,
             "level": 0,
@@ -31,7 +31,7 @@
             "expanded": false,
             "node": {
                 "label": "IterNode",
-                "function": "pyiron_nodes.executors.IterNode",
+                "function": "pyiron_core.pyiron_nodes.executors.IterNode",
                 "inputs": {
                     "kwarg_name": "a"
                 }
@@ -39,7 +39,7 @@
         },
         "Linspace": {
             "id": "Linspace",
-            "import_path": "pyiron_nodes.math.Linspace",
+            "import_path": "pyiron_core.pyiron_nodes.math.Linspace",
             "label": "Linspace",
             "parent_id": null,
             "level": 0,
@@ -49,7 +49,7 @@
             "expanded": false,
             "node": {
                 "label": "Linspace",
-                "function": "pyiron_nodes.math.Linspace",
+                "function": "pyiron_core.pyiron_nodes.math.Linspace",
                 "inputs": {
                     "x_min": 3,
                     "x_max": 7,
@@ -59,7 +59,7 @@
         },
         "CreateDB": {
             "id": "CreateDB",
-            "import_path": "pyiron_nodes.databases.node_hash_db.CreateDB",
+            "import_path": "pyiron_core.pyiron_nodes.databases.node_hash_db.CreateDB",
             "label": "CreateDB",
             "parent_id": null,
             "level": 0,
@@ -69,7 +69,7 @@
             "expanded": false,
             "node": {
                 "label": "CreateDB",
-                "function": "pyiron_nodes.databases.node_hash_db.CreateDB",
+                "function": "pyiron_core.pyiron_nodes.databases.node_hash_db.CreateDB",
                 "inputs": {
                     "user": "localuser",
                     "database": "localdb"
@@ -78,7 +78,7 @@
         },
         "ShowTable": {
             "id": "ShowTable",
-            "import_path": "pyiron_nodes.databases.node_hash_db.ShowTable",
+            "import_path": "pyiron_core.pyiron_nodes.databases.node_hash_db.ShowTable",
             "label": "ShowTable",
             "parent_id": null,
             "level": 0,
@@ -88,7 +88,7 @@
             "expanded": false,
             "node": {
                 "label": "ShowTable",
-                "function": "pyiron_nodes.databases.node_hash_db.ShowTable",
+                "function": "pyiron_core.pyiron_nodes.databases.node_hash_db.ShowTable",
                 "inputs": {}
             }
         },
