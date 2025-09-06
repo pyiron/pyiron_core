@@ -10,7 +10,7 @@ class LocalPostgres:
         self._ci_mode = os.environ.get('GITHUB_ACTIONS') == 'true'
 
         self.dbdir = str(
-            (pathlib.Path(__file__).parent.parent / ".pycor" / "pgdata").absolute()
+            (pathlib.Path(__file__).parent.parent.parent / ".pycor" / "pgdata").absolute()
         )
         self.logfile = os.path.join(self.dbdir, "logfile")
         self.port = str(5432)
@@ -99,4 +99,4 @@ class LocalPostgres:
         return f"postgresql://{self.user}:{self.password}@{self.host}:{self.port}/{self.db}"
 
 
-STORED_WORKFLOW_DIR = pathlib.Path(__file__).parent.parent / "stored_workflows"
+STORED_WORKFLOW_DIR = pathlib.Path(__file__).parent.parent.parent / "stored_workflows"
