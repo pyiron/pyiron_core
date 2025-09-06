@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from pyiron_workflow import as_macro_node
+from pyiron_core.pyiron_workflow import as_macro_node
 
 
 @as_macro_node("chemical_potential")

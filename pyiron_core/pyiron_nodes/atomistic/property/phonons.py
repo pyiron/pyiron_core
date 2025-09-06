@@ -6,7 +6,7 @@ import numpy as np
 
 from ase import Atoms
 from phonopy.api_phonopy import Phonopy
-from pyiron_workflow import (
+from pyiron_core.pyiron_workflow import (
     as_inp_dataclass_node,
     as_out_dataclass_node,
     as_function_node,
@@ -55,7 +55,7 @@ def phonopy(
     GetThermalProperties__mesh="10",
 ):
 
-    from pyiron_workflow import Workflow
+    from pyiron_core.pyiron_workflow import Workflow
     from pyiron_core.pyiron_nodes.atomistic.calculator.ase import Static
     from pyiron_core.pyiron_nodes.atomistic.property.phonons import PhonopyObject
     from pyiron_core.pyiron_nodes.atomistic.property.phonons import GenerateSupercells
@@ -202,7 +202,7 @@ def HasImaginaryModes(eigenvalues, tolerance: float = 1e-10) -> bool:
 
 @as_out_dataclass_node
 class ThermalProperties:
-    from pyiron_workflow.data_fields import DataArray, EmptyArrayField
+    from pyiron_core.pyiron_workflow.data_fields import DataArray, EmptyArrayField
 
     temperatures: DataArray = EmptyArrayField()
     free_energy: DataArray = EmptyArrayField()

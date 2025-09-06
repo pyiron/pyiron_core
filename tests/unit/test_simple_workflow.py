@@ -5,7 +5,7 @@ import unittest
 from collections import OrderedDict
 
 import pyiron_core.pyiron_database.instance_database as idb
-from pyiron_workflow.simple_workflow import (
+from pyiron_core.pyiron_workflow.simple_workflow import (
     PORT_LABEL,
     Node,
     Workflow,

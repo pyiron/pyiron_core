@@ -1,4 +1,4 @@
-from pyiron_workflow import Workflow, as_function_node
+from pyiron_core.pyiron_workflow import Workflow, as_function_node
 import pandas as pd
 import numpy as np
 from dataclasses import dataclass, field, asdict

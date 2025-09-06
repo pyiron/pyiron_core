@@ -77,7 +77,7 @@
                             "inputs": {}
                         }
                     },
-                    "_obj_type": "pyiron_workflow.graph.base.GraphNode"
+                    "_obj_type": "pyiron_core.pyiron_workflow.graph.base.GraphNode"
                 },
                 "edges": {
                     "values": [
@@ -100,7 +100,7 @@
                             "targetHandle": "engine"
                         }
                     ],
-                    "obj_type": "pyiron_workflow.graph.base.GraphEdge"
+                    "obj_type": "pyiron_core.pyiron_workflow.graph.base.GraphEdge"
                 }
             },
             "node_type": "graph",
@@ -108,7 +108,7 @@
             "expanded": false,
             "node": {
                 "label": "subgraph",
-                "function": "pyiron_workflow.graph.base.subgraph",
+                "function": "pyiron_core.pyiron_workflow.graph.base.subgraph",
                 "inputs": {
                     "Bulk__name": "Al",
                     "Bulk__a": 2.2
@@ -204,7 +204,7 @@
         },
         "va_i_subgraph__Bulk__name": {
             "id": "va_i_subgraph__Bulk__name",
-            "import_path": "pyiron_workflow.graph.base.identity",
+            "import_path": "pyiron_core.pyiron_workflow.graph.base.identity",
             "label": "va_i_subgraph__Bulk__name",
             "parent_id": "subgraph",
             "level": 0,
@@ -215,7 +215,7 @@
         },
         "va_i_subgraph__Bulk__a": {
             "id": "va_i_subgraph__Bulk__a",
-            "import_path": "pyiron_workflow.graph.base.identity",
+            "import_path": "pyiron_core.pyiron_workflow.graph.base.identity",
             "label": "va_i_subgraph__Bulk__a",
             "parent_id": "subgraph",
             "level": 0,
@@ -226,7 +226,7 @@
         },
         "va_o_subgraph__GetEnergyLast__energy_last": {
             "id": "va_o_subgraph__GetEnergyLast__energy_last",
-            "import_path": "pyiron_workflow.graph.base.identity",
+            "import_path": "pyiron_core.pyiron_workflow.graph.base.identity",
             "label": "va_o_subgraph__GetEnergyLast__energy_last",
             "parent_id": "subgraph",
             "level": 0,
@@ -307,7 +307,7 @@
                 "inputs": {}
             }
         },
-        "_obj_type": "pyiron_workflow.graph.base.GraphNode"
+        "_obj_type": "pyiron_core.pyiron_workflow.graph.base.GraphNode"
     },
     "edges": {
         "values": [
@@ -372,6 +372,6 @@
                 "targetHandle": "df"
             }
         ],
-        "obj_type": "pyiron_workflow.graph.base.GraphEdge"
+        "obj_type": "pyiron_core.pyiron_workflow.graph.base.GraphEdge"
     }
 }

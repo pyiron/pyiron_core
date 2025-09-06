@@ -1,4 +1,4 @@
-from pyiron_workflow import as_function_node, Node
+from pyiron_core.pyiron_workflow import as_function_node, Node
 
 from pyiron_core.pyiron_nodes.atomistic.calculator.data import (
     InputCalcMinimize,

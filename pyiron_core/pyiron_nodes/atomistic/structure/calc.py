@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Optional
 
 from ase import Atoms
-from pyiron_workflow import as_function_node, as_macro_node
+from pyiron_core.pyiron_workflow import as_function_node, as_macro_node
 import numpy as np
 
 
@@ -174,7 +174,7 @@ def FitDiffPotential(
     store: bool = True,
 ):
 
-    from pyiron_workflow import Workflow
+    from pyiron_core.pyiron_workflow import Workflow
     from pyiron_core.pyiron_nodes.atomistic.ml_potentials.fitting.linearfit import (
         ReadPickledDatasetAsDataframe,
     )
@@ -279,7 +279,7 @@ def FitDiffPotential2(
     store: bool = True,
 ):
 
-    from pyiron_workflow import Workflow
+    from pyiron_core.pyiron_workflow import Workflow
     from pyiron_core.pyiron_nodes.atomistic.ml_potentials.fitting.linearfit import (
         ReadPickledDatasetAsDataframe,
     )

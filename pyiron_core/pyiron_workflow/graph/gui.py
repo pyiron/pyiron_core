@@ -16,8 +16,8 @@ from IPython.display import display
 from pyiron_core.pyiron_database import instance_database as idb
 from pyiron_core import pyironflow
 
-from pyiron_workflow import simple_workflow
-from pyiron_workflow.graph import (
+from pyiron_core.pyiron_workflow import simple_workflow
+from pyiron_core.pyiron_workflow.graph import (
     base,
     decorators,
     edges,
@@ -360,7 +360,7 @@ class PyironFlow:
         hash_nodes=False,
         gui_layout: GUILayout = GUILayout(),
         db: idb.PostgreSQLInstanceDatabase | None = None,
-        workflow_path: str = os.path.expanduser("~/pyiron_workflows") # rooth path to directory where .json graph workflows are stored
+        workflow_path: str = os.path.expanduser("~/pyiron_core.pyiron_workflows") # rooth path to directory where .json graph workflows are stored
     ):
 
         # create empty workflow directory if it does not exist

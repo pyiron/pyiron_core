@@ -2,8 +2,8 @@ import contextlib
 import os
 import unittest
 
-import pyiron_workflow as pwf
-from pyiron_workflow.graph import base, graph_json, group, run, labelling
+import pyiron_core.pyiron_workflow as pwf
+from pyiron_core.pyiron_workflow.graph import base, graph_json, group, run, labelling
 
 from static import nodes, other_nodes
 

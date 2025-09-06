@@ -1,4 +1,4 @@
-from pyiron_workflow import Node, as_function_node
+from pyiron_core.pyiron_workflow import Node, as_function_node
 import numpy as np
 import pandas as pd
 

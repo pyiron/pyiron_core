@@ -5,7 +5,7 @@ Tests for tools in the local version of `pyiron_database`
 import unittest
 
 from pyiron_core import pyiron_database
-import pyiron_workflow as pwf
+import pyiron_core.pyiron_workflow as pwf
 
 from static import nodes
 

@@ -1,7 +1,7 @@
 from typing import List
 
-from pyiron_workflow import simple_workflow
-from pyiron_workflow.graph import base, group
+from pyiron_core.pyiron_workflow import simple_workflow
+from pyiron_core.pyiron_workflow.graph import base, group
 
 
 def run_node(node: simple_workflow.Node | base.GraphNode, **kwargs):

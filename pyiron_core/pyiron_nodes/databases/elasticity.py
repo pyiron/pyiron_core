@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from pyiron_workflow import as_function_node
+from pyiron_core.pyiron_workflow import as_function_node
 
 
 @as_function_node("dataframe")

@@ -16,15 +16,15 @@ import textwrap
 from collections import defaultdict
 from typing import List, Tuple, Union, Optional
 
-from pyiron_workflow import simple_workflow
-from pyiron_workflow.graph.decorators import (
+from pyiron_core.pyiron_workflow import simple_workflow
+from pyiron_core.pyiron_workflow.graph.decorators import (
     NestedDict,
     NestedList,
     as_dotdict_dataclass,
     get_import_path_from_type,
 )
-from pyiron_workflow.graph.edges import Edges, GraphEdge
-from pyiron_workflow.graph.labelling import (
+from pyiron_core.pyiron_workflow.graph.edges import Edges, GraphEdge
+from pyiron_core.pyiron_workflow.graph.labelling import (
     concatenate,
     is_virtual,
     is_virtual_input,
@@ -34,8 +34,8 @@ from pyiron_workflow.graph.labelling import (
     virtual_input_label,
     virtual_output_label,
 )
-from pyiron_workflow.graph.not_data import NotData
-from pyiron_workflow.simple_workflow import Data, Node, Port, Workflow, identity
+from pyiron_core.pyiron_workflow.graph.not_data import NotData
+from pyiron_core.pyiron_workflow.simple_workflow import Data, Node, Port, Workflow, identity
 
 
 def get_node_from_path(import_path, log=None):
@@ -1143,7 +1143,7 @@ def get_code_from_graph(
         f"""
     def {graph.label}({kwargs}):
 
-        from pyiron_workflow import Workflow
+        from pyiron_core.pyiron_workflow import Workflow
     """
     )
 

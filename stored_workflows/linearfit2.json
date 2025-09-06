@@ -99,7 +99,7 @@
                 "inputs": {}
             }
         },
-        "_obj_type": "pyiron_workflow.api.serial.GraphNode"
+        "_obj_type": "pyiron_core.pyiron_workflow.api.serial.GraphNode"
     },
     "edges": {
         "values": [
@@ -152,6 +152,6 @@
                 "targetHandle": "data_dict"
             }
         ],
-        "obj_type": "pyiron_workflow.api.serial.GraphEdge"
+        "obj_type": "pyiron_core.pyiron_workflow.api.serial.GraphEdge"
     }
 }

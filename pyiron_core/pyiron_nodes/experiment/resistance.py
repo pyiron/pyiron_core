@@ -1,4 +1,4 @@
-from pyiron_workflow import as_function_node, Node, as_out_dataclass_node
+from pyiron_core.pyiron_workflow import as_function_node, Node, as_out_dataclass_node
 from dataclasses import field
 from typing import Optional
 import numpy as np

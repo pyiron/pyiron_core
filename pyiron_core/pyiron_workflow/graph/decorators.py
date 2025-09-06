@@ -18,7 +18,7 @@ import pandas as pd
 
 
 def get_import_path_from_type(obj):
-    from pyiron_workflow.api import serial
+    from pyiron_core.pyiron_workflow.api import serial
 
     if obj.__name__ in dir(serial):
         return f"{serial.__name__}.{obj.__name__}"
@@ -57,7 +57,7 @@ def as_dotdict_dataclass(
 ):
     # def wf_data_class(*args, doc_func=None, keys_to_store=None, **kwargs):
     """
-    Extension of the python default dataclass to include methods and functionality needed for pyiron_workflows
+    Extension of the python default dataclass to include methods and functionality needed for pyiron_core.pyiron_workflows
 
     :param args: pass to dataclass decorator
     :param doc_func: function from which to copy docstring

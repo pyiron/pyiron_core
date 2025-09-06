@@ -1,8 +1,8 @@
 import copy
 from typing import TypeAlias, List
 
-from pyiron_workflow import simple_workflow
-from pyiron_workflow.graph import base, decorators, edges, labelling
+from pyiron_core.pyiron_workflow import simple_workflow
+from pyiron_core.pyiron_workflow.graph import base, decorators, edges, labelling
 
 NodeIdLike: TypeAlias = list[str] | list[int] | tuple[str, ...] | tuple[int, ...]
 

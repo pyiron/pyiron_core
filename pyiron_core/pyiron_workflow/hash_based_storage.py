@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 # Define functions needed to construct and utilize a hash based database for node storage
-# Could/should be later moved to pyiron_workflows
+# Could/should be later moved to pyiron_core.pyiron_workflows
 
 from sqlalchemy import Column, Integer, String, DateTime, JSON, Boolean
 from sqlalchemy import MetaData
@@ -494,10 +494,10 @@ def has_multiple_output_ports(node):
 
 def extract_node_input(node, db):
     """
-    This function extracts input from a pyiron_workflow node object as a dictionary.
+    This function extracts input from a pyiron_core.pyiron_workflow node object as a dictionary.
 
     Arguments:
-    node -- the pyiron_workflow node object from which to extract the input
+    node -- the pyiron_core.pyiron_workflow node object from which to extract the input
 
     Returns:
     A dictionary where each key-value pair is the name of a channel and its corresponding value.
@@ -527,16 +527,16 @@ def extract_node_input(node, db):
 
 def extract_node_output(node, as_string=True):
     """
-    This function extracts input from a pyiron_workflow node object as a dictionary.
+    This function extracts input from a pyiron_core.pyiron_workflow node object as a dictionary.
 
     Arguments:
-    node -- the pyiron_workflow node object from which to extract the input
+    node -- the pyiron_core.pyiron_workflow node object from which to extract the input
 
     Returns:
     A dictionary where each key-value pair is the name of a channel and its corresponding value.
     """
 
-    # from pyiron_workflow.channels import NotData
+    # from pyiron_core.pyiron_workflow.channels import NotData
 
     output_dict = dict()
     for k in node.outputs.channel_dict.keys():
@@ -1144,7 +1144,7 @@ def get_all_connected_input_nodes(node):
     dict: A dictionary where the key is the name of the input channel, and the value is the Node object connected to it.
     """
 
-    from pyiron_workflow.topology import get_nodes_in_data_tree
+    from pyiron_core.pyiron_workflow.topology import get_nodes_in_data_tree
 
     # Get channel_dict dictionary containing all input channels
     # channel_dict = node.inputs.channel_dict

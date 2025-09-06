@@ -4,7 +4,7 @@ import numpy as np
 import os
 import random
 import string
-from pyiron_workflow import (
+from pyiron_core.pyiron_workflow import (
     as_function_node,
     as_inp_dataclass_node,
     as_macro_node,
@@ -518,7 +518,7 @@ def ComputeTransitionTemperature(structure, potential, inp, seed: int = 42):
     float
         Phase transformation temperature
     """
-    from pyiron_workflow import Workflow
+    from pyiron_core.pyiron_workflow import Workflow
 
     wf = Workflow("macro")
     wf.solid = SolidFreeEnergyWithTemperature(inp, structure, potential)

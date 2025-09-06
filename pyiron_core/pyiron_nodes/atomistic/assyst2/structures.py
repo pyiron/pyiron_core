@@ -3,7 +3,7 @@ from collections.abc import Generator, Sequence
 from numbers import Integral
 from itertools import product
 
-from pyiron_workflow import Workflow, as_inp_dataclass_node, as_function_node
+from pyiron_core.pyiron_workflow import Workflow, as_inp_dataclass_node, as_function_node
 
 import pandas as pd
 from ase import Atoms

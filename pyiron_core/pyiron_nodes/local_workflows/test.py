@@ -1,4 +1,4 @@
-from pyiron_workflow import as_function_node, as_macro_node, Workflow
+from pyiron_core.pyiron_workflow import as_function_node, as_macro_node, Workflow
 
 
 @as_macro_node("BulkStaticEnergy")
@@ -22,7 +22,7 @@ def BulkStaticEnergy(name: str, a: float = None, store: bool = True, _db=None) -
 @as_function_node("energy")
 def BulkStaticEnergyF(name: str, a: float = None, store: bool = True, _db=None):
 
-    from pyiron_workflow import Workflow
+    from pyiron_core.pyiron_workflow import Workflow
     import pyiron_core.pyiron_nodes as pyiron_nodes
 
     wf = Workflow("subgraph")

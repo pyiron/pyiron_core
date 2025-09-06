@@ -1,7 +1,7 @@
 import json
 import pathlib
 
-from pyiron_workflow.graph import base
+from pyiron_core.pyiron_workflow.graph import base
 
 
 def _compact_graph(graph: base.Graph):
@@ -51,7 +51,7 @@ def _uncompact_graph_from_state(state: dict):
         state (dict): The state representation of the graph.
     Returns:
         base.Graph: The reconstructed graph."""
-    from pyiron_workflow.graph import gui
+    from pyiron_core.pyiron_workflow.graph import gui
 
     graph = base.Graph(label=state["label"])
     for k, node_state in state["nodes"].items():

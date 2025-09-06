@@ -6,7 +6,7 @@ from typing import Optional
 
 import numpy as np
 
-from pyiron_workflow import as_function_node
+from pyiron_core.pyiron_workflow import as_function_node
 
 
 @as_function_node("linspace")

@@ -48,7 +48,7 @@ class FileObject:
 
 
 class Replacer:
-    from pyiron_workflow import Node
+    from pyiron_core.pyiron_workflow import Node
 
     def __init__(self, node: Node):
         self.node = node
@@ -78,10 +78,10 @@ def set_replacer(node, node_dict):
     return replacer
 
 
-def register_libraries(libraries, library_path="pyiron_workflow.pyiron_nodes"):
-    raise NotImplementedError("pyiron_workflow.workflow.Workflow did not exist at time of refactoring")
+def register_libraries(libraries, library_path="pyiron_core.pyiron_workflow.pyiron_nodes"):
+    raise NotImplementedError("pyiron_core.pyiron_workflow.workflow.Workflow did not exist at time of refactoring")
     # import importlib
-    # from pyiron_workflow.workflow import Workflow
+    # from pyiron_core.pyiron_workflow.workflow import Workflow
     #
     # wf = Workflow("lib")
     # for nodes in libraries:
@@ -214,7 +214,7 @@ def filter_internals(input_list):
 def wf_data_class(*args, doc_func=None, **kwargs):
     # def wf_data_class(*args, doc_func=None, keys_to_store=None, **kwargs):
     """
-    Extension of the python default dataclass to include methods and functionality needed for pyiron_workflows
+    Extension of the python default dataclass to include methods and functionality needed for pyiron_core.pyiron_workflows
 
     :param args: pass to dataclass decorator
     :param doc_func: function from which to copy docstring

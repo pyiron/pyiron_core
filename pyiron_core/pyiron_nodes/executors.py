@@ -1,4 +1,4 @@
-from pyiron_workflow import Node, as_function_node, as_inp_dataclass_node
+from pyiron_core.pyiron_workflow import Node, as_function_node, as_inp_dataclass_node
 
 
 @as_function_node("Executor")
@@ -34,7 +34,7 @@ def IterNode(
 
     # TODO: add to node ._hash_parent (with hash of this node)
     from concurrent.futures import as_completed
-    from pyiron_workflow.api.graph import run_node
+    from pyiron_core.pyiron_workflow.api.graph import run_node
     from copy import copy
     from pandas import DataFrame
 
@@ -56,8 +56,8 @@ def IterNode(
         raise ValueError(
             "Communicating with the database is not supported for IterNode while using "
             "and executor. At time of writing, the proximate cause for this limitation "
-            "is that the `db` argument of `pyiron_workflow.simple_workflow.Node.run` "
-            "cannot be propagated into the `pyiron_workflow.graph.run.run_node` "
+            "is that the `db` argument of `pyiron_core.pyiron_workflow.simple_workflow.Node.run` "
+            "cannot be propagated into the `pyiron_core.pyiron_workflow.graph.run.run_node` "
             "function used in the executor case."
         )
     else:

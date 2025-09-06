@@ -1,6 +1,6 @@
 """
 Provide functions that are needed for pyironFlow, but that should be provided by 
-pyiron_workflows in the end.
+pyiron_core.pyiron_workflows in the end.
 """
 
 from pyiron_core.pyironflow.themes import get_color
@@ -111,7 +111,7 @@ def get_node_position(node, id_num, node_width=200, y0=100, x_spacing=30):
 
 
 def _to_jsonifyable(obj):
-    from pyiron_workflow import Node, Port
+    from pyiron_core.pyiron_workflow import Node, Port
 
     if isinstance(obj, np.ndarray):
         return obj.tolist()
@@ -131,13 +131,13 @@ def _to_jsonifyable(obj):
 
 
 def _is_connected(obj):
-    from pyiron_workflow import Node, Port
+    from pyiron_core.pyiron_workflow import Node, Port
 
     return isinstance(obj, (Port, Node))
 
 
 def get_node_dict(node, id_num, key=None):
-    from pyiron_workflow import Node
+    from pyiron_core.pyiron_workflow import Node
 
     node_width = 200
     label = node.label

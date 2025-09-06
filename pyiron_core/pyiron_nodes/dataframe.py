@@ -4,7 +4,7 @@ This module provides functions to manipulate and analyze pandas DataFrames
 """
 
 import pandas as pd
-from pyiron_workflow import as_function_node, Node
+from pyiron_core.pyiron_workflow import as_function_node, Node
 
 
 @as_function_node("df")

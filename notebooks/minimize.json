@@ -57,7 +57,7 @@
                             "targetHandle": "x"
                         }
                     ],
-                    "obj_type": "pyiron_workflow.graph.base.GraphEdge"
+                    "obj_type": "pyiron_core.pyiron_workflow.graph.base.GraphEdge"
                 }
             },
             "node_type": "graph",
@@ -75,7 +75,7 @@
         },
         "va_i_CubicBulkCell__element": {
             "id": "va_i_CubicBulkCell__element",
-            "import_path": "pyiron_workflow.graph.base.identity",
+            "import_path": "pyiron_core.pyiron_workflow.graph.base.identity",
             "label": "va_i_CubicBulkCell__element",
             "parent_id": "CubicBulkCell",
             "level": 1,
@@ -85,7 +85,7 @@
             "expanded": false,
             "node": {
                 "label": "va_i_CubicBulkCell__element",
-                "function": "pyiron_workflow.graph.base.identity",
+                "function": "pyiron_core.pyiron_workflow.graph.base.identity",
                 "inputs": {
                     "x": "NotData"
                 }
@@ -93,7 +93,7 @@
         },
         "va_i_CubicBulkCell__cell_size": {
             "id": "va_i_CubicBulkCell__cell_size",
-            "import_path": "pyiron_workflow.graph.base.identity",
+            "import_path": "pyiron_core.pyiron_workflow.graph.base.identity",
             "label": "va_i_CubicBulkCell__cell_size",
             "parent_id": "CubicBulkCell",
             "level": 1,
@@ -103,7 +103,7 @@
             "expanded": false,
             "node": {
                 "label": "va_i_CubicBulkCell__cell_size",
-                "function": "pyiron_workflow.graph.base.identity",
+                "function": "pyiron_core.pyiron_workflow.graph.base.identity",
                 "inputs": {
                     "x": "NotData"
                 }
@@ -111,7 +111,7 @@
         },
         "va_i_CubicBulkCell__vacancy_index": {
             "id": "va_i_CubicBulkCell__vacancy_index",
-            "import_path": "pyiron_workflow.graph.base.identity",
+            "import_path": "pyiron_core.pyiron_workflow.graph.base.identity",
             "label": "va_i_CubicBulkCell__vacancy_index",
             "parent_id": "CubicBulkCell",
             "level": 1,
@@ -121,7 +121,7 @@
             "expanded": false,
             "node": {
                 "label": "va_i_CubicBulkCell__vacancy_index",
-                "function": "pyiron_workflow.graph.base.identity",
+                "function": "pyiron_core.pyiron_workflow.graph.base.identity",
                 "inputs": {
                     "x": "NotData"
                 }
@@ -184,7 +184,7 @@
         },
         "va_o_CubicBulkCell__structure": {
             "id": "va_o_CubicBulkCell__structure",
-            "import_path": "pyiron_workflow.graph.base.identity",
+            "import_path": "pyiron_core.pyiron_workflow.graph.base.identity",
             "label": "va_o_CubicBulkCell__structure",
             "parent_id": "CubicBulkCell",
             "level": 1,
@@ -194,7 +194,7 @@
             "expanded": false,
             "node": {
                 "label": "va_o_CubicBulkCell__structure",
-                "function": "pyiron_workflow.graph.base.identity",
+                "function": "pyiron_core.pyiron_workflow.graph.base.identity",
                 "inputs": {
                     "x": "NotData"
                 }
@@ -234,7 +234,7 @@
         },
         "OutputCalcStaticList": {
             "id": "OutputCalcStaticList",
-            "import_path": "pyiron_workflow.simple_workflow.func_dataclass",
+            "import_path": "pyiron_core.pyiron_workflow.simple_workflow.func_dataclass",
             "label": "OutputCalcStaticList",
             "parent_id": null,
             "level": 0,
@@ -264,7 +264,7 @@
                 "inputs": {}
             }
         },
-        "_obj_type": "pyiron_workflow.graph.base.GraphNode"
+        "_obj_type": "pyiron_core.pyiron_workflow.graph.base.GraphNode"
     },
     "edges": {
         "values": [
@@ -329,6 +329,6 @@
                 "targetHandle": "y"
             }
         ],
-        "obj_type": "pyiron_workflow.graph.base.GraphEdge"
+        "obj_type": "pyiron_core.pyiron_workflow.graph.base.GraphEdge"
     }
 }

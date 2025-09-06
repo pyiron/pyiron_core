@@ -38,7 +38,7 @@ To use this module, simply import it and access the various functions and tools 
 
 
 # Convert a workflow to execteable code
-    from pyiron_workflow import Workflow
+    from pyiron_core.pyiron_workflow import Workflow
     import pyiron_core.pyiron_nodes as pyiron_nodes
 
     wf = Workflow("compute_elastic_constants")
@@ -74,7 +74,7 @@ from pyiron_core.pyironflow.wf_extensions import get_node_from_path
 from typing import TYPE_CHECKING, List, Tuple
 
 if TYPE_CHECKING:
-    from pyiron_workflow import Workflow
+    from pyiron_core.pyiron_workflow import Workflow
 
 
 @dataclasses.dataclass
@@ -322,7 +322,7 @@ def get_graph_from_wf(wf: "Workflow") -> WorkflowGraph:
 
 def get_code_from_graph(
     graph: WorkflowGraph,
-    workflow_lib="pyiron_workflow",
+    workflow_lib="pyiron_core.pyiron_workflow",
     pyiron_nodes_lib="pyiron_nodes",
 ):
     """
@@ -384,7 +384,7 @@ wf = Workflow('{graph.label}')
 
 
 def get_code_from_wf(wf: "Workflow"):
-    """Generate Python source code from pyiron_workflow"""
+    """Generate Python source code from pyiron_core.pyiron_workflow"""
 
     graph = get_graph_from_wf(wf)
 
@@ -462,7 +462,7 @@ def graph_edges_to_wf_edges(graph_edges: List[Tuple[str, str]]):
 
 
 def get_wf_from_graph(graph: WorkflowGraph) -> "Workflow":
-    from pyiron_workflow import Workflow
+    from pyiron_core.pyiron_workflow import Workflow
 
     wf = Workflow(graph.label)
     # Add nodes to Workflow

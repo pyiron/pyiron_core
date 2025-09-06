@@ -1,5 +1,5 @@
 """
-workflow manager following the specs from pyiron_workflow but more oriented on functional
+workflow manager following the specs from pyiron_core.pyiron_workflow but more oriented on functional
 programming, i.e., supports higher order functions (nodes and data as function arguments)
 and implemented in a more functional (less abstract) approach.
 """
@@ -14,7 +14,7 @@ import logging
 from typing import Any, Literal, TypeAlias, Union, get_type_hints, get_args, get_origin
 
 import pandas as pd
-from pyiron_workflow import wf_graph_tools
+from pyiron_core.pyiron_workflow import wf_graph_tools
 
 PORT_LABEL = "label"
 PORT_VALUE = "value"
@@ -1227,7 +1227,7 @@ class Workflow:
         return wf_graph_tools.run_wf(self, debug=debug)
 
     def __repr__(self):
-        return "pyiron_workflow instance: \n" + wf_graph_tools.get_code_from_wf(self)
+        return "pyiron_core.pyiron_workflow instance: \n" + wf_graph_tools.get_code_from_wf(self)
 
     def save(self, filename, workflow_dir=WORKFLOW_DIR, overwrite=False):
         graph = wf_graph_tools.get_graph_from_wf(self)

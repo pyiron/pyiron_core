@@ -9,7 +9,7 @@ from typing import Optional, Literal
 import numpy as np
 import pandas as pd
 
-from pyiron_workflow import as_function_node
+from pyiron_core.pyiron_workflow import as_function_node
 
 
 @as_function_node("fig")

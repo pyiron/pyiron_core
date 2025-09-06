@@ -55,7 +55,7 @@
                             "targetHandle": "structure"
                         }
                     ],
-                    "obj_type": "pyiron_workflow.graph.base.GraphEdge"
+                    "obj_type": "pyiron_core.pyiron_workflow.graph.base.GraphEdge"
                 }
             },
             "node_type": "graph",
@@ -63,7 +63,7 @@
             "expanded": false,
             "node": {
                 "label": "subgraph",
-                "function": "pyiron_workflow.graph.base.subgraph",
+                "function": "pyiron_core.pyiron_workflow.graph.base.subgraph",
                 "inputs": {
                     "bulk__name": "Al",
                     "bulk__cubic": true
@@ -97,7 +97,7 @@
                 "nodes": {
                     "va_i_lammps__structure": {
                         "id": "va_i_lammps__structure",
-                        "import_path": "pyiron_workflow.graph.base.identity",
+                        "import_path": "pyiron_core.pyiron_workflow.graph.base.identity",
                         "label": "va_i_lammps__structure",
                         "parent_id": "lammps",
                         "level": 1,
@@ -107,7 +107,7 @@
                         "expanded": false,
                         "node": {
                             "label": "va_i_lammps__structure",
-                            "function": "pyiron_workflow.graph.base.identity",
+                            "function": "pyiron_core.pyiron_workflow.graph.base.identity",
                             "inputs": {
                                 "x": "NotData"
                             }
@@ -115,7 +115,7 @@
                     },
                     "va_i_lammps__potential": {
                         "id": "va_i_lammps__potential",
-                        "import_path": "pyiron_workflow.graph.base.identity",
+                        "import_path": "pyiron_core.pyiron_workflow.graph.base.identity",
                         "label": "va_i_lammps__potential",
                         "parent_id": "lammps",
                         "level": 1,
@@ -125,7 +125,7 @@
                         "expanded": false,
                         "node": {
                             "label": "va_i_lammps__potential",
-                            "function": "pyiron_workflow.graph.base.identity",
+                            "function": "pyiron_core.pyiron_workflow.graph.base.identity",
                             "inputs": {
                                 "x": "NotData"
                             }
@@ -133,7 +133,7 @@
                     },
                     "va_i_lammps__calculator": {
                         "id": "va_i_lammps__calculator",
-                        "import_path": "pyiron_workflow.graph.base.identity",
+                        "import_path": "pyiron_core.pyiron_workflow.graph.base.identity",
                         "label": "va_i_lammps__calculator",
                         "parent_id": "lammps",
                         "level": 1,
@@ -143,7 +143,7 @@
                         "expanded": false,
                         "node": {
                             "label": "va_i_lammps__calculator",
-                            "function": "pyiron_workflow.graph.base.identity",
+                            "function": "pyiron_core.pyiron_workflow.graph.base.identity",
                             "inputs": {
                                 "x": "NotData"
                             }
@@ -151,7 +151,7 @@
                     },
                     "va_i_lammps__working_dir": {
                         "id": "va_i_lammps__working_dir",
-                        "import_path": "pyiron_workflow.graph.base.identity",
+                        "import_path": "pyiron_core.pyiron_workflow.graph.base.identity",
                         "label": "va_i_lammps__working_dir",
                         "parent_id": "lammps",
                         "level": 1,
@@ -161,7 +161,7 @@
                         "expanded": false,
                         "node": {
                             "label": "va_i_lammps__working_dir",
-                            "function": "pyiron_workflow.graph.base.identity",
+                            "function": "pyiron_core.pyiron_workflow.graph.base.identity",
                             "inputs": {
                                 "x": "NotData"
                             }
@@ -238,7 +238,7 @@
                     },
                     "va_o_lammps__path": {
                         "id": "va_o_lammps__path",
-                        "import_path": "pyiron_workflow.graph.base.identity",
+                        "import_path": "pyiron_core.pyiron_workflow.graph.base.identity",
                         "label": "va_o_lammps__path",
                         "parent_id": "lammps",
                         "level": 1,
@@ -248,7 +248,7 @@
                         "expanded": false,
                         "node": {
                             "label": "va_o_lammps__path",
-                            "function": "pyiron_workflow.graph.base.identity",
+                            "function": "pyiron_core.pyiron_workflow.graph.base.identity",
                             "inputs": {
                                 "x": "NotData"
                             }
@@ -306,7 +306,7 @@
                     },
                     "va_o_lammps__generic": {
                         "id": "va_o_lammps__generic",
-                        "import_path": "pyiron_workflow.graph.base.identity",
+                        "import_path": "pyiron_core.pyiron_workflow.graph.base.identity",
                         "label": "va_o_lammps__generic",
                         "parent_id": "lammps",
                         "level": 1,
@@ -316,7 +316,7 @@
                         "expanded": false,
                         "node": {
                             "label": "va_o_lammps__generic",
-                            "function": "pyiron_workflow.graph.base.identity",
+                            "function": "pyiron_core.pyiron_workflow.graph.base.identity",
                             "inputs": {
                                 "x": "NotData"
                             }
@@ -410,7 +410,7 @@
                             "targetHandle": "x"
                         }
                     ],
-                    "obj_type": "pyiron_workflow.graph.base.GraphEdge"
+                    "obj_type": "pyiron_core.pyiron_workflow.graph.base.GraphEdge"
                 }
             },
             "node_type": "graph",
@@ -543,7 +543,7 @@
                 }
             }
         },
-        "_obj_type": "pyiron_workflow.graph.base.GraphNode"
+        "_obj_type": "pyiron_core.pyiron_workflow.graph.base.GraphNode"
     },
     "edges": {
         "values": [
@@ -644,6 +644,6 @@
                 "targetHandle": "structure"
             }
         ],
-        "obj_type": "pyiron_workflow.graph.base.GraphEdge"
+        "obj_type": "pyiron_core.pyiron_workflow.graph.base.GraphEdge"
     }
 }

@@ -1,5 +1,5 @@
 from ase import Atoms
-from pyiron_workflow import as_function_node
+from pyiron_core.pyiron_workflow import as_function_node
 from pyiron_core.pyiron_nodes.atomistic.engine.generic import OutputEngine
 
 

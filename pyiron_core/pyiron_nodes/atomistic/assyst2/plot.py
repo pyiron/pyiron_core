@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING, Iterable
 
-from pyiron_workflow import Workflow, as_function_node
+from pyiron_core.pyiron_workflow import Workflow, as_function_node
 
 from ase import Atoms
 

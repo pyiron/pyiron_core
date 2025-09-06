@@ -53,7 +53,7 @@
         },
         "OutputCalcStatic": {
             "id": "OutputCalcStatic",
-            "import_path": "pyiron_workflow.api.serial.func_dataclass",
+            "import_path": "pyiron_core.pyiron_workflow.api.serial.func_dataclass",
             "label": "OutputCalcStatic",
             "parent_id": null,
             "level": 0,
@@ -104,7 +104,7 @@
                 }
             }
         },
-        "_obj_type": "pyiron_workflow.api.serial.GraphNode"
+        "_obj_type": "pyiron_core.pyiron_workflow.api.serial.GraphNode"
     },
     "edges": {
         "values": [
@@ -139,6 +139,6 @@
                 "targetHandle": "node"
             }
         ],
-        "obj_type": "pyiron_workflow.api.serial.GraphEdge"
+        "obj_type": "pyiron_core.pyiron_workflow.api.serial.GraphEdge"
     }
 }

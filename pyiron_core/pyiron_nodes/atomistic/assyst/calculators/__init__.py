@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
-from pyiron_workflow import Workflow
+from pyiron_core.pyiron_workflow import Workflow
 
 from ase import Atoms
 from ase.calculators.calculator import Calculator

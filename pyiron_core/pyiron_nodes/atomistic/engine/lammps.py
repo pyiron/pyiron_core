@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Optional, TYPE_CHECKING
 
 from pyiron_atomistics.lammps.control import LammpsControl
-from pyiron_workflow import as_function_node, as_out_dataclass_node, as_macro_node, as_inp_dataclass_node
+from pyiron_core.pyiron_workflow import as_function_node, as_out_dataclass_node, as_macro_node, as_inp_dataclass_node
 
 from pyiron_core.pyiron_nodes.atomistic.calculator.data import (
     # InputCalcMinimize,
@@ -326,7 +326,7 @@ def Code(
     working_dir: str = "test2",
 ):
 
-    from pyiron_workflow import Workflow
+    from pyiron_core.pyiron_workflow import Workflow
 
     # print("structure: ", structure)
 
@@ -375,7 +375,7 @@ def Code1(
     working_dir: str = "test2",
 ):
 
-    from pyiron_workflow import Workflow
+    from pyiron_core.pyiron_workflow import Workflow
 
     wf = Workflow("LammpsMacro")
 
@@ -419,7 +419,7 @@ def Lammps(
     store: bool = False,
 ):
 
-    from pyiron_workflow import Workflow
+    from pyiron_core.pyiron_workflow import Workflow
 
     wf = Workflow("LammpsMacro")
 

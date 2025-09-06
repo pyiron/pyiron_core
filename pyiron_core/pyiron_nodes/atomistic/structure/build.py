@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from pyiron_workflow import as_function_node, as_macro_node
+from pyiron_core.pyiron_workflow import as_function_node, as_macro_node
 from typing import Optional, Literal
 from ase.atoms import Atoms
 
-# from pyiron_workflow.workflow import Workflow
+# from pyiron_core.pyiron_workflow.workflow import Workflow
 
 
 @as_function_node("structure")
@@ -107,7 +107,7 @@ def CubicBulkCell(
         CreateVacancy,
         Repeat,
     )
-    from pyiron_workflow import Workflow
+    from pyiron_core.pyiron_workflow import Workflow
 
     if vacancy_index is not None and "va_i_" not in vacancy_index:
         print("Vacancy Index: ", vacancy_index, type(vacancy_index))

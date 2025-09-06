@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from ase import Atoms
-from pyiron_workflow import as_function_node
+from pyiron_core.pyiron_workflow import as_function_node
 from typing import Optional, Union
 
 

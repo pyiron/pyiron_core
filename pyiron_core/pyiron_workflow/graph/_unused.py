@@ -1,7 +1,7 @@
 from typing import List
 
-from pyiron_workflow import simple_workflow
-from pyiron_workflow.graph import base, edges, group, labelling, run
+from pyiron_core.pyiron_workflow import simple_workflow
+from pyiron_core.pyiron_workflow.graph import base, edges, group, labelling, run
 
 
 def _build_input_argument_string(k, v, first_arg, as_string=True):

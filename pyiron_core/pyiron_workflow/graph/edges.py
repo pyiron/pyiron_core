@@ -1,4 +1,4 @@
-from pyiron_workflow.graph import decorators
+from pyiron_core.pyiron_workflow.graph import decorators
 
 
 def _getstate_GraphEdge(self):

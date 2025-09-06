@@ -1,7 +1,7 @@
 
 # Instructions to Generate the .pyiron_vasp_config
 
-The `.pyiron_vasp_config` file is essential for configuring the paths to the VASP pseudopotential files (POTCAR files) used in pyiron_workflow's VASP nodes. The file specifies the locations of different VASP potential sets and the default potential set to be used. Below are step-by-step instructions to generate the `.pyiron_vasp_config` file.
+The `.pyiron_vasp_config` file is essential for configuring the paths to the VASP pseudopotential files (POTCAR files) used in pyiron_core.pyiron_workflow's VASP nodes. The file specifies the locations of different VASP potential sets and the default potential set to be used. Below are step-by-step instructions to generate the `.pyiron_vasp_config` file.
 
 ## 1. Determine the Locations of Your VASP POTCAR Files
 

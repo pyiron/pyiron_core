@@ -1,6 +1,6 @@
 import numpy as np
 import landau
-from pyiron_workflow import as_function_node, as_macro_node, Workflow
+from pyiron_core.pyiron_workflow import as_function_node, as_macro_node, Workflow
 from typing import Literal
 
 import matplotlib.pyplot as plt

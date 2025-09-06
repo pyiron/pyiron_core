@@ -4,8 +4,8 @@ import os
 from collections.abc import Iterable
 from typing import Any
 
-from pyiron_workflow import NOT_DATA, Node
-from pyiron_workflow.api.graph import Graph, GraphEdge
+from pyiron_core.pyiron_workflow import NOT_DATA, Node
+from pyiron_core.pyiron_workflow.api.graph import Graph, GraphEdge
 
 from pyiron_core.pyiron_database.generic_storage import HDF5Storage, JSONGroup
 from pyiron_core.pyiron_database.obj_reconstruction.util import (

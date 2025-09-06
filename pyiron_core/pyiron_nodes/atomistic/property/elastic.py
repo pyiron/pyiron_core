@@ -1,12 +1,12 @@
 # from __future__ import annotations
 from typing import Optional
 
-from pyiron_workflow import as_inp_dataclass_node, as_out_dataclass_node, Node
+from pyiron_core.pyiron_workflow import as_inp_dataclass_node, as_out_dataclass_node, Node
 from dataclasses import field
 
 import atomistics.workflows.elastic.symmetry as sym
 import numpy as np
-from pyiron_workflow import (
+from pyiron_core.pyiron_workflow import (
     as_function_node,
     as_macro_node,
     # for_node,
@@ -18,7 +18,7 @@ from pyiron_core.pyiron_nodes.atomistic.engine.generic import OutputEngine
 
 # from pyiron_core.pyiron_nodes.dev_tools import wf_data_class
 # from pyiron_core.pyiron_nodes.development.settings import Storage
-# from pyiron_workflow import as_dataclass_node
+# from pyiron_core.pyiron_workflow import as_dataclass_node
 # from pyiron_core.pyiron_nodes.development.node_dataclass import as_output_node
 
 
@@ -193,7 +193,7 @@ def ComputeElasticConstantsMacro(
     """
     Get the elastic constants of a structure using an ASE calculator.
     """
-    from pyiron_workflow import Workflow
+    from pyiron_core.pyiron_workflow import Workflow
     from pyiron_core.pyiron_nodes.controls import iterate, IterToDataFrame, Print
     from pyiron_core.pyiron_nodes.atomistic.calculator.ase import StaticEnergy, Static
     from pyiron_core.pyiron_nodes.atomistic.property.phonons import GetFreeEnergy
@@ -240,7 +240,7 @@ def ComputeElasticConstants(
     calculator: str = "StaticEnergy",  # "StaticEnergy", "GetFreeEnergy"
     input_elastic_tensor: InputElasticTensor = None,
 ):
-    from pyiron_workflow import Workflow
+    from pyiron_core.pyiron_workflow import Workflow
     from pyiron_core.pyiron_nodes.controls import iterate
     from pyiron_core.pyiron_nodes.atomistic.calculator.ase import StaticEnergy
     from pyiron_core.pyiron_nodes.atomistic.property.phonons import GetFreeEnergy

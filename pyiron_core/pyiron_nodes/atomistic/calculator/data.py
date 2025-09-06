@@ -3,12 +3,12 @@
 from dataclasses import field, dataclass
 from typing import Optional
 import numpy as np
-from pyiron_workflow.data_fields import DataArray, EmptyArrayField
+from pyiron_core.pyiron_workflow.data_fields import DataArray, EmptyArrayField
 
 
 # from pyiron_core.pyiron_nodes.dev_tools import wf_data_class, wfMetaData
 # from pyiron_core.pyiron_nodes.development.node_dataclass import as_output_node
-from pyiron_workflow import as_inp_dataclass_node, as_out_dataclass_node
+from pyiron_core.pyiron_workflow import as_inp_dataclass_node, as_out_dataclass_node
 
 
 # only conceptual, not truly implemented

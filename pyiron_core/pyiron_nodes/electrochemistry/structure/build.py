@@ -1,4 +1,4 @@
-from pyiron_workflow import Workflow, as_function_node
+from pyiron_core.pyiron_workflow import Workflow, as_function_node
 import ase.units as units
 
 

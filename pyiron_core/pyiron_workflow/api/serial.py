@@ -8,11 +8,11 @@ the original paths for the `__module__` of imported objects.
 
 import functools
 
-from pyiron_workflow.graph.base import (
+from pyiron_core.pyiron_workflow.graph.base import (
     GraphEdge as _GraphEdge,
     GraphNode as _GraphNode,
 )
-from pyiron_workflow.simple_workflow import identity as _identity
+from pyiron_core.pyiron_workflow.simple_workflow import identity as _identity
 
 
 class GraphEdge(_GraphEdge): ...
@@ -33,7 +33,7 @@ def func_dataclass():
     raise NotImplementedError(
         "Prior to leveraging this API, the reference JSON workflows used to test the "
         "project contained references to "
-        '`"import_path": "pyiron_workflow.simple_workflow.func_dataclass"`. This '
+        '`"import_path": "pyiron_core.pyiron_workflow.simple_workflow.func_dataclass"`. This '
         "is a locally defined function inside another function definition in that "
         "module, and thus not actually importable. Since it's not actually importable, "
         "the code must not actually ever be importing it and thus this exception "
@@ -45,7 +45,7 @@ def subgraph():
     raise NotImplementedError(
         "Prior to leveraging this API, the reference JSON workflows used to test the "
         "project contained references to "
-        '`"function": "pyiron_workflow.graph.base.subgraph"`. This is not defined '
+        '`"function": "pyiron_core.pyiron_workflow.graph.base.subgraph"`. This is not defined '
         "at the top level of the module, and thus not actually importable. Since it's "
         "not actually importable, the code must not actually ever be importing it and "
         "thus this exception should never be reached."

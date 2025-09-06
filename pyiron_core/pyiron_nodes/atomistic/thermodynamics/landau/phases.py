@@ -1,5 +1,5 @@
 from dataclasses import replace
-from pyiron_workflow import as_function_node
+from pyiron_core.pyiron_workflow import as_function_node
 import landau
 import numpy as np
 
