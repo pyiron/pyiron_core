@@ -22,6 +22,7 @@ def Bulk(
 ):
     from pyiron_atomistics import _StructureFactory
 
+    print("type(a): ", type(a))
     return _StructureFactory().bulk(
         name,
         crystalstructure,
@@ -223,3 +224,9 @@ def Surface(
     return ase_to_pyiron(surface)
     # else:
     #     raise ValueError(f"Surface type {surface_type} not recognized.")
+
+@as_function_node
+def test(a: Optional[float] = None, b: Optional[int] = None, c: float = 1.0, d: Optional[str] = None):
+    print("types: ", type(a), type(b), type(c), type(d))
+
+    return a

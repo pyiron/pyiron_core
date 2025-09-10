@@ -580,13 +580,15 @@ def _to_jsonifyable(obj):
         if isinstance(value, (str, int, float, bool)):
             return value
         else:
-            return not_data.NotData
+            return "NonPrimitive"
     elif isinstance(obj, simple_workflow.Node):
-        return not_data.NotData
+        return "NonPrimitive"
     elif isinstance(obj, (str, int, float, bool, type(None))):
+        if isinstance(obj, str) & (obj == not_data.NotData):
+            return not_data.NotData
         return obj
     else:
-        return not_data.NotData
+        return "NonPrimitive"
 
 
 def gui_data(

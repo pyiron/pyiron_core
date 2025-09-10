@@ -34,7 +34,7 @@ import {
   GroupIcon,
 } from "@radix-ui/react-icons";
 
-import TextUpdaterNode from "./TextUpdaterNode.jsx";
+// import TextUpdaterNode from "./TextUpdaterNode.jsx";
 import CustomNode from "./CustomNode.tsx";
 
 import "./text-updater-node.css";
@@ -73,7 +73,7 @@ const render = createRender(() => {
 
   const flowWrapperRef = useRef<HTMLDivElement>(null);
 
-  const nodeTypes = { textUpdater: TextUpdaterNode, customNode: CustomNode };
+  const nodeTypes = { customNode: CustomNode };
 
   const sendCommand = useCallback(
     (command: string, payload: string = "__global__") => {

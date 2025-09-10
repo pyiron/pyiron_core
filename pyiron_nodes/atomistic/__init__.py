@@ -4,4 +4,5 @@ from pyiron_nodes.atomistic import (
     property,
     structure,
     assyst,
+    thermodynamics,
 )

@@ -161,7 +161,7 @@ class FunctionsALL:
 
 @dataclass
 class Functions:
-    number_of_functions_per_element: Optional[int | None] = None
+    number_of_functions_per_element: Optional[int] = None
     ALL: FunctionsALL = field(default_factory=FunctionsALL)
 
 

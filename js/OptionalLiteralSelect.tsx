@@ -1,11 +1,10 @@
-// OptionalLiteralSelect.tsx
 import React, { useState, useEffect } from "react";
-import { Checkbox } from "./Checkbox"; // at top
+import { Checkbox } from "./Checkbox";
 
 export interface OptionalLiteralSelectProps {
   value: string | null;
   options: readonly string[];
-  onChange: (v: string | null) => void;
+  onChange: (v: string | null, commit?: boolean) => void; // commit flag
   highlighted?: boolean;
   onHoverChange?: (state: boolean) => void;
   showCheckbox?: boolean;
@@ -33,31 +32,56 @@ export const OptionalLiteralSelect: React.FC<OptionalLiteralSelectProps> = ({
   const [useValue, setUseValue] = useState(value !== null);
   const [selected, setSelected] = useState(value ?? options[0] ?? "");
 
+  // Sync with incoming props
   useEffect(() => {
     setUseValue(value !== null);
-    if (value !== null) setSelected(value);
+    if (value !== null) {
+      setSelected(value);
+    }
   }, [value]);
 
   const handleToggle = () => {
     const newChecked = !useValue;
     setUseValue(newChecked);
     if (!newChecked) {
-      onChange(null);
+      onChange(null, true); // commit null
     } else {
-      onChange(selected);
+      onChange(selected, true); // commit existing
     }
   };
 
-  const handleSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newVal = e.target.value;
     setSelected(newVal);
-    if (!showCheckbox || useValue) onChange(newVal);
+    if (!showCheckbox || useValue) {
+      onChange(newVal, true); // select = instant commit
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newVal = e.target.value;
     setSelected(newVal);
-    if (!showCheckbox || useValue) onChange(newVal);
+    if (!showCheckbox || useValue) {
+      onChange(newVal, false); // typing (no commit)
+    }
+  };
+
+  const handleInputCommit = (val: string) => {
+    const trimmed = val.trim();
+    setSelected(trimmed);
+    if (!showCheckbox || useValue) {
+      onChange(trimmed, true); // commit
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleInputCommit((e.target as HTMLInputElement).value);
+    }
+  };
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    handleInputCommit(e.target.value);
   };
 
   const selectValue = showCheckbox && !useValue ? "__default__" : selected;
@@ -74,7 +98,6 @@ export const OptionalLiteralSelect: React.FC<OptionalLiteralSelectProps> = ({
         backgroundColor: highlighted ? STYLE_VARS.highlightColor : "white",
         border: "1px solid #ccc",
         boxSizing: "border-box",
-        transition: "background-color 0.2s ease",
         fontSize: STYLE_VARS.inputFontSize,
       }}
     >
@@ -84,7 +107,7 @@ export const OptionalLiteralSelect: React.FC<OptionalLiteralSelectProps> = ({
             className="nodrag"
             draggable={false}
             value={selectValue}
-            onChange={handleSelect}
+            onChange={handleSelectChange}
             style={{
               width: "100%",
               height: "100%",
@@ -112,32 +135,18 @@ export const OptionalLiteralSelect: React.FC<OptionalLiteralSelectProps> = ({
               </option>
             ))}
           </select>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 10 6"
-            width="10"
-            height="6"
-            style={{
-              position: "absolute",
-              right: 4,
-              top: "50%",
-              transform: "translateY(-50%)",
-              pointerEvents: "none",
-              fill: "black",
-              opacity: showCheckbox && !useValue ? 0.3 : 0.7,
-            }}
-          >
-            <path d="M0 0h10L5 6z" />
-          </svg>
         </div>
       ) : (
         <input
           type={inputType}
+          step={inputType === "number" ? "any" : undefined}
           className="nodrag"
           draggable={false}
           value={useValue ? (selected as string) : ""}
           placeholder={showCheckbox && !useValue ? "default" : ""}
           onChange={handleInputChange}
+          onKeyDown={handleKeyDown}   // commit on Enter
+          onBlur={handleBlur}         // commit on Blur
           style={{
             width: "100%",
             height: "100%",
@@ -155,12 +164,12 @@ export const OptionalLiteralSelect: React.FC<OptionalLiteralSelectProps> = ({
 
       {showCheckbox && (
         <>
-        <div style={{ width: "1px", height: "100%", backgroundColor: "#ccc" }}></div>
-        <Checkbox
-          checked={useValue}
-          inputHeight={STYLE_VARS.inputHeight}
-          onToggle={handleToggle}
-        />
+          <div style={{ width: "1px", height: "100%", backgroundColor: "#ccc" }}></div>
+          <Checkbox
+            checked={useValue}
+            inputHeight={STYLE_VARS.inputHeight}
+            onToggle={handleToggle}
+          />
         </>
       )}
     </div>
