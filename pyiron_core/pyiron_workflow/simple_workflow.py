@@ -600,10 +600,10 @@ class Node:
             if inp_type == "Node":  # node_type_as_str:
                 val = inp_port.copy()
                 # add hash to closure node
-                import pyiron_core.pyiron_database.instance_database as idb
+                import pyiron_core.pyiron_database.api as pyiron_database
 
                 try:
-                    hash = idb.get_hash(inp_port)
+                    hash = pyiron_database.get_hash(inp_port)
                     # inp_port._hash_parent = hash
                 except Exception as e:
                     print("Error getting hash for node:", inp_port.label, e)
@@ -619,9 +619,9 @@ class Node:
             ):  # should be used only as quick fix (node rather than port should be provided)
                 val = inp_port.node.copy()
                 # add hash to closure node
-                import pyiron_core.pyiron_database.instance_database as idb
+                import pyiron_core.pyiron_database.api as pyiron_database
 
-                hash = idb.get_hash(val)
+                hash = pyiron_database.get_hash(val)
                 val._hash_parent = hash
                 print("copy node (port): ", val.label, val._hash_parent)
                 # print("copy port: ", val.label, val.inputs)
@@ -659,7 +659,7 @@ class Node:
         pass
 
     def run(self, db=None):
-        import pyiron_core.pyiron_database.instance_database as idb
+        import pyiron_core.pyiron_database.api as pyiron_database
         from datetime import datetime
         import getpass
 
@@ -667,13 +667,13 @@ class Node:
             if self.inputs.store.value:
                 restored = False
                 try:
-                    restored = idb.restore_node_outputs(self)
+                    restored = pyiron_database.restore_node_outputs(self)
                     # print("restored: ", restored)
                 except FileNotFoundError as e:
                     print("No stored data found for node: ", self.label)
                 except Exception as e:
                     print("Error restoring node outputs: ", e)
-                    restored = idb.restore_node_outputs(self)
+                    restored = pyiron_database.restore_node_outputs(self)
 
                 if restored:
                     if len(self.outputs.data[PORT_VALUE]) == 1:
@@ -719,14 +719,14 @@ class Node:
         if "store" in self.inputs.keys():
             if self.inputs.store.value:
                 if db is not None:
-                    idb.store_node_in_database(
+                    pyiron_database.store_node_in_database(
                         db,
                         self,
                         store_outputs=True,
                         store_input_nodes_recursively=True,
                     )
                 else:
-                    idb.store_node_outputs(self)
+                    pyiron_database.store_node_outputs(self)
 
 
         return out
