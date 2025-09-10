@@ -66,10 +66,7 @@ import dataclasses
 import pathlib
 import json
 
-
-from pyiron_core.pyironflow.wf_extensions import get_edges as _get_edges
-from pyiron_core.pyironflow.wf_extensions import get_nodes as _get_nodes
-from pyiron_core.pyironflow.wf_extensions import get_node_from_path
+import pyiron_core.pyironflow.api as pyironflow
 
 from typing import TYPE_CHECKING, List, Tuple
 
@@ -150,7 +147,9 @@ def _edges_from_dict(edges_dict):
 
 def get_nodes_from_wf(wf, keys_to_keep=["data/label", "data/import_path"]):
     key_mapping = {"data__label": "label", "data__import_path": "import_path"}
-    nodes_dict = _filter_and_flatten_nested_dict_keys(_get_nodes(wf), keys_to_keep)
+    nodes_dict = _filter_and_flatten_nested_dict_keys(
+        pyironflow.get_nodes(wf), keys_to_keep
+    )
     nodes_dict = _rename_keys(nodes_dict, key_mapping)
     return nodes_dict
 
@@ -268,7 +267,7 @@ def topological_sort(graph: WorkflowGraph):
 def get_graph_from_wf(wf: "Workflow") -> WorkflowGraph:
     # get edges between nodes
     keys_to_keep = ["target", "targetHandle", "source", "sourceHandle"]
-    edges = _filter_and_flatten_nested_dict_keys(_get_edges(wf), keys_to_keep)
+    edges = _filter_and_flatten_nested_dict_keys(pyironflow.get_edges(wf), keys_to_keep)
 
     # add edges for non-default inputs
     nodes = get_nodes_from_wf(
@@ -284,7 +283,7 @@ def get_graph_from_wf(wf: "Workflow") -> WorkflowGraph:
     for node in nodes:
         label = node["label"]
         import_path = node["import_path"]
-        node_obj = get_node_from_path(import_path)()
+        node_obj = pyironflow.get_node_from_path(import_path)()
         changed_args = _different_indices(
             node_obj.inputs.data["default"], node["data__target_values"]
         )
@@ -486,7 +485,7 @@ def get_wf_from_graph(graph: WorkflowGraph) -> "Workflow":
                             kwargs[target_handle] = eval(source_handle)
                     # kwargs[target_handle] = source_handle
 
-            new_node = get_node_from_path(import_path)(**kwargs)
+            new_node = pyironflow.get_node_from_path(import_path)(**kwargs)
             wf.add_node(label, new_node)
     wf._set_edges(graph_edges_to_wf_edges(graph.edges))
 
