@@ -12,9 +12,9 @@ import numpy as np
 import pandas as pd
 import pygments
 
+import pyiron_core.pyironflow.api as pyironflow
 from IPython.display import display
 from pyiron_core.pyiron_database import instance_database as idb
-from pyiron_core import pyironflow
 
 from pyiron_core.pyiron_workflow import simple_workflow
 from pyiron_core.pyiron_workflow.graph import (
@@ -119,7 +119,7 @@ class PyironFlowWidget:
         self.db = db
         self.workflow_path = workflow_path
 
-        self.flow_widget = pyironflow.reactflow.ReactFlowWidget(
+        self.flow_widget = pyironflow.ReactFlowWidget(
             layout={
                 "width": f"100%",
                 "height": f"{gui_layout.flow_widget_height}px",
@@ -137,7 +137,7 @@ class PyironFlowWidget:
         self.log_widget = widgets.Output(layout=layout_accordion_widgets)
 
         self.out_widget = widgets.Output(layout=layout_accordion_widgets)
-        self.tree_widget = pyironflow.treeview.TreeView(
+        self.tree_widget = pyironflow.TreeView(
             log=self.log_widget, layout=layout_accordion_widgets
         )
         self.tree_widget.flow_widget = self
@@ -897,7 +897,7 @@ class GuiGraph:
         and returns the widget for display.
         """
 
-        w = pyironflow.reactflow.ReactFlowWidget(
+        w = pyironflow.ReactFlowWidget(
             layout={
                 "width": f"{self._width}px",
                 "height": f"{self._height}px",
