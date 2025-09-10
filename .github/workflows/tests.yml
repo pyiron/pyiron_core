@@ -54,7 +54,7 @@ jobs:
         run: |
           failed_notebooks=()
     
-          for notebook in ./notebooks/liam/*.ipynb; do
+          for notebook in ./notebooks/running/*.ipynb; do
             echo "Executing: $notebook"
             if papermill "$notebook" "$notebook"; then
               echo "✓ PASSED: $notebook"
