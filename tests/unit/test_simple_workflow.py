@@ -4,14 +4,12 @@ import time
 import unittest
 from collections import OrderedDict
 
-import pyiron_database.instance_database as idb
-from pyiron_workflow.simple_workflow import (
+import pyiron_core.pyiron_database.instance_database as idb
+from pyiron_core.pyiron_workflow.simple_workflow import (
     PORT_LABEL,
     Node,
     Workflow,
     as_function_node,
-    as_inp_dataclass_node,
-    as_macro_node,
     extract_dataclass_parameters,
     extract_input_parameters_from_function,
     get_inputs_data,

@@ -111,7 +111,7 @@
                             "targetHandle": "x"
                         }
                     ],
-                    "obj_type": "pyiron_workflow.graph.base.GraphEdge"
+                    "obj_type": "pyiron_core.pyiron_workflow.graph.base.GraphEdge"
                 }
             },
             "node_type": "graph",
@@ -125,7 +125,7 @@
         },
         "va_i_Code1__structure": {
             "id": "va_i_Code1__structure",
-            "import_path": "pyiron_workflow.graph.base.identity",
+            "import_path": "pyiron_core.pyiron_workflow.graph.base.identity",
             "label": "va_i_Code1__structure",
             "parent_id": "Code1",
             "level": 1,
@@ -135,7 +135,7 @@
             "expanded": false,
             "node": {
                 "label": "va_i_Code1__structure",
-                "function": "pyiron_workflow.graph.base.identity",
+                "function": "pyiron_core.pyiron_workflow.graph.base.identity",
                 "inputs": {
                     "x": "NotData"
                 }
@@ -143,7 +143,7 @@
         },
         "va_i_Code1__potential": {
             "id": "va_i_Code1__potential",
-            "import_path": "pyiron_workflow.graph.base.identity",
+            "import_path": "pyiron_core.pyiron_workflow.graph.base.identity",
             "label": "va_i_Code1__potential",
             "parent_id": "Code1",
             "level": 1,
@@ -153,7 +153,7 @@
             "expanded": false,
             "node": {
                 "label": "va_i_Code1__potential",
-                "function": "pyiron_workflow.graph.base.identity",
+                "function": "pyiron_core.pyiron_workflow.graph.base.identity",
                 "inputs": {
                     "x": "NotData"
                 }
@@ -161,7 +161,7 @@
         },
         "va_i_Code1__calculator": {
             "id": "va_i_Code1__calculator",
-            "import_path": "pyiron_workflow.graph.base.identity",
+            "import_path": "pyiron_core.pyiron_workflow.graph.base.identity",
             "label": "va_i_Code1__calculator",
             "parent_id": "Code1",
             "level": 1,
@@ -171,7 +171,7 @@
             "expanded": false,
             "node": {
                 "label": "va_i_Code1__calculator",
-                "function": "pyiron_workflow.graph.base.identity",
+                "function": "pyiron_core.pyiron_workflow.graph.base.identity",
                 "inputs": {
                     "x": "NotData"
                 }
@@ -179,7 +179,7 @@
         },
         "va_i_Code1__working_dir": {
             "id": "va_i_Code1__working_dir",
-            "import_path": "pyiron_workflow.graph.base.identity",
+            "import_path": "pyiron_core.pyiron_workflow.graph.base.identity",
             "label": "va_i_Code1__working_dir",
             "parent_id": "Code1",
             "level": 1,
@@ -189,7 +189,7 @@
             "expanded": false,
             "node": {
                 "label": "va_i_Code1__working_dir",
-                "function": "pyiron_workflow.graph.base.identity",
+                "function": "pyiron_core.pyiron_workflow.graph.base.identity",
                 "inputs": {
                     "x": "NotData"
                 }
@@ -263,7 +263,7 @@
         },
         "va_o_Code1__path": {
             "id": "va_o_Code1__path",
-            "import_path": "pyiron_workflow.graph.base.identity",
+            "import_path": "pyiron_core.pyiron_workflow.graph.base.identity",
             "label": "va_o_Code1__path",
             "parent_id": "Code1",
             "level": 1,
@@ -273,7 +273,7 @@
             "expanded": false,
             "node": {
                 "label": "va_o_Code1__path",
-                "function": "pyiron_workflow.graph.base.identity",
+                "function": "pyiron_core.pyiron_workflow.graph.base.identity",
                 "inputs": {
                     "x": "NotData"
                 }
@@ -331,7 +331,7 @@
         },
         "va_o_Code1__generic": {
             "id": "va_o_Code1__generic",
-            "import_path": "pyiron_workflow.graph.base.identity",
+            "import_path": "pyiron_core.pyiron_workflow.graph.base.identity",
             "label": "va_o_Code1__generic",
             "parent_id": "Code1",
             "level": 1,
@@ -341,7 +341,7 @@
             "expanded": false,
             "node": {
                 "label": "va_o_Code1__generic",
-                "function": "pyiron_workflow.graph.base.identity",
+                "function": "pyiron_core.pyiron_workflow.graph.base.identity",
                 "inputs": {
                     "x": "NotData"
                 }
@@ -367,7 +367,7 @@
         },
         "OutputCalcMD": {
             "id": "OutputCalcMD",
-            "import_path": "pyiron_workflow.simple_workflow.func_dataclass",
+            "import_path": "pyiron_core.pyiron_workflow.simple_workflow.func_dataclass",
             "label": "OutputCalcMD",
             "parent_id": null,
             "level": 0,
@@ -461,7 +461,7 @@
                 "inputs": {}
             }
         },
-        "_obj_type": "pyiron_workflow.graph.base.GraphNode"
+        "_obj_type": "pyiron_core.pyiron_workflow.graph.base.GraphNode"
     },
     "edges": {
         "values": [
@@ -592,6 +592,6 @@
                 "targetHandle": "y"
             }
         ],
-        "obj_type": "pyiron_workflow.graph.base.GraphEdge"
+        "obj_type": "pyiron_core.pyiron_workflow.graph.base.GraphEdge"
     }
 }

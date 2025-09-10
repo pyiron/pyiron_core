@@ -99,7 +99,7 @@
                             "targetHandle": "x"
                         }
                     ],
-                    "obj_type": "pyiron_workflow.graph.base.GraphEdge"
+                    "obj_type": "pyiron_core.pyiron_workflow.graph.base.GraphEdge"
                 }
             },
             "node_type": "graph",
@@ -113,7 +113,7 @@
         },
         "va_i_compute_cp_from_G__data": {
             "id": "va_i_compute_cp_from_G__data",
-            "import_path": "pyiron_workflow.graph.base.identity",
+            "import_path": "pyiron_core.pyiron_workflow.graph.base.identity",
             "label": "va_i_compute_cp_from_G__data",
             "parent_id": "compute_cp_from_G",
             "level": 1,
@@ -123,7 +123,7 @@
             "expanded": false,
             "node": {
                 "label": "va_i_compute_cp_from_G__data",
-                "function": "pyiron_workflow.graph.base.identity",
+                "function": "pyiron_core.pyiron_workflow.graph.base.identity",
                 "inputs": {
                     "x": "NotData"
                 }
@@ -131,7 +131,7 @@
         },
         "va_i_compute_cp_from_G__degree": {
             "id": "va_i_compute_cp_from_G__degree",
-            "import_path": "pyiron_workflow.graph.base.identity",
+            "import_path": "pyiron_core.pyiron_workflow.graph.base.identity",
             "label": "va_i_compute_cp_from_G__degree",
             "parent_id": "compute_cp_from_G",
             "level": 1,
@@ -141,7 +141,7 @@
             "expanded": false,
             "node": {
                 "label": "va_i_compute_cp_from_G__degree",
-                "function": "pyiron_workflow.graph.base.identity",
+                "function": "pyiron_core.pyiron_workflow.graph.base.identity",
                 "inputs": {
                     "x": "NotData"
                 }
@@ -225,7 +225,7 @@
         },
         "va_o_compute_cp_from_G__cp": {
             "id": "va_o_compute_cp_from_G__cp",
-            "import_path": "pyiron_workflow.graph.base.identity",
+            "import_path": "pyiron_core.pyiron_workflow.graph.base.identity",
             "label": "va_o_compute_cp_from_G__cp",
             "parent_id": "compute_cp_from_G",
             "level": 1,
@@ -235,7 +235,7 @@
             "expanded": false,
             "node": {
                 "label": "va_o_compute_cp_from_G__cp",
-                "function": "pyiron_workflow.graph.base.identity",
+                "function": "pyiron_core.pyiron_workflow.graph.base.identity",
                 "inputs": {
                     "x": "NotData"
                 }
@@ -273,7 +273,7 @@
                 "inputs": {}
             }
         },
-        "_obj_type": "pyiron_workflow.graph.base.GraphNode"
+        "_obj_type": "pyiron_core.pyiron_workflow.graph.base.GraphNode"
     },
     "edges": {
         "values": [
@@ -356,6 +356,6 @@
                 "targetHandle": "data_1"
             }
         ],
-        "obj_type": "pyiron_workflow.graph.base.GraphEdge"
+        "obj_type": "pyiron_core.pyiron_workflow.graph.base.GraphEdge"
     }
 }

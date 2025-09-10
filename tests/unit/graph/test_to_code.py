@@ -1,7 +1,7 @@
 import unittest
 
-import pyiron_workflow.simple_workflow as swf
-from pyiron_workflow.graph import base
+import pyiron_core.pyiron_workflow.simple_workflow as swf
+from pyiron_core.pyiron_workflow.graph import base
 
 
 @swf.as_function_node

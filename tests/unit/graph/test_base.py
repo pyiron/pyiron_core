@@ -2,7 +2,7 @@ import contextlib
 import os
 import unittest
 
-from pyiron_workflow.graph import base, graph_json, run
+from pyiron_core.pyiron_workflow.graph import base, graph_json, run
 
 from static.nodes import AddOne
 

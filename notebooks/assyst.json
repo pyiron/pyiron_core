@@ -121,7 +121,7 @@
         },
         "OutputSEFS": {
             "id": "OutputSEFS",
-            "import_path": "pyiron_workflow.simple_workflow.func_dataclass",
+            "import_path": "pyiron_core.pyiron_workflow.simple_workflow.func_dataclass",
             "label": "OutputSEFS",
             "parent_id": null,
             "level": 0,
@@ -167,7 +167,7 @@
                 "inputs": {}
             }
         },
-        "_obj_type": "pyiron_workflow.graph.base.GraphNode"
+        "_obj_type": "pyiron_core.pyiron_workflow.graph.base.GraphNode"
     },
     "edges": {
         "values": [
@@ -226,6 +226,6 @@
                 "targetHandle": "x"
             }
         ],
-        "obj_type": "pyiron_workflow.graph.base.GraphEdge"
+        "obj_type": "pyiron_core.pyiron_workflow.graph.base.GraphEdge"
     }
 }

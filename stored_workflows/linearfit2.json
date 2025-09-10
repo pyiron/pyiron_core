@@ -3,7 +3,7 @@
     "nodes": {
         "ParameterizePotentialConfig": {
             "id": "ParameterizePotentialConfig",
-            "import_path": "pyiron_nodes.atomistic.ml_potentials.fitting.linearfit.ParameterizePotentialConfig",
+            "import_path": "pyiron_core.pyiron_nodes.atomistic.ml_potentials.fitting.linearfit.ParameterizePotentialConfig",
             "label": "ParameterizePotentialConfig",
             "parent_id": null,
             "level": 0,
@@ -13,13 +13,13 @@
             "expanded": false,
             "node": {
                 "label": "ParameterizePotentialConfig",
-                "function": "pyiron_nodes.atomistic.ml_potentials.fitting.linearfit.ParameterizePotentialConfig",
+                "function": "pyiron_core.pyiron_nodes.atomistic.ml_potentials.fitting.linearfit.ParameterizePotentialConfig",
                 "inputs": {}
             }
         },
         "SplitTrainingAndTesting": {
             "id": "SplitTrainingAndTesting",
-            "import_path": "pyiron_nodes.atomistic.ml_potentials.fitting.linearfit.SplitTrainingAndTesting",
+            "import_path": "pyiron_core.pyiron_nodes.atomistic.ml_potentials.fitting.linearfit.SplitTrainingAndTesting",
             "label": "SplitTrainingAndTesting",
             "parent_id": null,
             "level": 0,
@@ -29,13 +29,13 @@
             "expanded": false,
             "node": {
                 "label": "SplitTrainingAndTesting",
-                "function": "pyiron_nodes.atomistic.ml_potentials.fitting.linearfit.SplitTrainingAndTesting",
+                "function": "pyiron_core.pyiron_nodes.atomistic.ml_potentials.fitting.linearfit.SplitTrainingAndTesting",
                 "inputs": {}
             }
         },
         "RunLinearFit": {
             "id": "RunLinearFit",
-            "import_path": "pyiron_nodes.atomistic.ml_potentials.fitting.linearfit.RunLinearFit",
+            "import_path": "pyiron_core.pyiron_nodes.atomistic.ml_potentials.fitting.linearfit.RunLinearFit",
             "label": "RunLinearFit",
             "parent_id": null,
             "level": 0,
@@ -45,13 +45,13 @@
             "expanded": false,
             "node": {
                 "label": "RunLinearFit",
-                "function": "pyiron_nodes.atomistic.ml_potentials.fitting.linearfit.RunLinearFit",
+                "function": "pyiron_core.pyiron_nodes.atomistic.ml_potentials.fitting.linearfit.RunLinearFit",
                 "inputs": {}
             }
         },
         "ReadPickledDatasetAsDataframe": {
             "id": "ReadPickledDatasetAsDataframe",
-            "import_path": "pyiron_nodes.atomistic.ml_potentials.fitting.linearfit.ReadPickledDatasetAsDataframe",
+            "import_path": "pyiron_core.pyiron_nodes.atomistic.ml_potentials.fitting.linearfit.ReadPickledDatasetAsDataframe",
             "label": "ReadPickledDatasetAsDataframe",
             "parent_id": null,
             "level": 0,
@@ -61,7 +61,7 @@
             "expanded": false,
             "node": {
                 "label": "ReadPickledDatasetAsDataframe",
-                "function": "pyiron_nodes.atomistic.ml_potentials.fitting.linearfit.ReadPickledDatasetAsDataframe",
+                "function": "pyiron_core.pyiron_nodes.atomistic.ml_potentials.fitting.linearfit.ReadPickledDatasetAsDataframe",
                 "inputs": {
                     "file_path": "mgca.pckl.tgz"
                 }
@@ -69,7 +69,7 @@
         },
         "PlotEnergyFittingCurve": {
             "id": "PlotEnergyFittingCurve",
-            "import_path": "pyiron_nodes.atomistic.ml_potentials.fitting.linearfit.PlotEnergyFittingCurve",
+            "import_path": "pyiron_core.pyiron_nodes.atomistic.ml_potentials.fitting.linearfit.PlotEnergyFittingCurve",
             "label": "PlotEnergyFittingCurve",
             "parent_id": null,
             "level": 0,
@@ -79,13 +79,13 @@
             "expanded": false,
             "node": {
                 "label": "PlotEnergyFittingCurve",
-                "function": "pyiron_nodes.atomistic.ml_potentials.fitting.linearfit.PlotEnergyFittingCurve",
+                "function": "pyiron_core.pyiron_nodes.atomistic.ml_potentials.fitting.linearfit.PlotEnergyFittingCurve",
                 "inputs": {}
             }
         },
         "PredictEnergiesAndForces": {
             "id": "PredictEnergiesAndForces",
-            "import_path": "pyiron_nodes.atomistic.ml_potentials.fitting.linearfit.PredictEnergiesAndForces",
+            "import_path": "pyiron_core.pyiron_nodes.atomistic.ml_potentials.fitting.linearfit.PredictEnergiesAndForces",
             "label": "PredictEnergiesAndForces",
             "parent_id": null,
             "level": 0,
@@ -95,11 +95,11 @@
             "expanded": false,
             "node": {
                 "label": "PredictEnergiesAndForces",
-                "function": "pyiron_nodes.atomistic.ml_potentials.fitting.linearfit.PredictEnergiesAndForces",
+                "function": "pyiron_core.pyiron_nodes.atomistic.ml_potentials.fitting.linearfit.PredictEnergiesAndForces",
                 "inputs": {}
             }
         },
-        "_obj_type": "pyiron_workflow.api.serial.GraphNode"
+        "_obj_type": "pyiron_core.pyiron_workflow.api.serial.GraphNode"
     },
     "edges": {
         "values": [
@@ -152,6 +152,6 @@
                 "targetHandle": "data_dict"
             }
         ],
-        "obj_type": "pyiron_workflow.api.serial.GraphEdge"
+        "obj_type": "pyiron_core.pyiron_workflow.api.serial.GraphEdge"
     }
 }

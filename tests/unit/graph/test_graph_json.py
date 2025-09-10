@@ -3,7 +3,7 @@ import pathlib
 import shutil
 import unittest
 
-from pyiron_workflow.graph import graph_json
+from pyiron_core.pyiron_workflow.graph import graph_json
 
 class TestGraphJson(unittest.TestCase):
     def test_compact_failure(self):

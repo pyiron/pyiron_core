@@ -57,7 +57,7 @@
                             "targetHandle": "x"
                         }
                     ],
-                    "obj_type": "pyiron_workflow.graph.base.GraphEdge"
+                    "obj_type": "pyiron_core.pyiron_workflow.graph.base.GraphEdge"
                 }
             },
             "node_type": "graph",
@@ -74,7 +74,7 @@
         },
         "va_i_CubicBulkCell__element": {
             "id": "va_i_CubicBulkCell__element",
-            "import_path": "pyiron_workflow.graph.base.identity",
+            "import_path": "pyiron_core.pyiron_workflow.graph.base.identity",
             "label": "va_i_CubicBulkCell__element",
             "parent_id": "CubicBulkCell",
             "level": 1,
@@ -84,7 +84,7 @@
             "expanded": false,
             "node": {
                 "label": "va_i_CubicBulkCell__element",
-                "function": "pyiron_workflow.graph.base.identity",
+                "function": "pyiron_core.pyiron_workflow.graph.base.identity",
                 "inputs": {
                     "x": "NotData"
                 }
@@ -92,7 +92,7 @@
         },
         "va_i_CubicBulkCell__cell_size": {
             "id": "va_i_CubicBulkCell__cell_size",
-            "import_path": "pyiron_workflow.graph.base.identity",
+            "import_path": "pyiron_core.pyiron_workflow.graph.base.identity",
             "label": "va_i_CubicBulkCell__cell_size",
             "parent_id": "CubicBulkCell",
             "level": 1,
@@ -102,7 +102,7 @@
             "expanded": false,
             "node": {
                 "label": "va_i_CubicBulkCell__cell_size",
-                "function": "pyiron_workflow.graph.base.identity",
+                "function": "pyiron_core.pyiron_workflow.graph.base.identity",
                 "inputs": {
                     "x": "NotData"
                 }
@@ -110,7 +110,7 @@
         },
         "va_i_CubicBulkCell__vacancy_index": {
             "id": "va_i_CubicBulkCell__vacancy_index",
-            "import_path": "pyiron_workflow.graph.base.identity",
+            "import_path": "pyiron_core.pyiron_workflow.graph.base.identity",
             "label": "va_i_CubicBulkCell__vacancy_index",
             "parent_id": "CubicBulkCell",
             "level": 1,
@@ -120,7 +120,7 @@
             "expanded": false,
             "node": {
                 "label": "va_i_CubicBulkCell__vacancy_index",
-                "function": "pyiron_workflow.graph.base.identity",
+                "function": "pyiron_core.pyiron_workflow.graph.base.identity",
                 "inputs": {
                     "x": "NotData"
                 }
@@ -183,7 +183,7 @@
         },
         "va_o_CubicBulkCell__structure": {
             "id": "va_o_CubicBulkCell__structure",
-            "import_path": "pyiron_workflow.graph.base.identity",
+            "import_path": "pyiron_core.pyiron_workflow.graph.base.identity",
             "label": "va_o_CubicBulkCell__structure",
             "parent_id": "CubicBulkCell",
             "level": 1,
@@ -193,7 +193,7 @@
             "expanded": false,
             "node": {
                 "label": "va_o_CubicBulkCell__structure",
-                "function": "pyiron_workflow.graph.base.identity",
+                "function": "pyiron_core.pyiron_workflow.graph.base.identity",
                 "inputs": {
                     "x": "NotData"
                 }
@@ -324,7 +324,7 @@
                             "targetHandle": "x"
                         }
                     ],
-                    "obj_type": "pyiron_workflow.graph.base.GraphEdge"
+                    "obj_type": "pyiron_core.pyiron_workflow.graph.base.GraphEdge"
                 }
             },
             "node_type": "graph",
@@ -338,7 +338,7 @@
         },
         "va_i_Lammps__structure": {
             "id": "va_i_Lammps__structure",
-            "import_path": "pyiron_workflow.graph.base.identity",
+            "import_path": "pyiron_core.pyiron_workflow.graph.base.identity",
             "label": "va_i_Lammps__structure",
             "parent_id": "Lammps",
             "level": 1,
@@ -348,13 +348,13 @@
             "expanded": false,
             "node": {
                 "label": "va_i_Lammps__structure",
-                "function": "pyiron_workflow.graph.base.identity",
+                "function": "pyiron_core.pyiron_workflow.graph.base.identity",
                 "inputs": {}
             }
         },
         "va_i_Lammps__potential": {
             "id": "va_i_Lammps__potential",
-            "import_path": "pyiron_workflow.graph.base.identity",
+            "import_path": "pyiron_core.pyiron_workflow.graph.base.identity",
             "label": "va_i_Lammps__potential",
             "parent_id": "Lammps",
             "level": 1,
@@ -364,7 +364,7 @@
             "expanded": false,
             "node": {
                 "label": "va_i_Lammps__potential",
-                "function": "pyiron_workflow.graph.base.identity",
+                "function": "pyiron_core.pyiron_workflow.graph.base.identity",
                 "inputs": {
                     "x": "NotData"
                 }
@@ -372,7 +372,7 @@
         },
         "va_i_Lammps__calculator": {
             "id": "va_i_Lammps__calculator",
-            "import_path": "pyiron_workflow.graph.base.identity",
+            "import_path": "pyiron_core.pyiron_workflow.graph.base.identity",
             "label": "va_i_Lammps__calculator",
             "parent_id": "Lammps",
             "level": 1,
@@ -382,7 +382,7 @@
             "expanded": false,
             "node": {
                 "label": "va_i_Lammps__calculator",
-                "function": "pyiron_workflow.graph.base.identity",
+                "function": "pyiron_core.pyiron_workflow.graph.base.identity",
                 "inputs": {
                     "x": "NotData"
                 }
@@ -390,7 +390,7 @@
         },
         "va_i_Lammps__working_dir": {
             "id": "va_i_Lammps__working_dir",
-            "import_path": "pyiron_workflow.graph.base.identity",
+            "import_path": "pyiron_core.pyiron_workflow.graph.base.identity",
             "label": "va_i_Lammps__working_dir",
             "parent_id": "Lammps",
             "level": 1,
@@ -400,7 +400,7 @@
             "expanded": false,
             "node": {
                 "label": "va_i_Lammps__working_dir",
-                "function": "pyiron_workflow.graph.base.identity",
+                "function": "pyiron_core.pyiron_workflow.graph.base.identity",
                 "inputs": {
                     "x": "NotData"
                 }
@@ -539,7 +539,7 @@
         },
         "va_o_Lammps__generic": {
             "id": "va_o_Lammps__generic",
-            "import_path": "pyiron_workflow.graph.base.identity",
+            "import_path": "pyiron_core.pyiron_workflow.graph.base.identity",
             "label": "va_o_Lammps__generic",
             "parent_id": "Lammps",
             "level": 1,
@@ -549,7 +549,7 @@
             "expanded": false,
             "node": {
                 "label": "va_o_Lammps__generic",
-                "function": "pyiron_workflow.graph.base.identity",
+                "function": "pyiron_core.pyiron_workflow.graph.base.identity",
                 "inputs": {
                     "x": "NotData"
                 }
@@ -694,7 +694,7 @@
                 "inputs": {}
             }
         },
-        "_obj_type": "pyiron_workflow.graph.base.GraphNode"
+        "_obj_type": "pyiron_core.pyiron_workflow.graph.base.GraphNode"
     },
     "edges": {
         "values": [
@@ -903,6 +903,6 @@
                 "targetHandle": "structure"
             }
         ],
-        "obj_type": "pyiron_workflow.graph.base.GraphEdge"
+        "obj_type": "pyiron_core.pyiron_workflow.graph.base.GraphEdge"
     }
 }

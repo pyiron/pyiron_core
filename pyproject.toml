@@ -57,19 +57,16 @@ Repository = "https://github.com/pyiron/pyiron_core"
 [tool.hatch.build]
 only-packages = true
 artifacts = [
-    "pyiron_database/*",
-    "pyiron_nodes/*",
-    "pyiron_workflow/*",
-    "pyironflow/*",
+    "pyiron_core/*",
     "static/*",
 ]
 
 [tool.hatch.build.hooks.vcs]
-version-file = "pyiron_workflow/_version.py"
+version-file = "pyiron_core/_version.py"
 
 [tool.hatch.version]
 source = "vcs"
-path = "pyiron_workflow/_version.py"
+path = "pyiron_core/_version.py"
 
 [tool.hatch.build.hooks.jupyter-builder]
 build-function = "hatch_jupyter_builder.npm_builder"

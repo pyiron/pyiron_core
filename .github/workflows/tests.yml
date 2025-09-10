@@ -7,7 +7,7 @@ jobs:
     services:
       postgres:
         image: postgres
-        env:  # Taken from pyiron_workflow.util.LocalPostgres defaults
+        env:  # Taken from pyiron_core.pyiron_workflow.util.LocalPostgres defaults
           POSTGRES_USER: localuser
           POSTGRES_PASSWORD: none
           POSTGRES_DB: localdb
@@ -41,7 +41,7 @@ jobs:
         shell: bash -l {0}
         run: |
           pip install . --no-deps --no-build-isolation
-        timeout-minutes: 1
+        timeout-minutes: 4
 
       - name: Run unit tests
         shell: bash -l {0}

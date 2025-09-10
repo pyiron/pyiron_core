@@ -12,7 +12,7 @@
                 "nodes": {
                     "va_i_BulkStaticEnergy__name": {
                         "id": "va_i_BulkStaticEnergy__name",
-                        "import_path": "pyiron_workflow.graph.base.identity",
+                        "import_path": "pyiron_core.pyiron_workflow.graph.base.identity",
                         "label": "va_i_BulkStaticEnergy__name",
                         "parent_id": "BulkStaticEnergy",
                         "level": 1,
@@ -23,7 +23,7 @@
                     },
                     "va_i_BulkStaticEnergy__a": {
                         "id": "va_i_BulkStaticEnergy__a",
-                        "import_path": "pyiron_workflow.graph.base.identity",
+                        "import_path": "pyiron_core.pyiron_workflow.graph.base.identity",
                         "label": "va_i_BulkStaticEnergy__a",
                         "parent_id": "BulkStaticEnergy",
                         "level": 1,
@@ -100,7 +100,7 @@
                     },
                     "va_o_BulkStaticEnergy__BulkStaticEnergy": {
                         "id": "va_o_BulkStaticEnergy__BulkStaticEnergy",
-                        "import_path": "pyiron_workflow.graph.base.identity",
+                        "import_path": "pyiron_core.pyiron_workflow.graph.base.identity",
                         "label": "va_o_BulkStaticEnergy__BulkStaticEnergy",
                         "parent_id": "BulkStaticEnergy",
                         "level": 1,
@@ -109,7 +109,7 @@
                         "widget_type": "customNode",
                         "expanded": false
                     },
-                    "_obj_type": "pyiron_workflow.graph.base.GraphNode"
+                    "_obj_type": "pyiron_core.pyiron_workflow.graph.base.GraphNode"
                 },
                 "edges": {
                     "values": [
@@ -150,7 +150,7 @@
                             "targetHandle": "x"
                         }
                     ],
-                    "obj_type": "pyiron_workflow.graph.base.GraphEdge"
+                    "obj_type": "pyiron_core.pyiron_workflow.graph.base.GraphEdge"
                 }
             },
             "node_type": "graph",
@@ -167,7 +167,7 @@
         },
         "va_i_BulkStaticEnergy__name": {
             "id": "va_i_BulkStaticEnergy__name",
-            "import_path": "pyiron_workflow.graph.base.identity",
+            "import_path": "pyiron_core.pyiron_workflow.graph.base.identity",
             "label": "va_i_BulkStaticEnergy__name",
             "parent_id": "BulkStaticEnergy",
             "level": 1,
@@ -178,7 +178,7 @@
         },
         "va_i_BulkStaticEnergy__a": {
             "id": "va_i_BulkStaticEnergy__a",
-            "import_path": "pyiron_workflow.graph.base.identity",
+            "import_path": "pyiron_core.pyiron_workflow.graph.base.identity",
             "label": "va_i_BulkStaticEnergy__a",
             "parent_id": "BulkStaticEnergy",
             "level": 1,
@@ -257,7 +257,7 @@
         },
         "va_o_BulkStaticEnergy__BulkStaticEnergy": {
             "id": "va_o_BulkStaticEnergy__BulkStaticEnergy",
-            "import_path": "pyiron_workflow.graph.base.identity",
+            "import_path": "pyiron_core.pyiron_workflow.graph.base.identity",
             "label": "va_o_BulkStaticEnergy__BulkStaticEnergy",
             "parent_id": "BulkStaticEnergy",
             "level": 1,
@@ -304,7 +304,7 @@
                 }
             }
         },
-        "_obj_type": "pyiron_workflow.graph.base.GraphNode"
+        "_obj_type": "pyiron_core.pyiron_workflow.graph.base.GraphNode"
     },
     "edges": {
         "values": [
@@ -357,6 +357,6 @@
                 "targetHandle": "kwarg_list"
             }
         ],
-        "obj_type": "pyiron_workflow.graph.base.GraphEdge"
+        "obj_type": "pyiron_core.pyiron_workflow.graph.base.GraphEdge"
     }
 }

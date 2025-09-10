@@ -55,7 +55,7 @@
         },
         "var_lammps__structure": {
             "id": "var_lammps__structure",
-            "import_path": "pyiron_workflow.graph.base.identity",
+            "import_path": "pyiron_core.pyiron_workflow.graph.base.identity",
             "label": "var_lammps__structure",
             "parent_id": "lammps",
             "level": 1,
@@ -65,7 +65,7 @@
             "expanded": false,
             "node": {
                 "label": "var_lammps__structure",
-                "function": "pyiron_workflow.graph.base.identity",
+                "function": "pyiron_core.pyiron_workflow.graph.base.identity",
                 "inputs": {
                     "x": "NotData"
                 }
@@ -73,7 +73,7 @@
         },
         "var_lammps__potential": {
             "id": "var_lammps__potential",
-            "import_path": "pyiron_workflow.graph.base.identity",
+            "import_path": "pyiron_core.pyiron_workflow.graph.base.identity",
             "label": "var_lammps__potential",
             "parent_id": "lammps",
             "level": 1,
@@ -83,7 +83,7 @@
             "expanded": false,
             "node": {
                 "label": "var_lammps__potential",
-                "function": "pyiron_workflow.graph.base.identity",
+                "function": "pyiron_core.pyiron_workflow.graph.base.identity",
                 "inputs": {
                     "x": "NotData"
                 }
@@ -91,7 +91,7 @@
         },
         "var_lammps__calculator": {
             "id": "var_lammps__calculator",
-            "import_path": "pyiron_workflow.graph.base.identity",
+            "import_path": "pyiron_core.pyiron_workflow.graph.base.identity",
             "label": "var_lammps__calculator",
             "parent_id": "lammps",
             "level": 1,
@@ -101,7 +101,7 @@
             "expanded": false,
             "node": {
                 "label": "var_lammps__calculator",
-                "function": "pyiron_workflow.graph.base.identity",
+                "function": "pyiron_core.pyiron_workflow.graph.base.identity",
                 "inputs": {
                     "x": "NotData"
                 }
@@ -109,7 +109,7 @@
         },
         "var_lammps__working_directory": {
             "id": "var_lammps__working_directory",
-            "import_path": "pyiron_workflow.graph.base.identity",
+            "import_path": "pyiron_core.pyiron_workflow.graph.base.identity",
             "label": "var_lammps__working_directory",
             "parent_id": "lammps",
             "level": 1,
@@ -119,7 +119,7 @@
             "expanded": false,
             "node": {
                 "label": "var_lammps__working_directory",
-                "function": "pyiron_workflow.graph.base.identity",
+                "function": "pyiron_core.pyiron_workflow.graph.base.identity",
                 "inputs": {
                     "x": "NotData"
                 }
@@ -127,7 +127,7 @@
         },
         "var_lammps__calc_mode": {
             "id": "var_lammps__calc_mode",
-            "import_path": "pyiron_workflow.graph.base.identity",
+            "import_path": "pyiron_core.pyiron_workflow.graph.base.identity",
             "label": "var_lammps__calc_mode",
             "parent_id": "lammps",
             "level": 1,
@@ -137,7 +137,7 @@
             "expanded": false,
             "node": {
                 "label": "var_lammps__calc_mode",
-                "function": "pyiron_workflow.graph.base.identity",
+                "function": "pyiron_core.pyiron_workflow.graph.base.identity",
                 "inputs": {
                     "x": "NotData"
                 }
@@ -339,7 +339,7 @@
                 "inputs": {}
             }
         },
-        "_obj_type": "pyiron_workflow.graph.base.GraphNode"
+        "_obj_type": "pyiron_core.pyiron_workflow.graph.base.GraphNode"
     },
     "edges": {
         "values": [
@@ -464,6 +464,6 @@
                 "targetHandle": "y"
             }
         ],
-        "obj_type": "pyiron_workflow.graph.base.GraphEdge"
+        "obj_type": "pyiron_core.pyiron_workflow.graph.base.GraphEdge"
     }
 }

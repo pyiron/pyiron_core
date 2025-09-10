@@ -3,7 +3,7 @@
     "nodes": {
         "CubicBulkCell": {
             "id": "CubicBulkCell",
-            "import_path": "pyiron_nodes.atomistic.structure.build.CubicBulkCell",
+            "import_path": "pyiron_core.pyiron_nodes.atomistic.structure.build.CubicBulkCell",
             "label": "CubicBulkCell",
             "parent_id": null,
             "level": 0,
@@ -57,7 +57,7 @@
                             "targetHandle": "x"
                         }
                     ],
-                    "obj_type": "pyiron_workflow.api.serial.GraphEdge"
+                    "obj_type": "pyiron_core.pyiron_workflow.api.serial.GraphEdge"
                 }
             },
             "node_type": "graph",
@@ -65,7 +65,7 @@
             "expanded": false,
             "node": {
                 "label": "CubicBulkCell",
-                "function": "pyiron_nodes.atomistic.structure.build.CubicBulkCell",
+                "function": "pyiron_core.pyiron_nodes.atomistic.structure.build.CubicBulkCell",
                 "inputs": {
                     "element": "Al",
                     "cell_size": 5
@@ -74,7 +74,7 @@
         },
         "va_i_CubicBulkCell__element": {
             "id": "va_i_CubicBulkCell__element",
-            "import_path": "pyiron_workflow.api.serial.identity",
+            "import_path": "pyiron_core.pyiron_workflow.api.serial.identity",
             "label": "va_i_CubicBulkCell__element",
             "parent_id": "CubicBulkCell",
             "level": 1,
@@ -84,7 +84,7 @@
             "expanded": false,
             "node": {
                 "label": "va_i_CubicBulkCell__element",
-                "function": "pyiron_workflow.api.serial.identity",
+                "function": "pyiron_core.pyiron_workflow.api.serial.identity",
                 "inputs": {
                     "x": "NotData"
                 }
@@ -92,7 +92,7 @@
         },
         "va_i_CubicBulkCell__cell_size": {
             "id": "va_i_CubicBulkCell__cell_size",
-            "import_path": "pyiron_workflow.api.serial.identity",
+            "import_path": "pyiron_core.pyiron_workflow.api.serial.identity",
             "label": "va_i_CubicBulkCell__cell_size",
             "parent_id": "CubicBulkCell",
             "level": 1,
@@ -102,7 +102,7 @@
             "expanded": false,
             "node": {
                 "label": "va_i_CubicBulkCell__cell_size",
-                "function": "pyiron_workflow.api.serial.identity",
+                "function": "pyiron_core.pyiron_workflow.api.serial.identity",
                 "inputs": {
                     "x": "NotData"
                 }
@@ -110,7 +110,7 @@
         },
         "va_i_CubicBulkCell__vacancy_index": {
             "id": "va_i_CubicBulkCell__vacancy_index",
-            "import_path": "pyiron_workflow.api.serial.identity",
+            "import_path": "pyiron_core.pyiron_workflow.api.serial.identity",
             "label": "va_i_CubicBulkCell__vacancy_index",
             "parent_id": "CubicBulkCell",
             "level": 1,
@@ -120,7 +120,7 @@
             "expanded": false,
             "node": {
                 "label": "va_i_CubicBulkCell__vacancy_index",
-                "function": "pyiron_workflow.api.serial.identity",
+                "function": "pyiron_core.pyiron_workflow.api.serial.identity",
                 "inputs": {
                     "x": "NotData"
                 }
@@ -128,7 +128,7 @@
         },
         "bulk": {
             "id": "bulk",
-            "import_path": "pyiron_nodes.atomistic.structure.build.Bulk",
+            "import_path": "pyiron_core.pyiron_nodes.atomistic.structure.build.Bulk",
             "label": "bulk",
             "parent_id": "CubicBulkCell",
             "level": 1,
@@ -138,7 +138,7 @@
             "expanded": false,
             "node": {
                 "label": "bulk",
-                "function": "pyiron_nodes.atomistic.structure.build.Bulk",
+                "function": "pyiron_core.pyiron_nodes.atomistic.structure.build.Bulk",
                 "inputs": {
                     "name": "NotData",
                     "cubic": true
@@ -147,7 +147,7 @@
         },
         "repeat": {
             "id": "repeat",
-            "import_path": "pyiron_nodes.atomistic.structure.transform.Repeat",
+            "import_path": "pyiron_core.pyiron_nodes.atomistic.structure.transform.Repeat",
             "label": "repeat",
             "parent_id": "CubicBulkCell",
             "level": 1,
@@ -157,7 +157,7 @@
             "expanded": false,
             "node": {
                 "label": "repeat",
-                "function": "pyiron_nodes.atomistic.structure.transform.Repeat",
+                "function": "pyiron_core.pyiron_nodes.atomistic.structure.transform.Repeat",
                 "inputs": {
                     "structure": "NotData"
                 }
@@ -165,7 +165,7 @@
         },
         "vacancy": {
             "id": "vacancy",
-            "import_path": "pyiron_nodes.atomistic.structure.transform.CreateVacancy",
+            "import_path": "pyiron_core.pyiron_nodes.atomistic.structure.transform.CreateVacancy",
             "label": "vacancy",
             "parent_id": "CubicBulkCell",
             "level": 1,
@@ -175,7 +175,7 @@
             "expanded": false,
             "node": {
                 "label": "vacancy",
-                "function": "pyiron_nodes.atomistic.structure.transform.CreateVacancy",
+                "function": "pyiron_core.pyiron_nodes.atomistic.structure.transform.CreateVacancy",
                 "inputs": {
                     "structure": "NotData"
                 }
@@ -183,7 +183,7 @@
         },
         "va_o_CubicBulkCell__structure": {
             "id": "va_o_CubicBulkCell__structure",
-            "import_path": "pyiron_workflow.api.serial.identity",
+            "import_path": "pyiron_core.pyiron_workflow.api.serial.identity",
             "label": "va_o_CubicBulkCell__structure",
             "parent_id": "CubicBulkCell",
             "level": 1,
@@ -193,7 +193,7 @@
             "expanded": false,
             "node": {
                 "label": "va_o_CubicBulkCell__structure",
-                "function": "pyiron_workflow.api.serial.identity",
+                "function": "pyiron_core.pyiron_workflow.api.serial.identity",
                 "inputs": {
                     "x": "NotData"
                 }
@@ -201,7 +201,7 @@
         },
         "Tolerance": {
             "id": "Tolerance",
-            "import_path": "pyiron_nodes.atomistic.property.calphy.Tolerance",
+            "import_path": "pyiron_core.pyiron_nodes.atomistic.property.calphy.Tolerance",
             "label": "Tolerance",
             "parent_id": null,
             "level": 0,
@@ -211,7 +211,7 @@
             "expanded": false,
             "node": {
                 "label": "Tolerance",
-                "function": "pyiron_nodes.atomistic.property.calphy.Tolerance",
+                "function": "pyiron_core.pyiron_nodes.atomistic.property.calphy.Tolerance",
                 "inputs": {
                     "solid_fraction": 0
                 }
@@ -219,7 +219,7 @@
         },
         "InputClass": {
             "id": "InputClass",
-            "import_path": "pyiron_nodes.atomistic.property.calphy.InputClass",
+            "import_path": "pyiron_core.pyiron_nodes.atomistic.property.calphy.InputClass",
             "label": "InputClass",
             "parent_id": null,
             "level": 0,
@@ -229,13 +229,13 @@
             "expanded": false,
             "node": {
                 "label": "InputClass",
-                "function": "pyiron_nodes.atomistic.property.calphy.InputClass",
+                "function": "pyiron_core.pyiron_nodes.atomistic.property.calphy.InputClass",
                 "inputs": {}
             }
         },
         "InputClass_1": {
             "id": "InputClass_1",
-            "import_path": "pyiron_nodes.atomistic.property.calphy.InputClass",
+            "import_path": "pyiron_core.pyiron_nodes.atomistic.property.calphy.InputClass",
             "label": "InputClass_1",
             "parent_id": null,
             "level": 0,
@@ -245,13 +245,13 @@
             "expanded": false,
             "node": {
                 "label": "InputClass_1",
-                "function": "pyiron_nodes.atomistic.property.calphy.InputClass",
+                "function": "pyiron_core.pyiron_nodes.atomistic.property.calphy.InputClass",
                 "inputs": {}
             }
         },
         "SolidFreeEnergyWithTemperature": {
             "id": "SolidFreeEnergyWithTemperature",
-            "import_path": "pyiron_nodes.atomistic.property.calphy.SolidFreeEnergyWithTemperature",
+            "import_path": "pyiron_core.pyiron_nodes.atomistic.property.calphy.SolidFreeEnergyWithTemperature",
             "label": "SolidFreeEnergyWithTemperature",
             "parent_id": null,
             "level": 0,
@@ -261,13 +261,13 @@
             "expanded": false,
             "node": {
                 "label": "SolidFreeEnergyWithTemperature",
-                "function": "pyiron_nodes.atomistic.property.calphy.SolidFreeEnergyWithTemperature",
+                "function": "pyiron_core.pyiron_nodes.atomistic.property.calphy.SolidFreeEnergyWithTemperature",
                 "inputs": {}
             }
         },
         "CalculatePhaseTransformationTemperature": {
             "id": "CalculatePhaseTransformationTemperature",
-            "import_path": "pyiron_nodes.atomistic.property.calphy.CalculatePhaseTransformationTemperature",
+            "import_path": "pyiron_core.pyiron_nodes.atomistic.property.calphy.CalculatePhaseTransformationTemperature",
             "label": "CalculatePhaseTransformationTemperature",
             "parent_id": null,
             "level": 0,
@@ -277,13 +277,13 @@
             "expanded": false,
             "node": {
                 "label": "CalculatePhaseTransformationTemperature",
-                "function": "pyiron_nodes.atomistic.property.calphy.CalculatePhaseTransformationTemperature",
+                "function": "pyiron_core.pyiron_nodes.atomistic.property.calphy.CalculatePhaseTransformationTemperature",
                 "inputs": {}
             }
         },
         "Potential": {
             "id": "Potential",
-            "import_path": "pyiron_nodes.atomistic.engine.lammps.Potential",
+            "import_path": "pyiron_core.pyiron_nodes.atomistic.engine.lammps.Potential",
             "label": "Potential",
             "parent_id": null,
             "level": 0,
@@ -293,13 +293,13 @@
             "expanded": false,
             "node": {
                 "label": "Potential",
-                "function": "pyiron_nodes.atomistic.engine.lammps.Potential",
+                "function": "pyiron_core.pyiron_nodes.atomistic.engine.lammps.Potential",
                 "inputs": {}
             }
         },
         "LiquidFreeEnergyWithTemperature": {
             "id": "LiquidFreeEnergyWithTemperature",
-            "import_path": "pyiron_nodes.atomistic.property.calphy.LiquidFreeEnergyWithTemperature",
+            "import_path": "pyiron_core.pyiron_nodes.atomistic.property.calphy.LiquidFreeEnergyWithTemperature",
             "label": "LiquidFreeEnergyWithTemperature",
             "parent_id": null,
             "level": 0,
@@ -309,11 +309,11 @@
             "expanded": false,
             "node": {
                 "label": "LiquidFreeEnergyWithTemperature",
-                "function": "pyiron_nodes.atomistic.property.calphy.LiquidFreeEnergyWithTemperature",
+                "function": "pyiron_core.pyiron_nodes.atomistic.property.calphy.LiquidFreeEnergyWithTemperature",
                 "inputs": {}
             }
         },
-        "_obj_type": "pyiron_workflow.api.serial.GraphNode"
+        "_obj_type": "pyiron_core.pyiron_workflow.api.serial.GraphNode"
     },
     "edges": {
         "values": [
@@ -426,6 +426,6 @@
                 "targetHandle": "inp"
             }
         ],
-        "obj_type": "pyiron_workflow.api.serial.GraphEdge"
+        "obj_type": "pyiron_core.pyiron_workflow.api.serial.GraphEdge"
     }
 }

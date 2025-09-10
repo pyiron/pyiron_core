@@ -55,7 +55,7 @@
                             "targetHandle": "structure"
                         }
                     ],
-                    "obj_type": "pyiron_workflow.graph.base.GraphEdge"
+                    "obj_type": "pyiron_core.pyiron_workflow.graph.base.GraphEdge"
                 }
             },
             "node_type": "graph",
@@ -63,7 +63,7 @@
             "expanded": false,
             "node": {
                 "label": "subgraph",
-                "function": "pyiron_workflow.graph.base.subgraph",
+                "function": "pyiron_core.pyiron_workflow.graph.base.subgraph",
                 "inputs": {
                     "Bulk__name": "Al",
                     "Bulk__a": 2
@@ -161,7 +161,7 @@
         },
         "va_i_subgraph__Bulk__name": {
             "id": "va_i_subgraph__Bulk__name",
-            "import_path": "pyiron_workflow.graph.base.identity",
+            "import_path": "pyiron_core.pyiron_workflow.graph.base.identity",
             "label": "va_i_subgraph__Bulk__name",
             "parent_id": "subgraph",
             "level": 0,
@@ -171,7 +171,7 @@
             "expanded": false,
             "node": {
                 "label": "va_i_subgraph__Bulk__name",
-                "function": "pyiron_workflow.graph.base.identity",
+                "function": "pyiron_core.pyiron_workflow.graph.base.identity",
                 "inputs": {
                     "x": "NotData"
                 }
@@ -179,7 +179,7 @@
         },
         "va_i_subgraph__Bulk__a": {
             "id": "va_i_subgraph__Bulk__a",
-            "import_path": "pyiron_workflow.graph.base.identity",
+            "import_path": "pyiron_core.pyiron_workflow.graph.base.identity",
             "label": "va_i_subgraph__Bulk__a",
             "parent_id": "subgraph",
             "level": 0,
@@ -189,7 +189,7 @@
             "expanded": false,
             "node": {
                 "label": "va_i_subgraph__Bulk__a",
-                "function": "pyiron_workflow.graph.base.identity",
+                "function": "pyiron_core.pyiron_workflow.graph.base.identity",
                 "inputs": {
                     "x": "NotData"
                 }
@@ -197,7 +197,7 @@
         },
         "va_o_subgraph__Volume__volume": {
             "id": "va_o_subgraph__Volume__volume",
-            "import_path": "pyiron_workflow.graph.base.identity",
+            "import_path": "pyiron_core.pyiron_workflow.graph.base.identity",
             "label": "va_o_subgraph__Volume__volume",
             "parent_id": "subgraph",
             "level": 0,
@@ -207,13 +207,13 @@
             "expanded": false,
             "node": {
                 "label": "va_o_subgraph__Volume__volume",
-                "function": "pyiron_workflow.graph.base.identity",
+                "function": "pyiron_core.pyiron_workflow.graph.base.identity",
                 "inputs": {
                     "x": "NotData"
                 }
             }
         },
-        "_obj_type": "pyiron_workflow.graph.base.GraphNode"
+        "_obj_type": "pyiron_core.pyiron_workflow.graph.base.GraphNode"
     },
     "edges": {
         "values": [
@@ -260,6 +260,6 @@
                 "targetHandle": "Executor"
             }
         ],
-        "obj_type": "pyiron_workflow.graph.base.GraphEdge"
+        "obj_type": "pyiron_core.pyiron_workflow.graph.base.GraphEdge"
     }
 }
