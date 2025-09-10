@@ -1,10 +1,15 @@
 from pyiron_core.pyiron_nodes import (
     atomistic,
+    controls,
     databases,
     dataframe,
+    electrochemistry,
     executors,
+    experiment,
     graphs,
     math,
     plotting,
+    scipy,
+    thermodynamics,
     utilities,
 )
