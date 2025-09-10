@@ -9,14 +9,14 @@ def CreateDB(
     port: int = 5432,
     database: str = "none",
 ):
-    import pyiron_core.pyiron_database.instance_database as idb
+    import pyiron_core.pyiron_database.api as pyiron_database
 
     if database == "none":
         database = user
 
     connection_str = f"postgresql://{user}:{password}@{host}:{port}/{database}"
 
-    db = idb.PostgreSQLInstanceDatabase(connection_str)
+    db = pyiron_database.PostgreSQLInstanceDatabase(connection_str)
     db.init()
 
     return db
@@ -70,7 +70,7 @@ def GetGraph(db, node_id: int):
     """
     Get the graph of a node with id *node_id from the database.
     """
-    import pyiron_core.pyiron_database.instance_database as idb
+    import pyiron_core.pyiron_database.api as pyiron_database
     from pyiron_core.pyiron_workflow.api.gui import GuiGraph
     from sqlalchemy.orm import sessionmaker
     import pandas as pd
@@ -82,7 +82,9 @@ def GetGraph(db, node_id: int):
 
     session.close()
 
-    _, graph = idb.restore_node_from_database(db=db, node_hash=df.hash.iloc[node_id])
+    _, graph = pyiron_database.restore_node_from_database(
+        db=db, node_hash=df.hash.iloc[node_id]
+    )
 
     gui_graph = GuiGraph(graph)
 
@@ -94,8 +96,8 @@ def GetHash(node: Node):
     """
     Get the hash of a node
     """
-    import pyiron_core.pyiron_database.instance_database as idb
+    import pyiron_core.pyiron_database.api as pyiron_database
 
     print("inputs: ", node.inputs)
-    hash = idb.get_hash(node)
+    hash = pyiron_database.get_hash(node)
     return hash

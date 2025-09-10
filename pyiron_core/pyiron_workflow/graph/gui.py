@@ -12,9 +12,9 @@ import numpy as np
 import pandas as pd
 import pygments
 
+import pyiron_core.pyiron_database.api as pyiron_database
 import pyiron_core.pyironflow.api as pyironflow
 from IPython.display import display
-from pyiron_core.pyiron_database import instance_database as idb
 
 from pyiron_core.pyiron_workflow import simple_workflow
 from pyiron_core.pyiron_workflow.graph import (
@@ -42,14 +42,14 @@ def create_db(
     port: int = 5432,
     database: str = "none",
 ):
-    import pyiron_core.pyiron_database.instance_database as idb
+    import pyiron_core.pyiron_database.api as pyiron_database
 
     if database == "none":
         database = user
 
     connection_str = f"postgresql://{user}:{password}@{host}:{port}/{database}"
 
-    db = idb.PostgreSQLInstanceDatabase(connection_str)
+    db = pyiron_database.PostgreSQLInstanceDatabase(connection_str)
     db.init()
 
     return db
@@ -351,6 +351,7 @@ class PyironFlowWidget:
 ############################################################################################################
 # pyironflow_widget
 ############################################################################################################
+############################################################################################################
 
 
 class PyironFlow:
@@ -359,7 +360,7 @@ class PyironFlow:
         wf_list=None,
         hash_nodes=False,
         gui_layout: GUILayout = GUILayout(),
-        db: idb.PostgreSQLInstanceDatabase | None = None,
+        db: pyiron_database.PostgreSQLInstanceDatabase | None = None,
         workflow_path: str = os.path.expanduser("~/pyiron_core.pyiron_workflows") # rooth path to directory where .json graph workflows are stored
     ):
 
