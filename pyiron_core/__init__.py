@@ -9,4 +9,6 @@ from pyiron_core.pyiron_workflow import (
     as_macro_node,
     get_node_from_path,
 )
+
+from pyiron_core.pyiron_workflow.api import util
 from pyiron_core.pyiron_workflow.api.gui import GuiGraph, PyironFlow
