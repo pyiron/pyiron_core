@@ -1,0 +1,98 @@
+{
+    "label": "calphy",
+    "nodes": {
+        "SolidFreeEnergyWithTemperature": {
+            "id": "SolidFreeEnergyWithTemperature",
+            "import_path": "pyiron_nodes.atomistic.property.calphy.SolidFreeEnergyWithTemperature",
+            "label": "SolidFreeEnergyWithTemperature",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "SolidFreeEnergyWithTemperature",
+                "function": "pyiron_nodes.atomistic.property.calphy.SolidFreeEnergyWithTemperature",
+                "inputs": {
+                    "potential": "1995--Angelo-J-E--Ni-Al-H--LAMMPS--ipr1"
+                }
+            }
+        },
+        "InputClass": {
+            "id": "InputClass",
+            "import_path": "pyiron_nodes.atomistic.property.calphy.InputClass",
+            "label": "InputClass",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "InputClass",
+                "function": "pyiron_nodes.atomistic.property.calphy.InputClass",
+                "inputs": {}
+            }
+        },
+        "CubicBulkCell": {
+            "id": "CubicBulkCell",
+            "import_path": "pyiron_nodes.atomistic.structure.build.CubicBulkCell",
+            "label": "CubicBulkCell",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "graph",
+            "widget_type": null,
+            "expanded": false,
+            "node": {
+                "label": "CubicBulkCell",
+                "function": "pyiron_nodes.atomistic.structure.build.CubicBulkCell",
+                "inputs": {
+                    "element": "Al",
+                    "cell_size": 3
+                }
+            }
+        },
+        "ListPotentials": {
+            "id": "ListPotentials",
+            "import_path": "pyiron_nodes.atomistic.engine.lammps.ListPotentials",
+            "label": "ListPotentials",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "ListPotentials",
+                "function": "pyiron_nodes.atomistic.engine.lammps.ListPotentials",
+                "inputs": {}
+            }
+        },
+        "_obj_type": "pyiron_workflow.api.serial.GraphNode"
+    },
+    "edges": {
+        "values": [
+            {
+                "source": "InputClass",
+                "target": "SolidFreeEnergyWithTemperature",
+                "sourceHandle": "dataclass",
+                "targetHandle": "inp"
+            },
+            {
+                "source": "CubicBulkCell",
+                "target": "SolidFreeEnergyWithTemperature",
+                "sourceHandle": "structure",
+                "targetHandle": "structure"
+            },
+            {
+                "source": "CubicBulkCell",
+                "target": "ListPotentials",
+                "sourceHandle": "structure",
+                "targetHandle": "structure"
+            }
+        ],
+        "obj_type": "pyiron_workflow.api.serial.GraphEdge"
+    }
+}

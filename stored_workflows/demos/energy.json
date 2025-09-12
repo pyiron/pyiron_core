@@ -1,0 +1,95 @@
+{
+    "label": "energy",
+    "nodes": {
+        "Bulk": {
+            "id": "Bulk",
+            "import_path": "pyiron_nodes.atomistic.structure.build.Bulk",
+            "label": "Bulk",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "Bulk",
+                "function": "pyiron_nodes.atomistic.structure.build.Bulk",
+                "inputs": {
+                    "name": "Al"
+                }
+            }
+        },
+        "Static": {
+            "id": "Static",
+            "import_path": "pyiron_nodes.atomistic.calculator.ase.Static",
+            "label": "Static",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "Static",
+                "function": "pyiron_nodes.atomistic.calculator.ase.Static",
+                "inputs": {}
+            }
+        },
+        "GetEnergyLast": {
+            "id": "GetEnergyLast",
+            "import_path": "pyiron_nodes.atomistic.calculator.output.GetEnergyLast",
+            "label": "GetEnergyLast",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "GetEnergyLast",
+                "function": "pyiron_nodes.atomistic.calculator.output.GetEnergyLast",
+                "inputs": {}
+            }
+        },
+        "EMT": {
+            "id": "EMT",
+            "import_path": "pyiron_nodes.atomistic.engine.ase.EMT",
+            "label": "EMT",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "EMT",
+                "function": "pyiron_nodes.atomistic.engine.ase.EMT",
+                "inputs": {}
+            }
+        },
+        "_obj_type": "pyiron_workflow.api.serial.GraphNode"
+    },
+    "edges": {
+        "values": [
+            {
+                "source": "Bulk",
+                "target": "Static",
+                "sourceHandle": "structure",
+                "targetHandle": "structure"
+            },
+            {
+                "source": "Static",
+                "target": "GetEnergyLast",
+                "sourceHandle": "out",
+                "targetHandle": "calculator"
+            },
+            {
+                "source": "EMT",
+                "target": "Static",
+                "sourceHandle": "out",
+                "targetHandle": "engine"
+            }
+        ],
+        "obj_type": "pyiron_workflow.api.serial.GraphEdge"
+    }
+}

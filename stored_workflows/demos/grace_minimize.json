@@ -1,0 +1,77 @@
+{
+    "label": "grace_minimize",
+    "nodes": {
+        "GRACE": {
+            "id": "GRACE",
+            "import_path": "pyiron_nodes.atomistic.engine.ase.GRACE",
+            "label": "GRACE",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "GRACE",
+                "function": "pyiron_nodes.atomistic.engine.ase.GRACE",
+                "inputs": {
+                    "model": "GRACE-1L-MP-r6"
+                }
+            }
+        },
+        "CubicBulkCell": {
+            "id": "CubicBulkCell",
+            "import_path": "pyiron_nodes.atomistic.structure.build.CubicBulkCell",
+            "label": "CubicBulkCell",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "graph",
+            "widget_type": null,
+            "expanded": false,
+            "node": {
+                "label": "CubicBulkCell",
+                "function": "pyiron_nodes.atomistic.structure.build.CubicBulkCell",
+                "inputs": {
+                    "element": "Al",
+                    "cell_size": 3,
+                    "vacancy_index": 0
+                }
+            }
+        },
+        "Minimize": {
+            "id": "Minimize",
+            "import_path": "pyiron_nodes.atomistic.calculator.ase.Minimize",
+            "label": "Minimize",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "Minimize",
+                "function": "pyiron_nodes.atomistic.calculator.ase.Minimize",
+                "inputs": {}
+            }
+        },
+        "_obj_type": "pyiron_workflow.api.serial.GraphNode"
+    },
+    "edges": {
+        "values": [
+            {
+                "source": "CubicBulkCell",
+                "target": "Minimize",
+                "sourceHandle": "structure",
+                "targetHandle": "structure"
+            },
+            {
+                "source": "GRACE",
+                "target": "Minimize",
+                "sourceHandle": "out",
+                "targetHandle": "engine"
+            }
+        ],
+        "obj_type": "pyiron_workflow.api.serial.GraphEdge"
+    }
+}
