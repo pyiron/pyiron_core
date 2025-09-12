@@ -191,9 +191,12 @@ class PyironFlowWidget:
                 logging.getLogger("pyiron_log").setLevel(logging.WARNING)
 
                 # print("command: ", change["new"])
+                print("parsing")
                 command, node_name = change["new"].split(":", 1)
                 command = command.strip()
+                print(f"command:{command}", command=="run")
                 node_name = node_name.rsplit("-", 1)[0].strip()
+                print(f"node_name:{node_name}")
 
                 ### ADDED FOR CUSTOM FEATURES
                 if command == "renameNode":
@@ -233,7 +236,7 @@ class PyironFlowWidget:
                     self.update_gui()  # ???
                 elif command == "selected_nodes":
                     self._selected_nodes = node_name.split(",")
-                    # print("selected_nodes: ", self._selected_nodes)
+                    print("selected_nodes: ", self._selected_nodes)
                 elif command == "groupSelectedNodes":
                     print("group_nodes: ", self._selected_nodes)
                     self.graph = group.create_group(self.graph, self._selected_nodes)
@@ -287,12 +290,14 @@ class PyironFlowWidget:
                         )
 
                     elif command == "run":
+                        print("Got run command")
                         self.accordion_widget.selected_index = 1
                         self.out_widget.clear_output()
                         print("Running node:", node.label)
                         out = run.pull_node(
                             base.get_updated_graph(self.graph), node.label, db=self.db
                         )
+                        print("Got out", out)
 
                         # display(out)
                     elif command in ["expand", "collapse"]:
