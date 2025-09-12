@@ -109,7 +109,11 @@ def CubicBulkCell(
     )
     from pyiron_core.pyiron_workflow import Workflow
 
-    if vacancy_index is not None and "va_i_" not in vacancy_index:
+    if (
+        vacancy_index is not None
+        and type(vacancy_index) is not int
+        and "va_i_" not in vacancy_index
+    ):
         print("Vacancy Index: ", vacancy_index, type(vacancy_index))
         vacancy_index = int(vacancy_index)
     wf = Workflow("macro")
