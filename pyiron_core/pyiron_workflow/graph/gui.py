@@ -361,7 +361,10 @@ class PyironFlow:
         hash_nodes=False,
         gui_layout: GUILayout = GUILayout(),
         db: pyiron_database.PostgreSQLInstanceDatabase | None = None,
-        workflow_path: str = os.path.expanduser("~/pyiron_core.pyiron_workflows") # rooth path to directory where .json graph workflows are stored
+        workflow_path: str = os.path.expanduser(
+            "~/pyiron_core.pyiron_workflows"
+        ),  # rooth path to directory where .json graph workflows are stored
+        load_from_compact: bool = False,
     ):
 
         # create empty workflow directory if it does not exist
@@ -386,7 +389,9 @@ class PyironFlow:
         self.wf_widgets = list()  # list of PyironFlowWidget objects
         for wf in wf_list:
             if isinstance(wf, str):
-                wf = graph_json._load_graph(f"{workflow_path}/{wf}")
+                wf = graph_json._load_graph(
+                    f"{workflow_path}/{wf}", compact=load_from_compact
+                )
             self.wf_widgets.append(
                 PyironFlowWidget(
                     wf=wf,
