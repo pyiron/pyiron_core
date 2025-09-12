@@ -19,7 +19,7 @@ dependencies:
 - matplotlib =3.10.0
 - numpy =1.26.4
 - psycopg2 =2.9.9
-- pyiron_atomistics =0.6.25
+- pyiron_atomistics =0.7.17
 - pyiron-data =0.0.30
 - pyiron_lammps =0.4.1
 - sqlalchemy =2.0.38
