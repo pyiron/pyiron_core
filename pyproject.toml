@@ -43,7 +43,6 @@ dependencies = [
     "pyiron_lammps==0.4.1",
     "sqlalchemy==2.0.38",
     "structuretoolkit==0.0.32",
-    "tensorpotential==0.2.0",
     "traitlets==5.14.3",
 ]
 dynamic = ["version"]
