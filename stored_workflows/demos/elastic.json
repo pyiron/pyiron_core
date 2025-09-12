@@ -3,7 +3,7 @@
     "nodes": {
         "ComputeElasticConstants": {
             "id": "ComputeElasticConstants",
-            "import_path": "pyiron_nodes.atomistic.property.elastic.ComputeElasticConstants",
+            "import_path": "pyiron_core.pyiron_nodes.atomistic.property.elastic.ComputeElasticConstants",
             "label": "ComputeElasticConstants",
             "parent_id": null,
             "level": 0,
@@ -13,13 +13,13 @@
             "expanded": false,
             "node": {
                 "label": "ComputeElasticConstants",
-                "function": "pyiron_nodes.atomistic.property.elastic.ComputeElasticConstants",
+                "function": "pyiron_core.pyiron_nodes.atomistic.property.elastic.ComputeElasticConstants",
                 "inputs": {}
             }
         },
         "GRACE": {
             "id": "GRACE",
-            "import_path": "pyiron_nodes.atomistic.engine.ase.GRACE",
+            "import_path": "pyiron_core.pyiron_nodes.atomistic.engine.ase.GRACE",
             "label": "GRACE",
             "parent_id": null,
             "level": 0,
@@ -29,7 +29,7 @@
             "expanded": false,
             "node": {
                 "label": "GRACE",
-                "function": "pyiron_nodes.atomistic.engine.ase.GRACE",
+                "function": "pyiron_core.pyiron_nodes.atomistic.engine.ase.GRACE",
                 "inputs": {
                     "model": "GRACE-1L-MP-r6"
                 }
@@ -37,7 +37,7 @@
         },
         "InputElasticTensor": {
             "id": "InputElasticTensor",
-            "import_path": "pyiron_nodes.atomistic.property.elastic.InputElasticTensor",
+            "import_path": "pyiron_core.pyiron_nodes.atomistic.property.elastic.InputElasticTensor",
             "label": "InputElasticTensor",
             "parent_id": null,
             "level": 0,
@@ -47,13 +47,13 @@
             "expanded": false,
             "node": {
                 "label": "InputElasticTensor",
-                "function": "pyiron_nodes.atomistic.property.elastic.InputElasticTensor",
+                "function": "pyiron_core.pyiron_nodes.atomistic.property.elastic.InputElasticTensor",
                 "inputs": {}
             }
         },
         "DeJong": {
             "id": "DeJong",
-            "import_path": "pyiron_nodes.databases.elasticity.DeJong",
+            "import_path": "pyiron_core.pyiron_nodes.databases.elasticity.DeJong",
             "label": "DeJong",
             "parent_id": null,
             "level": 0,
@@ -63,13 +63,13 @@
             "expanded": false,
             "node": {
                 "label": "DeJong",
-                "function": "pyiron_nodes.databases.elasticity.DeJong",
+                "function": "pyiron_core.pyiron_nodes.databases.elasticity.DeJong",
                 "inputs": {}
             }
         },
         "GetColumnFromDataFrame": {
             "id": "GetColumnFromDataFrame",
-            "import_path": "pyiron_nodes.dataframe.GetColumnFromDataFrame",
+            "import_path": "pyiron_core.pyiron_nodes.dataframe.GetColumnFromDataFrame",
             "label": "GetColumnFromDataFrame",
             "parent_id": null,
             "level": 0,
@@ -79,7 +79,7 @@
             "expanded": false,
             "node": {
                 "label": "GetColumnFromDataFrame",
-                "function": "pyiron_nodes.dataframe.GetColumnFromDataFrame",
+                "function": "pyiron_core.pyiron_nodes.dataframe.GetColumnFromDataFrame",
                 "inputs": {
                     "column_name": "atoms"
                 }
@@ -87,7 +87,7 @@
         },
         "GetRowsFromDataFrame": {
             "id": "GetRowsFromDataFrame",
-            "import_path": "pyiron_nodes.dataframe.GetRowsFromDataFrame",
+            "import_path": "pyiron_core.pyiron_nodes.dataframe.GetRowsFromDataFrame",
             "label": "GetRowsFromDataFrame",
             "parent_id": null,
             "level": 0,
@@ -97,7 +97,7 @@
             "expanded": false,
             "node": {
                 "label": "GetRowsFromDataFrame",
-                "function": "pyiron_nodes.dataframe.GetRowsFromDataFrame",
+                "function": "pyiron_core.pyiron_nodes.dataframe.GetRowsFromDataFrame",
                 "inputs": {
                     "max_index": 20
                 }
@@ -105,7 +105,7 @@
         },
         "iterate": {
             "id": "iterate",
-            "import_path": "pyiron_nodes.controls.iterate",
+            "import_path": "pyiron_core.pyiron_nodes.controls.iterate",
             "label": "iterate",
             "parent_id": null,
             "level": 0,
@@ -115,7 +115,7 @@
             "expanded": false,
             "node": {
                 "label": "iterate",
-                "function": "pyiron_nodes.controls.iterate",
+                "function": "pyiron_core.pyiron_nodes.controls.iterate",
                 "inputs": {
                     "input_label": "structure"
                 }
@@ -123,7 +123,7 @@
         },
         "Code": {
             "id": "Code",
-            "import_path": "pyiron_nodes.controls.Code",
+            "import_path": "pyiron_core.pyiron_nodes.controls.Code",
             "label": "Code",
             "parent_id": null,
             "level": 0,
@@ -133,7 +133,7 @@
             "expanded": false,
             "node": {
                 "label": "Code",
-                "function": "pyiron_nodes.controls.Code",
+                "function": "pyiron_core.pyiron_nodes.controls.Code",
                 "inputs": {
                     "code": "[xx.BV for xx in x]"
                 }
@@ -141,7 +141,7 @@
         },
         "GetColumnFromDataFrame_1": {
             "id": "GetColumnFromDataFrame_1",
-            "import_path": "pyiron_nodes.dataframe.GetColumnFromDataFrame",
+            "import_path": "pyiron_core.pyiron_nodes.dataframe.GetColumnFromDataFrame",
             "label": "GetColumnFromDataFrame_1",
             "parent_id": null,
             "level": 0,
@@ -151,7 +151,7 @@
             "expanded": false,
             "node": {
                 "label": "GetColumnFromDataFrame_1",
-                "function": "pyiron_nodes.dataframe.GetColumnFromDataFrame",
+                "function": "pyiron_core.pyiron_nodes.dataframe.GetColumnFromDataFrame",
                 "inputs": {
                     "column_name": "K_Voigt"
                 }
@@ -159,7 +159,7 @@
         },
         "LinearFittingCurve": {
             "id": "LinearFittingCurve",
-            "import_path": "pyiron_nodes.plotting.LinearFittingCurve",
+            "import_path": "pyiron_core.pyiron_nodes.plotting.LinearFittingCurve",
             "label": "LinearFittingCurve",
             "parent_id": null,
             "level": 0,
@@ -169,11 +169,11 @@
             "expanded": false,
             "node": {
                 "label": "LinearFittingCurve",
-                "function": "pyiron_nodes.plotting.LinearFittingCurve",
+                "function": "pyiron_core.pyiron_nodes.plotting.LinearFittingCurve",
                 "inputs": {}
             }
         },
-        "_obj_type": "pyiron_workflow.api.serial.GraphNode"
+        "_obj_type": "pyiron_core.pyiron_workflow.api.serial.GraphNode"
     },
     "edges": {
         "values": [
@@ -238,6 +238,6 @@
                 "targetHandle": "y"
             }
         ],
-        "obj_type": "pyiron_workflow.api.serial.GraphEdge"
+        "obj_type": "pyiron_core.pyiron_workflow.api.serial.GraphEdge"
     }
 }

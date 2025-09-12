@@ -3,7 +3,7 @@
     "nodes": {
         "SolidFreeEnergyWithTemperature": {
             "id": "SolidFreeEnergyWithTemperature",
-            "import_path": "pyiron_nodes.atomistic.property.calphy.SolidFreeEnergyWithTemperature",
+            "import_path": "pyiron_core.pyiron_nodes.atomistic.property.calphy.SolidFreeEnergyWithTemperature",
             "label": "SolidFreeEnergyWithTemperature",
             "parent_id": null,
             "level": 0,
@@ -13,7 +13,7 @@
             "expanded": false,
             "node": {
                 "label": "SolidFreeEnergyWithTemperature",
-                "function": "pyiron_nodes.atomistic.property.calphy.SolidFreeEnergyWithTemperature",
+                "function": "pyiron_core.pyiron_nodes.atomistic.property.calphy.SolidFreeEnergyWithTemperature",
                 "inputs": {
                     "potential": "1995--Angelo-J-E--Ni-Al-H--LAMMPS--ipr1"
                 }
@@ -21,7 +21,7 @@
         },
         "InputClass": {
             "id": "InputClass",
-            "import_path": "pyiron_nodes.atomistic.property.calphy.InputClass",
+            "import_path": "pyiron_core.pyiron_nodes.atomistic.property.calphy.InputClass",
             "label": "InputClass",
             "parent_id": null,
             "level": 0,
@@ -31,13 +31,13 @@
             "expanded": false,
             "node": {
                 "label": "InputClass",
-                "function": "pyiron_nodes.atomistic.property.calphy.InputClass",
+                "function": "pyiron_core.pyiron_nodes.atomistic.property.calphy.InputClass",
                 "inputs": {}
             }
         },
         "CubicBulkCell": {
             "id": "CubicBulkCell",
-            "import_path": "pyiron_nodes.atomistic.structure.build.CubicBulkCell",
+            "import_path": "pyiron_core.pyiron_nodes.atomistic.structure.build.CubicBulkCell",
             "label": "CubicBulkCell",
             "parent_id": null,
             "level": 0,
@@ -47,7 +47,7 @@
             "expanded": false,
             "node": {
                 "label": "CubicBulkCell",
-                "function": "pyiron_nodes.atomistic.structure.build.CubicBulkCell",
+                "function": "pyiron_core.pyiron_nodes.atomistic.structure.build.CubicBulkCell",
                 "inputs": {
                     "element": "Al",
                     "cell_size": 3
@@ -56,7 +56,7 @@
         },
         "ListPotentials": {
             "id": "ListPotentials",
-            "import_path": "pyiron_nodes.atomistic.engine.lammps.ListPotentials",
+            "import_path": "pyiron_core.pyiron_nodes.atomistic.engine.lammps.ListPotentials",
             "label": "ListPotentials",
             "parent_id": null,
             "level": 0,
@@ -66,11 +66,11 @@
             "expanded": false,
             "node": {
                 "label": "ListPotentials",
-                "function": "pyiron_nodes.atomistic.engine.lammps.ListPotentials",
+                "function": "pyiron_core.pyiron_nodes.atomistic.engine.lammps.ListPotentials",
                 "inputs": {}
             }
         },
-        "_obj_type": "pyiron_workflow.api.serial.GraphNode"
+        "_obj_type": "pyiron_core.pyiron_workflow.api.serial.GraphNode"
     },
     "edges": {
         "values": [
@@ -93,6 +93,6 @@
                 "targetHandle": "structure"
             }
         ],
-        "obj_type": "pyiron_workflow.api.serial.GraphEdge"
+        "obj_type": "pyiron_core.pyiron_workflow.api.serial.GraphEdge"
     }
 }
