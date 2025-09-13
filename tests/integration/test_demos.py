@@ -30,6 +30,20 @@ class TestDemoWorkflows(unittest.TestCase):
         finally:
             pathlib.Path(fname).unlink()
 
+    def _mock_run(self, wf_name: str, node_name: str, port_name: str):
+        # Instantiate the gui like a user
+        pf = pc.PyironFlow([wf_name], workflow_path=DEMOS_DIR, load_from_compact=True)
+        # Mock a "run" click at the PyironFlowWidget level
+        pf.wf_widgets[0].on_value_change(
+            {"new": f"run: {node_name}", "old": None, "name": "mock"}
+        )
+        # The result gets passed directly to a display widget, and is hard to parse
+        # As a fallback, inspect the underlying graph
+        node_instance = pf.wf_widgets[0].graph.nodes[node_name].node
+        output_value = getattr(node_instance.outputs, port_name).value
+        # Return the target data
+        return output_value
+
     def test_loading(self):
         pc.PyironFlow(
             ALL_DEMOS,
@@ -41,17 +55,7 @@ class TestDemoWorkflows(unittest.TestCase):
         with self._download_then_delete(
                 "https://github.com/pyiron-workshop/DPG-tutorial-2025/raw/351eeca736cce45f9bc3bfca84ab05de049e38c2/data/MgCaFreeEnergies.pckl.gz"
         ) as _:
-            # Instantiate the gui like a user
-            pf = pc.PyironFlow(["landau"], workflow_path=DEMOS_DIR, load_from_compact=True)
-
-            # Mock a "run" click
-            pf.wf_widgets[0].on_value_change(
-                {"new": "run: CalcPhaseDiagram", "old": None, "name": "manual"}
-            )
-
-            # The result gets passed directly to a display widget, and is hard to parse
-            # As a fallback, inspect the underlying graph
-            output = pf.wf_widgets[0].graph.nodes["CalcPhaseDiagram"].node.outputs.df.value
+            output = self._mock_run("landau", "CalcPhaseDiagram", "df")
             tail = output.tail(3)
 
             # And compare it to results grabbed from a manual run where the plot is ok
@@ -84,11 +88,7 @@ class TestDemoWorkflows(unittest.TestCase):
         pyace is None, "pyace not available -- skipping linearfit test"
     )
     def test_linearfit(self):
-        pf = pc.PyironFlow(["linearfit"], workflow_path=DEMOS_DIR, load_from_compact=True)
-        pf.wf_widgets[0].on_value_change(
-            {"new": "run: PredictEnergiesAndForces", "old": None, "name": "manual"}
-        )
-        output = pf.wf_widgets[0].graph.nodes["PredictEnergiesAndForces"].node.outputs.data_dict.value
+        output = self._mock_run("linearfit", "PredictEnergiesAndForces", "data_dict")
 
         reference = {  # Last items of each entry from a manual run
             "reference_training_epa": np.array([-1.6219105069933333, -1.6426530701, -1.4760515700066668, -1.449002318375, -1.204447103705]),
