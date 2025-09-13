@@ -3,8 +3,14 @@ import pathlib
 import unittest
 import urllib
 
+import numpy as np
 import pandas as pd
 import pandas.testing as pdt
+
+try:
+    import pyace
+except ImportError:
+    pyace = None
 
 import pyiron_core as pc
 
@@ -73,3 +79,33 @@ class TestDemoWorkflows(unittest.TestCase):
                 atol=1e-4,
                 check_dtype=False
             )
+
+    @unittest.skipIf(
+        pyace is None, "pyace not available -- skipping linearfit test"
+    )
+    def test_linearfit(self):
+        pf = pc.PyironFlow(["linearfit"], workflow_path=DEMOS_DIR, load_from_compact=True)
+        pf.wf_widgets[0].on_value_change(
+            {"new": "run: PredictEnergiesAndForces", "old": None, "name": "manual"}
+        )
+        output = pf.wf_widgets[0].graph.nodes["PredictEnergiesAndForces"].node.outputs.data_dict.value
+
+        reference = {  # Last items of each entry from a manual run
+            "reference_training_epa": np.array([-1.6219105069933333, -1.6426530701, -1.4760515700066668, -1.449002318375, -1.204447103705]),
+            "reference_training_fpa": np.array([-0.00052099, -3.075e-05, 5.55e-06, 0.00052099, 3.075e-05]),
+            "predicted_training_epa": np.array([-1.782124353671963, -1.709263676346597, -1.6974051358740896, -1.6446346861135153, -1.1999858821779013]),
+            "predicted_training_fpa": np.array([-0.0006600464048357077, -5.380634712150788e-05, -4.127741166488192e-06, 0.0006600464048357077, 5.38063471215287e-05]),
+            "reference_testing_epa": np.array([-0.48387109904111114, -0.3011008274525, -0.8320895942100001, -0.257647389155, -0.27296485680125]),
+            "reference_testing_fpa": np.array([0.06379655, -1.23912384, -0.05524943, -0.03189827, -1.23912384]),
+            "predicted_testing_epa": np.array([-0.2911790725598916, -0.23546299226525025, -0.7422808416362213, -0.16393019733556505, -0.09089519915920707]),
+            "predicted_testing_fpa": np.array([-0.026306930659412288, -1.0806129186000701, 0.02278246992192133, 0.013153465125682134, -1.0806129185952347]),
+        }
+
+        for key, data in output.items():
+            expected = reference[key]
+            actual = data[-len(expected):]
+            with self.subTest(key):
+                self.assertTrue(
+                    np.allclose(expected, actual),
+                    msg=f"expected {expected}\ngot {actual}"
+                )
