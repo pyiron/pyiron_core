@@ -25,7 +25,7 @@ class TestDemoWorkflows(unittest.TestCase):
             pathlib.Path(fname).unlink()
 
     def test_loading(self):
-        pf = pc.PyironFlow(
+        pc.PyironFlow(
             ALL_DEMOS,
             workflow_path=DEMOS_DIR,
             load_from_compact=True,
