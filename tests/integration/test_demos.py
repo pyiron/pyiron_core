@@ -56,33 +56,33 @@ class TestDemoWorkflows(unittest.TestCase):
                 "https://github.com/pyiron-workshop/DPG-tutorial-2025/raw/351eeca736cce45f9bc3bfca84ab05de049e38c2/data/MgCaFreeEnergies.pckl.gz"
         ) as _:
             output = self._mock_run("landau", "CalcPhaseDiagram", "df")
-            tail = output.tail(3)
+        tail = output.tail(3)
 
-            # And compare it to results grabbed from a manual run where the plot is ok
-            expected = pd.DataFrame({
-                'T': [528.781028, 528.781028, 528.781028],
-                'phase': ['fcc Ca', 'liquid', 'Mg$_2$Ca'],  # Note the newline in the third entry
-                'phi': [-1.78757, -1.78757, -1.78757],
-                'mu': [-0.316953, -0.316953, -0.316953],
-                'c': [1.000000, 0.721217, 0.333333],
-                'stable': [True, True, True],
-                'border': [True, True, True],
-                'refined': ['delaunay-triple', 'delaunay-triple', 'delaunay-triple'],
-                'f': [-2.104523, -2.016162, -1.893221],
-                'f_excess': [0.000000, 0.029454, 0.070434]
-            })
+        # And compare it to results grabbed from a manual run where the plot is ok
+        expected = pd.DataFrame({
+            'T': [528.781028, 528.781028, 528.781028],
+            'phase': ['fcc Ca', 'liquid', 'Mg$_2$Ca'],  # Note the newline in the third entry
+            'phi': [-1.78757, -1.78757, -1.78757],
+            'mu': [-0.316953, -0.316953, -0.316953],
+            'c': [1.000000, 0.721217, 0.333333],
+            'stable': [True, True, True],
+            'border': [True, True, True],
+            'refined': ['delaunay-triple', 'delaunay-triple', 'delaunay-triple'],
+            'f': [-2.104523, -2.016162, -1.893221],
+            'f_excess': [0.000000, 0.029454, 0.070434]
+        })
 
 
-            expected_sorted = expected.sort_values(by=list(expected.columns)).reset_index(drop=True)
-            actual_sorted = tail.sort_values(by=list(tail.columns)).reset_index(drop=True)
+        expected_sorted = expected.sort_values(by=list(expected.columns)).reset_index(drop=True)
+        actual_sorted = tail.sort_values(by=list(tail.columns)).reset_index(drop=True)
 
-            pdt.assert_frame_equal(
-                expected_sorted,
-                actual_sorted,
-                rtol=1e-3,
-                atol=1e-4,
-                check_dtype=False
-            )
+        pdt.assert_frame_equal(
+            expected_sorted,
+            actual_sorted,
+            rtol=1e-3,
+            atol=1e-4,
+            check_dtype=False
+        )
 
     @unittest.skipIf(
         pyace is None, "pyace not available -- skipping linearfit test"
