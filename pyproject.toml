@@ -57,6 +57,14 @@ file = "LICENSE"
 Homepage = "https://pyiron.org/"
 Repository = "https://github.com/pyiron/pyiron_core"
 
+[project.optional-dependencies]
+demos = [
+    "grace-tensorpotential==0.5.1",
+    "pyace==0.3.1",
+]
+# some dependencies for demo workflows (stored_workflows/demos) are only available
+# for linux-64 and osx-64
+
 [tool.hatch.build]
 only-packages = true
 artifacts = [

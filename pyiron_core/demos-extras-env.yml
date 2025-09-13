@@ -1,0 +1,5 @@
+channels:
+- conda-forge
+dependencies:
+- grace-tensorpotential =0.5.1
+- pyace =0.3.1
