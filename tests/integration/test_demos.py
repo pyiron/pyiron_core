@@ -88,7 +88,10 @@ class TestDemoWorkflows(unittest.TestCase):
         pyace is None, "pyace not available -- skipping linearfit test"
     )
     def test_linearfit(self):
-        output = self._mock_run("linearfit", "PredictEnergiesAndForces", "data_dict")
+        with self._download_then_delete(
+                "https://github.com/pyiron-workshop/DPG-tutorial-2025/raw/351eeca736cce45f9bc3bfca84ab05de049e38c2/data/mgca.pckl.tgz"
+        ) as _:
+            output = self._mock_run("linearfit", "PredictEnergiesAndForces", "data_dict")
 
         reference = {  # Last items of each entry from a manual run
             "reference_training_epa": np.array([-1.6219105069933333, -1.6426530701, -1.4760515700066668, -1.449002318375, -1.204447103705]),
