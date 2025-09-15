@@ -59,12 +59,15 @@ class TestDemoWorkflows(unittest.TestCase):
     )
     def test_grace_minimize(self):
         output = self._mock_run("grace_minimize", "Minimize", "out")
-        print("BEGIN GRACE OUTPUT")
-        print("GRACE ENERGIES", output.energies_pot)
-        print("GRACE STRUCTURES", output.structures)
-        print("GRACE IS CONVERGED", output.is_converged)
-        print("GRACE ITER STEPS", output.iter_steps)
-        print("END GRACE OUTPUT")
+        reference_energies = [-398.1614752680032, -398.1970445514807]
+        reference_itersteps = 8
+
+        self.assertTrue(output.is_converged)
+        self.assertEqual(output.iter_steps, reference_itersteps)
+        self.assertTrue(
+            np.allclose(reference_energies, output.energies_pot),
+            msg=f"expected {reference_energies}\ngot {output.energies_pot}"
+        )
 
 
     def test_landau(self):
