@@ -1,27 +1,33 @@
 channels:
 - conda-forge
 dependencies:
+# Let's sort dependencies with comments -- but take the sorting with a grain of salt
+# Build and develop
 - hatchling =1.27.0
 - hatch-vcs =0.5.0
 - hatch-jupyter-builder >=0.5.0
-- papermill
+- papermill  # For testing notebooks generally
+# Platform (pyiron_core/pyiron_workflow, pyironflow, pyiron_database)
 - anywidget =0.9.18
-- ase =3.24.0
-- assyst =0.3.0
-- bayesian-optimization =2.0.3
 - black =25.1.0
-- calphy =1.3.13
 - cloudpickle =3.1.1
-- iprpy-data =2023.07.25
 - ipytree =0.2.2
 - ipywidgets =8.1.6
 - jupyterlab =4.4.1
+- numpy =1.26.4
+- sqlalchemy =2.0.38
+- traitlets =5.14.3
+# Nodes (pyiron_nodes)
+- ase =3.24.0
+- assyst =0.3.0
+- bayesian-optimization =2.0.3
+- calphy =1.3.13
+- iprpy-data =2023.07.25
 - lammps =2024.08.29=*openmpi*
 - landau =1.3.4
 - matgl =1.1.3
 - matplotlib =3.10.0
 - nglview =3.1.4
-- numpy =1.26.4
 - pandas =2.2.3
 - psycopg2 =2.9.9
 - pyiron_atomistics =0.7.18
@@ -34,6 +40,4 @@ dependencies:
 - scikit-learn =1.6.1
 - scipy =1.15.2
 - seaborn =0.13.2
-- sqlalchemy =2.0.38
 - structuretoolkit = 0.0.32
-- traitlets =5.14.3
