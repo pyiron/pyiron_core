@@ -54,6 +54,11 @@ class TestDemoWorkflows(unittest.TestCase):
             load_from_compact=True,
         )
 
+    def test_energy(self):
+        output = self._mock_run("energy", "GetEnergyLast", "energy_last")
+        reference_energy = -0.0015020475862299598
+        self.assertAlmostEqual(output, reference_energy)
+
     @unittest.skipIf(
         pyace is None, "pyace not available -- skipping grace_minimize test"
     )
