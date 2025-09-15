@@ -278,10 +278,7 @@ class TestDemoWorkflows(unittest.TestCase):
             np.allclose(reference_cell, output.cells[0]),
             msg=f"expected\n{reference_cell}\ngot\n{output.cells[0]}"
         )
-        self.assertTrue(
-            np.allclose(reference_initial_energy, output.energies_pot[0]),
-            msg=f"expected\n{reference_initial_energy}\ngot\n{output.energies_pot[0]}"
-        )
+        self.assertAlmostEqual(reference_initial_energy, output.energies_pot[0])
 
         # Finally, a bit of a physics comparison
         # What is the likelihood that the potential energies we obtained were drawn
