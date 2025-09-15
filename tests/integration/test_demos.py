@@ -262,12 +262,22 @@ class TestDemoWorkflows(unittest.TestCase):
             msg=f"expected\n{reference_initial_energy}\ngot\n{output.energies_pot[0]}"
         )
 
+        # Finally, a bit of a physics comparison
+        # What is the likelihood that the potential energies we obtained were drawn
+        # from the same distribution as the reference data?
         p_same_distribution = stats.mannwhitneyu(
             reference_energy[n_equilibration_steps:],
             output.energies_pot[n_equilibration_steps:],
             alternative="two-sided",
         ).pvalue
-        print("null p (same distribution): ", p_same_distribution)
-        print("Raw energy")
-        print(output.energies_pot)
-
+        six_sigma_p = 2.0e-09  # I didn't verify this, I just got ChatGPT to give me
+        # a table relating two-sided alternative Mann-Whitney U p-values to standard
+        # deviations of likelihood.
+        # A couple by-hand tests indicate that the odds of two samples of the same
+        # water simulation appear very unlikely to be from the same distribution
+        # (p = 1e-05 to 1e-06 seems to be the ballpark), but different physics (e.g.
+        # e.g. comparing total energy to potential energy) or complete nonsense (e.g.
+        # all 1's) gives p-values of 1e-20 and beyond.
+        # so let's be pretty generous and say we demand a 6-sigma result to claim the
+        # null hypothesis has been broken and the test has failed.
+        self.assertGreater(p_same_distribution, six_sigma_p)
