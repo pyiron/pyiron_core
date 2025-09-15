@@ -7,6 +7,7 @@ import urllib
 import numpy as np
 import pandas as pd
 import pandas.testing as pdt
+from scipy import stats
 
 try:
     import pyace
@@ -215,3 +216,58 @@ class TestDemoWorkflows(unittest.TestCase):
                 expected = getattr(reference, field.name)
                 got = getattr(output, field.name)
                 self.assertTrue(np.allclose(expected, got), msg=f"expected {expected}\ngot {got}")
+
+    def test_water(self):
+        output = self._mock_run("water", "Equilibrate", "out")
+
+        reference_cell = np.array([[1.71826948e+01, 1.05213661e-15, 1.05213661e-15],
+           [0.00000000e+00, 1.98408669e+01, 1.21490271e-15],
+           [0.00000000e+00, 0.00000000e+00, 4.16913430e+01]])
+        reference_initial_energy = 31.46838306
+        n_equilibration_steps = 10
+        reference_energy = np.array([ 31.46838306,  -4.26942597,  -8.0805482 , -12.90076907,
+           -16.59626162, -18.47873051, -18.93215519, -18.67742173,
+           -15.40624307, -16.3339607 , -15.76489409, -16.9078756 ,
+           -17.66525076, -16.80113781, -15.2462573 , -14.0982591 ,
+           -14.18508625, -13.6224965 , -14.5188483 , -12.92224425,
+           -12.56978264, -13.1520431 , -12.56133904, -14.46415631,
+           -13.17798482, -11.97324439, -11.19910964, -11.90843353,
+           -12.09170554, -12.8062513 , -12.85819809, -10.6408585 ,
+           -11.49414487, -10.38585455, -10.26564317, -13.25688849,
+           -11.77704207, -12.00399434, -11.03770623, -10.99755484,
+           -11.22154936, -11.34856006, -12.161935  , -11.74241786,
+           -11.00740265, -11.26740768, -12.61250859, -10.43336029,
+           -12.64427893, -13.44524596, -12.58108501, -11.86740602,
+           -10.17643539, -10.55642178,  -8.13795718,  -8.92421519,
+           -11.08234688,  -9.19346724,  -9.45115114,  -9.0158142 ,
+            -8.14580283,  -8.88854698, -10.55075374,  -8.21890427,
+            -9.11128619,  -8.21918011,  -7.46283417,  -8.04671325,
+            -9.83082643, -11.59542109,  -9.38027939,  -8.74295339,
+            -8.76248409,  -9.03951998,  -8.97056175,  -9.59879561,
+           -11.30991291,  -9.14053122,  -8.60409889, -10.40048267,
+            -9.87544651,  -9.00918605,  -9.58545053, -10.30768069,
+            -8.91142289, -10.37895725,  -9.60720873,  -9.40381222,
+           -11.48253315,  -8.87587232,  -8.6542851 , -10.44444786,
+           -11.08185074, -10.05379793, -10.43616253,  -8.2677656 ,
+            -9.8360291 ,  -9.38505847, -10.70454689, -11.89606576,
+           -11.70837562
+        ])
+
+        self.assertTrue(
+            np.allclose(reference_cell, output.cells[0]),
+            msg=f"expected\n{reference_cell}\ngot\n{output.cells[0]}"
+        )
+        self.assertTrue(
+            np.allclose(reference_initial_energy, output.energies_pot[0]),
+            msg=f"expected\n{reference_initial_energy}\ngot\n{output.energies_pot[0]}"
+        )
+
+        p_same_distribution = stats.mannwhitneyu(
+            reference_energy[n_equilibration_steps:],
+            output.energies_pot[n_equilibration_steps:],
+            alternative="two-sided",
+        ).pvalue
+        print("null p (same distribution): ", p_same_distribution)
+        print("Raw energy")
+        print(output.energies_pot)
+
