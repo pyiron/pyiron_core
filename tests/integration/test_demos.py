@@ -54,6 +54,19 @@ class TestDemoWorkflows(unittest.TestCase):
             load_from_compact=True,
         )
 
+    @unittest.skipIf(
+        pyace is None, "pyace not available -- skipping grace_minimize test"
+    )
+    def test_grace_minimize(self):
+        output = self._mock_run("grace_minimize", "Minimize", "out")
+        print("BEGIN GRACE OUTPUT")
+        print("GRACE ENERGIES", output.energies_pot)
+        print("GRACE STRUCTURES", output.structures)
+        print("GRACE IS CONVERGED", output.is_converged)
+        print("GRACE ITER STEPS", output.iter_steps)
+        print("END GRACE OUTPUT")
+
+
     def test_landau(self):
         with self._download_then_delete(
                 "https://github.com/pyiron-workshop/DPG-tutorial-2025/raw/351eeca736cce45f9bc3bfca84ab05de049e38c2/data/MgCaFreeEnergies.pckl.gz"
