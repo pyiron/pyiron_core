@@ -54,6 +54,12 @@ class TestDemoWorkflows(unittest.TestCase):
             load_from_compact=True,
         )
 
+    @unittest.skipIf(
+        True, "The elastic demo is not running -- https://github.com/pyiron/pyiron_core/issues/119"
+    )
+    def test_elastic(self):
+        raise NotImplementedError()
+
     def test_energy(self):
         output = self._mock_run("energy", "GetEnergyLast", "energy_last")
         reference_energy = -0.0015020475862299598
