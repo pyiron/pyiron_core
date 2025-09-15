@@ -54,6 +54,11 @@ class TestDemoWorkflows(unittest.TestCase):
             load_from_compact=True,
         )
 
+    def test_calphy(self):
+        output = self._mock_run("calphy", "SolidFreeEnergyWithTemperature", "f")
+        reference_f = np.load(pathlib.Path(__file__).parent.parent / "static" / "calphy_reference_f.npy")
+        self.assertTrue(np.allclose(reference_f, output))
+
     @unittest.skipIf(
         True, "The elastic demo is not running -- https://github.com/pyiron/pyiron_core/issues/119"
     )
