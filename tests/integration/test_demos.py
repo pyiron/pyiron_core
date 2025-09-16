@@ -62,6 +62,9 @@ class TestDemoWorkflows(unittest.TestCase):
         # And then run it as usual
         node_name = "SolidFreeEnergyWithTemperature"
         port_name = "f"
+        pf.wf_widgets[0].on_value_change(
+            {"new": f"run: {node_name}", "old": None, "name": "mock"}
+        )
         node_instance = pf.wf_widgets[0].graph.nodes[node_name].node
         output_value = getattr(node_instance.outputs, port_name).value
 
