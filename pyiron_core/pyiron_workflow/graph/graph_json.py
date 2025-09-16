@@ -1,6 +1,7 @@
 import json
 import pathlib
 
+from pyiron_core.pyiron_workflow import simple_workflow
 from pyiron_core.pyiron_workflow.graph import base
 
 
@@ -59,7 +60,7 @@ def _uncompact_graph_from_state(state: dict):
             # print(k, type(node_state))
             graph_node = base.GraphNode().__setstate__(node_state)
             if (graph_node.node is None) and (graph_node.import_path is not None):
-                node = base.Node().__setstate__(node_state["node"])
+                node = simple_workflow.Node().__setstate__(node_state["node"])
                 graph = base.add_node(graph, node, label=node.label)
                 graph = gui._mark_node_as_collapsed(graph, node.label)
             else:
