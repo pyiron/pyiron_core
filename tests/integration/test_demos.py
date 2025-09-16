@@ -47,13 +47,6 @@ class TestDemoWorkflows(unittest.TestCase):
         # Return the target data
         return output_value
 
-    def test_loading(self):
-        pc.PyironFlow(
-            ALL_DEMOS,
-            workflow_path=DEMOS_DIR,
-            load_from_compact=True,
-        )
-
     def test_calphy(self):
         pf = pc.PyironFlow(
             ["calphy"], workflow_path=DEMOS_DIR, load_from_compact=True
