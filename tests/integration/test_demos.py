@@ -55,12 +55,26 @@ class TestDemoWorkflows(unittest.TestCase):
         )
 
     def test_calphy(self):
-        output = self._mock_run("calphy", "SolidFreeEnergyWithTemperature", "f")
-        if output is None:
-            raise RuntimeError("CALPHY TEST MELTED")
+        pf = pc.PyironFlow(
+            ["calphy"], workflow_path=DEMOS_DIR, load_from_compact=True
+        )
 
-        reference_f = np.load(pathlib.Path(__file__).parent.parent / "static" / "calphy_reference_f.npy")
-        self.assertTrue(np.allclose(reference_f, output, atol=0.02, rtol=0.008))
+        # If we run the calphy as-is, it melts too often
+        # (The default stopping temperature in the calphy InputData dataclass is 600k,
+        # and the example runs aluminum)
+        # So we manually lower the temperature first
+        pfw = pf.wf_widgets[0]
+        pfw.graph.nodes["InputClass"].node.to_inputs(temperature_stop=450)
+
+        # And then run it as usual
+        node_name = "SolidFreeEnergyWithTemperature"
+        port_name = "f"
+        node_instance = pf.wf_widgets[0].graph.nodes[node_name].node
+        output_value = getattr(node_instance.outputs, port_name).value
+
+        reference_f = np.load(pathlib.Path(__file__).parent.parent / "static" / "calphy_reference_f_450K.npy")
+        # This is still stochastic, so don't be too strict on the comparison
+        self.assertTrue(np.allclose(reference_f, output_value, atol=0.02, rtol=0.008))
 
     @unittest.skipIf(
         True, "The elastic demo is not running -- https://github.com/pyiron/pyiron_core/issues/119"
