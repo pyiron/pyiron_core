@@ -2,6 +2,7 @@ import copy
 from typing import TypeAlias, List
 
 from pyiron_core.pyiron_workflow import simple_workflow
+from pyiron_core.pyiron_workflow.api import serial
 from pyiron_core.pyiron_workflow.graph import base, decorators, edges, labelling
 
 NodeIdLike: TypeAlias = list[str] | list[int] | tuple[str, ...] | tuple[int, ...]
@@ -37,6 +38,10 @@ def create_group(
     full_graph = base.copy_graph(full_graph)
     sub_graph = _get_subgraph(full_graph, node_ids, label)
     sub_graph_node = base.graph_to_node(sub_graph)
+    sub_graph_node.function = simple_workflow.DotDict(
+        name=label,
+        import_path=simple_workflow.get_import_path_from_type(serial.subgraph),
+    )
 
     # print("sub_graph: ", sub_graph.label, "_obj_type" in full_graph.nodes.__getstate__())
     full_graph.nodes[sub_graph.label] = base.GraphNode(
