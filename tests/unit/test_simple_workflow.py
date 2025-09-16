@@ -4,7 +4,7 @@ import time
 import unittest
 from collections import OrderedDict
 
-import pyiron_core.pyiron_database.instance_database as idb
+import pyiron_core.pyiron_database.api as pyiron_database
 from pyiron_core.pyiron_workflow.simple_workflow import (
     PORT_LABEL,
     Node,
@@ -140,7 +140,7 @@ class TestSimpleWorkflow(unittest.TestCase):
                     delta=t_sleep / 10.0,
                 )
             finally:
-                storage_location = idb.store_node_outputs(n)
+                storage_location = pyiron_database.store_node_outputs(n)
                 os.unlink(storage_location)
 
 

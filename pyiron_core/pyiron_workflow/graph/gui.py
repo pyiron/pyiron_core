@@ -12,9 +12,9 @@ import numpy as np
 import pandas as pd
 import pygments
 
+import pyiron_core.pyiron_database.api as pyiron_database
+import pyiron_core.pyironflow.api as pyironflow
 from IPython.display import display
-from pyiron_core.pyiron_database import instance_database as idb
-from pyiron_core import pyironflow
 
 from pyiron_core.pyiron_workflow import simple_workflow
 from pyiron_core.pyiron_workflow.graph import (
@@ -42,14 +42,14 @@ def create_db(
     port: int = 5432,
     database: str = "none",
 ):
-    import pyiron_core.pyiron_database.instance_database as idb
+    import pyiron_core.pyiron_database.api as pyiron_database
 
     if database == "none":
         database = user
 
     connection_str = f"postgresql://{user}:{password}@{host}:{port}/{database}"
 
-    db = idb.PostgreSQLInstanceDatabase(connection_str)
+    db = pyiron_database.PostgreSQLInstanceDatabase(connection_str)
     db.init()
 
     return db
@@ -119,7 +119,7 @@ class PyironFlowWidget:
         self.db = db
         self.workflow_path = workflow_path
 
-        self.flow_widget = pyironflow.reactflow.ReactFlowWidget(
+        self.flow_widget = pyironflow.ReactFlowWidget(
             layout={
                 "width": f"100%",
                 "height": f"{gui_layout.flow_widget_height}px",
@@ -137,7 +137,7 @@ class PyironFlowWidget:
         self.log_widget = widgets.Output(layout=layout_accordion_widgets)
 
         self.out_widget = widgets.Output(layout=layout_accordion_widgets)
-        self.tree_widget = pyironflow.treeview.TreeView(
+        self.tree_widget = pyironflow.TreeView(
             log=self.log_widget, layout=layout_accordion_widgets
         )
         self.tree_widget.flow_widget = self
@@ -351,6 +351,7 @@ class PyironFlowWidget:
 ############################################################################################################
 # pyironflow_widget
 ############################################################################################################
+############################################################################################################
 
 
 class PyironFlow:
@@ -359,7 +360,7 @@ class PyironFlow:
         wf_list=None,
         hash_nodes=False,
         gui_layout: GUILayout = GUILayout(),
-        db: idb.PostgreSQLInstanceDatabase | None = None,
+        db: pyiron_database.PostgreSQLInstanceDatabase | None = None,
         workflow_path: str = os.path.expanduser("~/pyiron_core.pyiron_workflows") # rooth path to directory where .json graph workflows are stored
     ):
 
@@ -897,7 +898,7 @@ class GuiGraph:
         and returns the widget for display.
         """
 
-        w = pyironflow.reactflow.ReactFlowWidget(
+        w = pyironflow.ReactFlowWidget(
             layout={
                 "width": f"{self._width}px",
                 "height": f"{self._height}px",
