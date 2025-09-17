@@ -1151,6 +1151,7 @@ def get_code_from_graph(
     code += f"    wf = Workflow('{graph.label}')\n"
     code += body_code
     code += f"\n    return {', '.join(returns)}\n"
+    code += f"{graph.label}._is_subgraph_code = True"
 
     return code
 
