@@ -26,6 +26,12 @@ jobs:
         with:
           node-version: "18"
 
+      - name: Write composite environment file
+        uses: pyiron/actions/write-environment@actions-4.0.8
+        with:
+          env-files: project-env.yml demos-extras-env.yml
+          output-env-file: environment.yml
+
       - name: Build environment from file
         uses: conda-incubator/setup-miniconda@v3
         with:
@@ -34,7 +40,7 @@ jobs:
           channels: conda-forge
           conda-remove-defaults: true
           channel-priority: strict
-          environment-file: project-env.yml
+          environment-file: environment.yml
         timeout-minutes: 5
 
       - name: Build package
@@ -43,11 +49,11 @@ jobs:
           pip install . --no-deps --no-build-isolation
         timeout-minutes: 4
 
-      - name: Run unit tests
+      - name: Run tests
         shell: bash -l {0}
         run: |
           python -m unittest discover -s tests -v
-        timeout-minutes: 1
+        timeout-minutes: 5
 
       - name: Execute notebooks
         shell: bash -l {0}
