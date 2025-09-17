@@ -74,13 +74,7 @@ class DotDict(collections.OrderedDict):
 # store and retrive types as str paths
 
 
-def get_import_path_from_type(obj):
-    module = obj.__module__ if hasattr(obj, "__module__") else obj.__class__.__module__
-    name = obj.__name__ if hasattr(obj, "__name__") else obj.__class__.__name__
-    path = f"{module}.{name}"
-    if path == "numpy.ndarray":
-        path = "numpy.array"
-    return path
+from pyiron_core.pyiron_workflow.graph.decorators import get_import_path_from_type
 
 
 def get_type_from_path(import_path, log=None):
