@@ -45,8 +45,10 @@ def subgraph():
     raise NotImplementedError(
         "Prior to leveraging this API, the reference JSON workflows used to test the "
         "project contained references to "
-        '`"function": "pyiron_core.pyiron_workflow.graph.base.subgraph"`. This is not defined '
-        "at the top level of the module, and thus not actually importable. Since it's "
-        "not actually importable, the code must not actually ever be importing it and "
-        "thus this exception should never be reached."
+        '`"function": "pyiron_core.pyiron_workflow.graph.base.subgraph"`, or whatever '
+        "the subgraph label was whenever the node being serialzed was a created group. "
+        "These are dynamically defined functions and not actually importable. Now, we "
+        "replace those with references to this static object. It never actually gets "
+        "imported, and exists merely to provide clarity for what the serialization "
+        "means when it puts a function path for a subgraph node."
     )
