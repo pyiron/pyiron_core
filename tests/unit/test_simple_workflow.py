@@ -17,7 +17,7 @@ from pyiron_core.pyiron_workflow.simple_workflow import (
     value_to_string,
 )
 
-from static import nodes
+from static import nodes, not_nodes
 
 
 @as_function_node
@@ -143,6 +143,24 @@ class TestSimpleWorkflow(unittest.TestCase):
                 storage_location = pyiron_database.store_node_outputs(n)
                 os.unlink(storage_location)
 
+    def test_decorator_name_mangling(self):
+        with self.subTest("Node classes should get mangled names"):
+            self.assertNotEqual(
+                not_nodes.Identity.__name__,
+                nodes.Identity.__name__,
+                msg="The decorated object should get a different name",
+            )
+            self.assertTrue(
+                nodes.Identity.__name__.startswith(not_nodes.Identity.__name__),
+                msg="The node class name should derive from the underlying class name"
+            )
+
+        with self.subTest("name/qualname alignment"):
+            self.assertEqual(
+                nodes.Identity.__name__,
+                nodes.Identity.__qualname__,
+                msg="For unqualified objects, name and qualname should match",
+            )
 
 class TestValueToString(unittest.TestCase):
     def test_int(self):
