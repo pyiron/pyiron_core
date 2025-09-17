@@ -14,7 +14,7 @@ import logging
 from typing import Any, Literal, TypeAlias, Union, get_type_hints, get_args, get_origin
 
 import pandas as pd
-from pyiron_core.pyiron_workflow import wf_graph_tools
+from pyiron_core.pyiron_workflow import imports, wf_graph_tools
 
 PORT_LABEL = "label"
 PORT_VALUE = "value"
@@ -72,11 +72,6 @@ class DotDict(collections.OrderedDict):
 
 
 # store and retrive types as str paths
-
-
-from pyiron_core.pyiron_workflow.graph.decorators import get_import_path_from_type
-
-
 def get_type_from_path(import_path, log=None):
     # Split the path into module and object part
     module_path, _, name = import_path.rpartition(".")
@@ -129,7 +124,7 @@ def extract_output_parameters_from_function(func):
 
     output_dict = dict()
     output_dict[PORT_LABEL] = return_names
-    output_dict[PORT_TYPE] = [get_import_path_from_type(t) for t in return_types]
+    output_dict[PORT_TYPE] = [imports.get_import_path_from_type(t) for t in return_types]
 
     return output_dict
 
@@ -588,7 +583,7 @@ class Node:
         # print("get_value: ", inp_type, type(inp_port))
         # this is the function that realizes nodes as inputs
         # -> analogous to higher order functions in functional programming"
-        # node_type_as_str = get_import_path_from_type(Node)
+        # node_type_as_str = imports.get_import_path_from_type(Node)
         if isinstance(inp_port, Node):
             # check whether input type is a node (provide node rather than node output value)
             if inp_type == "Node":  # node_type_as_str:
@@ -825,7 +820,7 @@ def get_node_from_path(import_path):
 
 
 def get_function_data(func: callable):
-    function = DotDict(name=func.__name__, import_path=get_import_path_from_type(func))
+    function = DotDict(name=func.__name__, import_path=imports.get_import_path_from_type(func))
     return function
 
 

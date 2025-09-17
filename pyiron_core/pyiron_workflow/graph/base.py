@@ -16,12 +16,11 @@ import textwrap
 from collections import defaultdict
 from typing import List, Tuple, Union, Optional
 
-from pyiron_core.pyiron_workflow import simple_workflow
+from pyiron_core.pyiron_workflow import imports, simple_workflow
 from pyiron_core.pyiron_workflow.graph.decorators import (
     NestedDict,
     NestedList,
     as_dotdict_dataclass,
-    get_import_path_from_type,
 )
 from pyiron_core.pyiron_workflow.graph.edges import Edges, GraphEdge
 from pyiron_core.pyiron_workflow.graph.labelling import (
@@ -311,7 +310,7 @@ def _add_node_instance(graph: Graph, node, label):
     new_graph = copy_graph(graph)
     new_graph.nodes[label] = GraphNode(
         id=label,
-        import_path=get_import_path_from_type(node._func),
+        import_path=imports.get_import_path_from_type(node._func),
         node=node,
         label=label,
         widget_type="customNode",
@@ -335,7 +334,7 @@ def _add_graph_instance(graph: Graph, sub_graph: Graph, label: str = None, node=
         # node = sub_graph.root_node
         import_path = None
     else:
-        import_path = get_import_path_from_type(node._func)
+        import_path = imports.get_import_path_from_type(node._func)
     new_graph.nodes[label] = GraphNode(
         id=label,
         import_path=import_path,
