@@ -59,9 +59,11 @@ class TestImports(unittest.TestCase):
             self.assertIs(
                 nodes.AddOne,
                 imports.get_object_from_path(
-                    f"{nodes.__name__}.{nodes.AddOne.__qualname__}"
+                    f"{nodes.__name__}.{nodes.AddOne()._func.__qualname__}"
                 ),
-                msg="Should be able to load nodes"
+                msg="Should be able to load nodes. Remember: nodes.AddOne.__name__ is "
+                "dynamically mangled by the decorator; Use the unchanged name of the "
+                "underlying function instead."
             )
 
             self.assertIs(
