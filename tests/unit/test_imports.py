@@ -54,3 +54,29 @@ class TestImports(unittest.TestCase):
                 imports.get_object_from_path("this_doesnt.exist", log=None),
                 msg="If the module is not importable module, we should return None",
             )
+
+        with self.subTest("Load objects that do exist"):
+            self.assertIs(
+                nodes.AddOne,
+                imports.get_object_from_path(
+                    f"{nodes.__name__}.{nodes.AddOne.__qualname__}"
+                ),
+                msg="Should be able to load nodes"
+            )
+
+            self.assertIs(
+                int,
+                imports.get_object_from_path(
+                    f"{int.__module__}.{int.__qualname__}"
+                ),
+                msg="Should be able to load built-ins"
+            )
+
+            self.assertIs(
+                nodes.SomethingNested.the_nested_thing,
+                imports.get_object_from_path(
+                    f"{nodes.__name__}."
+                    f"{nodes.SomethingNested.the_nested_thing.__qualname__}"
+                ),
+                msg="Should be able to load objects with non-trivial qualnames"
+            )
