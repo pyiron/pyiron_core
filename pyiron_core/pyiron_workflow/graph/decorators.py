@@ -18,9 +18,6 @@ import pandas as pd
 
 
 def get_import_path_from_type(obj):
-    if obj is None:
-        return None
-
     from pyiron_core.pyiron_workflow.api import serial
 
     module = obj.__module__ if hasattr(obj, "__module__") else obj.__class__.__module__
