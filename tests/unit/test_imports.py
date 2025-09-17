@@ -30,7 +30,7 @@ class TestImports(unittest.TestCase):
 
     def test_get_import_path_from_type(self):
         self.assertEqual(
-            f"{nodes.__name__}.{nodes.AddOne.__name__}",
+            f"{nodes.__name__}.{nodes.AddOne.__qualname__}",
             imports.get_import_path_from_type(nodes.AddOne),
             msg="Expect typical path for a typical import",
         )
@@ -47,3 +47,10 @@ class TestImports(unittest.TestCase):
             imports.get_import_path_from_type(nontrivial_qualname),
             msg="Expect typical path for objects with non-trivial qualnames",
         )
+
+    def test_get_object_from_path(self):
+        with self.subTest("Return None on a missing module"):
+            self.assertIsNone(
+                imports.get_object_from_path("this_doesnt.exist", log=None),
+                msg="If the module is not importable module, we should return None",
+            )
