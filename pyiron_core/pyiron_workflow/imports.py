@@ -1,4 +1,5 @@
 import importlib
+import typing
 
 
 def get_import_path_from_type(obj):
@@ -19,16 +20,22 @@ def get_import_path_from_type(obj):
 
 
 def get_object_from_path(import_path, log=None):
-    # Split the path into module and object part
-    module_path, _, name = import_path.rpartition(".")
-    # print('module_path: ', module_path)
-    # Import the module
     try:
-        module = importlib.import_module(module_path)
+        return _bagofholding_import_from_string(import_path)
     except ModuleNotFoundError as e:
         if log is not None:
             log.append_stderr(e)
         return None
-    # Get the object
-    object_from_path = getattr(module, name)
-    return object_from_path
+
+
+def _bagofholding_import_from_string(library_path: str) -> typing.Any:
+    # https://github.com/pyiron/bagofholding/blob/071aa2ebece51de0342f5ebd8d966f2bdc590527/bagofholding/retrieve.py#L13-L22
+    split_path = library_path.split(".", 1)
+    if len(split_path) == 1:
+        module_name, path = split_path[0], ""
+    else:
+        module_name, path = split_path
+    obj = importlib.import_module(module_name)
+    for k in path.split("."):
+        obj = getattr(obj, k)
+    return obj
