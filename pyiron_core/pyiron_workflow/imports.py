@@ -1,5 +1,17 @@
 import importlib
+import types
 import typing
+
+
+def _get_locally_defined_objects(module: types.ModuleType) -> list[object]:
+    """
+    Get everything defined locally in a module, avoiding things that are accessible
+    there but defined elsewhere.
+    """
+    return [
+        name for name in dir(module)
+        if getattr(getattr(module, name), "__module__", None) == module.__name__
+    ]
 
 
 def get_import_path_from_type(obj):
@@ -8,7 +20,7 @@ def get_import_path_from_type(obj):
     module = obj.__module__ if hasattr(obj, "__module__") else obj.__class__.__module__
     name = obj.__qualname__ if hasattr(obj, "__qualname__") else obj.__class__.__qualname__
 
-    if name in dir(serial) and getattr(serial, name).__module__ == serial.__name__:
+    if name in _get_locally_defined_objects(serial):
         return f"{serial.__name__}.{name}"
     elif hasattr(obj, "_is_subgraph_code"):
         return f"{serial.__name__}.subgraph"

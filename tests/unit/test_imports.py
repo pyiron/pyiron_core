@@ -12,6 +12,19 @@ def non_subgraph(): ...
 
 
 class TestImports(unittest.TestCase):
+    def test_get_locally_defined_objects(self):
+        self.assertListEqual(
+            [
+                imports._bagofholding_import_from_string.__name__,
+                imports._get_locally_defined_objects.__name__,
+                imports.get_import_path_from_type.__name__,
+                imports.get_object_from_path.__name__,
+            ],
+            imports._get_locally_defined_objects(imports),
+            msg="The reference list is just done by-hand; if this fails trivially"
+            "because the contents of the module change, just update it and move on."
+        )
+
     def test_subgraph_misdirection(self):
         api_path = f"{serial.__name__}.{serial.subgraph.__name__}"
 
