@@ -401,7 +401,7 @@ def _expand_node(graph, node_label: str):
             v.parent_id = (
                 node.label
             )  # set parent id, make assignment more robust (easy to confuse id and label)
-            v.level += 1
+            v.level = graph_node.level + 1
             new_graph.nodes[k] = v
 
         for edge in node.edges:

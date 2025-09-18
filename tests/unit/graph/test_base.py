@@ -70,5 +70,20 @@ class TestSaveLoad(unittest.TestCase):
             with contextlib.suppress(FileNotFoundError):
                 os.remove(fname)
 
+    def test_private_expand_node(self):
+        g = base.Graph("test")
+        g = base.add_node(g, serial.identity(label="n", x=0))
+        g = group.create_group(g, ["n"], label="subgraph")
+
+        with self.subTest("Level consistency"):
+            g_expanded = base._expand_node(g, "subgraph")
+            self.assertEqual(
+                g_expanded.nodes["subgraph"].level + 1,
+                g_expanded.nodes["subgraph"].graph.nodes["n"].level,
+                msg="Regardless of how many times the same node is expanded, the "
+                "children of the expanded node should always have a level one deeper "
+                "than their parent."
+            )
+
 
 
