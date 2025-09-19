@@ -422,8 +422,8 @@ class DataElement:
             if self.type == "builtins.NoneType":
                 # let the deserializer handle NoneType
                 return v
-            if self.type.endswith("_postfix"):
-                my_type = self.type.replace("_postfix", "")
+            if self.type.endswith(NODE_CLASS_NAME_POSTFIX):
+                my_type = self.type.replace(NODE_CLASS_NAME_POSTFIX, "")
                 # print('type: ', my_type, v)
                 return eval(my_type)().dataclass(**v["__getstate__"])
             return eval(self.type)(v)
@@ -874,14 +874,17 @@ def get_outputs_data(func, extract_output_parameters):
 NULL = object()
 
 
+NODE_CLASS_NAME_POSTFIX: str = "_postfix"  # For mangling node class names
+# to distinguish them from the name of the underlying function the node wraps
+
+
 def make_node_decorator(
-    inner_wrap_return_func, name_postfix, node_type="function_node"
+    inner_wrap_return_func, node_type="function_node"
 ):
     """Create a decorator for a function node.
 
     Args:
         inner_wrap_return_func (callable): A function that defines the return value of the inner_wrapper.
-        name_postfix (str): Post fix for the function name.
         node_type (str, optional): Node type. Defaults to "function_node".
 
     Returns:
@@ -936,8 +939,8 @@ def make_node_decorator(
 
             # if hasattr(func, "__wrapped__"):
             #     print('wrapped: ', func.__wrapped__)
-            inner_wrapper.__name__ += name_postfix
-            inner_wrapper.__qualname__ += name_postfix
+            inner_wrapper.__name__ += NODE_CLASS_NAME_POSTFIX
+            inner_wrapper.__qualname__ += NODE_CLASS_NAME_POSTFIX
 
             return inner_wrapper
 
@@ -968,7 +971,7 @@ def _return_as_function_node(
 
 
 as_function_node = make_node_decorator(
-    _return_as_function_node, "_postfix", "function_node"
+    _return_as_function_node, "function_node"
 )
 
 
@@ -1001,7 +1004,7 @@ def _return_as_inp_dataclass_node(
 
 
 as_inp_dataclass_node = make_node_decorator(
-    _return_as_inp_dataclass_node, "_postfix", "inp_dataclass_node"
+    _return_as_inp_dataclass_node, "inp_dataclass_node"
 )
 
 
@@ -1055,7 +1058,7 @@ def _return_as_out_dataclass_node(
 
 
 as_out_dataclass_node = make_node_decorator(
-    _return_as_out_dataclass_node, "_postfix", "out_dataclass_node"
+    _return_as_out_dataclass_node, "out_dataclass_node"
 )
 
 
@@ -1076,7 +1079,7 @@ def _return_as_macro_node(func, label, output_labels, node_type, *f_args, **f_kw
     return node
 
 
-as_macro_node = make_node_decorator(_return_as_macro_node, "_postfix", "macro_node")
+as_macro_node = make_node_decorator(_return_as_macro_node, "macro_node")
 
 
 WORKFLOW_DIR = "../pyiron_nodes/local_workflows"

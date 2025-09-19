@@ -57,7 +57,7 @@ class TestSimpleWorkflow(unittest.TestCase):
         def dummy_func():
             pass
 
-        decorator = make_node_decorator(dummy_func, "_postfix", "dummy_node")
+        decorator = make_node_decorator(dummy_func, "dummy_node")
         self.assertTrue(callable(decorator))
 
     def test_connections(self):
