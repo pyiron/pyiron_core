@@ -942,6 +942,7 @@ def make_node_decorator(
             # if hasattr(func, "__wrapped__"):
             #     print('wrapped: ', func.__wrapped__)
             inner_wrapper.__name__ += name_postfix
+            inner_wrapper.__qualname__ += name_postfix
 
             return inner_wrapper
 

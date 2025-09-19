@@ -17,7 +17,7 @@ from pyiron_core.pyiron_workflow.simple_workflow import (
     value_to_string,
 )
 
-from static.nodes import Identity, IdentityMacro
+from static import nodes, not_nodes
 
 
 @as_function_node
@@ -62,9 +62,9 @@ class TestSimpleWorkflow(unittest.TestCase):
 
     def test_connections(self):
         wf = Workflow("single_value")
-        wf.upstream = Identity(0)
-        wf.downstream_by_port = Identity(wf.upstream.outputs.x)
-        wf.downstream_by_node = Identity(wf.upstream)
+        wf.upstream = nodes.Identity(0)
+        wf.downstream_by_port = nodes.Identity(wf.upstream.outputs.x)
+        wf.downstream_by_node = nodes.Identity(wf.upstream)
 
         con_by_port = wf.downstream_by_port.inputs["x"].connections[0]
         con_by_node = wf.downstream_by_node.inputs["x"].connections[0]
@@ -97,7 +97,7 @@ class TestSimpleWorkflow(unittest.TestCase):
         )
 
     def test_simple_macro(self):
-        m = IdentityMacro(x=42)
+        m = nodes.IdentityMacro(x=42)
         out = m.run()
         self.assertTupleEqual(
             (42, 42),
@@ -143,6 +143,24 @@ class TestSimpleWorkflow(unittest.TestCase):
                 storage_location = pyiron_database.store_node_outputs(n)
                 os.unlink(storage_location)
 
+    def test_decorator_name_mangling(self):
+        with self.subTest("Node classes should get mangled names"):
+            self.assertNotEqual(
+                not_nodes.Identity.__name__,
+                nodes.Identity.__name__,
+                msg="The decorated object should get a different name",
+            )
+            self.assertTrue(
+                nodes.Identity.__name__.startswith(not_nodes.Identity.__name__),
+                msg="The node class name should derive from the underlying class name"
+            )
+
+        with self.subTest("name/qualname alignment"):
+            self.assertEqual(
+                nodes.Identity.__name__,
+                nodes.Identity.__qualname__,
+                msg="For unqualified objects, name and qualname should match",
+            )
 
 class TestValueToString(unittest.TestCase):
     def test_int(self):
