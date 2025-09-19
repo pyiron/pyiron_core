@@ -24,10 +24,10 @@ class TestGraphJson(unittest.TestCase):
             name = filepath.rsplit("/", 1)[-1]
             if name in skip:
                 continue
-            g = graph_json._load_graph(filename=name, workflow_dir=storage_directory, compact=False)
-            graph_json._save_graph(g, filename=name, workflow_dir=target_dir, compact=True)
+            g = graph_json._load_graph(filename=name, workflow_dir=storage_directory)
+            graph_json._save_graph(g, filename=name, workflow_dir=target_dir)
             try:
-                graph_json._load_graph(filename=name, workflow_dir=target_dir, compact=True)
+                graph_json._load_graph(filename=name, workflow_dir=target_dir)
                 print("Loaded", name)
             except Exception as e:
                 print(f"Failed to load {name}: {type(e)}: {e}")

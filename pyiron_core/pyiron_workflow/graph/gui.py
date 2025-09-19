@@ -363,7 +363,6 @@ class PyironFlow:
         workflow_path: str = os.path.expanduser(
             "~/pyiron_core.pyiron_workflows"
         ),  # rooth path to directory where .json graph workflows are stored
-        load_from_compact: bool = False,
     ):
 
         # create empty workflow directory if it does not exist
@@ -389,7 +388,7 @@ class PyironFlow:
         for wf in wf_list:
             if isinstance(wf, str):
                 wf = graph_json._load_graph(
-                    f"{workflow_path}/{wf}", compact=load_from_compact
+                    f"{workflow_path}/{wf}"
                 )
             self.wf_widgets.append(
                 PyironFlowWidget(
