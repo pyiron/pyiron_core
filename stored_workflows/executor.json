@@ -49,8 +49,7 @@
                 "label": "IterNode",
                 "function": "pyiron_core.pyiron_nodes.executors.IterNode",
                 "inputs": {
-                    "kwarg_name": "name",
-                    "max_workers": 2
+                    "kwarg_name": "name"
                 }
             }
         },
