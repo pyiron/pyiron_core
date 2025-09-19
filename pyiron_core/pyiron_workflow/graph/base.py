@@ -767,6 +767,7 @@ def collapse_node(
 
         # TODO: make the following recursive, i.e., also remove children of nodes in the collapsed graph
         new_graph = remove_hidden_nodes(new_graph, node_label)
+        new_graph = _remove_edges_to_hidden_nodes(new_graph)
 
     return new_graph
 

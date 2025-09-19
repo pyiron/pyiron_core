@@ -85,5 +85,36 @@ class TestSaveLoad(unittest.TestCase):
                 "than their parent."
             )
 
+    def test_collapse_node(self):
+        g = base.Graph("to_collapse")
+        g = base.add_node(g, serial.identity(label="n1", x=0))
+        g = base.add_node(g, serial.identity(label="n2"))
+        g = base.add_node(g, serial.identity(label="n3"))
+        g = base.add_edge(g, "n1", "n2", "x", "x")
+        g = base.add_edge(g, "n2", "n3", "x", "x")
+        g = group.create_group(g, ["n1", "n2"], label="group2")
+        gc = base.collapse_node(g, "group2")
+
+        for child_label in gc.nodes["group2"].graph.nodes:
+            self.assertIn(child_label, g.nodes, msg="Sanity check")
+            self.assertNotIn(
+                child_label,
+                gc.nodes,
+                msg="Collapsed nodes should purge collapsed children from the overall "
+                "graph",
+            )
+
+        for edge in gc.edges:
+            self.assertNotIn(
+                edge.source,
+                gc.nodes["group2"].graph.nodes,
+                msg="Purged nodes should not appear in outstanding edges",
+            )
+            self.assertNotIn(
+                edge.target,
+                gc.nodes["group2"].graph.nodes,
+                msg="Purged nodes should not appear in outstanding edges",
+            )
+
 
 
