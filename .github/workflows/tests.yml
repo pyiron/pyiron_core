@@ -7,7 +7,7 @@ jobs:
     services:
       postgres:
         image: postgres
-        env:  # Taken from pyiron_core.pyiron_workflow.util.LocalPostgres defaults
+        env:
           POSTGRES_USER: localuser
           POSTGRES_PASSWORD: none
           POSTGRES_DB: localdb
@@ -17,21 +17,21 @@ jobs:
           --health-timeout 5s
           --health-retries 5
         ports:
-          - 5432:5432  # Map container port to runner
+          - 5432:5432
+    strategy:
+      matrix:
+        task: [tests, notebooks]
     steps:
       - uses: actions/checkout@v4
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "18"
-
       - name: Write composite environment file
         uses: pyiron/actions/write-environment@actions-4.0.8
         with:
           env-files: project-env.yml demos-extras-env.yml
           output-env-file: environment.yml
-
       - name: Build environment from file
         uses: conda-incubator/setup-miniconda@v3
         with:
@@ -42,24 +42,20 @@ jobs:
           channel-priority: strict
           environment-file: environment.yml
         timeout-minutes: 5
-
       - name: Build package
         shell: bash -l {0}
-        run: |
-          pip install . --no-deps --no-build-isolation
+        run: pip install . --no-deps --no-build-isolation
         timeout-minutes: 4
-
       - name: Run tests
+        if: matrix.task == 'tests'
         shell: bash -l {0}
-        run: |
-          python -m unittest discover -s tests -v
+        run: python -m unittest discover -s tests -v
         timeout-minutes: 5
-
       - name: Execute notebooks
+        if: matrix.task == 'notebooks'
         shell: bash -l {0}
         run: |
           failed_notebooks=()
-    
           for notebook in ./notebooks/running/*.ipynb; do
             echo "Executing: $notebook"
             if papermill "$notebook" "$notebook"; then
@@ -69,7 +65,6 @@ jobs:
               failed_notebooks+=("$notebook")
             fi
           done
-          
           if [ ${#failed_notebooks[@]} -ne 0 ]; then
             echo "Failed notebooks: ${failed_notebooks[*]}"
             exit 1
