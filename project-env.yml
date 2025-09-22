@@ -22,6 +22,7 @@ dependencies:
 - assyst =0.3.0
 - bayesian-optimization =2.0.3
 - calphy =1.3.13
+- grace-tensorpotential =0.5.1
 - iprpy-data =2023.07.25
 - lammps =2024.08.29=*openmpi*
 - landau =1.3.4
@@ -34,6 +35,7 @@ dependencies:
 - pyiron_base =0.14.3
 - pyiron-data =0.0.30
 - pyiron_lammps =0.4.1
+- python-ace =0.3.1
 - python-ternary =1.0.8
 - pyxtal =1.1.0
 - scikit-image =0.25.2
