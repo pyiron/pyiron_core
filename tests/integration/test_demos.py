@@ -83,9 +83,6 @@ class TestDemoWorkflows(unittest.TestCase):
         reference_energy = -0.0015020475862299598
         self.assertAlmostEqual(output, reference_energy)
 
-    @unittest.skipIf(
-        pyace is None, "pyace not available -- skipping grace_minimize test"
-    )
     def test_grace_minimize(self):
         output = self._mock_run("grace_minimize", "Minimize", "out")
         reference_energies = [-398.1614752680032, -398.1970445514807]
@@ -132,9 +129,6 @@ class TestDemoWorkflows(unittest.TestCase):
             check_dtype=False
         )
 
-    @unittest.skipIf(
-        pyace is None, "pyace not available -- skipping linearfit test"
-    )
     def test_linearfit(self):
         with self._download_then_delete(
                 "https://github.com/pyiron-workshop/DPG-tutorial-2025/raw/351eeca736cce45f9bc3bfca84ab05de049e38c2/data/mgca.pckl.tgz"
