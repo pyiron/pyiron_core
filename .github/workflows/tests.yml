@@ -23,7 +23,7 @@ jobs:
           git add .binder/environment.yml
           git commit -m "[dependabot skip] Update env file" -a
       - name: push
-        if: steps.commit-docs-env.outcome == 'success'  # But only push if we made it here without continue-on-error
+        if: steps.commit-binder-env.outcome == 'success'  # But only push if we made it here without continue-on-error
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
