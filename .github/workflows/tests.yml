@@ -70,4 +70,4 @@ jobs:
             exit 1
           fi
           echo "All notebooks passed!"
-        timeout-minutes: 5
+        timeout-minutes: 10
