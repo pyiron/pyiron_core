@@ -407,7 +407,7 @@ class DataElement:
         if not self.connected:
             return []
         upstream_node: Node
-        upstream_port_lable: str
+        upstream_port_label: str
         if isinstance(self.value, Port):
             upstream_node = self.value.node
             upstream_port_label = self.value.label
