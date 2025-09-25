@@ -15,6 +15,7 @@ import importlib
 import textwrap
 from collections import defaultdict
 from typing import List, Optional, Tuple, Union  # noqa: F401
+
 # We need Optional for later execking of code strings
 
 from pyiron_core.pyiron_workflow import imports, simple_workflow
