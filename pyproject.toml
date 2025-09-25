@@ -107,7 +107,7 @@ extend-exclude = '''
 
 [tool.ruff]
 exclude = [
-    "notebooks/development/",
+    "notebooks/",
     "devbooks/",
 ]
 
