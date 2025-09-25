@@ -73,15 +73,15 @@ def PlotAtomsCells(
     N = np.array([len(s) for s in structures])
     C = np.array([s.cell.array for s in structures])
 
-    # def get_angle(cell, idx=0):
-    get_angle = lambda cell, idx=0: np.arccos(
+    def get_angle(cell, idx):
+        return np.arccos(
         np.dot(cell[idx], cell[(idx + 1) % 3])
         / np.linalg.norm(cell[idx])
         / np.linalg.norm(cell[(idx + 1) % 3])
     )
 
-    # def extract(n, c):
-    extract = lambda n, c: {
+    def extract(c):
+        return {
         "a": np.linalg.norm(c[0]),
         "b": np.linalg.norm(c[1]),
         "c": np.linalg.norm(c[2]),
@@ -90,7 +90,7 @@ def PlotAtomsCells(
         "gamma": get_angle(c, 2),
     }
 
-    df = pd.DataFrame([extract(n, c) for n, c in zip(N, C)])
+    df = pd.DataFrame([extract(c) for c in C])
     df["V"] = np.linalg.det(C)
     df["N"] = N
     if angle_in_degrees:
