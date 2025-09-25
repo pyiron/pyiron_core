@@ -234,8 +234,8 @@ def ReadPickledDatasetAsDataframe(
 
 @as_function_node
 def ParameterizePotentialConfig(
-    nrad_max: list = [15, 6, 4, 1],
-    l_max: list = [0, 6, 5, 1],
+    nrad_max: tuple | list = (15, 6, 4, 1),
+    l_max: tuple | list = (0, 6, 5, 1),
     # number_of_functions_per_element: int | None = None,
     number_of_functions_per_element: int = 10,
     rcut: float = 7.0,
@@ -244,8 +244,8 @@ def ParameterizePotentialConfig(
     potential_config = PotentialConfig()
 
     potential_config.bonds.ALL.rcut = rcut
-    potential_config.functions.ALL.nradmax_by_orders = nrad_max
-    potential_config.functions.ALL.lmax_by_orders = l_max
+    potential_config.functions.ALL.nradmax_by_orders = list(nrad_max)
+    potential_config.functions.ALL.lmax_by_orders = list(l_max)
     potential_config.functions.number_of_functions_per_element = (
         number_of_functions_per_element
     )

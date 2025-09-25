@@ -144,7 +144,7 @@ def _edges_from_dict(edges_dict):
     return edges
 
 
-def get_nodes_from_wf(wf, keys_to_keep=["data/label", "data/import_path"]):
+def get_nodes_from_wf(wf, keys_to_keep=("data/label", "data/import_path")):
     key_mapping = {"data__label": "label", "data__import_path": "import_path"}
     nodes_dict = _filter_and_flatten_nested_dict_keys(
         pyironflow.get_nodes(wf), keys_to_keep

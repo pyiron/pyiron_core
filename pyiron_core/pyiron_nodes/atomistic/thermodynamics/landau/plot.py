@@ -14,7 +14,7 @@ def plot_phase_diagram(
     alpha=0.1,
     element=None,
     min_c_width=5e-3,
-    color_override: dict[str, str] = {},
+    color_override: dict[str, str] | None = None,
     tielines=False,
     poly_method: Literal["concave", "segments"] = "concave",
     ax=None,
@@ -60,6 +60,7 @@ def plot_phase_diagram(
     color_map = dict(
         zip(df.phase.unique(), sns.palettes.SEABORN_PALETTES["pastel"], strict=False)
     )
+    color_override = {} if color_override is None else color_override
     color_override = {p: c for p, c in color_override.items() if p in color_map}
 
     duplicates_map = {c: color_map[o] for o, c in color_override.items()}

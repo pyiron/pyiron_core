@@ -313,11 +313,15 @@ def add_field(data, **kwargs):
 class Attribute:
     # TODO: add read_only option (modify via explicit update method)
     def __init__(
-        self, dataset: dict, label: str, callbacks: dict = {}, read_only: bool = False
+        self,
+        dataset: dict,
+        label: str,
+        callbacks: dict | None = None,
+        read_only: bool = False,
     ):
         self.__dataset = dataset
         self.__label = label
-        self.__callbacks = callbacks
+        self.__callbacks = {} if callbacks is None else callbacks
         self.__read_only = read_only
 
     @property

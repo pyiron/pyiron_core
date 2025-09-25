@@ -33,7 +33,7 @@ def CreateVacancy(structure, index: Optional[int] = None):
 def RotateAxisAngle(
     structure: Atoms,
     angle: float | int = 0,
-    axis: list = [0, 0, 1],
+    axis: list | str | tuple = (0, 0, 1),
     center=(0, 0, 0),
     rotate_cell: bool = False,
 ):

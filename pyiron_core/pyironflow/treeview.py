@@ -205,12 +205,12 @@ class TreeView:
     @staticmethod
     def list_pyiron_nodes(
         file_name,
-        decorators=[
+        decorators=(
             "as_function_node",
             "as_macro_node",
             "as_inp_dataclass_node",
             "as_out_dataclass_node",
-        ],
+        ),
     ):
         """
         This function reads a Python code file and looks for any assignments
