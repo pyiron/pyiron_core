@@ -73,7 +73,7 @@ def plot_phase_diagram(
     # Polygon construction
     if "refined" in df.columns and poly_method == "segments":
         df.loc[:, "phase"] = df.phase_id
-        tdf = get_transitions(df)
+        tdf = landau.plot.get_transitions(df)
         tdf["phase_unit"] = tdf.phase.str.rsplit("_", n=1).map(lambda x: int(x[1]))
         tdf["phase"] = tdf.phase.str.rsplit("_", n=1).map(lambda x: x[0])
         polys = tdf.groupby(["phase", "phase_unit"]).apply(
@@ -99,7 +99,7 @@ def plot_phase_diagram(
     # Tielines
     if tielines:
         if "refined" in df.columns:
-            tdf = get_transitions(df)
+            tdf = landau.plot.get_transitions(df)
 
             def plot_tie(dd):
                 Tmin = dd["T"].min()
