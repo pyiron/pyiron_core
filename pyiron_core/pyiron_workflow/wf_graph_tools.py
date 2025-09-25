@@ -61,14 +61,13 @@ To use this module, simply import it and access the various functions and tools 
     sorted_graph = gt.topological_sort(graph)
 """
 
-from collections import defaultdict
 import dataclasses
-import pathlib
 import json
+import pathlib
+from collections import defaultdict
+from typing import TYPE_CHECKING, List, Tuple
 
 import pyiron_core.pyironflow.api as pyironflow
-
-from typing import TYPE_CHECKING, List, Tuple
 
 if TYPE_CHECKING:
     from pyiron_core.pyiron_workflow import Workflow

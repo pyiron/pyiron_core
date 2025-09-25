@@ -1,12 +1,12 @@
-import numpy as np
-import landau
-from pyiron_core.pyiron_workflow import as_function_node, as_macro_node, Workflow
 from typing import Literal
+from warnings import warn
 
 import matplotlib.pyplot as plt
-import seaborn as sns
 import numpy as np
-from warnings import warn
+import seaborn as sns
+
+import landau
+from pyiron_core.pyiron_workflow import Workflow, as_function_node, as_macro_node
 
 
 def plot_phase_diagram(
@@ -159,9 +159,9 @@ def TransitionTemperature(
     dmu: float = 0,
     plot: bool = True,
 ) -> float:
-    import seaborn as sns
     import matplotlib.pyplot as plt
     import numpy as np
+    import seaborn as sns
     from IPython.display import display
 
     df = landau.calculate.calc_phase_diagram(
@@ -219,10 +219,11 @@ def guess_mu_range(phases, Tmax, samples):
         array of chemical potentials that likely cover the whole concentration space
     """
 
-    import landau
-    import scipy.optimize as so
-    import scipy.interpolate as si
     import numpy as np
+    import scipy.interpolate as si
+    import scipy.optimize as so
+
+    import landau
 
     # semigrand canonical "average" concentration
     # use this to avoid discontinuities and be phase agnostic
@@ -274,6 +275,7 @@ def CalcPhaseDiagram(
         dataframe with phase data
     """
     import matplotlib.pyplot as plt
+
     import landau
 
     if isinstance(chemical_potentials, int):
@@ -331,8 +333,8 @@ def PlotConcPhaseDiagram(
             will be plotted as a rectangle
     """
     import matplotlib.pyplot as plt
-    import seaborn as sns
     import numpy as np
+    import seaborn as sns
 
     # Create a clean figure and axis
     fig, ax = plt.subplots()
@@ -380,8 +382,8 @@ def PlotMuPhaseDiagram(phase_data):
     phase_data should originate from CalcPhaseDiagram.
     Returns a matplotlib Figure object.
     """
-    import seaborn as sns
     import matplotlib.pyplot as plt
+    import seaborn as sns
 
     fig, ax = plt.subplots()
 
@@ -409,8 +411,8 @@ def PlotIsotherms(phase_data):
     phase_data should originate from CalcPhaseDiagram.
     Returns a matplotlib Figure object.
     """
-    import seaborn as sns
     import matplotlib.pyplot as plt
+    import seaborn as sns
 
     fig, ax = plt.subplots()
 
@@ -430,8 +432,8 @@ def PlotPhiMuDiagram(phase_data):
     phase_data should originate from CalcPhaseDiagram.
     Returns a matplotlib Figure object.
     """
-    import seaborn as sns
     import matplotlib.pyplot as plt
+    import seaborn as sns
 
     fig, ax = plt.subplots()
 
@@ -453,8 +455,8 @@ def CheckTemperatureInterpolation(
     """Check and visualize temperature interpolation of line phase free energies.
     Returns a matplotlib Figure object.
     """
-    import numpy as np
     import matplotlib.pyplot as plt
+    import numpy as np
 
     if Tmin is None:
         Tmin = np.min(phase.temperatures) * 0.9

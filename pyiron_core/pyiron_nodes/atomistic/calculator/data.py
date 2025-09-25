@@ -1,14 +1,14 @@
 # from __future__ import annotations
 
-from dataclasses import field, dataclass
+from dataclasses import dataclass, field
 from typing import Optional
-import numpy as np
-from pyiron_core.pyiron_workflow.data_fields import DataArray, EmptyArrayField
 
+import numpy as np
 
 # from pyiron_core.pyiron_nodes.dev_tools import wf_data_class, wfMetaData
 # from pyiron_core.pyiron_nodes.development.node_dataclass import as_output_node
 from pyiron_core.pyiron_workflow import as_inp_dataclass_node, as_out_dataclass_node
+from pyiron_core.pyiron_workflow.data_fields import DataArray, EmptyArrayField
 
 
 # only conceptual, not truly implemented
@@ -32,8 +32,8 @@ class OutputSEFS:
 
 @as_out_dataclass_node
 class OutputCalcStatic:
-    from ase import Atoms
     import numpy as np
+    from ase import Atoms
 
     energy: Optional[float] = field(default=None, metadata=wfMetaData(log_level=0))
     force: Optional[np.ndarray] = field(default=None, metadata=wfMetaData(log_level=0))

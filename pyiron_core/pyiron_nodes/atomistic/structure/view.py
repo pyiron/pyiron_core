@@ -1,8 +1,9 @@
-from pyiron_core.pyiron_workflow import as_function_node
+from typing import Literal, Optional, Union
 
-from ase import Atoms as _Atoms
 import numpy as np
-from typing import Optional, Union, Literal
+from ase import Atoms as _Atoms
+
+from pyiron_core.pyiron_workflow import as_function_node
 
 
 @as_function_node("plot")

@@ -1,10 +1,9 @@
-from typing import Optional, TYPE_CHECKING
-from pyiron_core.pyiron_workflow.api.graph import Graph, GraphNode
+from typing import TYPE_CHECKING, Optional
 
 # import numpy as np
 # import pandas as pd
-
 from pyiron_core.pyiron_workflow import as_function_node
+from pyiron_core.pyiron_workflow.api.graph import Graph, GraphNode
 
 # if TYPE_CHECKING:
 #     from pyiron_core.pyiron_workflow.graph import Node, Graph
@@ -30,6 +29,7 @@ def LoadGraph(path: str):
         The deserialized workflow graph.
     """
     import os
+
     from pyiron_core.pyiron_workflow.api.graph import _load_graph
 
     # 1️⃣  Is the supplied path already absolute?
@@ -111,7 +111,8 @@ def NodeInput(node: GraphNode):
 @as_function_node
 def DisplayGraphAsJson(graph: Graph):
     import json
-    from IPython.display import display, JSON
+
+    from IPython.display import JSON, display
 
     graph_json = JSON(json.dumps(graph.__getstate__(), indent=2), exanded=True)
 
@@ -190,8 +191,8 @@ def GetFunctionFromNode(graph_node):
 @as_function_node
 def DisplayCode(code):
     from pygments import highlight
-    from pygments.lexers import Python2Lexer
     from pygments.formatters import TerminalFormatter
+    from pygments.lexers import Python2Lexer
 
     print(highlight(code, Python2Lexer(), TerminalFormatter()))
 

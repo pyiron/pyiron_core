@@ -3,10 +3,10 @@ from __future__ import annotations
 try:
     from sqlalchemy import (
         Column,
-        MetaData,
-        String,
         DateTime,
         Float,
+        MetaData,
+        String,
         Table,
         create_engine,
     )

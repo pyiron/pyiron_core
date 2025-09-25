@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
-from pyiron_core.pyiron_workflow import Workflow
-
 from ase import Atoms
 from ase.calculators.calculator import Calculator
+
+from pyiron_core.pyiron_workflow import Workflow
 
 
 class AseCalculatorConfig(ABC):
@@ -49,11 +49,11 @@ class GenericOptimizerSettings:
     force_tolerance: float = 1e-2
 
 
-from ase.filters import StrainFilter, FrechetCellFilter
-from ase.constraints import FixSymmetry, FixAtoms
+from enum import Enum
 
 import numpy as np
-from enum import Enum
+from ase.constraints import FixAtoms, FixSymmetry
+from ase.filters import FrechetCellFilter, StrainFilter
 
 
 class RelaxMode(Enum):
@@ -82,8 +82,8 @@ def Relax(
     opt: GenericOptimizerSettings.dataclass,
     structure: Atoms,
 ) -> Atoms:
-    from ase.optimize import LBFGS
     from ase.calculators.singlepoint import SinglePointCalculator
+    from ase.optimize import LBFGS
 
     mode = RelaxMode(mode)
 
@@ -115,8 +115,8 @@ def Relax(
     return relaxed_structure
 
 
-from matgl.ext.ase import M3GNetCalculator
 from matgl import load_model, models
+from matgl.ext.ase import M3GNetCalculator
 
 GPA2EVA3 = 0.006_241_509_074
 

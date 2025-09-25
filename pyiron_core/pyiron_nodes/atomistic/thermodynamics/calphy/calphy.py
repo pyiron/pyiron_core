@@ -1,17 +1,19 @@
-from dataclasses import dataclass, asdict, field
-from typing import Optional, Union, Tuple, List
-import numpy as np
 import os
 import random
 import string
+from dataclasses import asdict, dataclass, field
+from typing import List, Optional, Tuple, Union
+
+import numpy as np
+import pandas as pd
+from ase import Atoms
+
 from pyiron_core.pyiron_workflow import (
     as_function_node,
+    as_inp_dataclass_node,
     as_macro_node,
     as_out_dataclass_node,
-    as_inp_dataclass_node,
 )
-from ase import Atoms
-import pandas as pd
 
 
 @as_function_node("potentials")
@@ -219,8 +221,9 @@ def _prepare_potential_and_structure(potential, structure):
 
 
 def _prepare_input(inp, potential, structure, mode="fe", reference_phase="solid"):
-    from calphy.input import Calculation
     import os
+
+    from calphy.input import Calculation
 
     pair_style, pair_coeff, elements, masses, file_name = (
         _prepare_potential_and_structure(potential, structure)
@@ -275,8 +278,8 @@ def _prepare_input(inp, potential, structure, mode="fe", reference_phase="solid"
 
 
 def _run_cleanup(simfolder, lattice, delete_folder=False):
-    import shutil
     import os
+    import shutil
 
     os.remove(lattice)
     if delete_folder:
@@ -304,9 +307,10 @@ def SolidFreeEnergy(
     float
         Free energy in eV/atom
     """
-    from calphy.solid import Solid
-    from calphy.routines import routine_fe
     import os
+
+    from calphy.routines import routine_fe
+    from calphy.solid import Solid
 
     calc = _prepare_input(inp, potential, structure, mode="fe", reference_phase="solid")
     # os.chdir()
@@ -371,8 +375,8 @@ def SolidFreeEnergyWithTemp(
     Tuple[np.ndarray, np.ndarray]
         Temperature and free energy in K and eV/atom, respectively.
     """
-    from calphy.solid import Solid
     from calphy.routines import routine_ts
+    from calphy.solid import Solid
 
     calc = _prepare_input(inp, potential, structure, mode="ts", reference_phase="solid")
     simfolder = calc.create_folders()
@@ -468,8 +472,9 @@ def CalcPhaseTransformationTemp(
     float
         Phase transformation temperature
     """
-    import matplotlib.pyplot as plt
     import warnings
+
+    import matplotlib.pyplot as plt
 
     # do some fitting to determine temps
     t1min = np.min(temp_A)

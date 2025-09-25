@@ -1,5 +1,6 @@
-from pyiron_core.pyiron_workflow import as_function_node
 import numpy as np
+
+from pyiron_core.pyiron_workflow import as_function_node
 
 # workflow does not understand this
 # from typing import Any

@@ -1,14 +1,12 @@
 from __future__ import annotations
 
-from typing import Optional, TYPE_CHECKING
+from dataclasses import asdict
+from typing import TYPE_CHECKING, Optional
 
+# if TYPE_CHECKING:
+from ase import Atoms
+from pandas import DataFrame
 from pyiron_atomistics.lammps.control import LammpsControl
-from pyiron_core.pyiron_workflow import (
-    as_function_node,
-    as_out_dataclass_node,
-    as_macro_node,
-    as_inp_dataclass_node,
-)
 
 from pyiron_core.pyiron_nodes.atomistic.calculator.data import (
     # InputCalcMinimize,
@@ -17,11 +15,12 @@ from pyiron_core.pyiron_nodes.atomistic.calculator.data import (
     OutputCalcMD,
 )
 from pyiron_core.pyiron_nodes.dev_tools import FileObject, parse_input_kwargs
-from dataclasses import asdict
-
-# if TYPE_CHECKING:
-from ase import Atoms
-from pandas import DataFrame
+from pyiron_core.pyiron_workflow import (
+    as_function_node,
+    as_inp_dataclass_node,
+    as_macro_node,
+    as_out_dataclass_node,
+)
 
 as_inp_dataclass_node()
 
@@ -117,6 +116,7 @@ def InitLammps(
     create_dir: bool = True,
 ):
     import os
+
     from pyiron_atomistics.lammps.potential import LammpsPotential, LammpsPotentialFile
 
     # print('structure: ', structure)
@@ -233,9 +233,9 @@ def Collect(
     import numpy as np
 
     from pyiron_core.pyiron_nodes.atomistic.calculator.data import (
-        OutputCalcStatic,
-        OutputCalcMinimize,
         OutputCalcMD,
+        OutputCalcMinimize,
+        OutputCalcStatic,
     )
 
     log = out_log[0]

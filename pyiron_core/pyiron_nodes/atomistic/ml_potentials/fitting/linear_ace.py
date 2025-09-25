@@ -1,9 +1,14 @@
-from pyiron_core.pyiron_workflow import Workflow
-import pandas as pd
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from typing import Optional
-from pyiron_core.pyiron_workflow import as_function_node, as_inp_dataclass_node
+
 import numpy as np
+import pandas as pd
+
+from pyiron_core.pyiron_workflow import (
+    Workflow,
+    as_function_node,
+    as_inp_dataclass_node,
+)
 
 
 @as_inp_dataclass_node
@@ -75,8 +80,9 @@ def remove_none(d):
 @as_function_node("empty_basis_config")
 def CreateEmptyBasisFunctions(potential_config: PotentialConfig):
 
-    from pyace import create_multispecies_basis_config
     from dataclasses import asdict
+
+    from pyace import create_multispecies_basis_config
 
     potential_config_dict = remove_none(asdict(potential_config))
     bconf = create_multispecies_basis_config(potential_config_dict)
@@ -87,8 +93,8 @@ def CreateEmptyBasisFunctions(potential_config: PotentialConfig):
 @as_function_node
 def ReadPickledDatasetAsDataframe(file_path: str, compression: str = None):
 
-    from pyiron_atomistics import Atoms as pyironAtoms
     from ase.atoms import Atoms as aseAtoms
+    from pyiron_atomistics import Atoms as pyironAtoms
 
     df = pd.read_pickle(file_path, compression=compression)
 
@@ -248,9 +254,8 @@ def DesignMatrix(
         LinearACEDataset: The constructed design matrix for the training dataset.
     """
 
-    from pyace.linearacefit import LinearACEDataset
     from pyace import create_multispecies_basis_config
-
+    from pyace.linearacefit import LinearACEDataset
     from pyiron_snippets.logger import logger
 
     logger.setLevel(30)

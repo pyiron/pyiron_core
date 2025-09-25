@@ -1,8 +1,8 @@
 from typing import TYPE_CHECKING, Iterable
 
-from pyiron_core.pyiron_workflow import Workflow, as_function_node
-
 from ase import Atoms
+
+from pyiron_core.pyiron_workflow import Workflow, as_function_node
 
 # from matplotlib.axis import Axis
 
@@ -11,8 +11,8 @@ from ase import Atoms
 # def PlotSPG(structures: list[Atoms]) -> tuple[Axis, list[int]]:
 def PlotSPG(structures: list[Atoms]):
     """Plot a histogram of space groups in input list."""
-    from structuretoolkit.analyse import get_symmetry
     import matplotlib.pyplot as plt
+    from structuretoolkit.analyse import get_symmetry
 
     spacegroups = []
     for structure in structures:
@@ -62,9 +62,9 @@ def PlotAtomsCells(structures: list[Atoms], angle_in_degrees: bool = True):
                         - V: volume of the cell
                         - N: number of atoms in the cell
     """
-    import pandas as pd
     import matplotlib.pyplot as plt
     import numpy as np
+    import pandas as pd
 
     N = np.array([len(s) for s in structures])
     C = np.array([s.cell.array for s in structures])
@@ -133,9 +133,9 @@ def PlotDistances(
         structures (list of Atoms): structures to plot
         bins (int or iterable of floats): if int number of bins; if iterable of floats bin edges
     """
-    from structuretoolkit import get_neighbors
     import matplotlib.pyplot as plt
     import numpy as np
+    from structuretoolkit import get_neighbors
 
     distances = []
     for structure in structures:
@@ -167,9 +167,10 @@ def PlotConcentration(structures: list[Atoms]):
         structures (list of Atoms): structures to take concentrations of
     """
     from collections import Counter
+
     import matplotlib.pyplot as plt
-    import seaborn as sns
     import pandas as pd
+    import seaborn as sns
 
     symbols = [Counter(s.symbols) for s in structures]
     elements = sorted(set.union(*(set(s) for s in symbols)))

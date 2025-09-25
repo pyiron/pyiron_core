@@ -1,8 +1,10 @@
 from __future__ import annotations
 
-from pyiron_core.pyiron_workflow import as_function_node, as_macro_node
-from typing import Optional, Literal
+from typing import Literal, Optional
+
 from ase.atoms import Atoms
+
+from pyiron_core.pyiron_workflow import as_function_node, as_macro_node
 
 # from pyiron_core.pyiron_workflow.workflow import Workflow
 
@@ -68,12 +70,12 @@ def HighIndexSurface(
     Returns:
         slab: ase.atoms.Atoms instance Required surface
     """
-    from structuretoolkit.build.surface import get_high_index_surface_info
-    from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
-    from pyiron import ase_to_pyiron
-    from ase.build import bulk, surface
-    from structuretoolkit.common.pymatgen import ase_to_pymatgen, pymatgen_to_ase
     import numpy as np
+    from ase.build import bulk, surface
+    from pyiron import ase_to_pyiron
+    from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
+    from structuretoolkit.build.surface import get_high_index_surface_info
+    from structuretoolkit.common.pymatgen import ase_to_pymatgen, pymatgen_to_ase
 
     basis = bulk(
         name=element, crystalstructure=crystal_structure, a=lattice_constant, cubic=True
@@ -155,10 +157,8 @@ def Surface(
 
     """
     import types
+
     import numpy as np
-    from pyiron_atomistics.atomistics.structure.atoms import (
-        ase_to_pyiron,
-    )
     from ase.build import (
         add_adsorbate,
         add_vacuum,
@@ -182,6 +182,9 @@ def Surface(
     )
     from ase.build import (
         surface as ase_surf,
+    )
+    from pyiron_atomistics.atomistics.structure.atoms import (
+        ase_to_pyiron,
     )
 
     # https://gitlab.com/ase/ase/blob/master/ase/lattice/surface.py

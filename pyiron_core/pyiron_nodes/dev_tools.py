@@ -162,8 +162,9 @@ class MiniProject:
         return new
 
 
-from pyiron_base.storage.hdfio import ProjectHDFio
 import pathlib
+
+from pyiron_base.storage.hdfio import ProjectHDFio
 
 
 class DataStore:

@@ -1,8 +1,8 @@
-from ipytree import Tree, Node
-from pathlib import Path
 import ast
-
 from dataclasses import dataclass
+from pathlib import Path
+
+from ipytree import Node, Tree
 
 __author__ = "Joerg Neugebauer"
 __copyright__ = (

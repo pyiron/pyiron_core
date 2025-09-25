@@ -11,9 +11,10 @@ import functools
 import importlib
 import inspect
 import logging
-from typing import Any, Literal, TypeAlias, Union, get_type_hints, get_args, get_origin
+from typing import Any, Literal, TypeAlias, Union, get_args, get_origin, get_type_hints
 
 import pandas as pd
+
 from pyiron_core.pyiron_workflow import imports, wf_graph_tools
 
 PORT_LABEL = "label"
@@ -652,9 +653,10 @@ class Node:
         pass
 
     def run(self, db=None):
-        import pyiron_core.pyiron_database.api as pyiron_database
-        from datetime import datetime
         import getpass
+        from datetime import datetime
+
+        import pyiron_core.pyiron_database.api as pyiron_database
 
         if "store" in self.inputs.keys():
             if self.inputs.store.value:

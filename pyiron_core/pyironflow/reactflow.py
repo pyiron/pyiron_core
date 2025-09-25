@@ -14,8 +14,9 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     pass
 
-import anywidget
 import pathlib
+
+import anywidget
 import traitlets
 
 # import os

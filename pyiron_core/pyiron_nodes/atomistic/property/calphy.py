@@ -1,18 +1,20 @@
-from dataclasses import dataclass, asdict, field
-from typing import Optional, Union, Tuple, List
-import numpy as np
 import os
 import random
 import string
+import warnings
+from dataclasses import asdict, dataclass, field
+from typing import List, Optional, Tuple, Union
+
+import numpy as np
+import pandas as pd
+from ase import Atoms
+
 from pyiron_core.pyiron_workflow import (
+    Workflow,
     as_function_node,
     as_inp_dataclass_node,
     as_macro_node,
-    Workflow,
 )
-from ase import Atoms
-import pandas as pd
-import warnings
 
 
 @as_inp_dataclass_node
@@ -291,8 +293,8 @@ def SolidFreeEnergy(inp, structure: Atoms, potential: str) -> float:
     float
         Free energy in eV/atom
     """
-    from calphy.solid import Solid
     from calphy.routines import routine_fe
+    from calphy.solid import Solid
 
     calc = _prepare_input(inp, potential, structure, mode="fe", reference_phase="solid")
     simfolder = calc.create_folders()
@@ -355,8 +357,8 @@ def SolidFreeEnergyWithTemperature(
     Tuple[np.ndarray, np.ndarray]
         Temperature and free energy in K and eV/atom, respectively.
     """
-    from calphy.solid import Solid
     from calphy.routines import routine_ts
+    from calphy.solid import Solid
 
     calc = _prepare_input(inp, potential, structure, mode="ts", reference_phase="solid")
     simfolder = calc.create_folders()

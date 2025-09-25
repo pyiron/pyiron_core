@@ -1,6 +1,7 @@
 from ase import Atoms
-from pyiron_core.pyiron_workflow import as_function_node
+
 from pyiron_core.pyiron_nodes.atomistic.engine.generic import OutputEngine
+from pyiron_core.pyiron_workflow import as_function_node
 
 
 @as_function_node
@@ -9,10 +10,12 @@ def Static(
     engine=None,
 ):
     import numpy as np
+
     from pyiron_core.pyiron_nodes.atomistic.calculator.data import OutputCalcStaticList
 
     if engine is None:
         from ase.calculators.emt import EMT
+
         from pyiron_core.pyiron_nodes.atomistic.engine.generic import OutputEngine
 
         engine = OutputEngine(calculator=EMT())
@@ -44,14 +47,16 @@ def StaticEnergy(
 def Minimize(
     structure: Atoms = None, engine=None, fmax: float = 0.005, log_file: str = "tmp.log"
 ):
-    from ase.optimize import BFGS
     from ase.io.trajectory import Trajectory
+    from ase.optimize import BFGS
+
     from pyiron_core.pyiron_nodes.atomistic.calculator.data import OutputCalcStaticList
 
     # import numpy as np
 
     if engine is None:
         from ase.calculators.emt import EMT
+
         from pyiron_core.pyiron_nodes.atomistic.engine.generic import OutputEngine
 
         engine = OutputEngine(calculator=EMT())

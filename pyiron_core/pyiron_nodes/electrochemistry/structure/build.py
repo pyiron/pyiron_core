@@ -1,5 +1,6 @@
-from pyiron_core.pyiron_workflow import Workflow, as_function_node
 import ase.units as units
+
+from pyiron_core.pyiron_workflow import Workflow, as_function_node
 
 
 @as_function_node("water")
@@ -43,10 +44,10 @@ def add_water_film(
     density: float = 1.0e-24,
 ):
 
-    from ase.build import molecule
-    from pyiron_atomistics import ase_to_pyiron
     import ase.units as units
     import numpy as np
+    from ase.build import molecule
+    from pyiron_atomistics import ase_to_pyiron
 
     lx, ly = electrode.cell.diagonal()[:2]
     zmin = np.max(electrode.positions[:, 2])
@@ -88,8 +89,9 @@ def add_neon_layer(structure, d_eq: float, hydrophobic_gap: float = 1.0):
     Returns:
     ase.Atoms: The modified structure with a single layer of neon atoms.
     """
-    from pyiron_core.pyiron_nodes.atomistic.structure.build import Bulk, Surface
     import numpy as np
+
+    from pyiron_core.pyiron_nodes.atomistic.structure.build import Bulk, Surface
 
     # Get the maximum z value of an atom in the structure
     max_z = np.max(structure.get_positions()[:, 2])

@@ -1,5 +1,5 @@
 import copy
-from typing import TypeAlias, List
+from typing import List, TypeAlias
 
 from pyiron_core.pyiron_workflow import simple_workflow
 from pyiron_core.pyiron_workflow.graph import base, decorators, edges, labelling

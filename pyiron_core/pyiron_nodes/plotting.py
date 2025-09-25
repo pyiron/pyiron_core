@@ -4,7 +4,7 @@ For graphical representations of data.
 
 from __future__ import annotations
 
-from typing import Optional, Literal
+from typing import Literal, Optional
 
 import numpy as np
 import pandas as pd
@@ -63,8 +63,8 @@ def Scatter(
 def LinearFittingCurve(
     x: Optional[list | np.ndarray] = None, y: Optional[list | np.ndarray] = None
 ):
-    from matplotlib import pyplot as plt
     import numpy as np
+    from matplotlib import pyplot as plt
 
     rms = np.sqrt(np.var(x - y))
     correlation_coefficient = np.corrcoef(x, y)[0, 1]

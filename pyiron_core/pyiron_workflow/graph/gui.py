@@ -1,21 +1,20 @@
 import dataclasses
 import inspect
 import json
+import os
 import threading
 import time
 import warnings
-import os
 from typing import Optional, Union
 
 import ipywidgets as widgets
 import numpy as np
 import pandas as pd
 import pygments
+from IPython.display import display
 
 import pyiron_core.pyiron_database.api as pyiron_database
 import pyiron_core.pyironflow.api as pyironflow
-from IPython.display import display
-
 from pyiron_core.pyiron_workflow import simple_workflow
 from pyiron_core.pyiron_workflow.graph import (
     base,

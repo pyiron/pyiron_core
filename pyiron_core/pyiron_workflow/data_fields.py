@@ -12,9 +12,10 @@ Contents:
 - EmptyArrayField: Helper function that returns a dataclass field with an empty array default.
 """
 
-from typing import Union, Optional
-import numpy as np
 from dataclasses import field
+from typing import Optional, Union
+
+import numpy as np
 
 #: Type alias for a scalar numeric value (int or float).
 Scalar = Union[int, float]

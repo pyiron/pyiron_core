@@ -34,9 +34,11 @@ def IterNode(
 
     # TODO: add to node ._hash_parent (with hash of this node)
     from concurrent.futures import as_completed
-    from pyiron_core.pyiron_workflow.api.graph import run_node
     from copy import copy
+
     from pandas import DataFrame
+
+    from pyiron_core.pyiron_workflow.api.graph import run_node
 
     # import numpy as np
 

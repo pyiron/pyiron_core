@@ -2,9 +2,10 @@ from __future__ import annotations
 
 from typing import Optional
 
-from ase import Atoms
-from pyiron_core.pyiron_workflow import as_function_node, as_macro_node
 import numpy as np
+from ase import Atoms
+
+from pyiron_core.pyiron_workflow import as_function_node, as_macro_node
 
 
 @as_function_node
@@ -174,21 +175,27 @@ def FitDiffPotential(
     store: bool = True,
 ):
 
-    from pyiron_core.pyiron_workflow import Workflow
     from pyiron_core.pyiron_nodes.atomistic.ml_potentials.fitting.linearfit import (
         ReadPickledDatasetAsDataframe,
     )
-    from pyiron_core.pyiron_nodes.math import Linspace, Divide, DotProduct
     from pyiron_core.pyiron_nodes.atomistic.structure.calc import (
         LinearInterpolationDescriptor,
     )
     from pyiron_core.pyiron_nodes.dataframe import (
-        MergeDataFrames,
-        GetRowsFromDataFrame,
-        GetColumnFromDataFrame,
         ApplyFunctionToSeriesNew,
+        GetColumnFromDataFrame,
+        GetRowsFromDataFrame,
+        MergeDataFrames,
     )
-    from pyiron_core.pyiron_nodes.math import Subtract, PseudoInverse, Sum, DotProduct
+    from pyiron_core.pyiron_nodes.math import (
+        Divide,
+        DotProduct,
+        Linspace,
+        PseudoInverse,
+        Subtract,
+        Sum,
+    )
+    from pyiron_core.pyiron_workflow import Workflow
 
     wf = Workflow("assyst_linear_fit3")
 
@@ -281,19 +288,24 @@ def FitDiffPotential2(
     store: bool = True,
 ):
 
-    from pyiron_core.pyiron_workflow import Workflow
     from pyiron_core.pyiron_nodes.atomistic.ml_potentials.fitting.linearfit import (
         ReadPickledDatasetAsDataframe,
     )
-    from pyiron_core.pyiron_nodes.math import Divide, DotProduct
     from pyiron_core.pyiron_nodes.atomistic.structure.calc import SplineDescriptor
     from pyiron_core.pyiron_nodes.dataframe import (
-        MergeDataFrames,
-        GetRowsFromDataFrame,
-        GetColumnFromDataFrame,
         ApplyFunctionToSeriesNew,
+        GetColumnFromDataFrame,
+        GetRowsFromDataFrame,
+        MergeDataFrames,
     )
-    from pyiron_core.pyiron_nodes.math import Subtract, PseudoInverse, Sum, DotProduct
+    from pyiron_core.pyiron_nodes.math import (
+        Divide,
+        DotProduct,
+        PseudoInverse,
+        Subtract,
+        Sum,
+    )
+    from pyiron_core.pyiron_workflow import Workflow
 
     wf = Workflow("assyst_linear_fit3")
 

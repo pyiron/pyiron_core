@@ -1,9 +1,11 @@
-from pyiron_core.pyiron_workflow import Workflow, as_function_node
-import pandas as pd
-import numpy as np
-from dataclasses import dataclass, field, asdict
-from typing import Optional, List, Union
+from dataclasses import asdict, dataclass, field
+from typing import List, Optional, Union
+
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
+from pyiron_core.pyiron_workflow import Workflow, as_function_node
 
 
 @as_function_node
@@ -295,9 +297,8 @@ def RunLinearFit(
     store: bool = True,
 ):
 
-    from pyace.linearacefit import LinearACEFit, LinearACEDataset
     from pyace import create_multispecies_basis_config
-
+    from pyace.linearacefit import LinearACEDataset, LinearACEFit
     from pyiron_snippets.logger import logger
 
     logger.setLevel(30)
@@ -571,8 +572,8 @@ def PlotForcesHistogram(df: "pd.DataFrame", bins: int = 100, log_scale: bool = T
     fig : matplotlib.figure.Figure
         The generated histogram figure.
     """
-    import numpy as np
     import matplotlib.pyplot as plt
+    import numpy as np
 
     array = np.concatenate(df.forces.values).flatten()
 
@@ -728,9 +729,8 @@ def DesignMatrix(
         LinearACEDataset: The constructed design matrix for the training dataset.
     """
 
-    from pyace.linearacefit import LinearACEDataset
     from pyace import create_multispecies_basis_config
-
+    from pyace.linearacefit import LinearACEDataset
     from pyiron_snippets.logger import logger
 
     logger.setLevel(30)

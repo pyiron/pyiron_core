@@ -4,21 +4,19 @@ import os
 from collections.abc import Iterable
 from typing import Any
 
+from pyiron_core.pyiron_database.generic_storage import HDF5Storage, JSONGroup
+from pyiron_core.pyiron_database.obj_reconstruction.util import (
+    deserialize_obj,
+    get_type,
+    pickle_dump,
+    pickle_load,
+    recreate_obj,
+    serialize_obj,
+)
 from pyiron_core.pyiron_workflow import NOT_DATA, Node
 from pyiron_core.pyiron_workflow.api.graph import Graph, GraphEdge
 
-from pyiron_core.pyiron_database.generic_storage import HDF5Storage, JSONGroup
-from pyiron_core.pyiron_database.obj_reconstruction.util import (
-    get_type,
-    recreate_obj,
-    serialize_obj,
-    deserialize_obj,
-    pickle_dump,
-    pickle_load,
-)
-
 from .InstanceDatabase import InstanceDatabase
-
 
 PyironStoragePath: str = os.path.expanduser("~/.storage")
 # create storage path if it does not exist

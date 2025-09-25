@@ -16,7 +16,6 @@ from pyiron_core.pyiron_workflow.simple_workflow import (
     make_node_decorator,
     value_to_string,
 )
-
 from static import nodes, not_nodes
 
 

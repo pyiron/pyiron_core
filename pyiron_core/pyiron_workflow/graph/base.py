@@ -14,7 +14,7 @@ import dataclasses
 import importlib
 import textwrap
 from collections import defaultdict
-from typing import List, Tuple, Union, Optional
+from typing import List, Optional, Tuple, Union
 
 from pyiron_core.pyiron_workflow import imports, simple_workflow
 from pyiron_core.pyiron_workflow.graph.decorators import (
@@ -25,11 +25,11 @@ from pyiron_core.pyiron_workflow.graph.decorators import (
 from pyiron_core.pyiron_workflow.graph.edges import Edges, GraphEdge
 from pyiron_core.pyiron_workflow.graph.labelling import (
     concatenate,
+    handle_to_parent_label,
+    handle_to_port_label,
     is_virtual,
     is_virtual_input,
     is_virtual_output,
-    handle_to_port_label,
-    handle_to_parent_label,
     virtual_input_label,
     virtual_output_label,
 )

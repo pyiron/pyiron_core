@@ -1,6 +1,6 @@
-from typing import Any
-import pickle
 import codecs
+import pickle
+from typing import Any
 
 
 def get_type(cls: Any) -> tuple[str, str, str]:

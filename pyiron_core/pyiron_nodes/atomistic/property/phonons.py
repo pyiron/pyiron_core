@@ -2,20 +2,20 @@
 
 from dataclasses import asdict
 from typing import Optional
-import numpy as np
 
+import numpy as np
 from ase import Atoms
 from phonopy.api_phonopy import Phonopy
-from pyiron_core.pyiron_workflow import (
-    as_inp_dataclass_node,
-    as_out_dataclass_node,
-    as_function_node,
-    as_macro_node,
-)
 from structuretoolkit.common import atoms_to_phonopy, phonopy_to_atoms
 
 from pyiron_core.pyiron_nodes.atomistic.calculator.ase import Static
 from pyiron_core.pyiron_nodes.atomistic.engine.generic import OutputEngine
+from pyiron_core.pyiron_workflow import (
+    as_function_node,
+    as_inp_dataclass_node,
+    as_macro_node,
+    as_out_dataclass_node,
+)
 
 
 @as_function_node("phonopy")
@@ -55,15 +55,15 @@ def phonopy(
     GetThermalProperties__mesh="10",
 ):
 
-    from pyiron_core.pyiron_workflow import Workflow
     from pyiron_core.pyiron_nodes.atomistic.calculator.ase import Static
-    from pyiron_core.pyiron_nodes.atomistic.property.phonons import PhonopyObject
-    from pyiron_core.pyiron_nodes.atomistic.property.phonons import GenerateSupercells
-    from pyiron_core.pyiron_nodes.controls import iterate
-    from pyiron_core.pyiron_nodes.controls import GetAttribute
-    from pyiron_core.pyiron_nodes.controls import SetAttribute
-    from pyiron_core.pyiron_nodes.atomistic.property.phonons import GetDynamicalMatrix
-    from pyiron_core.pyiron_nodes.atomistic.property.phonons import GetThermalProperties
+    from pyiron_core.pyiron_nodes.atomistic.property.phonons import (
+        GenerateSupercells,
+        GetDynamicalMatrix,
+        GetThermalProperties,
+        PhonopyObject,
+    )
+    from pyiron_core.pyiron_nodes.controls import GetAttribute, SetAttribute, iterate
+    from pyiron_core.pyiron_workflow import Workflow
 
     if phonopy_parameters is None:
         phonopy_parameters = PhonopyParameters()
@@ -246,8 +246,8 @@ def GetThermalProperties(
 def GetAnalyticalFreeEnergy(
     nu, dos, temperatures, n_atoms: int = None, quantum: bool = True
 ):
-    from scipy.integrate import simpson
     from scipy.constants import physical_constants
+    from scipy.integrate import simpson
 
     KB = physical_constants["Boltzmann constant in eV/K"][0]
     H = physical_constants["Planck constant in eV/Hz"][0]

@@ -1,31 +1,36 @@
 from __future__ import annotations
 
-# Define functions needed to construct and utilize a hash based database for node storage
-# Could/should be later moved to pyiron_core.pyiron_workflows
-
-from sqlalchemy import Column, Integer, String, DateTime, JSON, Boolean
-from sqlalchemy import MetaData
-from sqlalchemy.orm import declarative_base
-from sqlalchemy import create_engine
-from sqlalchemy.engine import reflection
-
+import getpass
+import hashlib
+import importlib
+import json
+import os
+import sys
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 
-# from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy import text
-from dataclasses import dataclass
-
-import sqlalchemy
-import hashlib
-import json
 import cloudpickle as pickle
 import pandas as pd
-import os
-import sys
-import importlib
-import getpass
+import sqlalchemy
+
+# Define functions needed to construct and utilize a hash based database for node storage
+# Could/should be later moved to pyiron_core.pyiron_workflows
+from sqlalchemy import (
+    JSON,
+    Boolean,
+    Column,
+    DateTime,
+    Integer,
+    MetaData,
+    String,
+    create_engine,
+    text,
+)
+from sqlalchemy.engine import reflection
+
+# from sqlalchemy import create_engine
+from sqlalchemy.orm import declarative_base, sessionmaker
 
 username = getpass.getuser()
 # username = 'joerg'

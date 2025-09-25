@@ -1,16 +1,16 @@
-from dataclasses import dataclass, field
 from collections.abc import Generator, Sequence
-from numbers import Integral
+from dataclasses import dataclass, field
 from itertools import product
-
-from pyiron_core.pyiron_workflow import (
-    Workflow,
-    as_inp_dataclass_node,
-    as_function_node,
-)
+from numbers import Integral
 
 import pandas as pd
 from ase import Atoms
+
+from pyiron_core.pyiron_workflow import (
+    Workflow,
+    as_function_node,
+    as_inp_dataclass_node,
+)
 
 
 @dataclass(frozen=True)
@@ -98,6 +98,7 @@ class SpaceGroupInput:
 @as_function_node
 def SpaceGroupSampling(input: SpaceGroupInput) -> list[Atoms]:
     from warnings import catch_warnings
+
     from structuretoolkit.build.random import pyxtal
     from tqdm.auto import tqdm
 
@@ -148,8 +149,9 @@ def SaveStructures(structures: list[Atoms], filename: str):
         structures (list of Atoms): structures to save
         filename (str): path where the dataframe is written to
     """
-    import pandas as pd
     import os.path
+
+    import pandas as pd
 
     df = pd.DataFrame(
         [
