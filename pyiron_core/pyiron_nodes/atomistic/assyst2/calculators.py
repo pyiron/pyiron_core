@@ -27,6 +27,7 @@ class PawDftInput:
 @as_inp_dataclass_node
 class GpawInput(AseCalculatorConfig, PawDftInput):
     def get_calculator(self, use_symmetry=True):
+        import gpaw
         return gpaw.GPAW(
             xc="PBE",
             kpts=(1, 1, 1),
