@@ -70,7 +70,10 @@ class Replacer:
         else:
             import warnings
 
-            warnings.warn(f"Could not replace {self.node.label}, as it has no parent.")
+            warnings.warn(
+                f"Could not replace {self.node.label}, as it has no parent.",
+                stacklevel=2,
+            )
 
 
 def set_replacer(node, node_dict):

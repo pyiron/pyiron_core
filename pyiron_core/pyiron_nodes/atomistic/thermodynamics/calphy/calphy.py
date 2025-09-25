@@ -483,9 +483,9 @@ def CalcPhaseTransformationTemp(
 
     # warn about extrapolation
     if not t1min == t2min:
-        warnings.warn("free energy is being extrapolated!")
+        warnings.warn("free energy is being extrapolated!", stacklevel=2)
     if not t1max == t2max:
-        warnings.warn("free energy is being extrapolated!")
+        warnings.warn("free energy is being extrapolated!", stacklevel=2)
 
     # now fit
     f1fit = np.polyfit(temp_A, fe_A, fit_order)
@@ -502,9 +502,13 @@ def CalcPhaseTransformationTemp(
 
     # warn if the temperature is shady
     if np.abs(transition_temp - tmin) < 1e-3:
-        warnings.warn("It is likely there is no intersection of free energies")
+        warnings.warn(
+            "It is likely there is no intersection of free energies", stacklevel=2
+        )
     elif np.abs(transition_temp - tmax) < 1e-3:
-        warnings.warn("It is likely there is no intersection of free energies")
+        warnings.warn(
+            "It is likely there is no intersection of free energies", stacklevel=2
+        )
 
     # plot
     c1lo = "#ef9a9a"

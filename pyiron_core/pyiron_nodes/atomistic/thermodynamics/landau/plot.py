@@ -70,7 +70,10 @@ def plot_phase_diagram(
     # Cluster the phase data
     df = cluster_phase(df)
     if (df.phase_unit == -1).any():
-        warn("Clustering of phase points failed for some points, dropping them.")
+        warn(
+            "Clustering of phase points failed for some points, dropping them.",
+            stacklevel=2,
+        )
         df = df.query("phase_unit >= 0")
 
     # Polygon construction

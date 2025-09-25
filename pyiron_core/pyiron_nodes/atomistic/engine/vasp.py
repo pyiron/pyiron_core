@@ -249,7 +249,8 @@ def create_WorkingDirectory(workdir: str, quiet: bool = False) -> str:
         logger.info(f"made directory '{workdir}'")
     else:
         warnings.warn(
-            f"Directory '{workdir}' already exists. Existing files may be overwritten."
+            f"Directory '{workdir}' already exists. Existing files may be overwritten.",
+            stacklevel=2,
         )
     return workdir
 
