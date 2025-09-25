@@ -510,16 +510,8 @@ class Node:
     def __init__(
         self,
         func=None,
-        inputs=Data(
-            {
-                PORT_LABEL: [],
-                PORT_TYPE: [],
-                PORT_DEFAULT: [],
-                PORT_VALUE: [],
-            },
-            attribute=Port,
-        ),
-        outputs=Data({PORT_LABEL: [], PORT_TYPE: [], PORT_VALUE: []}, attribute=Port),
+        inputs=None,
+        outputs=None,
         label=None,
         output_labels=None,
         node_type=None,
@@ -529,8 +521,31 @@ class Node:
 
         self.node_type = node_type
 
-        self.inputs = inputs
-        self.outputs = outputs
+        self.inputs = (
+            Data(
+                {
+                    PORT_LABEL: [],
+                    PORT_TYPE: [],
+                    PORT_DEFAULT: [],
+                    PORT_VALUE: [],
+                },
+                attribute=Port,
+            )
+            if inputs is None
+            else inputs
+        )
+        self.outputs = (
+            Data(
+                {
+                    PORT_LABEL: [],
+                    PORT_TYPE: [],
+                    PORT_VALUE: [],
+                },
+                attribute=Port,
+            )
+            if outputs is None
+            else outputs
+        )
 
         self._func = func
         self._workflow = None

@@ -183,11 +183,14 @@ def ComputeElasticConstantsMacro(
     structure,
     engine,
     calculator: Node,
-    input_elastic_tensor: InputElasticTensor = InputElasticTensor(),
+    input_elastic_tensor: InputElasticTensor | None = None,
 ):
     """
     Get the elastic constants of a structure using an ASE calculator.
     """
+    input_elastic_tensor = (
+        InputElasticTensor() if input_elastic_tensor is None else input_elastic_tensor
+    )
     from pyiron_core.pyiron_nodes.controls import Print, iterate
     from pyiron_core.pyiron_workflow import Workflow
 

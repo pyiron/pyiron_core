@@ -99,10 +99,11 @@ class PyironFlowWidget:
         self,
         workflow_path: str,
         wf: Optional[Union[simple_workflow.Workflow, base.Graph]] = None,
-        gui_layout: GUILayout = GUILayout(),
+        gui_layout: GUILayout | None = None,
         main_widget=None,
         db=None,
     ):
+        gui_layout = GUILayout() if gui_layout is None else gui_layout
 
         if wf is None:
             graph = base.Graph("Workflow")
@@ -357,12 +358,13 @@ class PyironFlow:
         self,
         wf_list=None,
         hash_nodes=False,
-        gui_layout: GUILayout = GUILayout(),
+        gui_layout: GUILayout | None = None,
         db: pyiron_database.PostgreSQLInstanceDatabase | None = None,
         workflow_path: str = os.path.expanduser(
             "~/pyiron_core.pyiron_workflows"
         ),  # rooth path to directory where .json graph workflows are stored
     ):
+        gui_layout = GUILayout() if gui_layout is None else gui_layout
 
         # create empty workflow directory if it does not exist
         if not os.path.exists(workflow_path):

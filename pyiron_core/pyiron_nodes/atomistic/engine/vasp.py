@@ -383,8 +383,13 @@ def stack_element_string(structure) -> tuple[list[str], list[int]]:
 def get_default_POTCAR_paths(
     structure: Structure,
     pseudopot_lib_path: str,
-    potcar_df: pd.DataFrame = pd.read_csv(POTCAR_default_specification_data),
+    potcar_df: pd.DataFrame | None = None,
 ) -> list[str]:
+    potcar_df = (
+        pd.read_csv(POTCAR_default_specification_data)
+        if potcar_df is None
+        else potcar_df
+    )
     ele_list, _ = stack_element_string(structure)
     potcar_paths = []
     for element in ele_list:

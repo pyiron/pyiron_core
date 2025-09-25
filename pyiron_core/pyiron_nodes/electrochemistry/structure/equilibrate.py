@@ -6,7 +6,7 @@ from pyiron_core.pyiron_workflow import as_function_node
 def Equilibrate(
     solvated_electrode,
     water_potential,
-    parameters: InputCalcMD = InputCalcMD().run(),
+    parameters=None,
     store: bool = True,
 ):
     """
@@ -20,6 +20,8 @@ def Equilibrate(
     Returns:
         None
     """
+    parameters = InputCalcMD().run() if parameters is None else parameters
+
     from dataclasses import asdict
 
     from pyiron_atomistics import Project
