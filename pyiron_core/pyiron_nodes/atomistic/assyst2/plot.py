@@ -1,8 +1,8 @@
-from typing import TYPE_CHECKING, Iterable
+from typing import Iterable
 
 from ase import Atoms
 
-from pyiron_core.pyiron_workflow import Workflow, as_function_node
+from pyiron_core.pyiron_workflow import as_function_node
 
 # from matplotlib.axis import Axis
 

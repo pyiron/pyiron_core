@@ -1,11 +1,9 @@
-from dataclasses import asdict, dataclass, field
+from dataclasses import field
 from typing import Optional
 
-import numpy as np
 import pandas as pd
 
 from pyiron_core.pyiron_workflow import (
-    Workflow,
     as_function_node,
     as_inp_dataclass_node,
 )
@@ -145,9 +143,6 @@ def SplitTrainingAndTesting(df, training_frac: float = 0.2, random_state: int = 
     df_train = df.sample(frac=training_frac, random_state=random_state)
     df_test = df.loc[(i for i in df.index if i not in df_train.index)]
     return df_train, df_test
-
-
-import pandas as pd
 
 
 @as_function_node

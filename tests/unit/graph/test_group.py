@@ -1,6 +1,5 @@
 import unittest
 
-import pyiron_core.pyiron_workflow.simple_workflow as swf
 from pyiron_core.pyiron_workflow.graph import base
 from pyiron_core.pyiron_workflow.graph.group import create_group
 from static.nodes import AddOne

@@ -77,7 +77,6 @@ def deserialize_obj(serialized_obj: dict[str, Any]) -> Any:
     Returns:
     Any: The deserialized object.
     """
-    from dataclasses import dataclass
     from types import FunctionType as function
 
     if isinstance(serialized_obj, dict):

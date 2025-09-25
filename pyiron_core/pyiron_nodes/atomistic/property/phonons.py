@@ -1,6 +1,5 @@
 # from __future__ import annotations
 
-from dataclasses import asdict
 from typing import Optional
 
 import numpy as np
@@ -8,7 +7,6 @@ from ase import Atoms
 from phonopy.api_phonopy import Phonopy
 from structuretoolkit.common import atoms_to_phonopy, phonopy_to_atoms
 
-from pyiron_core.pyiron_nodes.atomistic.calculator.ase import Static
 from pyiron_core.pyiron_nodes.atomistic.engine.generic import OutputEngine
 from pyiron_core.pyiron_workflow import (
     as_function_node,

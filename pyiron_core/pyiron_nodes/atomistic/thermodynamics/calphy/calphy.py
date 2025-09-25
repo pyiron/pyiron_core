@@ -1,8 +1,8 @@
 import os
 import random
 import string
-from dataclasses import asdict, dataclass, field
-from typing import List, Optional, Tuple, Union
+from dataclasses import asdict
+from typing import Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -11,8 +11,6 @@ from ase import Atoms
 from pyiron_core.pyiron_workflow import (
     as_function_node,
     as_inp_dataclass_node,
-    as_macro_node,
-    as_out_dataclass_node,
 )
 
 
@@ -221,7 +219,6 @@ def _prepare_potential_and_structure(potential, structure):
 
 
 def _prepare_input(inp, potential, structure, mode="fe", reference_phase="solid"):
-    import os
 
     from calphy.input import Calculation
 
@@ -307,7 +304,6 @@ def SolidFreeEnergy(
     float
         Free energy in eV/atom
     """
-    import os
 
     from calphy.routines import routine_fe
     from calphy.solid import Solid

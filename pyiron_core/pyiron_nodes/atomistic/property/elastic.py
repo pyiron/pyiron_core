@@ -5,8 +5,6 @@ from typing import Optional
 import atomistics.workflows.elastic.symmetry as sym
 import numpy as np
 
-from pyiron_core.pyiron_nodes.atomistic.calculator.ase import Static
-from pyiron_core.pyiron_nodes.atomistic.engine.generic import OutputEngine
 from pyiron_core.pyiron_workflow import (
     Node,
     as_function_node,
@@ -194,9 +192,7 @@ def ComputeElasticConstantsMacro(
     """
     Get the elastic constants of a structure using an ASE calculator.
     """
-    from pyiron_core.pyiron_nodes.atomistic.calculator.ase import Static, StaticEnergy
-    from pyiron_core.pyiron_nodes.atomistic.property.phonons import GetFreeEnergy
-    from pyiron_core.pyiron_nodes.controls import IterToDataFrame, Print, iterate
+    from pyiron_core.pyiron_nodes.controls import Print, iterate
     from pyiron_core.pyiron_workflow import Workflow
 
     wf = Workflow("elastic_constants")

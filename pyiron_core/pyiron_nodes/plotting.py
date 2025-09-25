@@ -157,7 +157,6 @@ def Plot(
     log_y: bool = False,
 ):
     import numpy as np
-    import pandas as pd
     from matplotlib import pyplot as plt
 
     # If x is not provided, generate a default sequence

@@ -221,9 +221,7 @@ def guess_mu_range(phases, Tmax, samples):
 
     import numpy as np
     import scipy.interpolate as si
-    import scipy.optimize as so
 
-    import landau
 
     # semigrand canonical "average" concentration
     # use this to avoid discontinuities and be phase agnostic
@@ -274,7 +272,6 @@ def CalcPhaseDiagram(
     Returns:
         dataframe with phase data
     """
-    import matplotlib.pyplot as plt
 
     import landau
 

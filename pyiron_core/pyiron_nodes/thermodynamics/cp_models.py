@@ -5,7 +5,6 @@ import numpy as np
 from pyiron_core.pyiron_workflow import (
     Workflow,
     as_function_node,
-    as_inp_dataclass_node,
     as_macro_node,
     as_out_dataclass_node,
 )

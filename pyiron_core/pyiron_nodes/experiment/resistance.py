@@ -1,5 +1,4 @@
 from dataclasses import field
-from typing import Optional
 
 import numpy as np
 

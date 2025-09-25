@@ -1,9 +1,8 @@
 # from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import field
 from typing import Optional
 
-import numpy as np
 
 # from pyiron_core.pyiron_nodes.dev_tools import wf_data_class, wfMetaData
 # from pyiron_core.pyiron_nodes.development.node_dataclass import as_output_node

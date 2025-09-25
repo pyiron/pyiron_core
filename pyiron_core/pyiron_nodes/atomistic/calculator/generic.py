@@ -1,8 +1,6 @@
 from typing import Optional
 
 from pyiron_core.pyiron_nodes.atomistic.calculator.data import (
-    InputCalcMD,
-    InputCalcMinimize,
     InputCalcStatic,
     OutputSEFS,
 )

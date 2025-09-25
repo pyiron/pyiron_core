@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict
-from typing import TYPE_CHECKING, Optional
+from typing import Optional
 
 # if TYPE_CHECKING:
 from ase import Atoms
@@ -12,9 +12,8 @@ from pyiron_core.pyiron_nodes.atomistic.calculator.data import (
     # InputCalcMinimize,
     InputCalcMD,
     InputCalcStatic,
-    OutputCalcMD,
 )
-from pyiron_core.pyiron_nodes.dev_tools import FileObject, parse_input_kwargs
+from pyiron_core.pyiron_nodes.dev_tools import FileObject
 from pyiron_core.pyiron_workflow import (
     as_function_node,
     as_inp_dataclass_node,

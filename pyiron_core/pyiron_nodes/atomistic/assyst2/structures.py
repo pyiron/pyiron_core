@@ -1,13 +1,11 @@
-from collections.abc import Generator, Sequence
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from itertools import product
-from numbers import Integral
 
 import pandas as pd
 from ase import Atoms
 
 from pyiron_core.pyiron_workflow import (
-    Workflow,
     as_function_node,
     as_inp_dataclass_node,
 )

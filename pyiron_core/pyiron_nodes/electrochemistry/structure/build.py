@@ -1,6 +1,6 @@
 import ase.units as units
 
-from pyiron_core.pyiron_workflow import Workflow, as_function_node
+from pyiron_core.pyiron_workflow import as_function_node
 
 
 @as_function_node("water")
@@ -91,7 +91,7 @@ def add_neon_layer(structure, d_eq: float, hydrophobic_gap: float = 1.0):
     """
     import numpy as np
 
-    from pyiron_core.pyiron_nodes.atomistic.structure.build import Bulk, Surface
+    from pyiron_core.pyiron_nodes.atomistic.structure.build import Surface
 
     # Get the maximum z value of an atom in the structure
     max_z = np.max(structure.get_positions()[:, 2])

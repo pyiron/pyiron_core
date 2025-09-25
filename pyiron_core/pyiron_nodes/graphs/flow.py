@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional
+from typing import Optional
 
 # import numpy as np
 # import pandas as pd
@@ -112,7 +112,7 @@ def NodeInput(node: GraphNode):
 def DisplayGraphAsJson(graph: Graph):
     import json
 
-    from IPython.display import JSON, display
+    from IPython.display import JSON
 
     graph_json = JSON(json.dumps(graph.__getstate__(), indent=2), exanded=True)
 

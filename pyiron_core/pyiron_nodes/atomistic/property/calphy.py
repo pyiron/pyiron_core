@@ -2,15 +2,14 @@ import os
 import random
 import string
 import warnings
-from dataclasses import asdict, dataclass, field
-from typing import List, Optional, Tuple, Union
+from dataclasses import asdict
+from typing import Optional, Tuple
 
 import numpy as np
 import pandas as pd
 from ase import Atoms
 
 from pyiron_core.pyiron_workflow import (
-    Workflow,
     as_function_node,
     as_inp_dataclass_node,
     as_macro_node,
@@ -173,7 +172,6 @@ def _prepare_potential_and_structure(potential, structure):
     from pyiron_atomistics.lammps.potential import LammpsPotential, LammpsPotentialFile
     from pyiron_lammps.structure import (
         LammpsStructure,
-        UnfoldingPrism,
         structure_to_lammps,
     )
 

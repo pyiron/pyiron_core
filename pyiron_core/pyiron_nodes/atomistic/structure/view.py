@@ -1,4 +1,4 @@
-from typing import Literal, Optional, Union
+from typing import Literal, Optional
 
 import numpy as np
 from ase import Atoms as _Atoms
@@ -17,7 +17,6 @@ def Plot3d(
     distance_from_camera: Optional[float] = 1.0,
 ):
     """Display atomistic structure (ase.Atoms) using nglview"""
-    from structuretoolkit import plot3d
 
     if view_plane is None:
         view_plane = [1, 1, 1]

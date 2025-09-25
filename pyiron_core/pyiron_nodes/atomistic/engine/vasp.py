@@ -9,7 +9,6 @@ from pathlib import Path
 from typing import Optional
 
 import pandas as pd
-from ase import Atoms
 from pyiron_atomistics.vasp.output import parse_vasp_output as pvo
 from pyiron_snippets.logger import logger
 from pymatgen.core import Structure
@@ -17,8 +16,7 @@ from pymatgen.io.vasp.inputs import Incar, Kpoints
 from pymatgen.io.vasp.outputs import Vasprun
 
 # from pyiron_snippets.resources import ResourceResolver
-from pyiron_core.pyiron_nodes.atomistic.engine.lammps import Shell
-from pyiron_core.pyiron_nodes.dev_tools import FileObject, VarType
+from pyiron_core.pyiron_nodes.dev_tools import FileObject
 from pyiron_core.pyiron_workflow import Workflow
 
 

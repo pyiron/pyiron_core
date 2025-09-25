@@ -1,4 +1,4 @@
-from pyiron_core.pyiron_workflow import Node, as_function_node, as_inp_dataclass_node
+from pyiron_core.pyiron_workflow import Node, as_function_node
 
 
 @as_function_node("Executor")
@@ -34,7 +34,6 @@ def IterNode(
 
     # TODO: add to node ._hash_parent (with hash of this node)
     from concurrent.futures import as_completed
-    from copy import copy
 
     from pandas import DataFrame
 

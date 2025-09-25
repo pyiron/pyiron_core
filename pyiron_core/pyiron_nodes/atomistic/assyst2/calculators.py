@@ -5,7 +5,6 @@ from ase import Atoms
 from ase.calculators.calculator import Calculator
 
 from pyiron_core.pyiron_workflow import (
-    Workflow,
     as_function_node,
     as_inp_dataclass_node,
 )
@@ -54,8 +53,8 @@ class GenericOptimizerSettings:
 from enum import Enum
 
 import numpy as np
-from ase.constraints import FixAtoms, FixSymmetry
-from ase.filters import FrechetCellFilter, StrainFilter
+from ase.constraints import FixAtoms
+from ase.filters import FrechetCellFilter
 
 
 class RelaxMode(Enum):
@@ -142,7 +141,7 @@ class M3gnetConfig(AseCalculatorConfig):
     model: str = "M3GNet-MP-2021.2.8-PES"
 
     def get_calculator(self, use_symmetry=True):
-        from matgl import load_model, models
+        from matgl import load_model
         from matgl.ext.ase import M3GNetCalculator
 
         return M3GNetCalculator(
