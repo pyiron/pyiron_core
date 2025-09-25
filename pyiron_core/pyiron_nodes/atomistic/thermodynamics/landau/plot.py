@@ -222,7 +222,6 @@ def guess_mu_range(phases, Tmax, samples):
     import numpy as np
     import scipy.interpolate as si
 
-
     # semigrand canonical "average" concentration
     # use this to avoid discontinuities and be phase agnostic
     def c(mu):
