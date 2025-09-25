@@ -1004,7 +1004,7 @@ def eval_db_value(value, db):
             )
 
             val = eval(value)
-        except Exception as e:
+        except Exception:
             # print("eval exception: ", e, value)
             if isinstance(value, str):
                 val = value
@@ -1151,13 +1151,8 @@ def get_all_connected_input_nodes(node):
     dict: A dictionary where the key is the name of the input channel, and the value is the Node object connected to it.
     """
 
-    from pyiron_core.pyiron_workflow.topology import get_nodes_in_data_tree
-
     # Get channel_dict dictionary containing all input channels
     # channel_dict = node.inputs.channel_dict
-
-    # Get the nodes in the data tree of the given node
-    nodes_in_data_tree = get_nodes_in_data_tree(node)
 
     connected_nodes = {}
 

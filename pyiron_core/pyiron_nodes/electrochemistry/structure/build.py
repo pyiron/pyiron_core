@@ -51,7 +51,6 @@ def add_water_film(
 
     lx, ly = electrode.cell.diagonal()[:2]
     zmin = np.max(electrode.positions[:, 2])
-    zmax = zmin + water_width
 
     # Water
     n_mols = 1

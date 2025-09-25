@@ -280,6 +280,5 @@ def Title(axis: Optional[object] = None, title: Optional[str] = ""):
         fig, ax = plt.subplots()
     else:
         ax = axis
-        fig = ax.figure
     ax.set_title(title)
     return ax

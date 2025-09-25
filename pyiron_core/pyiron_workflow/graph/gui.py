@@ -749,7 +749,7 @@ def _get_node_height(node: simple_workflow.Node) -> int | float:
 
 def _get_child_dict(graph, node):
     if node["expanded"]:
-        node_children = _gui_children(graph, node)
+        _gui_children(graph, node)
     targetPorts = [
         dict(id=f"{node['id']}_in_{label}", properties=dict(side="WEST"))
         for label in node["data"]["target_labels"]

@@ -281,10 +281,7 @@ def GetMatrix(
     min_index: int = 0,
     max_index: int = None,
 ):
-    import numpy as np
-
     num_structures = len(df)
-    num_atoms = np.sum(df.NUMBER_OF_ATOMS)
 
     if max_index is None:
         max_index = num_structures

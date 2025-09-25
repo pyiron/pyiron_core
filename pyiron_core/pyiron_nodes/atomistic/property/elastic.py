@@ -174,10 +174,6 @@ def GenerateStructures(
 
             structures.append(struct.copy())
             structure_dict[jobname] = struct
-            structure_container = DataStructureContainer().dataclass(
-                structure=list(structure_dict.values()),
-                job_name=list(structure_dict.keys()),
-            )
     job_names = list(structure_dict.keys())
     return structures, job_names
 

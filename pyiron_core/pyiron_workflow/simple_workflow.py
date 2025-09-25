@@ -664,7 +664,7 @@ class Node:
                 try:
                     restored = pyiron_database.restore_node_outputs(self)
                     # print("restored: ", restored)
-                except FileNotFoundError as e:
+                except FileNotFoundError:
                     print("No stored data found for node: ", self.label)
                 except Exception as e:
                     print("Error restoring node outputs: ", e)
@@ -817,7 +817,7 @@ def get_node_from_path(import_path):
     # Import the module
     try:
         module = importlib.import_module(module_path)
-    except ModuleNotFoundError as e:
+    except ModuleNotFoundError:
         return None
     # Get the object
     object_from_path = getattr(module, name)

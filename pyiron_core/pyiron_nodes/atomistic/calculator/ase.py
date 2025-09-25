@@ -76,7 +76,7 @@ def Minimize(
         log_file = "-"
 
     dyn = BFGS(initial_structure, logfile=log_file, trajectory="minimize.traj")
-    out_dyn = dyn.run(fmax=fmax)
+    dyn.run(fmax=fmax)
 
     traj = Trajectory("minimize.traj")
     atoms_relaxed = traj[-1]
