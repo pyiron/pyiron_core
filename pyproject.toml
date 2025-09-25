@@ -98,7 +98,10 @@ npm = "npm"
 build_cmd = "build"
 
 [tool.ruff]
-exclude = ["notebooks/development/"]
+exclude = [
+    "notebooks/development/",
+    "devbooks/",
+]
 
 [tool.ruff.lint.per-file-ignores]
 "**/__init__.py" = ["F401"]  # Ignore unused imports in init files -- we specify APIs this way
