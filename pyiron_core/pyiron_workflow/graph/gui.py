@@ -803,7 +803,7 @@ def _graph_to_gui(graph: base.Graph, remove_none=True, optimize=True) -> dict:
     children = []
     for node in nodes:
         if (
-            not "parentId" in node.keys()
+            "parentID" not in node.keys()
         ):  # TODO: make this recursive, does not work yet
             child = _get_child_dict(graph, node)
             node_children = _gui_children(graph, node)
