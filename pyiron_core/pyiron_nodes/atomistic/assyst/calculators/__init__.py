@@ -1,10 +1,18 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from enum import Enum
 
+import numpy as np
 from ase import Atoms
 from ase.calculators.calculator import Calculator
+from ase.constraints import FixAtoms
+from ase.filters import FrechetCellFilter
+from matgl import load_model
+from matgl.ext.ase import M3GNetCalculator
 
 from pyiron_core.pyiron_workflow import Workflow
+
+GPA2EVA3 = 0.006_241_509_074
 
 
 class AseCalculatorConfig(ABC):
@@ -49,13 +57,6 @@ class GpawInput(AseCalculatorConfig, PawDftInput):
 class GenericOptimizerSettings:
     max_steps: int = 10
     force_tolerance: float = 1e-2
-
-
-from enum import Enum
-
-import numpy as np
-from ase.constraints import FixAtoms, FixSymmetry
-from ase.filters import FrechetCellFilter, StrainFilter
 
 
 class RelaxMode(Enum):
@@ -115,12 +116,6 @@ def Relax(
     # play catch with nodes
     relaxed_structure = structure
     return relaxed_structure
-
-
-from matgl import load_model, models
-from matgl.ext.ase import M3GNetCalculator
-
-GPA2EVA3 = 0.006_241_509_074
 
 
 @Workflow.wrap.as_dataclass_node

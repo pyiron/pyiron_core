@@ -1,14 +1,3 @@
-__author__ = "Joerg Neugebauer"
-__copyright__ = (
-    "Copyright 2024, Max-Planck-Institut for Sustainable Materials GmbH - "
-    "Computational Materials Design (CM) Department"
-)
-__version__ = "0.1"
-__maintainer__ = ""
-__email__ = ""
-__status__ = "development"
-__date__ = "Nov 20, 2024"
-
 """
 # wf_graph_tools Module
 This module provides a collection of tools to convert and manipulate workflow graphs. 
@@ -71,6 +60,17 @@ import pyiron_core.pyironflow.api as pyironflow
 
 if TYPE_CHECKING:
     from pyiron_core.pyiron_workflow import Workflow
+
+__author__ = "Joerg Neugebauer"
+__copyright__ = (
+    "Copyright 2024, Max-Planck-Institut for Sustainable Materials GmbH - "
+    "Computational Materials Design (CM) Department"
+)
+__version__ = "0.1"
+__maintainer__ = ""
+__email__ = ""
+__status__ = "development"
+__date__ = "Nov 20, 2024"
 
 
 @dataclasses.dataclass

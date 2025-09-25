@@ -2,7 +2,11 @@
 # provide functionality, data types etc. that will be later moved to the workflow code
 from __future__ import annotations
 
-from pathlib import Path
+import pathlib
+from dataclasses import dataclass
+from typing import Optional
+
+from pyiron_base.storage.hdfio import ProjectHDFio
 
 
 class VarType:
@@ -26,9 +30,9 @@ class VarType:
 class FileObject:
     def __init__(self, path=".", directory=None):
         if directory is None:
-            self._path = Path(path)
+            self._path = pathlib.Path(path)
         else:
-            self._path = Path(directory) / Path(path)
+            self._path = pathlib.Path(directory) / pathlib.Path(path)
 
     def __repr__(self):
         return f"FileObject: {self._path} {self.is_file}"
@@ -162,11 +166,6 @@ class MiniProject:
         return new
 
 
-import pathlib
-
-from pyiron_base.storage.hdfio import ProjectHDFio
-
-
 class DataStore:
     def __init__(self, path="."):
         self._path = path
@@ -203,9 +202,6 @@ class DataStore:
 
         new_node.from_hdf(hdf)
         return new_node
-
-
-from dataclasses import dataclass
 
 
 def filter_internals(input_list):
@@ -267,9 +263,6 @@ def wf_data_class(*args, doc_func=None, **kwargs):
         return cls
 
     return wrapper
-
-
-from typing import Optional
 
 
 @wf_data_class()

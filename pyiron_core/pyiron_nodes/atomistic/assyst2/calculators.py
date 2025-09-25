@@ -1,13 +1,19 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from enum import Enum
 
+import numpy as np
 from ase import Atoms
 from ase.calculators.calculator import Calculator
+from ase.constraints import FixAtoms
+from ase.filters import FrechetCellFilter
 
 from pyiron_core.pyiron_workflow import (
     as_function_node,
     as_inp_dataclass_node,
 )
+
+GPA2EVA3 = 0.006_241_509_074
 
 
 class AseCalculatorConfig(ABC):
@@ -50,13 +56,6 @@ class GpawInput(AseCalculatorConfig, PawDftInput):
 class GenericOptimizerSettings:
     max_steps: int = 10
     force_tolerance: float = 1e-2
-
-
-from enum import Enum
-
-import numpy as np
-from ase.constraints import FixAtoms
-from ase.filters import FrechetCellFilter
 
 
 class RelaxMode(Enum):
@@ -133,9 +132,6 @@ def RelaxLoop(
     for structure in tqdm(structures, desc=f"Relax {mode.value}"):
         relaxed_structures.append(Relax(calculator, opt, structure, mode))
     return relaxed_structures
-
-
-GPA2EVA3 = 0.006_241_509_074
 
 
 @as_inp_dataclass_node

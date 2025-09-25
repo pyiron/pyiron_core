@@ -1,3 +1,6 @@
+from concurrent.futures import as_completed
+from copy import copy
+
 import numpy as np
 import pandas as pd
 
@@ -26,10 +29,6 @@ def loop_until(recursive_function: Node, max_steps: int = 10):
             break
 
     return x
-
-
-from concurrent.futures import as_completed
-from copy import copy
 
 
 def _iterate_node(
