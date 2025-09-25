@@ -97,5 +97,8 @@ dependencies = ["hatch-jupyter-builder>=0.5.0"]
 npm = "npm"
 build_cmd = "build"
 
+[tool.ruff]
+exclude = ["notebooks/development/"]
+
 [tool.ruff.lint.per-file-ignores]
 "**/__init__.py" = ["F401"]  # Ignore unused imports in init files -- we specify APIs this way
