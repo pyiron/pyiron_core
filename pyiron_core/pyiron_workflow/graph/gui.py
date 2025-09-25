@@ -120,7 +120,7 @@ class PyironFlowWidget:
 
         self.flow_widget = pyironflow.ReactFlowWidget(
             layout={
-                "width": f"100%",
+                "width": "100%",
                 "height": f"{gui_layout.flow_widget_height}px",
             }
         )
@@ -128,7 +128,7 @@ class PyironFlowWidget:
 
         layout_accordion_widgets = {
             "border": "1px solid black",
-            "width": f"100%",
+            "width": "100%",
             "max_height": f"{gui_layout.flow_widget_height}px",
             "overflow": "auto",
         }

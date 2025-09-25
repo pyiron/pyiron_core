@@ -452,9 +452,9 @@ def CalculatePhaseTransformationTemperature(
 
     # warn about extrapolation
     if not t1min == t2min:
-        warnings.warn(f"free energy is being extrapolated!")
+        warnings.warn("free energy is being extrapolated!")
     if not t1max == t2max:
-        warnings.warn(f"free energy is being extrapolated!")
+        warnings.warn("free energy is being extrapolated!")
 
     # now fit
     f1fit = np.polyfit(t1, f1, fit_order)
@@ -482,8 +482,8 @@ def CalculatePhaseTransformationTemperature(
         c2lo = "#90caf9"
         c2hi = "#0d47a1"
 
-        plt.plot(fit_t, fit_f1, color=c1lo, label=f"data1 fit")
-        plt.plot(fit_t, fit_f2, color=c2lo, label=f"data2 fit")
+        plt.plot(fit_t, fit_f1, color=c1lo, label="data1 fit")
+        plt.plot(fit_t, fit_f2, color=c2lo, label="data2 fit")
         plt.plot(t1, f1, color=c1hi, label="data1", ls="dashed")
         plt.plot(t2, f2, color=c2hi, label="data2", ls="dashed")
         plt.axvline(transition_temp, ls="dashed", c="#37474f")

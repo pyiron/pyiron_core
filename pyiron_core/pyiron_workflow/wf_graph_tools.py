@@ -373,7 +373,7 @@ wf = Workflow('{graph.label}')
                             code += f"""{target_handle}=wf.{source}"""
                         else:
                             code += f"""{target_handle}=wf.{source}.outputs.{source_handle}"""
-            code += f""") \n"""
+            code += """) \n"""
             # code += '\n' + 'print(wf.run()) \n'
 
     formatted_code = black.format_str(code, mode=black.FileMode())

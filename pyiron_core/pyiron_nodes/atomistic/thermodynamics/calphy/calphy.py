@@ -483,9 +483,9 @@ def CalcPhaseTransformationTemp(
 
     # warn about extrapolation
     if not t1min == t2min:
-        warnings.warn(f"free energy is being extrapolated!")
+        warnings.warn("free energy is being extrapolated!")
     if not t1max == t2max:
-        warnings.warn(f"free energy is being extrapolated!")
+        warnings.warn("free energy is being extrapolated!")
 
     # now fit
     f1fit = np.polyfit(temp_A, fe_A, fit_order)
@@ -512,8 +512,8 @@ def CalcPhaseTransformationTemp(
     c2lo = "#90caf9"
     c2hi = "#0d47a1"
 
-    plt.plot(fit_t, fit_f1, color=c1lo, label=f"phase A fit")
-    plt.plot(fit_t, fit_f2, color=c2lo, label=f"phase B fit")
+    plt.plot(fit_t, fit_f1, color=c1lo, label="phase A fit")
+    plt.plot(fit_t, fit_f2, color=c2lo, label="phase B fit")
     plt.plot(temp_A, fe_A, color=c1hi, label="phase A", ls="dashed")
     plt.plot(temp_B, fe_B, color=c2hi, label="phase B", ls="dashed")
     plt.axvline(transition_temp, ls="dashed", c="#37474f")
