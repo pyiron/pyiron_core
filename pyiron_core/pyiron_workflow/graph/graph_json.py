@@ -65,6 +65,11 @@ def _uncompact_graph_from_state(state: dict):
                 graph = gui._mark_node_as_collapsed(graph, node.label)
             else:
                 graph += graph_node
+                if not graph_node.expanded:
+                    # Otherwise += calls `base._expand_node` on us
+                    graph = gui._mark_node_as_collapsed(graph, k)
+                if graph_node.graph is not None:
+                    graph = base.uncollapse_node(graph, k)
 
     for edge_state in state["edges"]["values"]:
         # print(edge_state)
@@ -78,7 +83,6 @@ def _save_graph(
     filename: str | pathlib.Path = None,
     workflow_dir: str = ".",
     overwrite: bool = False,
-    compact: bool = False,
 ):
     if filename is None:
         filename = f"{graph.label}.json"
@@ -97,13 +101,13 @@ def _save_graph(
         )
 
     with open(file, "w") as f:
-        state = _compact_graph(graph).__getstate__() if compact else graph.__getstate__()
+        state = _compact_graph(graph).__getstate__()
         f.write(json.dumps(state, indent=4))
 
     return True
 
 
-def _load_graph(filename: str | pathlib.Path, workflow_dir: str = ".", compact: bool = False):
+def _load_graph(filename: str | pathlib.Path, workflow_dir: str = "."):
     # check if filename has extension json, if not add it
     if isinstance(filename, str):
         if not filename.endswith(".json"):
@@ -118,6 +122,6 @@ def _load_graph(filename: str | pathlib.Path, workflow_dir: str = ".", compact: 
 
     with open(wf_file, "r") as f:
         state = json.load(f)
-    graph = _uncompact_graph_from_state(state) if compact else base.Graph().__setstate__(state)
+    graph = _uncompact_graph_from_state(state)
 
     return graph

@@ -65,7 +65,7 @@
                 "label": "GetEnergyLast",
                 "function": "pyiron_core.pyiron_nodes.atomistic.calculator.output.GetEnergyLast",
                 "inputs": {
-                  "store": true
+                    "store": true
                 }
             }
         },

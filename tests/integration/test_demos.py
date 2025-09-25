@@ -35,7 +35,7 @@ class TestDemoWorkflows(unittest.TestCase):
 
     def _mock_run(self, wf_name: str, node_name: str, port_name: str):
         # Instantiate the gui like a user
-        pf = pc.PyironFlow([wf_name], workflow_path=DEMOS_DIR, load_from_compact=True)
+        pf = pc.PyironFlow([wf_name], workflow_path=DEMOS_DIR)
         # Mock a "run" click at the PyironFlowWidget level
         pf.wf_widgets[0].on_value_change(
             {"new": f"run: {node_name}", "old": None, "name": "mock"}
@@ -49,7 +49,7 @@ class TestDemoWorkflows(unittest.TestCase):
 
     def test_calphy(self):
         pf = pc.PyironFlow(
-            ["calphy"], workflow_path=DEMOS_DIR, load_from_compact=True
+            ["calphy"], workflow_path=DEMOS_DIR
         )
 
         # If we run the calphy as-is, it melts too often

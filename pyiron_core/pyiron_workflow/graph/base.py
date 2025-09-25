@@ -772,6 +772,77 @@ def collapse_node(
     return new_graph
 
 
+def uncollapse_node(graph: Graph, node_label: str):
+    """
+    This is not the same as expanding; it is the opposite of collapsing.
+    Where collapse makes a projection of a full graph that prunes out the virtual nodes,
+    virtual edges, children, and child edges of the collapsed subgraph, here we add
+    them back. I.e. we use data in the subgraph we are un-collapsing to expand the
+    parent graph up to its "true" complete state including all the virtual nodes.
+    """
+    new_graph = copy_graph(graph)
+    graph_node = new_graph.nodes[node_label]
+
+    # Add children and child edges
+    # Unlike `_expand_node`, we are not going to touch the `expanded` field
+    if graph_node.node_type == "graph":
+        subgraph = graph_node.graph
+
+        for k, v in subgraph.nodes.items():
+            v.parent_id = subgraph.label
+            v.level = graph_node.level + 1
+            new_graph.nodes[k] = v
+
+        for edge in subgraph.edges:
+            if edge not in new_graph.edges:
+                new_graph.edges.append(edge)
+
+    # Add virtual nodes for interface
+    for (labeller, scope) in (
+            (virtual_input_label, "inputs"),
+            (virtual_output_label, "outputs"),
+    ):
+        for handle in getattr(graph_node.node, scope).data["label"]:
+            virtual_node_label = labeller(node_label, handle)
+            if virtual_node_label not in new_graph.nodes:
+                new_graph += identity(
+                    label=labeller(node_label, handle)
+                )
+
+    # Replace collapsed edges by routing through virtual nodes
+    for edge in new_graph.edges:
+        if edge.source == node_label:
+            edge.source = virtual_output_label(node_label, edge.sourceHandle)
+            edge.sourceHandle = "x"
+
+        if edge.target == node_label:
+            edge.target = virtual_input_label(node_label, edge.targetHandle)
+            edge.targetHandle = "x"
+
+    # Add edges from virtual nodes to subgraph interior
+    for (target, targetHandle) in get_unconnected_input_ports(graph_node.graph):
+        input_to_children_edge = GraphEdge(
+            source=virtual_input_label(node_label, target, targetHandle),
+            target=target,
+            sourceHandle="x",
+            targetHandle=targetHandle,
+        )
+        if input_to_children_edge not in new_graph.edges:
+            new_graph.edges.append(input_to_children_edge)
+
+    for (source, sourceHandle) in get_unconnected_output_ports(graph_node.graph):
+        children_to_output_edge = GraphEdge(
+            source=source,
+            target=virtual_output_label(node_label, source, sourceHandle),
+            sourceHandle=sourceHandle,
+            targetHandle="x",
+        )
+        if children_to_output_edge not in new_graph.edges:
+            new_graph.edges.append(children_to_output_edge)
+
+    return new_graph
+
+
 ####################################################################################################
 # Graph topology, sorting, and traversal functions
 ####################################################################################################

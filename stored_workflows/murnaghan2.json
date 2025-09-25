@@ -111,77 +111,8 @@
                 "function": "pyiron_core.pyiron_workflow.api.serial.subgraph",
                 "inputs": {
                     "Bulk__name": "Al",
-                    "Bulk__a": 2.2
+                    "Bulk__a": 2
                 }
-            }
-        },
-        "Bulk": {
-            "id": "Bulk",
-            "import_path": "pyiron_core.pyiron_nodes.atomistic.structure.build.Bulk",
-            "label": "Bulk",
-            "parent_id": "subgraph",
-            "level": 1,
-            "graph": null,
-            "node_type": "node",
-            "widget_type": "customNode",
-            "expanded": false,
-            "node": {
-                "label": "Bulk",
-                "function": "pyiron_core.pyiron_nodes.atomistic.structure.build.Bulk",
-                "inputs": {
-                    "name": "Al",
-                    "a": 2
-                }
-            }
-        },
-        "GetEnergyLast": {
-            "id": "GetEnergyLast",
-            "import_path": "pyiron_core.pyiron_nodes.atomistic.calculator.output.GetEnergyLast",
-            "label": "GetEnergyLast",
-            "parent_id": "subgraph",
-            "level": 1,
-            "graph": null,
-            "node_type": "node",
-            "widget_type": "customNode",
-            "expanded": false,
-            "node": {
-                "label": "GetEnergyLast",
-                "function": "pyiron_core.pyiron_nodes.atomistic.calculator.output.GetEnergyLast",
-                "inputs": {}
-            }
-        },
-        "Static": {
-            "id": "Static",
-            "import_path": "pyiron_core.pyiron_nodes.atomistic.calculator.ase.Static",
-            "label": "Static",
-            "parent_id": "subgraph",
-            "level": 1,
-            "graph": null,
-            "node_type": "node",
-            "widget_type": "customNode",
-            "expanded": false,
-            "node": {
-                "label": "Static",
-                "function": "pyiron_core.pyiron_nodes.atomistic.calculator.ase.Static",
-                "inputs": {
-                    "structure": "NotData"
-                }
-            }
-        },
-        "M3GNet": {
-            "id": "M3GNet",
-            "import_path": "pyiron_core.pyiron_nodes.atomistic.engine.ase.M3GNet",
-            "label": "M3GNet",
-            "parent_id": "subgraph",
-            "level": 1,
-            "graph": null,
-            "node_type": "node",
-            "widget_type": "customNode",
-            "expanded": false,
-            "node": {
-                "label": "M3GNet",
-                "function": "pyiron_core.pyiron_nodes.atomistic.engine.ase.M3GNet",
-                "inputs": {}
             }
         },
         "IterNode": {
@@ -201,39 +132,6 @@
                     "kwarg_name": "Bulk__a"
                 }
             }
-        },
-        "va_i_subgraph__Bulk__name": {
-            "id": "va_i_subgraph__Bulk__name",
-            "import_path": "pyiron_core.pyiron_workflow.api.serial.identity",
-            "label": "va_i_subgraph__Bulk__name",
-            "parent_id": "subgraph",
-            "level": 0,
-            "graph": null,
-            "node_type": "node",
-            "widget_type": "customNode",
-            "expanded": false
-        },
-        "va_i_subgraph__Bulk__a": {
-            "id": "va_i_subgraph__Bulk__a",
-            "import_path": "pyiron_core.pyiron_workflow.api.serial.identity",
-            "label": "va_i_subgraph__Bulk__a",
-            "parent_id": "subgraph",
-            "level": 0,
-            "graph": null,
-            "node_type": "node",
-            "widget_type": "customNode",
-            "expanded": false
-        },
-        "va_o_subgraph__GetEnergyLast__energy_last": {
-            "id": "va_o_subgraph__GetEnergyLast__energy_last",
-            "import_path": "pyiron_core.pyiron_workflow.api.serial.identity",
-            "label": "va_o_subgraph__GetEnergyLast__energy_last",
-            "parent_id": "subgraph",
-            "level": 0,
-            "graph": null,
-            "node_type": "node",
-            "widget_type": "customNode",
-            "expanded": false
         },
         "Linspace": {
             "id": "Linspace",
@@ -295,46 +193,10 @@
     "edges": {
         "values": [
             {
-                "source": "Static",
-                "target": "GetEnergyLast",
-                "sourceHandle": "out",
-                "targetHandle": "calculator"
-            },
-            {
-                "source": "Bulk",
-                "target": "Static",
-                "sourceHandle": "structure",
-                "targetHandle": "structure"
-            },
-            {
-                "source": "M3GNet",
-                "target": "Static",
-                "sourceHandle": "out",
-                "targetHandle": "engine"
-            },
-            {
-                "source": "va_o_subgraph__GetEnergyLast__energy_last",
+                "source": "subgraph",
                 "target": "IterNode",
-                "sourceHandle": "x",
+                "sourceHandle": "GetEnergyLast__energy_last",
                 "targetHandle": "node"
-            },
-            {
-                "source": "va_i_subgraph__Bulk__name",
-                "target": "Bulk",
-                "sourceHandle": "x",
-                "targetHandle": "name"
-            },
-            {
-                "source": "va_i_subgraph__Bulk__a",
-                "target": "Bulk",
-                "sourceHandle": "x",
-                "targetHandle": "a"
-            },
-            {
-                "source": "GetEnergyLast",
-                "target": "va_o_subgraph__GetEnergyLast__energy_last",
-                "sourceHandle": "energy_last",
-                "targetHandle": "x"
             },
             {
                 "source": "Linspace",

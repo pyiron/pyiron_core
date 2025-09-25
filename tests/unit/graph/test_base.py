@@ -59,9 +59,9 @@ class TestSaveLoad(unittest.TestCase):
 
 
         fname = "api_misdirection.json"
-        graph_json._save_graph(g, filename=fname, compact=True)
+        graph_json._save_graph(g, filename=fname)
         try:
-            reloaded = graph_json._load_graph(fname, compact=True)
+            reloaded = graph_json._load_graph(fname)
             self.assertEqual(expected_path, get_fnc_import(reloaded, "monogroup"))
             self.assertEqual(expected_path, get_fnc_import(reloaded, "digroup"))
             self.assertEqual(mono_out, run.pull_node(base.get_updated_graph(reloaded), "monogroup"))
@@ -116,5 +116,52 @@ class TestSaveLoad(unittest.TestCase):
                 msg="Purged nodes should not appear in outstanding edges",
             )
 
+        gu = base.uncollapse_node(gc, "group2")
+        self.assertSetEqual(
+            set(label for label in g.nodes),
+            set(label for label in gu.nodes),
+            msg="Uncollapsing node should cause graph to recover original nodes",
+        )
+        self.assertEqual(
+            len(g.nodes),
+            len(gu.nodes),
+            msg="Uncollapsed graph should have no extra nodes",
+        )
+
+        def hashable_edge(edge):
+            return (edge.source, edge.target, edge.sourceHandle, edge.targetHandle)
+
+        self.assertSetEqual(
+            set(hashable_edge(edge) for edge in g.edges),
+            set(hashable_edge(edge) for edge in gu.edges),
+            msg="Uncollapsing node should cause graph to recover original edges",
+        )
+        self.assertEqual(
+            len(g.edges),
+            len(gu.edges),
+            msg="Uncollapsed graph should have no extra edges",
+        )
+
+        guu = base.uncollapse_node(gu, "group2")
+        self.assertSetEqual(
+            set(label for label in g.nodes),
+            set(label for label in guu.nodes),
+            msg="Repeatedly un-collapsing should have no effect",
+        )
+        self.assertEqual(
+            len(g.nodes),
+            len(guu.nodes),
+            msg="Repeatedly un-collapsing should have no effect",
+        )
+        self.assertSetEqual(
+            set(hashable_edge(edge) for edge in g.edges),
+            set(hashable_edge(edge) for edge in guu.edges),
+            msg="Repeatedly un-collapsing should have no effect",
+        )
+        self.assertEqual(
+            len(g.edges),
+            len(guu.edges),
+            msg="Repeatedly un-collapsing should have no effect",
+        )
 
 
