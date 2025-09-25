@@ -14,7 +14,8 @@ import dataclasses
 import importlib
 import textwrap
 from collections import defaultdict
-from typing import List, Tuple, Union
+from typing import List, Optional, Tuple, Union  # noqa: F401
+# We need Optional for later execking of code strings
 
 from pyiron_core.pyiron_workflow import imports, simple_workflow
 from pyiron_core.pyiron_workflow.graph.decorators import (
