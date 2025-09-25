@@ -7,7 +7,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.DEPENDABOT_WORKFLOW_TOKEN }}
           ref: ${{ github.event.pull_request.head.ref }} # Check out the head of the actual branch, not the PR
           fetch-depth: 0 # otherwise, you will fail to push refs to dest repo
       - uses: pyiron/actions/write-environment@actions-4.0.8
@@ -26,7 +26,7 @@ jobs:
         if: steps.commit-binder-env.outcome == 'success'  # But only push if we made it here without continue-on-error
         uses: ad-m/github-push-action@master
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.DEPENDABOT_WORKFLOW_TOKEN }}
           branch: ${{ github.event.pull_request.head.ref }}
 
   test-suite:
