@@ -75,7 +75,9 @@ class RelaxMode(Enum):
             case RelaxMode.FULL:
                 return FrechetCellFilter(structure)
             case _:
-                raise ValueError("Lazy Marvin")
+                raise ValueError(
+                    f"Expected to match available enum: {RelaxMode.__members__}"
+                )
 
 
 @Workflow.wrap.as_function_node
@@ -99,7 +101,9 @@ def Relax(
         case RelaxMode.FULL:
             structure.calc = calculator.get_calculator(use_symmetry=False)
         case _:
-            assert False
+            raise ValueError(
+                f"Expected to match available enum: {RelaxMode.__members__}"
+            )
 
     filtered_structure = mode.apply_filter_and_constraints(structure)
     lbfgs = LBFGS(filtered_structure)
