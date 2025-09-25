@@ -993,14 +993,14 @@ def eval_db_value(value, db):
             val = new_node.outputs[output_port_label]
 
     elif value.startswith("array"):
-        import numpy as np
+        import numpy as np  # noqa: F401
 
         val = value.replace("array", "np.array")
     else:
         # If the value is not a hash, simply evaluate it
         try:
             from pyiron_core.pyiron_nodes.atomistic.property.elastic import (
-                DataStructureContainer,
+                DataStructureContainer,  # noqa: F401
             )
 
             val = eval(value)
