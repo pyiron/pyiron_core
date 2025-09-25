@@ -31,6 +31,7 @@ dependencies = [
     "black==25.1.0",
     "calphy==1.3.13",
     "cloudpickle==3.1.1",
+    "grace-tensorpotential==0.5.1",
     "ipytree==0.2.2",
     "ipywidgets==8.1.6",
     "jupyterlab==4.4.1",
@@ -46,6 +47,7 @@ dependencies = [
     "pyiron_base==0.14.3",
     "pyiron-data==0.0.30",
     "pyiron_lammps==0.4.1",
+    "python-ace==0.3.1",
     "python-ternary==1.0.8",
     "pyxtal==1.1.0",
     "scikit-image==0.25.2",
@@ -67,13 +69,6 @@ file = "LICENSE"
 Homepage = "https://pyiron.org/"
 Repository = "https://github.com/pyiron/pyiron_core"
 
-[project.optional-dependencies]
-demos = [
-    "grace-tensorpotential==0.5.1",
-    "python-ace==0.3.1",
-]
-# some dependencies for demo workflows (stored_workflows/demos) are only available
-# for linux-64 and osx-64
 
 [tool.hatch.build]
 only-packages = true

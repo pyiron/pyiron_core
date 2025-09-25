@@ -30,7 +30,7 @@ jobs:
       - name: Write composite environment file
         uses: pyiron/actions/write-environment@actions-4.0.8
         with:
-          env-files: project-env.yml demos-extras-env.yml
+          env-files: project-env.yml
           output-env-file: environment.yml
       - name: Build environment from file
         uses: conda-incubator/setup-miniconda@v3
@@ -70,4 +70,4 @@ jobs:
             exit 1
           fi
           echo "All notebooks passed!"
-        timeout-minutes: 5
+        timeout-minutes: 10
