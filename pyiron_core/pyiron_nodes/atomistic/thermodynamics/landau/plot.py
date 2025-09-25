@@ -245,9 +245,9 @@ def guess_mu_range(phases, Tmax, samples):
         mu1 += 0.05
     cc = np.array(cc)
     mm = np.array(mm)
-    I = cc.argsort()
-    cc = cc[I]
-    mm = mm[I]
+    sorted_indices = cc.argsort()
+    cc = cc[sorted_indices]
+    mm = mm[sorted_indices]
     return si.interp1d(cc, mm)(np.linspace(min(cc), max(cc), samples))
 
 
@@ -462,14 +462,14 @@ def CheckTemperatureInterpolation(
     fig, ax = plt.subplots()
 
     Ts = np.linspace(Tmin, Tmax, 50)
-    (l,) = ax.plot(Ts, phase.line_free_energy(Ts), label="interpolation")
+    (line,) = ax.plot(Ts, phase.line_free_energy(Ts), label="interpolation")
 
     # Try to plot about 50 points
     n = max(int(len(phase.temperatures) // 50), 1)
     ax.scatter(
         phase.temperatures[::n],
         phase.free_energies[::n],
-        c=l.get_color(),
+        c=line.get_color(),
         label="data",
     )
 

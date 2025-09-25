@@ -852,8 +852,12 @@ def get_inputs_data(func, extract_input_parameters, *args, **kwargs):
     args_list = list(args)  # Convert args (a tuple) into a list
 
     values = [
-        (kwargs[l] if l in kwargs else args_list[i] if i < len(args_list) else d)
-        for i, (l, d) in enumerate(zip(data[PORT_LABEL], values_default))
+        (
+            kwargs[label] if label in kwargs
+            else args_list[i] if i < len(args_list)
+            else default
+        )
+        for i, (label, default) in enumerate(zip(data[PORT_LABEL], values_default))
     ]
 
     ready = [not _is_equal_to_string(value, NotData) for value in values]
@@ -1161,15 +1165,15 @@ class Workflow:
     def _get_edges(self, node):
         values = node.inputs.data[PORT_VALUE]
         labels = node.inputs.data[PORT_LABEL]
-        for l, v in zip(labels, values):
+        for label, value in zip(labels, values):
             # print('ports: ', l, type(v))
-            if isinstance(v, Port):
-                source = v.node.label
-                sourceHandle = v.label
+            if isinstance(value, Port):
+                source = value.node.label
+                sourceHandle = value.label
                 target = node.label
-                targetHandle = l  # v.label
-            elif isinstance(v, Node):
-                source_node = v
+                targetHandle = label  # v.label
+            elif isinstance(value, Node):
+                source_node = value
                 source = source_node.label
                 # print('source_node: ', source_node, source_node.outputs.data[PORT_LABEL], node.label)
                 if source_node.n_out_labels == 1:
@@ -1180,7 +1184,7 @@ class Workflow:
                     )
 
                 target = node.label
-                targetHandle = l
+                targetHandle = label
             else:
                 continue
 
