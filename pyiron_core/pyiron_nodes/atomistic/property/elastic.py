@@ -92,7 +92,7 @@ def AddEnergies(
 @as_function_node("forces")
 def ExtractFinalEnergy(df):
     # Looks an awful lot like phonons.ExtractFinalForce -- room for abstraction here
-    return [getattr(e, "energy")[-1] for e in df["out"].tolist()]
+    return [e.energy[-1] for e in df["out"].tolist()]
 
 
 @as_function_node
@@ -286,7 +286,7 @@ def AnalyseStructures(
     Lag_strain_list = analysis.Lag_strain_list
 
     out = OutputElasticAnalysis().dataclass()
-    energy_dict = {k: v for k, v in zip(job_names, energies)}
+    energy_dict = {k: v for k, v in zip(job_names, energies, strict=False)}
 
     if 0.0 in epss:
         out.energy_0 = energy_dict[zero_strain_job_name]

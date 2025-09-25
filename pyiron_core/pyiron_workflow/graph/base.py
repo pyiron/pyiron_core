@@ -515,7 +515,7 @@ def get_graph_from_wf(
         graph += GraphEdge(**edge)
 
     # print(f"Adding output nodes {out_labels}")
-    for out_label, wf_output in zip(out_labels, wf_outputs):
+    for out_label, wf_output in zip(out_labels, wf_outputs, strict=True):
         out_node_label = virtual_output_label(wf_label, out_label)
         graph += identity(label=out_node_label)
 
@@ -930,7 +930,7 @@ def get_externally_connected_input_ports(graph):
     for node in graph.nodes.values():
         ports = node.node.inputs.data["label"]
         values = node.node.inputs.data["value"]
-        for port_label, value in zip(ports, values):
+        for port_label, value in zip(ports, values, strict=False):
             if is_port_external_to_graph(value, graph):
                 external_ports.append((node.label, port_label))
 

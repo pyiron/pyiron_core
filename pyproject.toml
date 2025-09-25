@@ -121,6 +121,8 @@ select = [
     "E",
     # Pyflakes
     "F",
+    # flake8-bugbear
+    "B",
 ]
 ignore = [
     # ignore line-length violations -- let black care about this

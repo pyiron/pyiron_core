@@ -250,11 +250,11 @@ def wf_data_class(*args, doc_func=None, **kwargs):
                 keys_to_store = self.keys()  # cls._keys_to_store
             return {k: self[k] for k in keys_to_store}
 
-        setattr(cls, "keys", keys)
-        setattr(cls, "items", items)
-        setattr(cls, "__getitem__", __getitem__)
-        setattr(cls, "__setitem__", __setitem__)
-        setattr(cls, "select", select)
+        cls.keys = keys
+        cls.items = items
+        cls.__getitem__ = __getitem__
+        cls.__setitem__ = __setitem__
+        cls.select = select
 
         # if keys_to_store is None:
         #     cls._keys_to_store = filter_internals(keys(cls))

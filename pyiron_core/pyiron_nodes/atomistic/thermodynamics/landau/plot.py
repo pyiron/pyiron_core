@@ -57,7 +57,9 @@ def plot_phase_diagram(
         fig = ax.figure
 
     # The default color map
-    color_map = dict(zip(df.phase.unique(), sns.palettes.SEABORN_PALETTES["pastel"]))
+    color_map = dict(
+        zip(df.phase.unique(), sns.palettes.SEABORN_PALETTES["pastel"], strict=False)
+    )
     color_override = {p: c for p, c in color_override.items() if p in color_map}
 
     duplicates_map = {c: color_map[o] for o, c in color_override.items()}

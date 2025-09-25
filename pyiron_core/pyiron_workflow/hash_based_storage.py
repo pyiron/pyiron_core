@@ -1180,7 +1180,7 @@ def _bracketed_split(string, delimiter, strip_brackets=False):
 
     openers = "[{(<"
     closers = "]})>"
-    opener_to_closer = dict(zip(openers, closers))
+    opener_to_closer = dict(zip(openers, closers, strict=True))
     opening_bracket = dict()
     current_string = ""
     depth = 0

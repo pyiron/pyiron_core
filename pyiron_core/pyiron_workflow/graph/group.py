@@ -61,7 +61,7 @@ def create_group(
         values = getattr(sub_graph_node, io_type).data["value"]
         labels = getattr(sub_graph_node, io_type).data["label"]
         print("labels", labels)
-        for handle, value in zip(labels, values):
+        for handle, value in zip(labels, values, strict=True):
             io_handle = (
                 labelling.virtual_input_label(sub_graph.label, handle)
                 if io_type == "inputs"

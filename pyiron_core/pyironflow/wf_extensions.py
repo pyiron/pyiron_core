@@ -30,7 +30,7 @@ def dict_to_node(dict_node, log):
         target_values = data["target_values"]
         target_labels = data["target_labels"]
         target_dict = dict()
-        for k, v in zip(target_labels, target_values):
+        for k, v in zip(target_labels, target_values, strict=True):
             if v not in ("NonPrimitive", NotData):
                 target_dict[k] = v
 
@@ -157,7 +157,7 @@ def get_node_dict(node, id_num, key=None):
     # TODO: set to None if it contains an edge (include connected parameter)
     target_types = [
         "None" if (t == "builtins.NoneType") or connected else t
-        for t, connected in zip(node.inputs.data["type"], is_connected)
+        for t, connected in zip(node.inputs.data["type"], is_connected, strict=True)
     ]
     import_path = node.function["import_path"]
     # print('import_path: ', import_path)

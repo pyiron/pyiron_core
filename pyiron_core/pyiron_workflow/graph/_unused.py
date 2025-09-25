@@ -104,7 +104,7 @@ def run_macro_node(macro_node):
     for graph_node in macro_graph.nodes.values():
         values = graph_node.node.inputs.data["value"]
         labels = graph_node.node.inputs.data["label"]
-        for port_label, port_value in zip(labels, values):
+        for port_label, port_value in zip(labels, values, strict=False):
             # print('label: ', port_label)
             if isinstance(port_value, (simple_workflow.Port)):
                 # print(port_label, type(port_value.value))

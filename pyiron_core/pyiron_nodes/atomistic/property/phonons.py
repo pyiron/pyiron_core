@@ -138,7 +138,7 @@ def GetFreeEnergy(
 
 @as_function_node("forces")
 def ExtractFinalForces(df):
-    return [getattr(e, "force")[-1] for e in df["out"].tolist()]
+    return [e.force[-1] for e in df["out"].tolist()]
 
 
 @as_function_node

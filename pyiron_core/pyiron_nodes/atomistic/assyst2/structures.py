@@ -36,7 +36,7 @@ class Stoichiometry(Sequence):
             other.elements
         ), "Can only or stoichiometries of different elements!"
         s = ()
-        for me, you in zip(self.stoichiometry, other.stoichiometry):
+        for me, you in zip(self.stoichiometry, other.stoichiometry, strict=False):
             s += (me | you,)
         return Stoichiometry(s)
 
@@ -103,8 +103,10 @@ def SpaceGroupSampling(input: SpaceGroupInput) -> list[Atoms]:
     structures = []
     with catch_warnings(category=UserWarning, action="ignore"):
         for stoich in (bar := tqdm(input.stoichiometry)):
-            elements, num_ions = zip(*stoich.items())
-            stoich_str = "".join(f"{s}{n}" for s, n in zip(elements, num_ions))
+            elements, num_ions = zip(*stoich.items(), strict=False)
+            stoich_str = "".join(
+                f"{s}{n}" for s, n in zip(elements, num_ions, strict=False)
+            )
             bar.set_description(stoich_str)
             structures += [
                 s["atoms"] for s in pyxtal(input.spacegroups, elements, num_ions)

@@ -551,7 +551,9 @@ class Node:
 
         if output_labels is not None:
             outs = self.outputs.data[PORT_LABEL]
-            for i, (label_outs, label_out) in enumerate(zip(outs, output_labels)):
+            for i, (label_outs, label_out) in enumerate(
+                zip(outs, output_labels, strict=True)
+            ):
                 if label_outs is None:
                     # self.outputs.data[PORT_LABEL][i] = label_out
                     outs[i] = label_out
@@ -574,7 +576,10 @@ class Node:
         values = self.inputs.data[PORT_VALUE]
         labels = self.inputs.data[PORT_LABEL]
         types = self.inputs.data[PORT_TYPE]
-        return {k: self._get_value(v, t) for k, v, t in zip(labels, values, types)}
+        return {
+            k: self._get_value(v, t)
+            for k, v, t in zip(labels, values, types, strict=False)
+        }
 
     @property
     def n_out_labels(self):
@@ -760,6 +765,7 @@ class Node:
                 self.inputs.data[PORT_LABEL],
                 self.inputs.data[PORT_VALUE],
                 self.inputs.data[PORT_DEFAULT],
+                strict=True,
             )
             if ((default == NotData) or (str(default) != str(v)))
             and not isinstance(v, (Node, Port))
@@ -857,7 +863,9 @@ def get_inputs_data(func, extract_input_parameters, *args, **kwargs):
             if label in kwargs
             else args_list[i] if i < len(args_list) else default
         )
-        for i, (label, default) in enumerate(zip(data[PORT_LABEL], values_default))
+        for i, (label, default) in enumerate(
+            zip(data[PORT_LABEL], values_default, strict=True)
+        )
     ]
 
     ready = [not _is_equal_to_string(value, NotData) for value in values]
@@ -1165,7 +1173,7 @@ class Workflow:
     def _get_edges(self, node):
         values = node.inputs.data[PORT_VALUE]
         labels = node.inputs.data[PORT_LABEL]
-        for label, value in zip(labels, values):
+        for label, value in zip(labels, values, strict=True):
             # print('ports: ', l, type(v))
             if isinstance(value, Port):
                 source = value.node.label

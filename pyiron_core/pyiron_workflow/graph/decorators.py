@@ -46,16 +46,16 @@ def as_dotdict_dataclass(
             cls.__doc__ = doc_func.__doc__
 
         if _repr_html_ is not None:
-            setattr(cls, "_repr_html_", _repr_html_)
+            cls._repr_html_ = _repr_html_
 
         if __add__ is not None:
-            setattr(cls, "__add__", __add__)
+            cls.__add__ = __add__
 
         if __getstate__ is not None:
-            setattr(cls, "__getstate__", __getstate__)
+            cls.__getstate__ = __getstate__
 
         if __setstate__ is not None:
-            setattr(cls, "__setstate__", __setstate__)
+            cls.__setstate__ = __setstate__
 
         # Add new methods
         def keys(self):
@@ -82,12 +82,12 @@ def as_dotdict_dataclass(
                 keys_to_store = self.keys()  # cls._keys_to_store
             return {k: self[k] for k in keys_to_store}
 
-        setattr(cls, "keys", keys)
-        setattr(cls, "items", items)
-        setattr(cls, "asdict", asdict)
-        setattr(cls, "__getitem__", __getitem__)
-        setattr(cls, "__setitem__", __setitem__)
-        setattr(cls, "select", select)
+        cls.keys = keys
+        cls.items = items
+        cls.asdict = asdict
+        cls.__getitem__ = __getitem__
+        cls.__setitem__ = __setitem__
+        cls.select = select
 
         return cls
 

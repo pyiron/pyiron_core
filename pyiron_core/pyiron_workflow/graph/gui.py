@@ -608,7 +608,7 @@ def gui_data(
     ]
     target_types = [
         "None" if (t == "builtins.NoneType") or connected else t
-        for t, connected in zip(node.inputs.data["type"], is_connected)
+        for t, connected in zip(node.inputs.data["type"], is_connected, strict=False)
     ]
 
     is_connected = [
