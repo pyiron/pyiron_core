@@ -115,6 +115,18 @@ exclude = [
     "devbooks/",
 ]
 
+[tool.ruff.lint]
+select = [
+    # pycodestyle
+    "E",
+    # Pyflakes
+    "F",
+]
+ignore = [
+    # ignore line-length violations -- let black care about this
+    "E501",
+]
+
 [tool.ruff.lint.per-file-ignores]
 "**/__init__.py" = ["F401"]  # Ignore unused imports in init files -- we specify APIs this way
 "pyiron_core/pyiron_database/api.py" = ["F401"]
