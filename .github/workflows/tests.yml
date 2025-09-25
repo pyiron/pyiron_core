@@ -2,6 +2,33 @@ name: Test suite
 on: [pull_request]
 
 jobs:
+  commit-updated-env: # Keep envs read by external sources (binder and readthedocs) up-to-date
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.DEPENDABOT_WORKFLOW_TOKEN }}
+          ref: ${{ github.event.pull_request.head.ref }} # Check out the head of the actual branch, not the PR
+          fetch-depth: 0 # otherwise, you will fail to push refs to dest repo
+      - uses: pyiron/actions/write-environment@actions-4.0.8
+        with:
+          env-files: project-env.yml .ci_support/binder-env.yml
+          output-env-file: .binder/environment.yml
+      - name: commit
+        id: commit-binder-env
+        continue-on-error: true  # Allow "failure" when there are no changes (the working tree is clean)
+        run: |
+          git config --local user.email "pyiron@mpie.de"
+          git config --local user.name "pyiron-runner"
+          git add .binder/environment.yml
+          git commit -m "[dependabot skip] Update env file" -a
+      - name: push
+        if: steps.commit-binder-env.outcome == 'success'  # But only push if we made it here without continue-on-error
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.DEPENDABOT_WORKFLOW_TOKEN }}
+          branch: ${{ github.event.pull_request.head.ref }}
+
   test-suite:
     runs-on: ubuntu-latest
     services:
