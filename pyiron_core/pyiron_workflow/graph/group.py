@@ -58,10 +58,9 @@ def create_group(
 
     add_edges = []
     for io_type in ["inputs", "outputs"]:
-        values = getattr(sub_graph_node, io_type).data["value"]
         labels = getattr(sub_graph_node, io_type).data["label"]
         print("labels", labels)
-        for handle, value in zip(labels, values, strict=True):
+        for handle in labels:
             io_handle = (
                 labelling.virtual_input_label(sub_graph.label, handle)
                 if io_type == "inputs"

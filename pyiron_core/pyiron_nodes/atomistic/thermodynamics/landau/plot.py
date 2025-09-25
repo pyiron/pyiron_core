@@ -89,7 +89,7 @@ def plot_phase_diagram(
         )
 
     # Draw polygons
-    for i, (phase, p) in enumerate(polys.items()):
+    for phase, p in polys.items():
         p.zorder = 1 / p.get_extents().size.prod()
         rep = phase[1] if isinstance(phase, tuple) else 0
         phase_name = phase[0] if isinstance(phase, tuple) else phase

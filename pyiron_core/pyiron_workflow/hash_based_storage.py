@@ -1289,6 +1289,6 @@ def clone_node_with_inputs(node):
     lib_path = ".".join(node.package_identifier.split("."))  # [1:])
     node_lib_path = ".".join([lib_path, node.label])
     new_node = create_node(node_lib_path)
-    for k, v in node.inputs.to_dict()["channels"].items():
+    for k in node.inputs.to_dict()["channels"]:
         new_node.inputs[k] = node.inputs[k].value
     return new_node

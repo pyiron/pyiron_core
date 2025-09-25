@@ -62,7 +62,7 @@ def is_primitive(obj):
 
 def get_node_values(channel_dict):
     values = list()
-    for k, v in channel_dict.items():
+    for v in channel_dict.values():
         value = v.value
         if value != NotData:
             value = NotData

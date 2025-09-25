@@ -96,7 +96,7 @@ def as_dotdict_dataclass(
 
 def transpose_dict_of_dicts(nested_dict: dict) -> dict:
     transposed = {}
-    for outer_key, inner_dict in nested_dict.items():
+    for inner_dict in nested_dict.values():
         for inner_key, value in inner_dict.items():
             if inner_key not in transposed:
                 transposed[inner_key] = []
