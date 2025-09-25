@@ -1,7 +1,11 @@
 # from __future__ import annotations
 from typing import Optional
 
-from pyiron_core.pyiron_workflow import as_inp_dataclass_node, as_out_dataclass_node, Node
+from pyiron_core.pyiron_workflow import (
+    as_inp_dataclass_node,
+    as_out_dataclass_node,
+    Node,
+)
 from dataclasses import field
 
 import atomistics.workflows.elastic.symmetry as sym

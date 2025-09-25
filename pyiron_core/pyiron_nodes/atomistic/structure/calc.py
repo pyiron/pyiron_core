@@ -84,7 +84,7 @@ def SplineDescriptor(
             degree=degree,
         )
 
-    return descriptor #, deriv_descriptor, r_bins
+    return descriptor  # , deriv_descriptor, r_bins
 
 
 @as_function_node
@@ -179,7 +179,9 @@ def FitDiffPotential(
         ReadPickledDatasetAsDataframe,
     )
     from pyiron_core.pyiron_nodes.math import Linspace, Divide, DotProduct
-    from pyiron_core.pyiron_nodes.atomistic.structure.calc import LinearInterpolationDescriptor
+    from pyiron_core.pyiron_nodes.atomistic.structure.calc import (
+        LinearInterpolationDescriptor,
+    )
     from pyiron_core.pyiron_nodes.dataframe import (
         MergeDataFrames,
         GetRowsFromDataFrame,
@@ -312,7 +314,9 @@ def FitDiffPotential2(
         how="inner",
     )
 
-    wf.Descriptor = SplineDescriptor(r_min=r_min, r_max=r_max, num_points=num_points, degree=degree)
+    wf.Descriptor = SplineDescriptor(
+        r_min=r_min, r_max=r_max, num_points=num_points, degree=degree
+    )
 
     wf.GetRowsFromDataFrame = GetRowsFromDataFrame(
         df=wf.MergeDataFrames, max_index=max_row_index

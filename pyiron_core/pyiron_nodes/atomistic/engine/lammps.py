@@ -3,7 +3,12 @@ from __future__ import annotations
 from typing import Optional, TYPE_CHECKING
 
 from pyiron_atomistics.lammps.control import LammpsControl
-from pyiron_core.pyiron_workflow import as_function_node, as_out_dataclass_node, as_macro_node, as_inp_dataclass_node
+from pyiron_core.pyiron_workflow import (
+    as_function_node,
+    as_out_dataclass_node,
+    as_macro_node,
+    as_inp_dataclass_node,
+)
 
 from pyiron_core.pyiron_nodes.atomistic.calculator.data import (
     # InputCalcMinimize,
@@ -128,7 +133,7 @@ def InitLammps(
         pot.df = LammpsPotentialFile().find_by_name(potential)
     elif isinstance(potential, DataFrame):
         pot.df = potential
-    print('Potential: ', pot.df)    
+    print("Potential: ", pot.df)
     pot.write_file(file_name="potential.inp", cwd=working_directory)
     pot.copy_pot_files(working_directory)
 

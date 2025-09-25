@@ -27,7 +27,7 @@ def build_water(project, n_mols: int = 10):
 
     if isinstance(project, str):
         project = Project(project)
-        
+
     water = project.create_atoms(
         elements=["H", "H", "O"], positions=[r_H1, r_H2, r_O], cell=unit_cell, pbc=True
     )
@@ -36,33 +36,38 @@ def build_water(project, n_mols: int = 10):
 
 
 @as_function_node
-def add_water_film(electrode, water_width: float = 10.0, hydrophobic_gap: float = 3.0, density: float = 1.0e-24):
+def add_water_film(
+    electrode,
+    water_width: float = 10.0,
+    hydrophobic_gap: float = 3.0,
+    density: float = 1.0e-24,
+):
 
     from ase.build import molecule
     from pyiron_atomistics import ase_to_pyiron
     import ase.units as units
     import numpy as np
-    
+
     lx, ly = electrode.cell.diagonal()[:2]
-    zmin = np.max(electrode.positions[:,2])
+    zmin = np.max(electrode.positions[:, 2])
     zmax = zmin + water_width
-    
-    # Water 
+
+    # Water
     n_mols = 1
     # density = 1.0e-24  # g/A^3
     mol_mass_water = 18.015  # g/mol
-    
+
     # Determining the supercell size size
     mass = mol_mass_water * n_mols / units.mol  # g
     vol_h2o = mass / density  # in A^3
     a = vol_h2o ** (1.0 / 3.0)  # A
     cell = np.array([lx, ly, water_width])
     cell_repeat = (cell // a).astype(int)
-    
-    H2O = molecule('H2O',cell=cell/cell_repeat)
+
+    H2O = molecule("H2O", cell=cell / cell_repeat)
     H2O.set_pbc(True)
     H2O = ase_to_pyiron(H2O).repeat(cell_repeat)
-    H2O.positions[:,2] += zmin + hydrophobic_gap
+    H2O.positions[:, 2] += zmin + hydrophobic_gap
     H2O.set_cell(electrode.cell)
 
     electrochemical_cell = electrode + H2O
@@ -85,7 +90,7 @@ def add_neon_layer(structure, d_eq: float, hydrophobic_gap: float = 1.0):
     """
     from pyiron_core.pyiron_nodes.atomistic.structure.build import Bulk, Surface
     import numpy as np
-    
+
     # Get the maximum z value of an atom in the structure
     max_z = np.max(structure.get_positions()[:, 2])
 
@@ -98,10 +103,12 @@ def add_neon_layer(structure, d_eq: float, hydrophobic_gap: float = 1.0):
     ny = int(np.ceil(b / (d_eq * 2))) * 2
 
     # Create a new Atoms object for the neon layer
-    neon_layer = Surface('Ne', 'fcc111', size = f'{nx} {ny} 1', vacuum = 25.0, orthogonal=True).run()
-    neon_layer.set_cell(cell = structure.cell, scale_atoms = True)
-    neon_layer.positions[:,2] = max_z + hydrophobic_gap
-    
+    neon_layer = Surface(
+        "Ne", "fcc111", size=f"{nx} {ny} 1", vacuum=25.0, orthogonal=True
+    ).run()
+    neon_layer.set_cell(cell=structure.cell, scale_atoms=True)
+    neon_layer.positions[:, 2] = max_z + hydrophobic_gap
+
     # Create a new Atoms object for the modified structure
     modified_structure = structure.copy()
 

@@ -3,6 +3,7 @@ import unittest
 
 from pyiron_core.pyiron_workflow.graph import base, graph_json, group
 
+
 class TestGraphJson(unittest.TestCase):
     def test_cycling_groups(self):
         g = base.Graph("has_a_group")

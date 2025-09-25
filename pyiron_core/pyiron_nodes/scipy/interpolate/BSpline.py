@@ -9,4 +9,3 @@ def DesignMatrix(x, t, k: int = 3, extrapolate: bool = False, toarray: bool = Tr
     if toarray:
         matrix = matrix.toarray()
     return matrix
-

@@ -387,9 +387,7 @@ class PyironFlow:
         self.wf_widgets = list()  # list of PyironFlowWidget objects
         for wf in wf_list:
             if isinstance(wf, str):
-                wf = graph_json._load_graph(
-                    f"{workflow_path}/{wf}"
-                )
+                wf = graph_json._load_graph(f"{workflow_path}/{wf}")
             self.wf_widgets.append(
                 PyironFlowWidget(
                     wf=wf,

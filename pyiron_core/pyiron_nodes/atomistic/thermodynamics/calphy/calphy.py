@@ -4,9 +4,15 @@ import numpy as np
 import os
 import random
 import string
-from pyiron_core.pyiron_workflow import as_function_node, as_macro_node, as_out_dataclass_node, as_inp_dataclass_node
+from pyiron_core.pyiron_workflow import (
+    as_function_node,
+    as_macro_node,
+    as_out_dataclass_node,
+    as_inp_dataclass_node,
+)
 from ase import Atoms
 import pandas as pd
+
 
 @as_function_node("potentials")
 def ListPotentials(structure):
@@ -14,6 +20,7 @@ def ListPotentials(structure):
 
     potentials = lp(structure)
     return potentials
+
 
 @as_inp_dataclass_node
 class MD:
@@ -37,6 +44,7 @@ class MD:
     barostat_damping: float
         https://calphy.org/en/latest/inputfile.html#barostat-damping
     """
+
     timestep: float = 0.001
     n_small_steps: int = 10000
     n_every_steps: int = 10
@@ -44,6 +52,7 @@ class MD:
     n_cycles: int = 100
     thermostat_damping: float = 0.5
     barostat_damping: float = 0.1
+
 
 @as_inp_dataclass_node
 class Tolerance:
@@ -61,10 +70,12 @@ class Tolerance:
     pressure: float
         https://calphy.org/en/latest/inputfile.html#tol-pressure
     """
+
     spring_constant: float = 0.01
     solid_fraction: float = 0.7
     liquid_fraction: float = 0.05
     pressure: float = 1.0
+
 
 @as_inp_dataclass_node
 class NoseHoover:
@@ -78,8 +89,10 @@ class NoseHoover:
     barostat_damping: float
         https://calphy.org/en/latest/inputfile.html#nose-hoover-barostat-damping
     """
+
     thermostat_damping: float = 0.1
     barostat_damping: float = 0.1
+
 
 @as_inp_dataclass_node
 class Berendsen:
@@ -93,8 +106,10 @@ class Berendsen:
     barostat_damping: float
         https://calphy.org/en/latest/inputfile.html#berendsen-barostat-damping
     """
+
     thermostat_damping: float = 100.0
     barostat_damping: float = 100.0
+
 
 @as_inp_dataclass_node
 class InputClass:
@@ -132,9 +147,10 @@ class InputClass:
     melting_cycle: bool
         https://calphy.org/en/latest/inputfile.html#melting-cycle
     spring_constants: Optional[float]
-        https://calphy.org/en/latest/inputfile.html#spring-constants        
+        https://calphy.org/en/latest/inputfile.html#spring-constants
     """
-    md: Optional[MD] = None 
+
+    md: Optional[MD] = None
     tolerance: Optional[Tolerance] = None
     nose_hoover: Optional[NoseHoover] = None
     berendsen: Optional[Berendsen] = None
@@ -150,14 +166,16 @@ class InputClass:
     melting_cycle: bool = False
     cores: Optional[int] = 1
 
+
 def _generate_random_string(length: str) -> str:
-    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=length))
+    return "".join(random.choices(string.ascii_uppercase + string.digits, k=length))
+
 
 def _prepare_potential_and_structure(potential, structure):
     from pyiron_atomistics.lammps.potential import LammpsPotential, LammpsPotentialFile
     from pyiron_atomistics.lammps.structure import (
         LammpsStructure,
-    ) 
+    )
 
     potential_df = LammpsPotentialFile().find_by_name(potential)
     potential = LammpsPotential()
@@ -165,11 +183,15 @@ def _prepare_potential_and_structure(potential, structure):
 
     pair_style = []
     pair_coeff = []
-    
-    pair_style.append(" ".join(potential.df["Config"].to_list()[0][0].strip().split()[1:]))
-    pair_coeff.append(" ".join(potential.df["Config"].to_list()[0][1].strip().split()[1:]))
 
-    #now prepare the list of elements
+    pair_style.append(
+        " ".join(potential.df["Config"].to_list()[0][0].strip().split()[1:])
+    )
+    pair_coeff.append(
+        " ".join(potential.df["Config"].to_list()[0][1].strip().split()[1:])
+    )
+
+    # now prepare the list of elements
     elements = potential.get_element_lst()
     elements_from_pot = potential.get_element_lst()
 
@@ -190,70 +212,81 @@ def _prepare_potential_and_structure(potential, structure):
         else:
             masses.append(1.0)
 
-    file_name = os.path.join(os.getcwd(), _generate_random_string(7)+'.dat')
+    file_name = os.path.join(os.getcwd(), _generate_random_string(7) + ".dat")
     lmp_structure.write_file(file_name=file_name)
     potential.copy_pot_files(os.getcwd())
     return pair_style, pair_coeff, elements, masses, file_name
 
-def _prepare_input(inp, potential, structure, mode='fe', reference_phase='solid'):
+
+def _prepare_input(inp, potential, structure, mode="fe", reference_phase="solid"):
     from calphy.input import Calculation
     import os
-    pair_style, pair_coeff, elements, masses, file_name = _prepare_potential_and_structure(potential, structure)
+
+    pair_style, pair_coeff, elements, masses, file_name = (
+        _prepare_potential_and_structure(potential, structure)
+    )
 
     inpdict = asdict(inp)
     inpdict["pair_style"] = pair_style
     inpdict["pair_coeff"] = pair_coeff
     inpdict["element"] = elements
     inpdict["mass"] = masses
-    inpdict['mode'] = mode
-    inpdict['reference_phase'] = reference_phase
-    inpdict['lattice'] = file_name
-    inpdict["queue"] = {"cores": inpdict["cores"],}
+    inpdict["mode"] = mode
+    inpdict["reference_phase"] = reference_phase
+    inpdict["lattice"] = file_name
+    inpdict["queue"] = {
+        "cores": inpdict["cores"],
+    }
     del inpdict["cores"]
 
     if inpdict["md"] is None:
         inpdict["md"] = {
-                "timestep": 0.001,
-                "n_small_steps": 10000,
-                "n_every_steps": 10,
-                "n_repeat_steps": 10,
-                "n_cycles": 100,
-                "thermostat_damping": 0.5,
-                "barostat_damping": 0.1,
+            "timestep": 0.001,
+            "n_small_steps": 10000,
+            "n_every_steps": 10,
+            "n_repeat_steps": 10,
+            "n_cycles": 100,
+            "thermostat_damping": 0.5,
+            "barostat_damping": 0.1,
         }
     if inpdict["tolerance"] is None:
         inpdict["tolerance"] = {
-                "spring_constant": 0.01,
-                "solid_fraction": 0.7,
-                "liquid_fraction": 0.05,
-                "pressure": 1.0,
+            "spring_constant": 0.01,
+            "solid_fraction": 0.7,
+            "liquid_fraction": 0.05,
+            "pressure": 1.0,
         }
     if inpdict["nose_hoover"] is None:
         inpdict["nose_hoover"] = {
-                "thermostat_damping": 0.1,
-                "barostat_damping": 0.1,
+            "thermostat_damping": 0.1,
+            "barostat_damping": 0.1,
         }
     if inpdict["berendsen"] is None:
         inpdict["berendsen"] = {
-                "thermostat_damping": 100.0,
-                "barostat_damping": 100.0,
+            "thermostat_damping": 100.0,
+            "barostat_damping": 100.0,
         }
-    if mode == 'ts':
-        inpdict["temperature"] = [inpdict['temperature'], inpdict["temperature_stop"]]
+    if mode == "ts":
+        inpdict["temperature"] = [inpdict["temperature"], inpdict["temperature_stop"]]
         del inpdict["temperature_stop"]
-        
+
     calc = Calculation(**inpdict)
     return calc
+
 
 def _run_cleanup(simfolder, lattice, delete_folder=False):
     import shutil
     import os
+
     os.remove(lattice)
     if delete_folder:
         shutil.rmtree(simfolder)
 
-@as_function_node('free_energy')
-def SolidFreeEnergy(inp, structure: Atoms, potential: str, store: bool = False, _db=None) -> float:
+
+@as_function_node("free_energy")
+def SolidFreeEnergy(
+    inp, structure: Atoms, potential: str, store: bool = False, _db=None
+) -> float:
     """
     Calculate the free energy of a solid phase.
 
@@ -265,7 +298,7 @@ def SolidFreeEnergy(inp, structure: Atoms, potential: str, store: bool = False, 
         Atomic structure.
     potential: str
         Potential name.
-    
+
     Returns:
     --------
     float
@@ -275,15 +308,16 @@ def SolidFreeEnergy(inp, structure: Atoms, potential: str, store: bool = False, 
     from calphy.routines import routine_fe
     import os
 
-    calc = _prepare_input(inp, potential, structure, mode='fe', reference_phase='solid')
-    #os.chdir()
+    calc = _prepare_input(inp, potential, structure, mode="fe", reference_phase="solid")
+    # os.chdir()
     simfolder = calc.create_folders()
     job = Solid(calculation=calc, simfolder=simfolder)
     job = routine_fe(job)
     _run_cleanup(simfolder, calc.lattice)
     return job.report["results"]["free_energy"]
 
-@as_function_node('free_energy')
+
+@as_function_node("free_energy")
 def LiquidFreeEnergy(inp, structure: Atoms, potential: str) -> float:
     """
     Calculate the free energy of a liquid phase.
@@ -296,7 +330,7 @@ def LiquidFreeEnergy(inp, structure: Atoms, potential: str) -> float:
         Atomic structure.
     potential: str
         Potential name.
-    
+
     Returns:
     --------
     float
@@ -304,17 +338,22 @@ def LiquidFreeEnergy(inp, structure: Atoms, potential: str) -> float:
     """
     from calphy.liquid import Liquid
     from calphy.routines import routine_fe
-    
-    calc = _prepare_input(inp, potential, structure, mode='fe', reference_phase='liquid')
+
+    calc = _prepare_input(
+        inp, potential, structure, mode="fe", reference_phase="liquid"
+    )
     simfolder = calc.create_folders()
     job = Liquid(calculation=calc, simfolder=simfolder)
     job = routine_fe(job)
-    #run calculation
+    # run calculation
     _run_cleanup(simfolder, calc.lattice)
     return job.report["results"]["free_energy"]
 
-@as_function_node('temperature', 'free_energy')
-def SolidFreeEnergyWithTemp(inp, structure: Atoms, potential: str) -> Tuple[np.ndarray, np.ndarray]:
+
+@as_function_node("temperature", "free_energy")
+def SolidFreeEnergyWithTemp(
+    inp, structure: Atoms, potential: str
+) -> Tuple[np.ndarray, np.ndarray]:
     """
     Calculate the free energy of a solid phase as a function of temperature.
 
@@ -334,22 +373,25 @@ def SolidFreeEnergyWithTemp(inp, structure: Atoms, potential: str) -> Tuple[np.n
     """
     from calphy.solid import Solid
     from calphy.routines import routine_ts
-    
-    calc = _prepare_input(inp, potential, structure, mode='ts', reference_phase='solid')
+
+    calc = _prepare_input(inp, potential, structure, mode="ts", reference_phase="solid")
     simfolder = calc.create_folders()
     job = Solid(calculation=calc, simfolder=simfolder)
     job = routine_ts(job)
-    #run calculation
+    # run calculation
 
-    #grab the results
-    datafile = os.path.join(os.getcwd(), simfolder, 'temperature_sweep.dat')
-    t, f = np.loadtxt(datafile, unpack=True, usecols=(0,1))
+    # grab the results
+    datafile = os.path.join(os.getcwd(), simfolder, "temperature_sweep.dat")
+    t, f = np.loadtxt(datafile, unpack=True, usecols=(0, 1))
 
     _run_cleanup(simfolder, calc.lattice)
     return t, f
 
-@as_function_node('temperature', 'free_energy')
-def LiquidFreeEnergyWithTemp(inp, structure: Atoms, potential: str) -> Tuple[np.ndarray, np.ndarray]:
+
+@as_function_node("temperature", "free_energy")
+def LiquidFreeEnergyWithTemp(
+    inp, structure: Atoms, potential: str
+) -> Tuple[np.ndarray, np.ndarray]:
     """
     Calculate the free energy of a liquid phase as a function of temperature.
 
@@ -369,31 +411,42 @@ def LiquidFreeEnergyWithTemp(inp, structure: Atoms, potential: str) -> Tuple[np.
     """
     from calphy.liquid import Liquid
     from calphy.routines import routine_ts
-    
-    calc = _prepare_input(inp, potential, structure, mode='ts', reference_phase='liquid')
+
+    calc = _prepare_input(
+        inp, potential, structure, mode="ts", reference_phase="liquid"
+    )
     simfolder = calc.create_folders()
     job = Liquid(calculation=calc, simfolder=simfolder)
     job = routine_ts(job)
-    
-    #grab the results
-    datafile = os.path.join(os.getcwd(), simfolder, 'temperature_sweep.dat')
-    t, f = np.loadtxt(datafile, unpack=True, usecols=(0,1))
+
+    # grab the results
+    datafile = os.path.join(os.getcwd(), simfolder, "temperature_sweep.dat")
+    t, f = np.loadtxt(datafile, unpack=True, usecols=(0, 1))
 
     _run_cleanup(simfolder, calc.lattice)
     return t, f
 
+
 @as_function_node
 def PlotFreeEnergy(temperature: np.ndarray, free_energy: np.ndarray):
     import matplotlib.pyplot as plt
-    plt.plot(temperature, free_energy, label='free energy')
-    plt.ylabel('Free energy (eV/atom)')
-    plt.xlabel('Temperature (K)')
+
+    plt.plot(temperature, free_energy, label="free energy")
+    plt.ylabel("Free energy (eV/atom)")
+    plt.xlabel("Temperature (K)")
     plt.legend(frameon=False)
     figure = plt.show()
     return figure
 
-@as_function_node('phase_transition_temperature', 'figure')
-def CalcPhaseTransformationTemp(temp_A: np.ndarray, fe_A: np.ndarray, temp_B: np.ndarray, fe_B: np.ndarray, fit_order: int = 4):
+
+@as_function_node("phase_transition_temperature", "figure")
+def CalcPhaseTransformationTemp(
+    temp_A: np.ndarray,
+    fe_A: np.ndarray,
+    temp_B: np.ndarray,
+    fe_B: np.ndarray,
+    fit_order: int = 4,
+):
     """
     Calculate the phase transformation temperature from free energy data.
 
@@ -409,7 +462,7 @@ def CalcPhaseTransformationTemp(temp_A: np.ndarray, fe_A: np.ndarray, temp_B: np
         Free energy array for phase 2.
     fit_order: int
         Order of the polynomial fit.
-    
+
     Returns:
     --------
     float
@@ -418,7 +471,7 @@ def CalcPhaseTransformationTemp(temp_A: np.ndarray, fe_A: np.ndarray, temp_B: np
     import matplotlib.pyplot as plt
     import warnings
 
-    #do some fitting to determine temps
+    # do some fitting to determine temps
     t1min = np.min(temp_A)
     t2min = np.min(temp_B)
     t1max = np.max(temp_A)
@@ -427,51 +480,53 @@ def CalcPhaseTransformationTemp(temp_A: np.ndarray, fe_A: np.ndarray, temp_B: np
     tmin = np.min([t1min, t2min])
     tmax = np.max([t1max, t2max])
 
-    #warn about extrapolation
+    # warn about extrapolation
     if not t1min == t2min:
-        warnings.warn(f'free energy is being extrapolated!')
+        warnings.warn(f"free energy is being extrapolated!")
     if not t1max == t2max:
-        warnings.warn(f'free energy is being extrapolated!')
+        warnings.warn(f"free energy is being extrapolated!")
 
-    #now fit
+    # now fit
     f1fit = np.polyfit(temp_A, fe_A, fit_order)
     f2fit = np.polyfit(temp_B, fe_B, fit_order)
 
-    #reevaluate over the new range
-    fit_t = np.arange(tmin, tmax+1, 1)
+    # reevaluate over the new range
+    fit_t = np.arange(tmin, tmax + 1, 1)
     fit_f1 = np.polyval(f1fit, fit_t)
     fit_f2 = np.polyval(f2fit, fit_t)
 
-    #now evaluate the intersection temp
-    arg = np.argsort(np.abs(fit_f1-fit_f2))[0]
+    # now evaluate the intersection temp
+    arg = np.argsort(np.abs(fit_f1 - fit_f2))[0]
     transition_temp = fit_t[arg]
 
-    #warn if the temperature is shady
-    if np.abs(transition_temp-tmin) < 1E-3:
-        warnings.warn('It is likely there is no intersection of free energies')
-    elif np.abs(transition_temp-tmax) < 1E-3:
-        warnings.warn('It is likely there is no intersection of free energies')
+    # warn if the temperature is shady
+    if np.abs(transition_temp - tmin) < 1e-3:
+        warnings.warn("It is likely there is no intersection of free energies")
+    elif np.abs(transition_temp - tmax) < 1e-3:
+        warnings.warn("It is likely there is no intersection of free energies")
 
-    #plot
-    c1lo = '#ef9a9a'
-    c1hi = '#b71c1c'
-    c2lo = '#90caf9'
-    c2hi = '#0d47a1'
+    # plot
+    c1lo = "#ef9a9a"
+    c1hi = "#b71c1c"
+    c2lo = "#90caf9"
+    c2hi = "#0d47a1"
 
-    plt.plot(fit_t, fit_f1, color=c1lo, label=f'phase A fit')
-    plt.plot(fit_t, fit_f2, color=c2lo, label=f'phase B fit')
-    plt.plot(temp_A, fe_A, color=c1hi, label='phase A', ls='dashed')
-    plt.plot(temp_B, fe_B, color=c2hi, label='phase B', ls='dashed')
-    plt.axvline(transition_temp, ls='dashed', c='#37474f')
-    plt.ylabel('Free energy (eV/atom)')
-    plt.xlabel('Temperature (K)')
+    plt.plot(fit_t, fit_f1, color=c1lo, label=f"phase A fit")
+    plt.plot(fit_t, fit_f2, color=c2lo, label=f"phase B fit")
+    plt.plot(temp_A, fe_A, color=c1hi, label="phase A", ls="dashed")
+    plt.plot(temp_B, fe_B, color=c2hi, label="phase B", ls="dashed")
+    plt.axvline(transition_temp, ls="dashed", c="#37474f")
+    plt.ylabel("Free energy (eV/atom)")
+    plt.xlabel("Temperature (K)")
     plt.legend(frameon=False)
     figure = plt.show()
 
     return transition_temp, figure
 
-@as_function_node('results')
+
+@as_function_node("results")
 def CollectResults() -> pd.DataFrame:
     from calphy.postprocessing import gather_results
-    df = gather_results('.')
+
+    df = gather_results(".")
     return df

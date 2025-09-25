@@ -4,5 +4,5 @@ from pyiron_core.pyironflow.treeview import TreeView
 from pyiron_core.pyironflow.wf_extensions import (
     get_edges,
     get_nodes,
-    get_node_from_path
+    get_node_from_path,
 )

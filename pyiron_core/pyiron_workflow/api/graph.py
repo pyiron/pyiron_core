@@ -15,6 +15,10 @@ from pyiron_core.pyiron_workflow.graph.base import (
     update_execution_graph,
 )
 from pyiron_core.pyiron_workflow.graph.graph_json import _load_graph, _save_graph
-from pyiron_core.pyiron_workflow.graph.run import _remove_node_inputs, pull_node, run_node
+from pyiron_core.pyiron_workflow.graph.run import (
+    _remove_node_inputs,
+    pull_node,
+    run_node,
+)
 from pyiron_core.pyiron_workflow.graph.edges import GraphEdge
 from pyiron_core.pyiron_workflow.graph.group import _find_input_nodes, create_group

@@ -152,7 +152,7 @@ class TestSimpleWorkflow(unittest.TestCase):
             )
             self.assertTrue(
                 nodes.Identity.__name__.startswith(not_nodes.Identity.__name__),
-                msg="The node class name should derive from the underlying class name"
+                msg="The node class name should derive from the underlying class name",
             )
 
         with self.subTest("name/qualname alignment"):
@@ -161,6 +161,7 @@ class TestSimpleWorkflow(unittest.TestCase):
                 nodes.Identity.__qualname__,
                 msg="For unqualified objects, name and qualname should match",
             )
+
 
 class TestValueToString(unittest.TestCase):
     def test_int(self):

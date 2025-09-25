@@ -7,10 +7,12 @@ import time
 
 class LocalPostgres:
     def __init__(self):
-        self._ci_mode = os.environ.get('GITHUB_ACTIONS') == 'true'
+        self._ci_mode = os.environ.get("GITHUB_ACTIONS") == "true"
 
         self.dbdir = str(
-            (pathlib.Path(__file__).parent.parent.parent / ".pycor" / "pgdata").absolute()
+            (
+                pathlib.Path(__file__).parent.parent.parent / ".pycor" / "pgdata"
+            ).absolute()
         )
         self.logfile = os.path.join(self.dbdir, "logfile")
         self.port = str(5432)

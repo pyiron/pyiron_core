@@ -57,7 +57,8 @@ class TestPortToCode(unittest.TestCase):
             base.port_to_code(p, use_default=True, scope=None), "foo: bool = False"
         )
         self.assertEqual(
-            base.port_to_code(p, use_default=True, scope="bar"), "bar__foo: bool = False"
+            base.port_to_code(p, use_default=True, scope="bar"),
+            "bar__foo: bool = False",
         )
 
 

@@ -20,8 +20,8 @@ class InstanceDatabase(abc.ABC):
         # add metadata for job execution
         master_hash: str | None = None
         start_time: datetime | None = None
-        cpu_time: float | None = None   # in seconds
-        executor: str | None = None     # server info including number of cores
+        cpu_time: float | None = None  # in seconds
+        executor: str | None = None  # server info including number of cores
         user: str | None = None
 
     @abc.abstractmethod

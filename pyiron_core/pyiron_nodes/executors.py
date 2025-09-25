@@ -72,9 +72,7 @@ def IterNode(
                     "Node must contain a link to its graph node to use the executor"
                 )
             for el in kwarg_list:
-                futures[
-                    executor.submit(run_node, graph_node, **{kwarg_name: el})
-                ] = el
+                futures[executor.submit(run_node, graph_node, **{kwarg_name: el})] = el
 
             for future in as_completed(futures):
                 out = futures[future]
