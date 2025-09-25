@@ -389,7 +389,9 @@ def get_default_POTCAR_paths(
     potcar_paths = []
     for element in ele_list:
         ele_default_potcar_path = potcar_df[
-            (potcar_df["symbol"] == element) & (potcar_df["default"] == True)
+            (potcar_df["symbol"] == element)
+            & (potcar_df["default"] == True)  # noqa: E712
+            # Dataframe columns are not strongly typed, so keep the robust comparison
         ].potential_name.values[0]
         potcar_paths.append(
             os.path.join(pseudopot_lib_path, ele_default_potcar_path, "POTCAR")

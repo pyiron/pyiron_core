@@ -455,7 +455,7 @@ def _calc_rmse(array_1, array_2, rmse_in_milli: bool = True):
     rmse: The calculated RMSE value
     """
     rmse = np.sqrt(np.mean((array_1 - array_2) ** 2))
-    if rmse_in_milli == True:
+    if rmse_in_milli:
         return rmse * 1000
     else:
         return rmse
