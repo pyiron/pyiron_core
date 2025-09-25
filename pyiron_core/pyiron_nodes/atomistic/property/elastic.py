@@ -183,7 +183,7 @@ def ComputeElasticConstantsMacro(
     structure,
     engine,
     calculator: Node,
-    input_elastic_tensor: InputElasticTensor | None = None,
+    input_elastic_tensor=None,
 ):
     """
     Get the elastic constants of a structure using an ASE calculator.
