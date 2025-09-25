@@ -180,7 +180,7 @@ def ExtractList(out_list: list, label: str, flatten: bool = True):
 def InputVector(vec: str = ""):
     try:
         vector = eval(vec)
-    except:
+    except Exception:
         vector = None
     return vector
 
@@ -189,7 +189,7 @@ def InputVector(vec: str = ""):
 def Slice(matrix, slice: str = "::"):
     try:
         result = eval(f"matrix[{slice}]")
-    except:
+    except Exception:
         result = None
     return result
 
@@ -198,7 +198,7 @@ def Slice(matrix, slice: str = "::"):
 def Code(x, code: str = "x**2"):
     try:
         y = eval(code)
-    except:
+    except Exception:
         y = None
     return y
 

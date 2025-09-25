@@ -315,21 +315,21 @@ def check_convergence(
     try:
         vr = Vasprun(filename=os.path.join(workdir, filename_vasprun))
         converged = vr.converged
-    except:
+    except Exception:
         try:
             converged = isLineInFile.node_function(
                 filepath=os.path.join(workdir, filename_vasplog),
                 line=line_converged,
                 exact_match=False,
             )
-        except:
+        except Exception:
             try:
                 converged = isLineInFile.node_function(
                     filepath=os.path.join(workdir, backup_vasplog),
                     line=line_converged,
                     exact_match=False,
                 )
-            except:
+            except Exception:
                 pass
 
     return converged
