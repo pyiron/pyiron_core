@@ -71,20 +71,20 @@ def PlotAtomsCells(structures: list[Atoms], angle_in_degrees: bool = True):
 
     def get_angle(cell, idx):
         return np.arccos(
-        np.dot(cell[idx], cell[(idx + 1) % 3])
-        / np.linalg.norm(cell[idx])
-        / np.linalg.norm(cell[(idx + 1) % 3])
-    )
+            np.dot(cell[idx], cell[(idx + 1) % 3])
+            / np.linalg.norm(cell[idx])
+            / np.linalg.norm(cell[(idx + 1) % 3])
+        )
 
     def extract(c):
         return {
-        "a": np.linalg.norm(c[0]),
-        "b": np.linalg.norm(c[1]),
-        "c": np.linalg.norm(c[2]),
-        "alpha": get_angle(c, 0),
-        "beta": get_angle(c, 1),
-        "gamma": get_angle(c, 2),
-    }
+            "a": np.linalg.norm(c[0]),
+            "b": np.linalg.norm(c[1]),
+            "c": np.linalg.norm(c[2]),
+            "alpha": get_angle(c, 0),
+            "beta": get_angle(c, 1),
+            "gamma": get_angle(c, 2),
+        }
 
     df = pd.DataFrame([extract(c) for c in C])
     df["V"] = np.linalg.det(C)

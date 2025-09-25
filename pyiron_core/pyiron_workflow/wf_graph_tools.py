@@ -1,13 +1,13 @@
 """
 # wf_graph_tools Module
-This module provides a collection of tools to convert and manipulate workflow graphs. 
-A workflow graph is represented by a set of nodes and edges, and this module offers 
-various functions to transform these graphs into different representations, such as 
+This module provides a collection of tools to convert and manipulate workflow graphs.
+A workflow graph is represented by a set of nodes and edges, and this module offers
+various functions to transform these graphs into different representations, such as
 executable workflow code.
 
-Additionally, this module includes helper tools to assist with tasks such as sorting 
+Additionally, this module includes helper tools to assist with tasks such as sorting
 the order of nodes in the graph, making it easier to work with and analyze workflow graphs.
-The tools provided in this module are designed to be flexible and reusable, allowing users 
+The tools provided in this module are designed to be flexible and reusable, allowing users
 to easily integrate them into their own workflow processing pipelines.
 
 # Key Features

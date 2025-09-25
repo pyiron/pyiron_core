@@ -853,9 +853,9 @@ def get_inputs_data(func, extract_input_parameters, *args, **kwargs):
 
     values = [
         (
-            kwargs[label] if label in kwargs
-            else args_list[i] if i < len(args_list)
-            else default
+            kwargs[label]
+            if label in kwargs
+            else args_list[i] if i < len(args_list) else default
         )
         for i, (label, default) in enumerate(zip(data[PORT_LABEL], values_default))
     ]
