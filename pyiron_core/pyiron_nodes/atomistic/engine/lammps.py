@@ -308,7 +308,7 @@ def ListPotentials(structure):
 
 
 def get_calculators():
-    calc_dict = dict()
+    calc_dict = {}
     calc_dict["md"] = CalcMD
     calc_dict["minimize"] = CalcMinimize
     calc_dict["static"] = CalcStatic

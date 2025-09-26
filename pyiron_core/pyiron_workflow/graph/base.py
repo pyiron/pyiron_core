@@ -135,11 +135,11 @@ def _add_obj_to_graph(graph, obj):
 
 
 def _getstate__graph(self):
-    state = dict(
-        label=self.label,
-        nodes=self.nodes.__getstate__(),
-        edges=self.edges.__getstate__(),
-    )
+    state = {
+        "label": self.label,
+        "nodes": self.nodes.__getstate__(),
+        "edges": self.edges.__getstate__(),
+    }
     if self.root_node is not None:
         state["root_node"] = self.root_node.__getstate__()
     return state
@@ -152,7 +152,7 @@ def _setstate__graph(self, state):
     if "graph" in state:
         self.graph = Graph().__setstate__(state["graph"])
     else:
-        self.graph = dict()
+        self.graph = {}
     if "root_node" in state:
         self.root_node = GraphNode().__setstate__(state["root_node"])
     self.nodes = Nodes().__setstate__(state["nodes"])
@@ -546,7 +546,7 @@ def get_graph_from_wf(
 
 
 def get_graph_from_macro_node(macro_node: Node) -> Graph:
-    orig_values = dict()
+    orig_values = {}
     kwargs = {}
     for inp in macro_node.inputs.data["label"]:
         inp_port_label = virtual_input_label(macro_node.label, inp)
@@ -865,12 +865,12 @@ def _different_indices(default, value):
 def get_non_default_input(
     graph: Graph, exclude_connections=False, flatten=False
 ) -> dict:
-    nodes = dict()
+    nodes = {}
     node_port_list = []  # list of tuples (node_label, port_label)
     for node in graph.nodes.values():
         data = node.node.inputs.data
         changed_args = _different_indices(data["default"], data["value"])
-        node_dict = dict()
+        node_dict = {}
         for i in changed_args:
             if not (exclude_connections and isinstance(data["value"][i], (Node, Port))):
                 node_dict[data["label"][i]] = data["value"][i]
@@ -967,7 +967,13 @@ def get_inputs_of_graph(graph: Graph, exclude_unconnected_default_ports=False) -
         ready.append(port.ready)
 
     return Data(
-        dict(label=labels, value=values, type=types, default=default, ready=ready),
+        {
+            "label": labels,
+            "value": values,
+            "type": types,
+            "default": default,
+            "ready": ready,
+        },
         attribute=Port,
     )
 
@@ -1010,7 +1016,8 @@ def get_outputs_of_graph(graph: Graph) -> Data:
         ready.append(port.ready)
 
     return Data(
-        dict(label=labels, value=values, type=types, ready=ready), attribute=Port
+        {"label": labels, "value": values, "type": types, "ready": ready},
+        attribute=Port,
     )
 
 
@@ -1066,7 +1073,7 @@ def topological_sort(graph: Graph) -> Graph:
     edges = _convert_to_integer_representation(graph)
     nodes = range(len(graph.nodes))
 
-    in_degree = {node: 0 for node in nodes}
+    in_degree = dict.fromkeys(nodes, 0)
 
     # Build the graph and count in-degrees
     for edge in edges:
@@ -1306,7 +1313,7 @@ def _process_nodes_and_edges(
             raise ValueError(
                 f"Only nodes from {enforced_node_library} are allowed during the conversion of the {graph.label} graph to code, but {node.label} has the import path {node.import_path}"
             )
-        kwargs = dict()
+        kwargs = {}
         # Process edges for the current node
         for edge in graph.edges:
             if edge.target == node.label:

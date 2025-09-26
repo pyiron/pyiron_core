@@ -116,7 +116,7 @@ class NestedDict(OrderedDict):
 
     @property
     def _index_dict(self):
-        return {i: k for i, k in enumerate(self.keys())}
+        return dict(enumerate(self.keys()))
 
     def __setitem__(self, key, value):
         super().__setitem__(key, value)
@@ -209,7 +209,7 @@ class NestedList(list):
         return self.df._repr_html_()
 
     def __getstate__(self):
-        state = dict(values=[v.__getstate__() for v in self])
+        state = {"values": [v.__getstate__() for v in self]}
         if self._obj_type is not None:
             state.update(
                 obj_type=imports.get_import_path_from_type(self._obj_type),

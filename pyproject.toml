@@ -125,6 +125,8 @@ select = [
     "B",
     # isort
     "I",
+    # flake8-comprehensions
+    "C4",
 ]
 ignore = [
     # ignore line-length violations -- let black care about this

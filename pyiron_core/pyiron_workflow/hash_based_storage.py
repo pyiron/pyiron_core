@@ -513,7 +513,7 @@ def extract_node_input(node, db):
 
     ic = node.inputs.channel_dict
     # print('ic: ', ic)
-    input_dict = dict()
+    input_dict = {}
     for k, v in ic.items():
         # print('extract: ', k, v)
         if k in inp_node_dict:
@@ -543,7 +543,7 @@ def extract_node_output(node, as_string=True):
 
     # from pyiron_core.pyiron_workflow.channels import NotData
 
-    output_dict = dict()
+    output_dict = {}
     for k in node.outputs.channel_dict.keys():
         val = node.outputs[k].value
         if hasattr(val, "_serialize"):
@@ -1181,7 +1181,7 @@ def _bracketed_split(string, delimiter, strip_brackets=False):
     openers = "[{(<"
     closers = "]})>"
     opener_to_closer = dict(zip(openers, closers, strict=True))
-    opening_bracket = dict()
+    opening_bracket = {}
     current_string = ""
     depth = 0
     for c in string:
@@ -1243,7 +1243,7 @@ def _strip_args(input_string):
     inp_str = _split_func_and_args(input_string)
     if inp_str is None:
         return None
-    return [s for s in _bracketed_split(inp_str, delimiter=",")]
+    return list(_bracketed_split(inp_str, delimiter=","))
 
 
 def str_to_dict(input_string):
@@ -1254,7 +1254,7 @@ def str_to_dict(input_string):
         input_string2 = 'my_obj(k1=1, k2=my_obj2(k11=1, k22=2), k3=my_obj3(k21=1, k22=array([[1,2], [2,3]])), k4=array([[(1,2)], [2,3]]), k5=[[(1, 2), (1, 2)]])'
         str_to_dict(input_string2)
     """
-    arg_dict = dict()
+    arg_dict = {}
     if _strip_args(input_string) is None:
         # print ('input_str: ', input_string)
         return input_string

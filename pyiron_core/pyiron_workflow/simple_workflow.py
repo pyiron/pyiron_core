@@ -123,7 +123,7 @@ def extract_output_parameters_from_function(func):
     else:  # Used for cases such as 'int', 'str', etc.
         return_types = [return_annotation]
 
-    output_dict = dict()
+    output_dict = {}
     output_dict[PORT_LABEL] = return_names
     output_dict[PORT_TYPE] = [
         imports.get_import_path_from_type(t) for t in return_types
@@ -276,7 +276,7 @@ def extract_input_parameters_from_function(function: callable) -> dict:
         else:
             defaults.append(parameter.default)
     # print('types: ', types)
-    output_dict = dict()
+    output_dict = {}
     output_dict[PORT_LABEL] = labels
     output_dict[PORT_TYPE] = types
     output_dict[PORT_DEFAULT] = defaults
@@ -289,7 +289,7 @@ def extract_dataclass_parameters(dataclass_instance: dataclasses.dataclass):
     types = [field.type for field in dataclasses.fields(type(dataclass_instance))]
     defaults = [getattr(dataclass_instance, name) for name in labels]
 
-    output_dict = dict()
+    output_dict = {}
     output_dict[PORT_LABEL] = labels
     output_dict[PORT_TYPE] = [type_hint_to_string(t) for t in types]
     output_dict[PORT_DEFAULT] = defaults
@@ -329,7 +329,7 @@ class Attribute:
         return self.__dataset[PORT_LABEL].index(self.__label)
 
     def _to_dict(self):
-        attr_dict = dict()
+        attr_dict = {}
         for key, value in self.__dataset.items():
             attr_dict[key] = value[self._index]
 
@@ -791,11 +791,11 @@ class Node:
         }
 
     def __getstate__(self):
-        return dict(
-            label=self.label,
-            function=self.function["import_path"],
-            inputs=self._get_non_default_input(),
-        )
+        return {
+            "label": self.label,
+            "function": self.function["import_path"],
+            "inputs": self._get_non_default_input(),
+        }
 
     # @classmethod
     def __setstate__(self, state):
@@ -813,7 +813,7 @@ class Node:
     def copy(self):
         # make a deep copy of the inputs
         # only values need to be copied, all other node input attributes are immutable
-        inp_val_copy = [v for v in self.inputs.data[PORT_VALUE]]
+        inp_val_copy = list(self.inputs.data[PORT_VALUE])
         inp_copy = Data(
             {
                 PORT_LABEL: self.inputs.data[PORT_LABEL],
@@ -1215,12 +1215,12 @@ class Workflow:
             else:
                 continue
 
-            edge = dict(
-                source=source,
-                sourceHandle=sourceHandle,
-                target=target,
-                targetHandle=targetHandle,
-            )
+            edge = {
+                "source": source,
+                "sourceHandle": sourceHandle,
+                "target": target,
+                "targetHandle": targetHandle,
+            }
             self._edges.append(edge)
             # print(f"{source}/{sourceHandle} -> {target}/{targetHandle}")
             logging.info(f"{source}/{sourceHandle} -> {target}/{targetHandle}")

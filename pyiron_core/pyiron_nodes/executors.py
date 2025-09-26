@@ -44,7 +44,7 @@ def IterNode(
     # kwarg_initial = node.inputs[kwarg_name].value
     # print("kwarg_initial", kwarg_initial)
 
-    out_dict = dict()
+    out_dict = {}
     if Executor is None:
         for el in kwarg_list:
             # print('iter kwargs: ', node.kwargs)
@@ -64,7 +64,7 @@ def IterNode(
     else:
         with Executor as executor:
             # Start the load operations and mark each future with its index
-            futures = dict()
+            futures = {}
             if hasattr(node, "_graph_node"):
                 graph_node = node._graph_node
                 print("graph_node", graph_node.label)

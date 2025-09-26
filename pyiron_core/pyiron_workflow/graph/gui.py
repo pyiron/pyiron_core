@@ -311,12 +311,12 @@ class PyironFlowWidget:
 
     def update_gui(self, export_data=True, sleep_time=0.2):
         opt_graph = base.get_updated_graph(self.graph)
-        data = dict(
-            nodes=_nodes_to_gui(opt_graph),
-            edges=_edges_to_gui(opt_graph),
-            graph=_graph_to_gui(opt_graph),
-            date=str(self._counter),
-        )
+        data = {
+            "nodes": _nodes_to_gui(opt_graph),
+            "edges": _edges_to_gui(opt_graph),
+            "graph": _graph_to_gui(opt_graph),
+            "date": str(self._counter),
+        }
         self._counter += 1
 
         time.sleep(sleep_time)
@@ -385,7 +385,7 @@ class PyironFlow:
 
         self.gui_layout = gui_layout
 
-        self.wf_widgets = list()  # list of PyironFlowWidget objects
+        self.wf_widgets = []  # list of PyironFlowWidget objects
         for wf in wf_list:
             if isinstance(wf, str):
                 wf = graph_json._load_graph(f"{workflow_path}/{wf}")
@@ -654,7 +654,7 @@ def _nodes_to_gui(graph: base.Graph, remove_none=True) -> decorators.NestedList:
             data=gui_data(v.node, key=k, expanded=v.expanded).asdict(
                 remove_none=remove_none
             ),
-            position=dict(x=pos_x, y=0),
+            position={"x": pos_x, "y": 0},
             style=GuiStyle(width=node_width, height=_get_node_height(v.node)).asdict(
                 remove_none=remove_none
             ),
@@ -753,22 +753,22 @@ def _get_child_dict(graph, node):
     if node["expanded"]:
         _gui_children(graph, node)
     targetPorts = [
-        dict(id=f"{node['id']}_in_{label}", properties=dict(side="WEST"))
+        {"id": f"{node['id']}_in_{label}", "properties": {"side": "WEST"}}
         for label in node["data"]["target_labels"]
     ][
         ::-1
     ]  # TODO: provide port positions x, y (this is only a quick fix)
     sourcePorts = [
-        dict(id=f"{node['id']}_out_{label}", properties=dict(side="EAST"))
+        {"id": f"{node['id']}_out_{label}", "properties": {"side": "EAST"}}
         for label in node["data"]["source_labels"]
     ][::-1]
-    child = dict(
-        id=node["id"],
-        width=node["style"]["width"],
-        height=node["style"]["height"],
-        properties={"org.eclipse.elk.portConstraints": "FIXED_ORDER"},
-        ports=[*targetPorts, *sourcePorts],
-    )
+    child = {
+        "id": node["id"],
+        "width": node["style"]["width"],
+        "height": node["style"]["height"],
+        "properties": {"org.eclipse.elk.portConstraints": "FIXED_ORDER"},
+        "ports": [*targetPorts, *sourcePorts],
+    }
 
     return child
 
@@ -798,7 +798,7 @@ def _graph_to_gui(graph: base.Graph, remove_none=True, optimize=True) -> dict:
         "elk.layered.nodePlacement.strategy": "SIMPLE",
         "elk.hierarchyHandling": "INCLUDE_CHILDREN",
     }
-    graph_dict = dict(id="root", layoutOptions=layoutOptions)
+    graph_dict = {"id": "root", "layoutOptions": layoutOptions}
 
     nodes = _nodes_to_gui(graph, remove_none=remove_none)
     edges = _edges_to_gui(graph, remove_none=remove_none)
@@ -816,13 +816,13 @@ def _graph_to_gui(graph: base.Graph, remove_none=True, optimize=True) -> dict:
     elk_edges = decorators.NestedList()
     for edge in edges:
         elk_edges.append(
-            dict(
-                id=edge["id"],
-                source=edge["source"],
-                target=edge["target"],
-                sourcePort=f"{edge['source']}_out_{edge['sourceHandle']}",
-                targetPort=f"{edge['target']}_in_{edge['targetHandle']}",
-            )
+            {
+                "id": edge["id"],
+                "source": edge["source"],
+                "target": edge["target"],
+                "sourcePort": f"{edge['source']}_out_{edge['sourceHandle']}",
+                "targetPort": f"{edge['target']}_in_{edge['targetHandle']}",
+            }
         )
 
     graph_dict["children"] = children
@@ -880,12 +880,12 @@ class GuiGraph:
         self._reactflow_widget_status = "running"
 
         opt_graph = base.copy_graph(self.graph)
-        data = dict(
+        data = {
             #    label=graph.label,
-            nodes=_nodes_to_gui(opt_graph),
-            edges=_edges_to_gui(opt_graph),
-            graph=_graph_to_gui(opt_graph),
-        )
+            "nodes": _nodes_to_gui(opt_graph),
+            "edges": _edges_to_gui(opt_graph),
+            "graph": _graph_to_gui(opt_graph),
+        }
         time.sleep(0.2)
 
         w.mydata = json.dumps(data)

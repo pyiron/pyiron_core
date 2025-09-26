@@ -47,7 +47,7 @@ def get_wf_from_graph(graph: base.Graph) -> simple_workflow.Workflow:
         label, import_path = node.label, node.import_path
 
         if not label.startswith("va_i_"):
-            kwargs = dict()
+            kwargs = {}
 
             # Add non-default arguments to node
             for edge in graph.edges:
@@ -92,8 +92,8 @@ def update_input_values(graph: base.Graph, node_label: str, values: list):
 def run_macro_node(macro_node):
     macro_graph = base.get_graph_from_macro_node(macro_node)
 
-    output_nodes = list()
-    output_labels = dict()
+    output_nodes = []
+    output_labels = {}
     for edge in macro_graph.edges:
         if f"va_o_{macro_node.label}__" in edge.target:
             output_nodes.append(edge.source)
@@ -112,7 +112,7 @@ def run_macro_node(macro_node):
                     # print('double: ', port_value.value.label, port_value.value.node.label)
                     graph_node.node.inputs.__setattr__(port_label, port_value.value)
 
-    outputs = list()
+    outputs = []
     # output_labels = macro_node.outputs.data["label"]
     for out_label in set(output_nodes):
         # print(f"output node {out_label} of macro {macro_node.label}")
@@ -123,7 +123,7 @@ def run_macro_node(macro_node):
     if len(outputs) == 1:
         return outputs[0]  # works only for nodes with single output
     else:
-        outputs = list()
+        outputs = []
         for label in macro_node.outputs.data["label"]:
             # print(f"output label {label}")
             o_source, o_handle = output_labels[label]

@@ -29,7 +29,7 @@ def dict_to_node(dict_node, log):
     if "target_values" in data:
         target_values = data["target_values"]
         target_labels = data["target_labels"]
-        target_dict = dict()
+        target_dict = {}
         for k, v in zip(target_labels, target_values, strict=True):
             if v not in ("NonPrimitive", NotData):
                 target_dict[k] = v
@@ -61,7 +61,7 @@ def is_primitive(obj):
 
 
 def get_node_values(channel_dict):
-    values = list()
+    values = []
     for v in channel_dict.values():
         value = v.value
         if value != NotData:
@@ -90,7 +90,7 @@ def _get_type_name(t):
 
 
 def get_node_types(node_io):
-    node_io_types = list()
+    node_io_types = []
     for k in node_io.channel_dict:
         type_hint = node_io[k].type_hint
         if isinstance(type_hint, typing._UnionGenericAlias):
@@ -215,7 +215,7 @@ def get_edges(wf):
     edges = []
     for ic, edge in enumerate(wf._edges):
 
-        edge_dict = dict()
+        edge_dict = {}
         edge_dict["source"] = edge["source"]
         edge_dict["sourceHandle"] = edge["sourceHandle"]
         edge_dict["target"] = edge["target"]

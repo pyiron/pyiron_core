@@ -289,7 +289,7 @@ def AnalyseStructures(
     Lag_strain_list = analysis.Lag_strain_list
 
     out = OutputElasticAnalysis().dataclass()
-    energy_dict = {k: v for k, v in zip(job_names, energies, strict=False)}
+    energy_dict = dict(zip(job_names, energies, strict=True))
 
     if 0.0 in epss:
         out.energy_0 = energy_dict[zero_strain_job_name]

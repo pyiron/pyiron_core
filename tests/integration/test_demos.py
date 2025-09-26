@@ -18,7 +18,7 @@ import pyiron_core as pc
 from pyiron_core import nodes
 
 DEMOS_DIR = pathlib.Path(__file__).parent.parent.parent / "stored_workflows" / "demos"
-ALL_DEMOS = list(f.stem for f in DEMOS_DIR.glob("*.json"))
+ALL_DEMOS = [f.stem for f in DEMOS_DIR.glob("*.json")]
 
 
 class TestDemoWorkflows(unittest.TestCase):

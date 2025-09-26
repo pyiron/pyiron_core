@@ -55,14 +55,14 @@ def serialize_obj(obj: Any) -> dict[str, Any]:
     if hasattr(obj, "__getstate__") and obj.__getstate__() is not None:
         if isinstance(obj.__getstate__(), dict):
             print("serialization needed")
-            return dict(
-                __import_path__={
+            return {
+                "__import_path__": {
                     "module": module,
                     "qualname": qualname,
                     "version": version,
                 },
-                __getstate__=obj.__getstate__(),
-            )
+                "__getstate__": obj.__getstate__(),
+            }
     print("serialization not needed")
     return obj
 

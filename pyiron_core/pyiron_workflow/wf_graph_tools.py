@@ -229,7 +229,7 @@ def topological_sort(graph: WorkflowGraph):
     edges = _convert_to_integer_representation(graph)
     nodes = range(len(graph.nodes))
 
-    in_degree = {node: 0 for node in nodes}
+    in_degree = dict.fromkeys(nodes, 0)
 
     # Build the graph and count in-degrees
     for edge in edges:
@@ -291,15 +291,15 @@ def get_graph_from_wf(wf: "Workflow") -> WorkflowGraph:
             handle = node["data__target_labels"][i]
             if value not in ("NonPrimitive", "NotData"):
                 inp_node_label = f"var_{label}__{handle}"
-                edge = dict(
-                    target=label,
-                    targetHandle=handle,
-                    source=inp_node_label,
-                    sourceHandle=value,
-                )
+                edge = {
+                    "target": label,
+                    "targetHandle": handle,
+                    "source": inp_node_label,
+                    "sourceHandle": value,
+                }
 
                 edges.append(edge)
-                inp_node = dict(label=inp_node_label, data__import_path=value)
+                inp_node = {"label": inp_node_label, "data__import_path": value}
                 nodes_non_default_inp_param.append(inp_node)
 
         nodes = get_nodes_from_wf(
@@ -449,12 +449,12 @@ def graph_edges_to_wf_edges(graph_edges: List[Tuple[str, str]]):
         target, target_handle = edge_target.split("/")
         source, source_handle = edge_source.split("/")
         if not source.startswith("var_"):
-            edge_dict = dict(
-                source=source,
-                sourceHandle=source_handle,
-                target=target,
-                targetHandle=target_handle,
-            )
+            edge_dict = {
+                "source": source,
+                "sourceHandle": source_handle,
+                "target": target,
+                "targetHandle": target_handle,
+            }
             wf_edges.append(edge_dict)
     return wf_edges
 
@@ -468,7 +468,7 @@ def get_wf_from_graph(graph: WorkflowGraph) -> "Workflow":
         label, import_path = node
 
         if not label.startswith("var_"):
-            kwargs = dict()
+            kwargs = {}
 
             # Add non-default arguments to node
             for edge in graph.edges:

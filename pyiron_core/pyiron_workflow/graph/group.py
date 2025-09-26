@@ -126,7 +126,7 @@ def create_group(
 
 
 def _node_labels_to_node_ids(graph: base.Graph, node_labels: List[str]) -> List[str]:
-    ind_dict = dict()
+    ind_dict = {}
     for ind, label in enumerate(graph.nodes.keys()):
         ind_dict[label] = ind
 
@@ -228,7 +228,7 @@ def _get_node_labels(graph: base.Graph):
     Returns:
         list: A list of node labels.
     """
-    return [node_label for node_label in graph.nodes.keys()]
+    return list(graph.nodes.keys())
 
 
 def _get_variable_nodes(graph: base.Graph):

@@ -124,7 +124,7 @@ def IterToDataFrame(
         if len(output_labels) == 1:
             data_dict[output_labels[0]] = out_lst
         else:
-            data_dict.update({label: out_lst for label in output_labels})
+            data_dict.update(dict.fromkeys(output_labels, out_lst))
 
     try:
         df = pd.DataFrame(data_dict)
