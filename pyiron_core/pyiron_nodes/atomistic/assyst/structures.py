@@ -1,7 +1,6 @@
 from dataclasses import field
 from itertools import product
 
-
 from pyiron_core.pyiron_workflow import (
     as_function_node,
     as_inp_dataclass_node,

@@ -1,11 +1,11 @@
 from typing import Literal
 from warnings import warn
 
+import landau
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 
-import landau
 from pyiron_core.pyiron_workflow import Workflow, as_function_node, as_macro_node
 
 

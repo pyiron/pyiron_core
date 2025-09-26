@@ -1,8 +1,8 @@
 from dataclasses import replace
 
+import landau
 import numpy as np
 
-import landau
 from pyiron_core.pyiron_workflow import as_function_node
 
 
