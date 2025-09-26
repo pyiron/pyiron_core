@@ -2,9 +2,10 @@ import contextlib
 import os
 import unittest
 
+from static.nodes import AddOne
+
 from pyiron_core.pyiron_workflow.api import serial
 from pyiron_core.pyiron_workflow.graph import base, graph_json, group, run
-from static.nodes import AddOne
 
 
 class TestSaveLoad(unittest.TestCase):
