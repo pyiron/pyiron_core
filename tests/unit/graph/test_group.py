@@ -1,8 +1,9 @@
 import unittest
 
+from static.nodes import AddOne
+
 from pyiron_core.pyiron_workflow.graph import base
 from pyiron_core.pyiron_workflow.graph.group import create_group
-from static.nodes import AddOne
 
 
 class TestPortToCode(unittest.TestCase):
