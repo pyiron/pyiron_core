@@ -392,24 +392,10 @@ def PlotMuPhaseDiagram(phase_data):
         border = phase_data.query("border")
         body = phase_data.query("not border")
 
-    sns.scatterplot(
-        data=body,
-        x="mu",
-        y="T",
-        hue="phase",
-        s=5,
-        ax=ax
-    )
+    sns.scatterplot(data=body, x="mu", y="T", hue="phase", s=5, ax=ax)
 
     if border is not None:
-        sns.scatterplot(
-            data=border,
-            x="mu",
-            y="T",
-            c="k",
-            s=5,
-            ax=ax
-        )
+        sns.scatterplot(data=border, x="mu", y="T", c="k", s=5, ax=ax)
 
     ax.set_xlabel("Chemical Potential Difference [eV]")
     ax.set_ylabel("Temperature [K]")
@@ -429,12 +415,7 @@ def PlotIsotherms(phase_data):
     fig, ax = plt.subplots()
 
     sns.lineplot(
-        data=phase_data.query("stable"),
-        x="mu",
-        y="c",
-        style="phase",
-        hue="T",
-        ax=ax
+        data=phase_data.query("stable"), x="mu", y="c", style="phase", hue="T", ax=ax
     )
 
     ax.set_xlabel("Chemical Potential Difference [eV]")
@@ -455,12 +436,7 @@ def PlotPhiMuDiagram(phase_data):
     fig, ax = plt.subplots()
 
     sns.lineplot(
-        data=phase_data.query("stable"),
-        x="mu",
-        y="phi",
-        style="phase",
-        hue="T",
-        ax=ax
+        data=phase_data.query("stable"), x="mu", y="phi", style="phase", hue="T", ax=ax
     )
 
     ax.set_xlabel("Chemical Potential Difference [eV]")

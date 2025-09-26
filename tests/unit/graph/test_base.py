@@ -49,7 +49,6 @@ class TestSaveLoad(unittest.TestCase):
         def get_fnc_import(graph: base.Graph, node_name: str) -> str:
             return graph.nodes[node_name].node.function["import_path"]
 
-
         self.assertEqual(expected_path, get_fnc_import(g, "monogroup"))
         self.assertEqual(expected_path, get_fnc_import(g, "digroup"))
         mono_out = run.pull_node(base.get_updated_graph(g), "monogroup")
@@ -57,15 +56,18 @@ class TestSaveLoad(unittest.TestCase):
         di_out = run.pull_node(base.get_updated_graph(g), "digroup")
         self.assertEqual(di_out, 2)
 
-
         fname = "api_misdirection.json"
         graph_json._save_graph(g, filename=fname)
         try:
             reloaded = graph_json._load_graph(fname)
             self.assertEqual(expected_path, get_fnc_import(reloaded, "monogroup"))
             self.assertEqual(expected_path, get_fnc_import(reloaded, "digroup"))
-            self.assertEqual(mono_out, run.pull_node(base.get_updated_graph(reloaded), "monogroup"))
-            self.assertEqual(di_out, run.pull_node(base.get_updated_graph(reloaded), "digroup"))
+            self.assertEqual(
+                mono_out, run.pull_node(base.get_updated_graph(reloaded), "monogroup")
+            )
+            self.assertEqual(
+                di_out, run.pull_node(base.get_updated_graph(reloaded), "digroup")
+            )
         finally:
             with contextlib.suppress(FileNotFoundError):
                 os.remove(fname)
@@ -82,7 +84,7 @@ class TestSaveLoad(unittest.TestCase):
                 g_expanded.nodes["subgraph"].graph.nodes["n"].level,
                 msg="Regardless of how many times the same node is expanded, the "
                 "children of the expanded node should always have a level one deeper "
-                "than their parent."
+                "than their parent.",
             )
 
     def test_collapse_node(self):
@@ -163,5 +165,3 @@ class TestSaveLoad(unittest.TestCase):
             len(guu.edges),
             msg="Repeatedly un-collapsing should have no effect",
         )
-
-

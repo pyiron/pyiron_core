@@ -1,7 +1,15 @@
 from __future__ import annotations
 
 try:
-    from sqlalchemy import Column, MetaData, String, DateTime, Float, Table, create_engine
+    from sqlalchemy import (
+        Column,
+        MetaData,
+        String,
+        DateTime,
+        Float,
+        Table,
+        create_engine,
+    )
     from sqlalchemy.dialects.postgresql import JSONB, insert
 
     FAILED_IMPORT = None
@@ -35,8 +43,10 @@ class PostgreSQLInstanceDatabase(InstanceDatabase):
             Column("master_hash", String, nullable=True),
             Column("start_time", DateTime, nullable=True),
             Column("cpu_time", Float, nullable=True),  # in seconds
-            Column("executor", String, nullable=True),  # server info including number of cores
-            Column("user", String, nullable=True),         
+            Column(
+                "executor", String, nullable=True
+            ),  # server info including number of cores
+            Column("user", String, nullable=True),
         )
 
         self.engine = create_engine(connection_string, echo=echo)

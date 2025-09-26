@@ -9,7 +9,8 @@ def _get_locally_defined_objects(module: types.ModuleType) -> list[object]:
     there but defined elsewhere.
     """
     return [
-        name for name in dir(module)
+        name
+        for name in dir(module)
         if getattr(getattr(module, name), "__module__", None) == module.__name__
     ]
 
@@ -18,7 +19,9 @@ def get_import_path_from_type(obj):
     from pyiron_core.pyiron_workflow.api import serial
 
     module = obj.__module__ if hasattr(obj, "__module__") else obj.__class__.__module__
-    name = obj.__qualname__ if hasattr(obj, "__qualname__") else obj.__class__.__qualname__
+    name = (
+        obj.__qualname__ if hasattr(obj, "__qualname__") else obj.__class__.__qualname__
+    )
 
     if name in _get_locally_defined_objects(serial):
         return f"{serial.__name__}.{name}"

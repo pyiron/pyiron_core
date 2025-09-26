@@ -29,5 +29,5 @@ class TestPortToCode(unittest.TestCase):
             g_by_id.nodes["sg"].node.graph,
             g_by_name.nodes["sg"].node.graph,
             msg="Subgroups should be equivalent regardless of whether created by index "
-                "or label"
+            "or label",
         )

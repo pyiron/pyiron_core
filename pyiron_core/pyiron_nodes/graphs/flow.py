@@ -129,7 +129,10 @@ def OptimizeGraphConnections(graph: Graph):
 
 @as_function_node
 def MarkNodeAsExpanded(graph: Graph, node_label: str, expanded: Optional[bool] = True):
-    from pyiron_core.pyiron_workflow.api.gui import _mark_node_as_collapsed, _mark_node_as_expanded
+    from pyiron_core.pyiron_workflow.api.gui import (
+        _mark_node_as_collapsed,
+        _mark_node_as_expanded,
+    )
 
     if expanded:
         graph = _mark_node_as_expanded(graph, node_label)

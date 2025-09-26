@@ -124,7 +124,9 @@ def extract_output_parameters_from_function(func):
 
     output_dict = dict()
     output_dict[PORT_LABEL] = return_names
-    output_dict[PORT_TYPE] = [imports.get_import_path_from_type(t) for t in return_types]
+    output_dict[PORT_TYPE] = [
+        imports.get_import_path_from_type(t) for t in return_types
+    ]
 
     return output_dict
 
@@ -170,14 +172,16 @@ def _clean_literal_value(val: Any) -> str:
     * Numbers, bools, ``None`` etc. are returned via ``repr``.
     """
     if isinstance(val, str):
-        return val.strip('\'"')
+        return val.strip("'\"")
     return repr(val)
 
 
 # ----------------------------------------------------------------------
 # Main conversion routine (drop‑in replacement for the original one)
 # ----------------------------------------------------------------------
-def type_hint_to_string(type_hint: Any) -> str:   # PortTypeValue is assumed to be ``str``
+def type_hint_to_string(
+    type_hint: Any,
+) -> str:  # PortTypeValue is assumed to be ``str``
     """Convert a Python type hint to the string representation used by pyiron‑workflow.
 
     The function recognises primitive types, ``Node``/``_NotHinted``,
@@ -222,7 +226,7 @@ def type_hint_to_string(type_hint: Any) -> str:   # PortTypeValue is assumed to 
     # Literal handling (with or without quotes)
     # ------------------------------------------------------------------
     if origin is Literal:
-        raw_vals = get_args(type_hint)               # e.g. (fcc, bcc, "hcp")
+        raw_vals = get_args(type_hint)  # e.g. (fcc, bcc, "hcp")
         cleaned = [_clean_literal_value(v) for v in raw_vals]
         return f"Literal[{', '.join(cleaned)}]"
 
@@ -717,7 +721,6 @@ class Node:
                 else:
                     pyiron_database.store_node_outputs(self)
 
-
         return out
 
     def _validate_input(self):
@@ -820,7 +823,9 @@ def get_node_from_path(import_path):
 
 
 def get_function_data(func: callable):
-    function = DotDict(name=func.__name__, import_path=imports.get_import_path_from_type(func))
+    function = DotDict(
+        name=func.__name__, import_path=imports.get_import_path_from_type(func)
+    )
     return function
 
 
@@ -878,9 +883,7 @@ NODE_CLASS_NAME_POSTFIX: str = "_postfix"  # For mangling node class names
 # to distinguish them from the name of the underlying function the node wraps
 
 
-def make_node_decorator(
-    inner_wrap_return_func, node_type="function_node"
-):
+def make_node_decorator(inner_wrap_return_func, node_type="function_node"):
     """Create a decorator for a function node.
 
     Args:
@@ -970,9 +973,7 @@ def _return_as_function_node(
     )
 
 
-as_function_node = make_node_decorator(
-    _return_as_function_node, "function_node"
-)
+as_function_node = make_node_decorator(_return_as_function_node, "function_node")
 
 
 # as_inp_dataclass_node decorator
@@ -1220,7 +1221,10 @@ class Workflow:
         return wf_graph_tools.run_wf(self, debug=debug)
 
     def __repr__(self):
-        return "pyiron_core.pyiron_workflow instance: \n" + wf_graph_tools.get_code_from_wf(self)
+        return (
+            "pyiron_core.pyiron_workflow instance: \n"
+            + wf_graph_tools.get_code_from_wf(self)
+        )
 
     def save(self, filename, workflow_dir=WORKFLOW_DIR, overwrite=False):
         graph = wf_graph_tools.get_graph_from_wf(self)

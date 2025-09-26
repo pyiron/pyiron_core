@@ -24,8 +24,12 @@ class TestDatabase(unittest.TestCase):
         wf_node.run()
 
         self.assertEqual(
-            pyiron_database.instance_database.node.node_inputs_to_jsongroup(wf_port.n2).data["x"],
-            pyiron_database.instance_database.node.node_inputs_to_jsongroup(wf_node.n2).data["x"],
+            pyiron_database.instance_database.node.node_inputs_to_jsongroup(
+                wf_port.n2
+            ).data["x"],
+            pyiron_database.instance_database.node.node_inputs_to_jsongroup(
+                wf_node.n2
+            ).data["x"],
             msg="The hash should be accessible and the same regardless of whether we "
             "exploit the connect-directly-to-(single-output)-node shortcut",
         )

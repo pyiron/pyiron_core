@@ -28,6 +28,10 @@ class ReactFlowWidget(anywidget.AnyWidget):
     _css = path / "widget.css"
     nodes = traitlets.Unicode("[]").tag(sync=True)
     edges = traitlets.Unicode("[]").tag(sync=True)
-    graph = traitlets.Unicode("[]").tag(sync=True) # graph for automated layout using ELK
-    mydata = traitlets.Unicode("[]").tag(sync=True) # dictionary containing nodes, edges, and graph
+    graph = traitlets.Unicode("[]").tag(
+        sync=True
+    )  # graph for automated layout using ELK
+    mydata = traitlets.Unicode("[]").tag(
+        sync=True
+    )  # dictionary containing nodes, edges, and graph
     commands = traitlets.Unicode("[]").tag(sync=True)

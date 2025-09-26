@@ -21,7 +21,7 @@ def MeasureResistance(index: int = 0, sample: str = "demo", n_radius: int = 5):
     for i in range(-n_radius, n_radius):
         for j in range(-n_radius, n_radius):
             if i**2 + j**2 < n_radius**2:
-                resistance.measurements.append(i * 0.1 + np.cos(j/n_radius))
+                resistance.measurements.append(i * 0.1 + np.cos(j / n_radius))
                 resistance.coordinates.append((i, j))
 
     resistance.index = index

@@ -168,7 +168,7 @@ class TestUsage(unittest.TestCase):
             labelling.virtual_output_label("subgraph", "n1", "y"),
             "n2",
             "y",
-            "x"
+            "x",
         )
         explicit_result = run.pull_node(base.get_updated_graph(explicit_graph), "n2")
         self.assertEqual(

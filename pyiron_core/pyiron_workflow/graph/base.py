@@ -34,7 +34,13 @@ from pyiron_core.pyiron_workflow.graph.labelling import (
     virtual_output_label,
 )
 from pyiron_core.pyiron_workflow.graph.not_data import NotData
-from pyiron_core.pyiron_workflow.simple_workflow import Data, Node, Port, Workflow, identity
+from pyiron_core.pyiron_workflow.simple_workflow import (
+    Data,
+    Node,
+    Port,
+    Workflow,
+    identity,
+)
 
 
 def get_node_from_path(import_path, log=None):
@@ -798,16 +804,14 @@ def uncollapse_node(graph: Graph, node_label: str):
                 new_graph.edges.append(edge)
 
     # Add virtual nodes for interface
-    for (labeller, scope) in (
-            (virtual_input_label, "inputs"),
-            (virtual_output_label, "outputs"),
+    for labeller, scope in (
+        (virtual_input_label, "inputs"),
+        (virtual_output_label, "outputs"),
     ):
         for handle in getattr(graph_node.node, scope).data["label"]:
             virtual_node_label = labeller(node_label, handle)
             if virtual_node_label not in new_graph.nodes:
-                new_graph += identity(
-                    label=labeller(node_label, handle)
-                )
+                new_graph += identity(label=labeller(node_label, handle))
 
     # Replace collapsed edges by routing through virtual nodes
     for edge in new_graph.edges:
@@ -820,7 +824,7 @@ def uncollapse_node(graph: Graph, node_label: str):
             edge.targetHandle = "x"
 
     # Add edges from virtual nodes to subgraph interior
-    for (target, targetHandle) in get_unconnected_input_ports(graph_node.graph):
+    for target, targetHandle in get_unconnected_input_ports(graph_node.graph):
         input_to_children_edge = GraphEdge(
             source=virtual_input_label(node_label, target, targetHandle),
             target=target,
@@ -830,7 +834,7 @@ def uncollapse_node(graph: Graph, node_label: str):
         if input_to_children_edge not in new_graph.edges:
             new_graph.edges.append(input_to_children_edge)
 
-    for (source, sourceHandle) in get_unconnected_output_ports(graph_node.graph):
+    for source, sourceHandle in get_unconnected_output_ports(graph_node.graph):
         children_to_output_edge = GraphEdge(
             source=source,
             target=virtual_output_label(node_label, source, sourceHandle),

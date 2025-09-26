@@ -30,8 +30,15 @@ def loop_until(recursive_function: Node, max_steps: int = 10):
 from concurrent.futures import as_completed
 from copy import copy
 
+
 def _iterate_node(
-    node, input_label: str, values, copy_results=True, collect_input=False, debug=False, executor=None
+    node,
+    input_label: str,
+    values,
+    copy_results=True,
+    collect_input=False,
+    debug=False,
+    executor=None,
 ):
     out_lst = []
     inp_lst = [] if collect_input else None
@@ -54,8 +61,10 @@ def _iterate_node(
                 print("out list: ", [id(o) for o in out_lst])
     else:
         # Parallel execution
-        futures = {executor.submit(node, **{input_label: value}): (idx, value) 
-                   for idx, value in enumerate(values)}
+        futures = {
+            executor.submit(node, **{input_label: value}): (idx, value)
+            for idx, value in enumerate(values)
+        }
         # Placeholder, to restore original order after as_completed
         results = [None] * len(values)
         for future in as_completed(futures):
@@ -72,15 +81,26 @@ def _iterate_node(
 
     return (out_lst, inp_lst) if collect_input else out_lst
 
+
 # --- Node iteration to DataFrame ---
 @as_function_node
 def IterToDataFrame(
-    node: Node, input_label: str, values: list | np.ndarray, debug: bool = False, executor=None
+    node: Node,
+    input_label: str,
+    values: list | np.ndarray,
+    debug: bool = False,
+    executor=None,
 ) -> pd.DataFrame:
     import pandas as pd
 
     out_lst, inp_lst = _iterate_node(
-        node, input_label, values, copy_results=True, collect_input=True, debug=debug, executor=executor
+        node,
+        input_label,
+        values,
+        copy_results=True,
+        collect_input=True,
+        debug=debug,
+        executor=executor,
     )
 
     data_dict = {}
@@ -88,7 +108,8 @@ def IterToDataFrame(
     first_out = out_lst[0] if out_lst else None
     output_labels = list(node.outputs.keys())
     multi_output = isinstance(first_out, (tuple, list, np.ndarray)) and len(
-        first_out) == len(output_labels)
+        first_out
+    ) == len(output_labels)
 
     # Ensure no column name conflict for input
     if input_label in output_labels:
@@ -113,13 +134,24 @@ def IterToDataFrame(
 
     return df
 
+
 # --- Simple iterator, parallel aware ---
 @as_function_node
 def iterate(
-    node: Node, input_label: str, values: list | np.ndarray, debug: bool = False, executor=None
+    node: Node,
+    input_label: str,
+    values: list | np.ndarray,
+    debug: bool = False,
+    executor=None,
 ):
     out_lst = _iterate_node(
-        node, input_label, values, copy_results=True, collect_input=False, debug=debug, executor=executor
+        node,
+        input_label,
+        values,
+        copy_results=True,
+        collect_input=False,
+        debug=debug,
+        executor=executor,
     )
     # For compatibility: flatten if only one result
     if out_lst and isinstance(out_lst, list) and len(out_lst) == 1:
@@ -198,6 +230,7 @@ def SetAttribute(obj, attr: str, val: str) -> any:
 #     else:
 #         column = df[column_name][:n_max]
 #     return column
+
 
 @as_function_node
 def Print(x):

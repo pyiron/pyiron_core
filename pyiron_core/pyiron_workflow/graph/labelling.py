@@ -31,7 +31,7 @@ def extract_node_handle(label: str) -> tuple[str, str]:
     paths = _get_paths_without_root(label)
     if len(paths) != 2:
         raise ValueError(
-            f"Expected find three elements when splitting on \"{DELIM}\", but this "
+            f'Expected find three elements when splitting on "{DELIM}", but this '
             f"was not the case for the provided label: {label}"
         )
     return tuple(paths)
@@ -64,5 +64,5 @@ def handle_to_parent_label(handle: str) -> str:
     else:
         raise NotImplementedError(
             f"Method indicates a string return, but first checks to see if the handle "
-            f"was virtual. \"{handle}\" wasn't."
+            f'was virtual. "{handle}" wasn\'t.'
         )

@@ -29,7 +29,20 @@ jobs:
           github_token: ${{ secrets.DEPENDABOT_WORKFLOW_TOKEN }}
           branch: ${{ github.event.pull_request.head.ref }}
 
+  black:
+    needs: commit-updated-env
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
+      - uses: psf/black@stable
+        with:
+          options: "--check --diff"
+
   test-suite:
+    needs: black
     runs-on: ubuntu-latest
     services:
       postgres:

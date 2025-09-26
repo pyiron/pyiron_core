@@ -5,11 +5,11 @@ import codecs
 
 def get_type(cls: Any) -> tuple[str, str, str]:
     # print("get_type", cls)
-    if hasattr(cls, "_func"): # pyiron function node
+    if hasattr(cls, "_func"):  # pyiron function node
         # print("pyiron function node")
         module = cls._func.__module__
         qualname = cls._func.__qualname__
-    else:    
+    else:
         module = cls.__class__.__module__
         qualname = cls.__class__.__qualname__
     from importlib import import_module
@@ -99,12 +99,12 @@ def deserialize_obj(serialized_obj: dict[str, Any]) -> Any:
                 return obj.dataclass(**serialized_obj["__getstate__"])
             print("return recreated node object")
             return recreated_type(**serialized_obj["__getstate__"])
-        
+
         # print("recreate object", recreated_type)
         new_obj = recreated_type()
         new_obj.__setstate__(serialized_obj["__getstate__"])
         return new_obj
-        
+
     else:
         # print("return original object")
         return serialized_obj

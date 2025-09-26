@@ -5,8 +5,12 @@ from pyiron_core.pyiron_workflow.api import serial
 
 from static import nodes
 
+
 def pseudo_subgraph(): ...
+
+
 pseudo_subgraph._is_subgraph_code = True
+
 
 def non_subgraph(): ...
 
@@ -22,7 +26,7 @@ class TestImports(unittest.TestCase):
             ],
             imports._get_locally_defined_objects(imports),
             msg="The reference list is just done by-hand; if this fails trivially"
-            "because the contents of the module change, just update it and move on."
+            "because the contents of the module change, just update it and move on.",
         )
 
     def test_subgraph_misdirection(self):
@@ -51,7 +55,7 @@ class TestImports(unittest.TestCase):
         self.assertEqual(
             f"{int.__module__}.{int.__name__}",
             imports.get_import_path_from_type(int),
-            msg="Expect typical path for built-in types"
+            msg="Expect typical path for built-in types",
         )
 
         nontrivial_qualname = nodes.SomethingNested.the_nested_thing
@@ -76,15 +80,13 @@ class TestImports(unittest.TestCase):
                 ),
                 msg="Should be able to load nodes. Remember: nodes.AddOne.__name__ is "
                 "dynamically mangled by the decorator; Use the unchanged name of the "
-                "underlying function instead."
+                "underlying function instead.",
             )
 
             self.assertIs(
                 int,
-                imports.get_object_from_path(
-                    f"{int.__module__}.{int.__qualname__}"
-                ),
-                msg="Should be able to load built-ins"
+                imports.get_object_from_path(f"{int.__module__}.{int.__qualname__}"),
+                msg="Should be able to load built-ins",
             )
 
             self.assertIs(
@@ -93,5 +95,5 @@ class TestImports(unittest.TestCase):
                     f"{nodes.__name__}."
                     f"{nodes.SomethingNested.the_nested_thing.__qualname__}"
                 ),
-                msg="Should be able to load objects with non-trivial qualnames"
+                msg="Should be able to load objects with non-trivial qualnames",
             )

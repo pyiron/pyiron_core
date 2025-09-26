@@ -22,7 +22,7 @@ def GetColumnFromDataFrame(df, column_name: str, as_array: bool = False):
     column = df[column_name]
     if as_array:
         column = np.asarray(column.tolist())
-    
+
     return column
 
 
@@ -87,7 +87,7 @@ def ApplyFunctionToSeriesNew(series: pd.Series, function: Node, store: bool = Fa
     first_arg = list(kwargs.keys())[0]
     del kwargs[first_arg]
     out = series.apply(function._func, **kwargs)
-    print (f"apply function: {function._func}, out")
+    print(f"apply function: {function._func}, out")
     transformed_series = np.stack(out)
 
     return transformed_series

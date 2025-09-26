@@ -64,8 +64,8 @@ def create_group(
         for handle, value in zip(labels, values):
             io_handle = (
                 labelling.virtual_input_label(sub_graph.label, handle)
-                if io_type == "inputs" else
-                labelling.virtual_output_label(sub_graph.label, handle)
+                if io_type == "inputs"
+                else labelling.virtual_output_label(sub_graph.label, handle)
             )
             full_graph += simple_workflow.identity(label=io_handle)
             full_graph.nodes[io_handle].parent_id = sub_graph.label
@@ -88,7 +88,9 @@ def create_group(
         for edge in full_graph.edges:
             if edge.target == node and edge.targetHandle == handle:
                 new_edge = copy.copy(edge)
-                new_edge.target = labelling.virtual_input_label(sub_graph.label, edge.targetHandle)
+                new_edge.target = labelling.virtual_input_label(
+                    sub_graph.label, edge.targetHandle
+                )
                 new_edge.targetHandle = "x"
                 add_edges.append(new_edge)
 
@@ -105,9 +107,13 @@ def create_group(
             for edge in full_graph.edges:
                 if edge.source == source_node:
                     new_edge = copy.copy(edge)
-                    edge.source = labelling.virtual_output_label(sub_graph.label, source_node, edge.sourceHandle)
+                    edge.source = labelling.virtual_output_label(
+                        sub_graph.label, source_node, edge.sourceHandle
+                    )
                     edge.sourceHandle = "x"
-                    new_edge.target = labelling.virtual_output_label(sub_graph.label, source_node, new_edge.sourceHandle)
+                    new_edge.target = labelling.virtual_output_label(
+                        sub_graph.label, source_node, new_edge.sourceHandle
+                    )
                     new_edge.targetHandle = "x"
                     add_edges.append(new_edge)
 
