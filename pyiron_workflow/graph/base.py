@@ -272,7 +272,6 @@ def remove_node(graph: Graph, label: str) -> Graph:
         edge for edge in graph.edges if edge.source == label or edge.target == label
     ]
     for edge in edges_to_remove:
-        # graph.nodes[edge.target].node.inputs.__setattr__(edge.targetHandle, NotData())
         new_graph.edges.remove(edge)
 
     print(f"Removed node {label} and its edges", new_graph.nodes.keys())

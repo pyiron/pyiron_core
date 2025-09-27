@@ -312,7 +312,6 @@ class PyironFlowWidget:
 
     def update_gui(self, export_data=True, sleep_time=0.2):
         opt_graph = base.get_updated_graph(self.graph)
-        # print("update_gui: ", opt_graph.nodes.keys())
         data = dict(
             nodes=_nodes_to_gui(opt_graph),
             edges=_edges_to_gui(opt_graph),
@@ -352,7 +351,6 @@ class PyironFlowWidget:
 ############################################################################################################
 # pyironflow_widget
 ############################################################################################################
-# ... rest of your original ~500 lines remain unchanged, except:
 
 
 class PyironFlow:
