@@ -10,7 +10,6 @@ from pyiron_core.pyiron_workflow import as_function_node, as_macro_node
 
 @as_function_node
 def Volume(structure: Optional[Atoms] = None, per_atom: bool = False) -> float:
-    # print("Calculating volume of the structure", structure)
     volume = structure.get_volume()
     # if per_atom:
     volume = volume / structure.get_number_of_atoms()
@@ -28,7 +27,6 @@ def GetDistances(
     structure: Optional[Atoms] = None,
     num_neighbors: int = 12,
     flatten: bool = True,
-    # vector: bool = False,
 ) -> np.ndarray:
     """
     Get distances between atoms in the structure.
@@ -76,7 +74,6 @@ def SplineDescriptor(
             structure=structure, num_neighbors=num_points, flatten=True
         )
 
-        # r_bins = np.linspace(r_min, r_max, num_points)
         descriptor, deriv_descriptor, r_bins = BSpline()._func(
             x0_vals=distances,
             x_min=r_bins[0],
@@ -85,13 +82,12 @@ def SplineDescriptor(
             degree=degree,
         )
 
-    return descriptor  # , deriv_descriptor, r_bins
+    return descriptor
 
 
 @as_function_node
 def LinearInterpolationDescriptor(
     structure: Optional[Atoms] = None,
-    # descriptor: str = "distance",
     r_bins: Optional[np.ndarray] = None,
 ) -> np.ndarray:
     """
@@ -115,7 +111,6 @@ def LinearInterpolationDescriptor(
             structure=structure, num_neighbors=num_points, flatten=True
         )
 
-        # r_bins = np.linspace(r_min, r_max, num_points)
         counts, _ = LinearBin()._func(data=distances, bin_centers=r_bins)
 
     return counts

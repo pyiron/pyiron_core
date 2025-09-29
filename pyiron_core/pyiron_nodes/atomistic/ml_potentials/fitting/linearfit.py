@@ -236,7 +236,6 @@ def ReadPickledDatasetAsDataframe(
 def ParameterizePotentialConfig(
     nrad_max: tuple | list = (15, 6, 4, 1),
     l_max: tuple | list = (0, 6, 5, 1),
-    # number_of_functions_per_element: int | None = None,
     number_of_functions_per_element: int = 10,
     rcut: float = 7.0,
 ):

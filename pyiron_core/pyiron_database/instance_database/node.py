@@ -58,8 +58,6 @@ def store_node_outputs(node: Node, storage_path: str = PyironStoragePath) -> str
 
             if v.value is NOT_DATA:
                 raise ValueError(f"Output '{k}' has no value.")
-            # print(f"Storing output {k} of node {node_hash}")
-            # print(f"Value: {serialize_obj(v.value)}")
             try:
                 storage[k] = pickle_dump(serialize_obj(v.value))
             except Exception as e:
@@ -89,12 +87,6 @@ def restore_node_outputs(node: Node, storage_path: str = PyironStoragePath) -> b
     )
     with HDF5Storage(output_path, "r") as storage:
         for k, v in storage.items():
-            # print(f"Restoring output {k} of node {node_hash}")
-            # print(f"Value: {v}")
-            # modified to Sebastian's version
-            # node.outputs[k].value  requires substantial changes in simple_workflow and base modules
-            # should be later done for consistency
-            # node.outputs[k]._value = node.outputs[k].type_hint(v)
             node.outputs[k]._value = deserialize_obj(
                 node.outputs[k].type_hint(pickle_load(v))
             )
@@ -123,13 +115,6 @@ def node_to_jsongroup(node: Node) -> JSONGroup:
             },
         }
     )
-    # for k, v in node.inputs.items():
-    #     # get hash of v
-    #     if str(type(v.value))[:-2].endswith("Port"):
-    #         val = id(v.value.value)
-    #     else:
-    #         val = v.value
-    #     print(f"node_to_jsongroup: {k} {val}")
     return json_group
 
 
@@ -294,7 +279,6 @@ def restore_node_from_database(
         init_args={
             "label": db_result.qualname
         },  # TODO: make sure that this is unique (use graph tool to generate a unique label)
-        # init_args={"label": generate_random_string()},
     )
 
     if parent is None:
@@ -306,7 +290,6 @@ def restore_node_from_database(
     # restore inputs
     for k, v in restored_inputs.items():
         if k in db_result.connected_inputs:
-            # if connect_nodes:
             input_hash, input_label = v.split("@")
             input_node, parent = restore_node_from_database(db, input_hash, parent)
             parent += GraphEdge(
@@ -315,7 +298,6 @@ def restore_node_from_database(
                 source=input_node.label,
                 sourceHandle=input_label,
             )
-            # node.inputs[k].connect(input_node.outputs[input_label])
         else:
             node.inputs[k] = v
 

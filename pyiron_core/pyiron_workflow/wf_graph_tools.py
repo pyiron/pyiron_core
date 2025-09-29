@@ -374,7 +374,6 @@ wf = Workflow('{graph.label}')
                         else:
                             code += f"""{target_handle}=wf.{source}.outputs.{source_handle}"""
             code += """) \n"""
-            # code += '\n' + 'print(wf.run()) \n'
 
     formatted_code = black.format_str(code, mode=black.FileMode())
 
@@ -433,13 +432,9 @@ def pull_node(wf: "Workflow", node_label: str):
     input_nodes = _find_input_nodes(graph, node_index)
     input_nodes_labels = [node_labels[i] for i in input_nodes]
 
-    # try:
     for input_node_label in input_nodes_labels:
         out = wf._nodes[input_node_label].run()
     return out
-    # except Exception as e:
-    #     print(f"Error running node '{input_node_label}': {e}")
-    #     return False
 
 
 def graph_edges_to_wf_edges(graph_edges: List[Tuple[str, str]]):
@@ -482,7 +477,6 @@ def get_wf_from_graph(graph: WorkflowGraph) -> "Workflow":
                             kwargs[target_handle] = source_handle[6:]
                         else:
                             kwargs[target_handle] = eval(source_handle)
-                    # kwargs[target_handle] = source_handle
 
             new_node = pyironflow.get_node_from_path(import_path)(**kwargs)
             wf.add_node(label, new_node)

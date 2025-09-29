@@ -39,20 +39,11 @@ def IterNode(
 
     from pyiron_core.pyiron_workflow.api.graph import run_node
 
-    # import numpy as np
-
-    # kwarg_initial = node.inputs[kwarg_name].value
-    # print("kwarg_initial", kwarg_initial)
-
     out_dict = {}
     if Executor is None:
         for el in kwarg_list:
-            # print('iter kwargs: ', node.kwargs)
             node.to_inputs(**{kwarg_name: el})
             out_dict[el] = node.run(db=_db)
-            # if hasattr(node, "_hash_parent"):
-            #     print("node._hash_parent", el, node._hash_parent)
-            # print("iter_node: ", node.inputs, node_run.inputs)
     elif _db is not None:
         raise ValueError(
             "Communicating with the database is not supported for IterNode while using "
@@ -82,7 +73,6 @@ def IterNode(
 
     # create dataframe, keep the order of the input list
     results = [out_dict[el] for el in kwarg_list]
-    # node.inputs[kwarg_name] = kwarg_initial
 
     df = DataFrame({kwarg_name: kwarg_list, "result": results})
     return df

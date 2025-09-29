@@ -172,7 +172,6 @@ def PrepareLinearACEdataset(
     return train_ds, test_ds
 
 
-# linear_fit = LinearACEFit(train_dataset=train_ds)
 @as_function_node
 def LinearACEFit(train_dataset, fit: bool = True):
     from pyace.linearacefit import LinearACEFit
@@ -183,25 +182,16 @@ def LinearACEFit(train_dataset, fit: bool = True):
     return linear_fit
 
 
-# # linear_fit.fit()
-# @as_function_node("fit")
-# def Fit(linear_fit):
-#     return linear_fit.fit()
-
-
-# linear_fit.compute_errors(test_ds)
 @as_function_node("errors")
 def ComputeErrors(linear_fit, ds):
     return linear_fit.compute_errors(ds)
 
 
-# basis = linear_fit.get_bbasis()
 @as_function_node("basis")
 def GetBasis(linear_fit):
     return linear_fit.get_bbasis()
 
 
-# e_pred,f_pred = linear_fit.predict(test_ds, reshape_forces=True)
 @as_function_node
 def Predict(linear_fit, ds, reshape_forces: bool = True):
     e_pred, f_pred = linear_fit.predict(ds, reshape_forces=reshape_forces)

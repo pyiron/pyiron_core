@@ -46,10 +46,7 @@ def _iterate_node(
     if executor is None:
         # Sequential execution
         for value in values:
-            # out = node(**{input_label: value})
-            # node.inputs[input_label].value = value
             node.inputs.__setattr__(input_label, value)
-            # print(f"Setting {input_label} = {value}", node.inputs[input_label].value)
             out = node.run()
             if copy_results:
                 out = copy(out)
@@ -221,15 +218,6 @@ def SetAttribute(obj, attr: str, val: str) -> any:
     except AttributeError:
         print(f"Attribute {attr} not found in object {obj}")
     return obj
-
-
-# @as_function_node
-# def ExtractColumnFromDataFrame(df, column_name: str, n_max: int = -1):
-#     if n_max == -1:
-#         column = df[column_name]
-#     else:
-#         column = df[column_name][:n_max]
-#     return column
 
 
 @as_function_node

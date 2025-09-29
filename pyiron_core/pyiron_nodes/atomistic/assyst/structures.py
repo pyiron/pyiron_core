@@ -23,7 +23,7 @@ class SpaceGroupInput:
 
 
 @as_function_node
-def SpaceGroupSampling(input: SpaceGroupInput, store: bool = True):  # -> list[Atoms]:
+def SpaceGroupSampling(input: SpaceGroupInput, store: bool = True):
     from warnings import catch_warnings
 
     from structuretoolkit.build.random import pyxtal
@@ -40,15 +40,12 @@ def SpaceGroupSampling(input: SpaceGroupInput, store: bool = True):  # -> list[A
             continue
         elements.append(inp.element)
         stoichiometry.append(inp.num)
-        # el_num.append((elements, num_ions))
     print("elements: ", elements, stoichiometry)
 
     ions = filter(
         lambda x: 0 < sum(x) <= input.max_atoms,
         product(stoichiometry, repeat=len(elements)),
     )
-
-    # print(list(ions))
 
     el_list, n_list = [], []
     for n_ions in ions:

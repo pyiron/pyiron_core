@@ -54,7 +54,6 @@ def add_water_film(
 
     # Water
     n_mols = 1
-    # density = 1.0e-24  # g/A^3
     mol_mass_water = 18.015  # g/mol
 
     # Determining the supercell size size

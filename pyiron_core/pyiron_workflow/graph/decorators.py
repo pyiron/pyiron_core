@@ -27,7 +27,6 @@ def as_dotdict_dataclass(
     __setstate__=None,
     **kwargs,
 ):
-    # def wf_data_class(*args, doc_func=None, keys_to_store=None, **kwargs):
     """
     Extension of the python default dataclass to include methods and functionality needed for pyiron_core.pyiron_workflows
 
@@ -79,7 +78,7 @@ def as_dotdict_dataclass(
 
         def select(self, keys_to_store=None):
             if keys_to_store is None:
-                keys_to_store = self.keys()  # cls._keys_to_store
+                keys_to_store = self.keys()
             return {k: self[k] for k in keys_to_store}
 
         cls.keys = keys
@@ -160,12 +159,10 @@ class NestedDict(OrderedDict):
         if self._obj_type is None:
             if "_obj_type" in state:
                 self._obj_type = imports.get_object_from_path(state["_obj_type"])
-                # del state["_obj_type"]
 
             # convert the state to a dictionary of objects
 
         if self._obj_type is not None:
-            # print('convert obj: ', self._obj_type, state.keys())
             self.update(
                 {
                     k: self._obj_type().__setstate__(v)
@@ -236,7 +233,6 @@ class NestedList(list):
         # Ensure each element is deeply copied
         for item in self:
             new_list.append(copy.deepcopy(item, memo))
-        # print("deepcopy: ", memo)
         return new_list
 
     def __copy__(self):

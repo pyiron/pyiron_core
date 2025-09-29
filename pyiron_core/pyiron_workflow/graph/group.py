@@ -38,7 +38,6 @@ def create_group(
     sub_graph = _get_subgraph(full_graph, node_ids, label)
     sub_graph_node = base.graph_to_node(sub_graph)
 
-    # print("sub_graph: ", sub_graph.label, "_obj_type" in full_graph.nodes.__getstate__())
     full_graph.nodes[sub_graph.label] = base.GraphNode(
         id=sub_graph.label,
         label=sub_graph.label,
@@ -49,8 +48,6 @@ def create_group(
         widget_type="customNode",
         expanded=False,
     )
-    # print("sub_graph1: ", sub_graph.label, "_obj_type" in full_graph.nodes.__getstate__())
-    # print("sub_graph_node: ", full_graph.nodes[sub_graph.label])
 
     for node in sub_graph.nodes.values():
         full_graph.nodes[node.label].parent_id = sub_graph.label
@@ -83,7 +80,6 @@ def create_group(
     # rewire connections to external output nodes
     node_ports = base.get_externally_connected_input_ports(sub_graph)
     for node, handle in node_ports:
-        # print(node, handle)
         for edge in full_graph.edges:
             if edge.target == node and edge.targetHandle == handle:
                 new_edge = copy.copy(edge)
@@ -93,16 +89,12 @@ def create_group(
                 new_edge.targetHandle = "x"
                 add_edges.append(new_edge)
 
-    # print("sub_graph1b: ", sub_graph.label, "_obj_type" in full_graph.nodes.__getstate__())
-    # print("Sub_Graph_node: ", full_graph.nodes[sub_graph.label])
     # rewire connections to external input nodes
     for key, node in full_graph.nodes.items():
         print("node: ", key, node)
         marker = labelling.virtual_output_label(sub_graph.label)
         if marker in node.label:
-            # print("virtual output node", node.label)
             source_node, source_handle = labelling.extract_node_handle(node.label)
-            # print(source_node, source_handle)
             for edge in full_graph.edges:
                 if edge.source == source_node:
                     new_edge = copy.copy(edge)
@@ -119,9 +111,7 @@ def create_group(
     for edge in add_edges:
         full_graph.edges.append(edge)
 
-    # print("sub_graph1c: ", sub_graph.label, "_obj_type" in full_graph.nodes.__getstate__())
     full_graph = move_parent_nodes_to_top(full_graph)
-    # print("sub_graph2: ", sub_graph.label, "_obj_type" in full_graph.nodes.__getstate__())
     return full_graph
 
 
@@ -149,7 +139,6 @@ def move_parent_nodes_to_top(graph):
 
     print(reordered_nodes)
     new_nodes = base.Nodes(obj_type=base.GraphNode)
-    # print("sub_graph22: ", "_obj_type" in new_nodes.__getstate__())
     for label in node_labels:
         new_nodes[label] = graph.nodes[label]
     new_graph = base.copy_graph(graph)
@@ -164,7 +153,6 @@ def _get_subgraph(
     # TODO: remove child nodes in subgraph of collapsed nodes
     graph = base.copy_graph(graph)
     for subgraph_node in graph.nodes.iloc(node_indices):
-        # print(f"Collapsing node {subgraph_node}", type(subgraph_node))
         graph.nodes[subgraph_node].expanded = False
 
     edges = graph.edges

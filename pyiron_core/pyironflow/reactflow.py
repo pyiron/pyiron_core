@@ -19,11 +19,8 @@ import pathlib
 import anywidget
 import traitlets
 
-# import os
-
 
 class ReactFlowWidget(anywidget.AnyWidget):
-    # path = pathlib.Path(os.getcwd()) / 'static'
     path = pathlib.Path(__file__).parent.parent.parent / "static"
     _esm = path / "widget.js"
     _css = path / "widget.css"

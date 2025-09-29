@@ -1,12 +1,7 @@
 from typing import Optional
 
-# import numpy as np
-# import pandas as pd
 from pyiron_core.pyiron_workflow import as_function_node
 from pyiron_core.pyiron_workflow.api.graph import Graph, GraphNode
-
-# if TYPE_CHECKING:
-#     from pyiron_core.pyiron_workflow.graph import Node, Graph
 
 
 @as_function_node
@@ -124,8 +119,6 @@ def OptimizeGraphConnections(graph: Graph):
     raise NotImplementedError(
         "pyiron_core.pyiron_workflow.graph.base._optimize_graph_connections did not exist at time of refactoring"
     )
-    # graph = base._optimize_graph_connections(graph)
-    # return graph
 
 
 @as_function_node
@@ -143,17 +136,13 @@ def MarkNodeAsExpanded(graph: Graph, node_label: str, expanded: Optional[bool] =
     return graph
 
 
-# def get_graph_from_macro(macro_node: Node) -> Graph:
 @as_function_node
 def GetGraphFromMacro(macro_node):
     raise NotImplementedError(
         "pyiron_core.pyiron_workflow.graph.base._get_graph_from_macro did not exist at time of refactoring"
     )
-    # graph = base.get_graph_from_macro(macro_node)
-    # return graph
 
 
-# def _get_active_nodes(graph: Graph) -> Nodes:
 @as_function_node
 def GetActiveNodes(graph: Graph):
     from pyiron_core.pyiron_workflow.api.gui import _get_active_nodes

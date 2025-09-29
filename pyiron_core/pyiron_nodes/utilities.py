@@ -2,9 +2,6 @@ import numpy as np
 
 from pyiron_core.pyiron_workflow import as_function_node
 
-# workflow does not understand this
-# from typing import Any
-
 
 @as_function_node("range")
 def Range(start: int, stop: int, step: int):

@@ -1,5 +1,3 @@
-# from __future__ import annotations
-
 from typing import Optional
 
 import numpy as np
@@ -150,7 +148,6 @@ def GetDynamicalMatrix(phonopy, q=None):
         phonopy.produce_force_constants()
         phonopy.dynamical_matrix.run(q=q)
     dynamical_matrix = np.real_if_close(phonopy.dynamical_matrix.dynamical_matrix)
-    # print (dynamical_matrix)
     return dynamical_matrix, phonopy
 
 
@@ -230,7 +227,6 @@ def GetThermalProperties(
     )
 
     tp_dict = phonopy_new.get_thermal_properties_dict()
-    # print(f"Thermal properties calculated for temperatures: {tp_dict['temperatures']}")
     # Convert the dictionary to a ThermalProperties dataclass
     thermal_properties = ThermalProperties().dataclass(**tp_dict)
     thermal_properties.free_energy *= (

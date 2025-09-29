@@ -1,7 +1,3 @@
-# from ._version import get_versions
-
-# __version__ = get_versions()["version"]
-
 # User entry point
 # Node developer entry points
 from pyiron_core.pyiron_workflow.api.simple_workflow import (

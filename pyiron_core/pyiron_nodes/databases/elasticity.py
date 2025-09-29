@@ -24,7 +24,6 @@ def DeJong(max_index: int | None = None, file_name="ec.json"):
     df = pd.read_json(file_path)
 
     structures = []
-    # count = 0
     if max_index is None:
         max_index = len(df.structure)
 
@@ -33,10 +32,6 @@ def DeJong(max_index: int | None = None, file_name="ec.json"):
         f = io.StringIO(structure)
         atoms = read(f, format="cif")
         structures.append(atoms)
-
-        # count += 1
-        # if count == max_index:
-        #     break
 
     df["atoms"] = structures
 

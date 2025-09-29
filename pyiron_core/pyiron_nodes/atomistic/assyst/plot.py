@@ -7,7 +7,6 @@ from pyiron_core.pyiron_workflow import as_function_node
 
 
 @as_function_node
-# def PlotSPG(structures: list[Atoms]) -> tuple[Axis, list[int]]:
 def PlotSPG(structures: list[Atoms]) -> list[int]:
     """Plot a histogram of space groups in input list."""
     import matplotlib.pyplot as plt
@@ -17,8 +16,6 @@ def PlotSPG(structures: list[Atoms]) -> list[int]:
     for structure in structures:
         spacegroups.append(get_symmetry(structure).info["number"])
     plt.hist(spacegroups)
-    # ax = plt.gca()
-    # return ax, spacegroups
     return spacegroups
 
 
@@ -122,7 +119,6 @@ def PlotAtomsCells(
         label = r"$\alpha,\beta,\gamma$ [rad]"
     plt.xlabel(label)
 
-    # return df
     return plt.show()
 
 
