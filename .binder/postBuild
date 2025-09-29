@@ -10,14 +10,17 @@ rm -r   ${HOME}/.binder \
         ${HOME}/decisions \
         ${HOME}/devbooks \
         ${HOME}/js \
+        ${HOME}/node_modules \
         ${HOME}/notebooks \
         ${HOME}/pyiron_core \
         ${HOME}/stored_workflows \
+        ${HOME}/tests \
         ${HOME}/.gitignore \
         ${HOME}/jest.config.js \
         ${HOME}/LICENSE \
         ${HOME}/local_postgres.zsh \
         ${HOME}/package.json \
+        ${HOME}/package-lock.json \
         ${HOME}/project-env.yml \
         ${HOME}/pyproject.toml \
         ${HOME}/README.md \
