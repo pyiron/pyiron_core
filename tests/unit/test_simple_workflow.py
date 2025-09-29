@@ -50,7 +50,6 @@ class TestSimpleWorkflow(unittest.TestCase):
         self.assertEqual(inp_labels, ["a", "b"])
         self.assertEqual(ready, [False, True])
         self.assertEqual(out_labels, ["result"])
-        # self.assertEqual(node._func, test_func)
 
     def test_make_node_decorator(self):
         def dummy_func():
@@ -104,17 +103,6 @@ class TestSimpleWorkflow(unittest.TestCase):
             msg="the macro should be runnable and should allow channel-based and "
             "node-based (with single-returns) output formats",
         )
-
-    # def test_node_with_libpath(self):
-    #     @dataclass
-    #     class TestData:
-    #         data: np.ndarray = field(default_factory=lambda: np.array([]))
-
-    #     def test_func(data: TestData):
-    #         return data.data.sum()
-
-    #     node = Node(func=test_func, libpath="test/path")
-    #     self.assertEqual(node.libpath, "test/path")
 
     def test_storage(self):
         with self.subTest("Off"):
