@@ -1,29 +1,16 @@
-# from __future__ import annotations
-from typing import Optional
-
-from pyiron_core.pyiron_workflow import (
-    as_inp_dataclass_node,
-    as_out_dataclass_node,
-    Node,
-)
 from dataclasses import field
+from typing import Optional
 
 import atomistics.workflows.elastic.symmetry as sym
 import numpy as np
+
 from pyiron_core.pyiron_workflow import (
+    Node,
     as_function_node,
+    as_inp_dataclass_node,
     as_macro_node,
-    # for_node,
-    # standard_nodes as standard,
+    as_out_dataclass_node,
 )
-
-from pyiron_core.pyiron_nodes.atomistic.calculator.ase import Static
-from pyiron_core.pyiron_nodes.atomistic.engine.generic import OutputEngine
-
-# from pyiron_core.pyiron_nodes.dev_tools import wf_data_class
-# from pyiron_core.pyiron_nodes.development.settings import Storage
-# from pyiron_core.pyiron_workflow import as_dataclass_node
-# from pyiron_core.pyiron_nodes.development.node_dataclass import as_output_node
 
 
 @as_out_dataclass_node
@@ -54,7 +41,6 @@ class DataStructureContainer:
 
 @as_out_dataclass_node
 class OutputElasticAnalysis:
-    # from pyiron_core.pyiron_nodes.development.hash_based_storage import str_to_dict
     strain_energy: list = field(default_factory=lambda: [])
     C: np.ndarray = field(default_factory=lambda: np.zeros(0))
     A2: list = field(default_factory=lambda: [])
@@ -77,7 +63,6 @@ class OutputElasticAnalysis:
     AVR: int | float = 0
     energy_0: float = 0
 
-    # _serialize: callable = str_to_dict  # provide optional function for serialization
     _skip_default_values = False
 
 
@@ -97,7 +82,7 @@ def AddEnergies(
 @as_function_node("forces")
 def ExtractFinalEnergy(df):
     # Looks an awful lot like phonons.ExtractFinalForce -- room for abstraction here
-    return [getattr(e, "energy")[-1] for e in df["out"].tolist()]
+    return [e.energy[-1] for e in df["out"].tolist()]
 
 
 @as_function_node
@@ -179,10 +164,6 @@ def GenerateStructures(
 
             structures.append(struct.copy())
             structure_dict[jobname] = struct
-            structure_container = DataStructureContainer().dataclass(
-                structure=list(structure_dict.values()),
-                job_name=list(structure_dict.keys()),
-            )
     job_names = list(structure_dict.keys())
     return structures, job_names
 
@@ -192,32 +173,22 @@ def ComputeElasticConstantsMacro(
     structure,
     engine,
     calculator: Node,
-    input_elastic_tensor: InputElasticTensor = InputElasticTensor(),
+    input_elastic_tensor=None,
 ):
     """
     Get the elastic constants of a structure using an ASE calculator.
     """
+    input_elastic_tensor = (
+        InputElasticTensor() if input_elastic_tensor is None else input_elastic_tensor
+    )
+    from pyiron_core.pyiron_nodes.controls import Print, iterate
     from pyiron_core.pyiron_workflow import Workflow
-    from pyiron_core.pyiron_nodes.controls import iterate, IterToDataFrame, Print
-    from pyiron_core.pyiron_nodes.atomistic.calculator.ase import StaticEnergy, Static
-    from pyiron_core.pyiron_nodes.atomistic.property.phonons import GetFreeEnergy
 
     wf = Workflow("elastic_constants")
 
     wf.calculator = calculator
-    # if calculator == "StaticEnergy":
-    #     wf.calculator = StaticEnergy(structure=structure, engine=engine)
-    # elif calculator == "GetFreeEnergy":
-    #     wf.calculator = GetFreeEnergy(structure=structure, engine=engine)
-    # else:
-    #     test1, test2 = (calculator == "StaticEnergy"), (calculator == "GetFreeEnergy")
-    #     raise ValueError(f"Unknown calculator: '{calculator}' {test1} {test2}")
 
     wf.print = Print(f"calculator: {calculator}")
-    # wf.calculator = StaticEnergy(structure=structure, engine=engine)
-    # wf.calculator = GetFreeEnergy(structure=structure, engine=engine)
-    # print(f"Using calculator: {wf.calculator}")
-    # print(f"Input calculator: {calculator}")
     wf.symmetry = SymmetryAnalysis(structure=structure, parameters=input_elastic_tensor)
     wf.structures = GenerateStructures(
         structure=structure, analysis=wf.symmetry, parameters=input_elastic_tensor
@@ -241,13 +212,13 @@ def ComputeElasticConstantsMacro(
 def ComputeElasticConstants(
     structure,
     engine,
-    calculator: str = "StaticEnergy",  # "StaticEnergy", "GetFreeEnergy"
+    calculator: str = "StaticEnergy",
     input_elastic_tensor: InputElasticTensor = None,
 ):
-    from pyiron_core.pyiron_workflow import Workflow
-    from pyiron_core.pyiron_nodes.controls import iterate
     from pyiron_core.pyiron_nodes.atomistic.calculator.ase import StaticEnergy
     from pyiron_core.pyiron_nodes.atomistic.property.phonons import GetFreeEnergy
+    from pyiron_core.pyiron_nodes.controls import iterate
+    from pyiron_core.pyiron_workflow import Workflow
 
     wf = Workflow("elastic_constants")
     if input_elastic_tensor is None:
@@ -279,13 +250,11 @@ def ComputeElasticConstants(
     )
 
     elastic_constants = wf.elastic_constants.pull()
-    # print("Energies:", wf.energies.outputs.out_lst)
     return elastic_constants
 
 
 @as_function_node("structures")
 def AnalyseStructures(
-    # data_df: DataStructureContainer,
     energies,
     job_names,
     analysis: OutputElasticSymmetryAnalysis,
@@ -297,7 +266,7 @@ def AnalyseStructures(
     Lag_strain_list = analysis.Lag_strain_list
 
     out = OutputElasticAnalysis().dataclass()
-    energy_dict = {k: v for k, v in zip(job_names, energies)}
+    energy_dict = dict(zip(job_names, energies, strict=True))
 
     if 0.0 in epss:
         out.energy_0 = energy_dict[zero_strain_job_name]

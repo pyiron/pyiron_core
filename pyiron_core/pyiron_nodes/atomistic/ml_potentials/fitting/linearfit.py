@@ -1,9 +1,10 @@
-from pyiron_core.pyiron_workflow import Workflow, as_function_node
-import pandas as pd
+from dataclasses import asdict, dataclass, field
+from typing import List, Optional, Union
+
 import numpy as np
-from dataclasses import dataclass, field, asdict
-from typing import Optional, List, Union
-import matplotlib.pyplot as plt
+import pandas as pd
+
+from pyiron_core.pyiron_workflow import Workflow, as_function_node
 
 
 @as_function_node
@@ -233,9 +234,8 @@ def ReadPickledDatasetAsDataframe(
 
 @as_function_node
 def ParameterizePotentialConfig(
-    nrad_max: list = [15, 6, 4, 1],
-    l_max: list = [0, 6, 5, 1],
-    # number_of_functions_per_element: int | None = None,
+    nrad_max: tuple | list = (15, 6, 4, 1),
+    l_max: tuple | list = (0, 6, 5, 1),
     number_of_functions_per_element: int = 10,
     rcut: float = 7.0,
 ):
@@ -243,8 +243,8 @@ def ParameterizePotentialConfig(
     potential_config = PotentialConfig()
 
     potential_config.bonds.ALL.rcut = rcut
-    potential_config.functions.ALL.nradmax_by_orders = nrad_max
-    potential_config.functions.ALL.lmax_by_orders = l_max
+    potential_config.functions.ALL.nradmax_by_orders = list(nrad_max)
+    potential_config.functions.ALL.lmax_by_orders = list(l_max)
     potential_config.functions.number_of_functions_per_element = (
         number_of_functions_per_element
     )
@@ -295,9 +295,8 @@ def RunLinearFit(
     store: bool = True,
 ):
 
-    from pyace.linearacefit import LinearACEFit, LinearACEDataset
     from pyace import create_multispecies_basis_config
-
+    from pyace.linearacefit import LinearACEDataset, LinearACEFit
     from pyiron_snippets.logger import logger
 
     logger.setLevel(30)
@@ -455,7 +454,7 @@ def _calc_rmse(array_1, array_2, rmse_in_milli: bool = True):
     rmse: The calculated RMSE value
     """
     rmse = np.sqrt(np.mean((array_1 - array_2) ** 2))
-    if rmse_in_milli == True:
+    if rmse_in_milli:
         return rmse * 1000
     else:
         return rmse
@@ -571,8 +570,8 @@ def PlotForcesHistogram(df: "pd.DataFrame", bins: int = 100, log_scale: bool = T
     fig : matplotlib.figure.Figure
         The generated histogram figure.
     """
-    import numpy as np
     import matplotlib.pyplot as plt
+    import numpy as np
 
     array = np.concatenate(df.forces.values).flatten()
 
@@ -728,9 +727,8 @@ def DesignMatrix(
         LinearACEDataset: The constructed design matrix for the training dataset.
     """
 
-    from pyace.linearacefit import LinearACEDataset
     from pyace import create_multispecies_basis_config
-
+    from pyace.linearacefit import LinearACEDataset
     from pyiron_snippets.logger import logger
 
     logger.setLevel(30)

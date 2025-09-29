@@ -1,10 +1,18 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from enum import Enum
+
+import numpy as np
+from ase import Atoms
+from ase.calculators.calculator import Calculator
+from ase.constraints import FixAtoms
+from ase.filters import FrechetCellFilter
+from matgl import load_model
+from matgl.ext.ase import M3GNetCalculator
 
 from pyiron_core.pyiron_workflow import Workflow
 
-from ase import Atoms
-from ase.calculators.calculator import Calculator
+GPA2EVA3 = 0.006_241_509_074
 
 
 class AseCalculatorConfig(ABC):
@@ -25,6 +33,8 @@ class PawDftInput:
 @dataclass
 class GpawInput(AseCalculatorConfig, PawDftInput):
     def get_calculator(self, use_symmetry=True):
+        import gpaw
+
         return gpaw.GPAW(
             xc="PBE",
             kpts=(1, 1, 1),
@@ -49,17 +59,8 @@ class GenericOptimizerSettings:
     force_tolerance: float = 1e-2
 
 
-from ase.filters import StrainFilter, FrechetCellFilter
-from ase.constraints import FixSymmetry, FixAtoms
-
-import numpy as np
-from enum import Enum
-
-
 class RelaxMode(Enum):
     VOLUME = "volume"
-    # CELL = "cell"
-    # POSITION = "position"
     FULL = "full"
 
     def apply_filter_and_constraints(self, structure):
@@ -67,12 +68,12 @@ class RelaxMode(Enum):
             case RelaxMode.VOLUME:
                 structure.set_constraint(FixAtoms(np.ones(len(structure), dtype=bool)))
                 return FrechetCellFilter(structure, hydrostatic_strain=True)
-            # case RelaxMode.CELL:
-            #     return FrechetCellFilter(structure, constant_volume=True)
             case RelaxMode.FULL:
                 return FrechetCellFilter(structure)
             case _:
-                raise ValueError("Lazy Marvin")
+                raise ValueError(
+                    f"Expected to match available enum: {RelaxMode.__members__}"
+                )
 
 
 @Workflow.wrap.as_function_node
@@ -82,8 +83,8 @@ def Relax(
     opt: GenericOptimizerSettings.dataclass,
     structure: Atoms,
 ) -> Atoms:
-    from ase.optimize import LBFGS
     from ase.calculators.singlepoint import SinglePointCalculator
+    from ase.optimize import LBFGS
 
     mode = RelaxMode(mode)
 
@@ -96,7 +97,9 @@ def Relax(
         case RelaxMode.FULL:
             structure.calc = calculator.get_calculator(use_symmetry=False)
         case _:
-            assert False
+            raise ValueError(
+                f"Expected to match available enum: {RelaxMode.__members__}"
+            )
 
     filtered_structure = mode.apply_filter_and_constraints(structure)
     lbfgs = LBFGS(filtered_structure)
@@ -113,12 +116,6 @@ def Relax(
     # play catch with nodes
     relaxed_structure = structure
     return relaxed_structure
-
-
-from matgl.ext.ase import M3GNetCalculator
-from matgl import load_model, models
-
-GPA2EVA3 = 0.006_241_509_074
 
 
 @Workflow.wrap.as_dataclass_node

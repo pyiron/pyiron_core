@@ -1,21 +1,17 @@
-# from __future__ import annotations
-
-from dataclasses import asdict
 from typing import Optional
-import numpy as np
 
+import numpy as np
 from ase import Atoms
 from phonopy.api_phonopy import Phonopy
-from pyiron_core.pyiron_workflow import (
-    as_inp_dataclass_node,
-    as_out_dataclass_node,
-    as_function_node,
-    as_macro_node,
-)
 from structuretoolkit.common import atoms_to_phonopy, phonopy_to_atoms
 
-from pyiron_core.pyiron_nodes.atomistic.calculator.ase import Static
 from pyiron_core.pyiron_nodes.atomistic.engine.generic import OutputEngine
+from pyiron_core.pyiron_workflow import (
+    as_function_node,
+    as_inp_dataclass_node,
+    as_macro_node,
+    as_out_dataclass_node,
+)
 
 
 @as_function_node("phonopy")
@@ -55,15 +51,15 @@ def phonopy(
     GetThermalProperties__mesh="10",
 ):
 
-    from pyiron_core.pyiron_workflow import Workflow
     from pyiron_core.pyiron_nodes.atomistic.calculator.ase import Static
-    from pyiron_core.pyiron_nodes.atomistic.property.phonons import PhonopyObject
-    from pyiron_core.pyiron_nodes.atomistic.property.phonons import GenerateSupercells
-    from pyiron_core.pyiron_nodes.controls import iterate
-    from pyiron_core.pyiron_nodes.controls import GetAttribute
-    from pyiron_core.pyiron_nodes.controls import SetAttribute
-    from pyiron_core.pyiron_nodes.atomistic.property.phonons import GetDynamicalMatrix
-    from pyiron_core.pyiron_nodes.atomistic.property.phonons import GetThermalProperties
+    from pyiron_core.pyiron_nodes.atomistic.property.phonons import (
+        GenerateSupercells,
+        GetDynamicalMatrix,
+        GetThermalProperties,
+        PhonopyObject,
+    )
+    from pyiron_core.pyiron_nodes.controls import GetAttribute, SetAttribute, iterate
+    from pyiron_core.pyiron_workflow import Workflow
 
     if phonopy_parameters is None:
         phonopy_parameters = PhonopyParameters()
@@ -140,7 +136,7 @@ def GetFreeEnergy(
 
 @as_function_node("forces")
 def ExtractFinalForces(df):
-    return [getattr(e, "force")[-1] for e in df["out"].tolist()]
+    return [e.force[-1] for e in df["out"].tolist()]
 
 
 @as_function_node
@@ -152,7 +148,6 @@ def GetDynamicalMatrix(phonopy, q=None):
         phonopy.produce_force_constants()
         phonopy.dynamical_matrix.run(q=q)
     dynamical_matrix = np.real_if_close(phonopy.dynamical_matrix.dynamical_matrix)
-    # print (dynamical_matrix)
     return dynamical_matrix, phonopy
 
 
@@ -232,7 +227,6 @@ def GetThermalProperties(
     )
 
     tp_dict = phonopy_new.get_thermal_properties_dict()
-    # print(f"Thermal properties calculated for temperatures: {tp_dict['temperatures']}")
     # Convert the dictionary to a ThermalProperties dataclass
     thermal_properties = ThermalProperties().dataclass(**tp_dict)
     thermal_properties.free_energy *= (
@@ -246,8 +240,8 @@ def GetThermalProperties(
 def GetAnalyticalFreeEnergy(
     nu, dos, temperatures, n_atoms: int = None, quantum: bool = True
 ):
-    from scipy.integrate import simpson
     from scipy.constants import physical_constants
+    from scipy.integrate import simpson
 
     KB = physical_constants["Boltzmann constant in eV/K"][0]
     H = physical_constants["Planck constant in eV/Hz"][0]

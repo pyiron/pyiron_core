@@ -1,6 +1,10 @@
-from pyiron_core.pyiron_workflow import Node, as_function_node
+from concurrent.futures import as_completed
+from copy import copy
+
 import numpy as np
 import pandas as pd
+
+from pyiron_core.pyiron_workflow import Node, as_function_node
 
 
 @as_function_node
@@ -27,10 +31,6 @@ def loop_until(recursive_function: Node, max_steps: int = 10):
     return x
 
 
-from concurrent.futures import as_completed
-from copy import copy
-
-
 def _iterate_node(
     node,
     input_label: str,
@@ -46,10 +46,7 @@ def _iterate_node(
     if executor is None:
         # Sequential execution
         for value in values:
-            # out = node(**{input_label: value})
-            # node.inputs[input_label].value = value
             node.inputs.__setattr__(input_label, value)
-            # print(f"Setting {input_label} = {value}", node.inputs[input_label].value)
             out = node.run()
             if copy_results:
                 out = copy(out)
@@ -124,7 +121,7 @@ def IterToDataFrame(
         if len(output_labels) == 1:
             data_dict[output_labels[0]] = out_lst
         else:
-            data_dict.update({label: out_lst for label in output_labels})
+            data_dict.update(dict.fromkeys(output_labels, out_lst))
 
     try:
         df = pd.DataFrame(data_dict)
@@ -180,7 +177,7 @@ def ExtractList(out_list: list, label: str, flatten: bool = True):
 def InputVector(vec: str = ""):
     try:
         vector = eval(vec)
-    except:
+    except Exception:
         vector = None
     return vector
 
@@ -189,7 +186,7 @@ def InputVector(vec: str = ""):
 def Slice(matrix, slice: str = "::"):
     try:
         result = eval(f"matrix[{slice}]")
-    except:
+    except Exception:
         result = None
     return result
 
@@ -198,7 +195,7 @@ def Slice(matrix, slice: str = "::"):
 def Code(x, code: str = "x**2"):
     try:
         y = eval(code)
-    except:
+    except Exception:
         y = None
     return y
 
@@ -221,15 +218,6 @@ def SetAttribute(obj, attr: str, val: str) -> any:
     except AttributeError:
         print(f"Attribute {attr} not found in object {obj}")
     return obj
-
-
-# @as_function_node
-# def ExtractColumnFromDataFrame(df, column_name: str, n_max: int = -1):
-#     if n_max == -1:
-#         column = df[column_name]
-#     else:
-#         column = df[column_name][:n_max]
-#     return column
 
 
 @as_function_node

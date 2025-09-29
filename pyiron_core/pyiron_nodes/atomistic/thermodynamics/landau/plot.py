@@ -1,12 +1,12 @@
-import numpy as np
-import landau
-from pyiron_core.pyiron_workflow import as_function_node, as_macro_node, Workflow
 from typing import Literal
-
-import matplotlib.pyplot as plt
-import seaborn as sns
-import numpy as np
 from warnings import warn
+
+import landau
+import matplotlib.pyplot as plt
+import numpy as np
+import seaborn as sns
+
+from pyiron_core.pyiron_workflow import Workflow, as_function_node, as_macro_node
 
 
 def plot_phase_diagram(
@@ -14,7 +14,7 @@ def plot_phase_diagram(
     alpha=0.1,
     element=None,
     min_c_width=5e-3,
-    color_override: dict[str, str] = {},
+    color_override: dict[str, str] | None = None,
     tielines=False,
     poly_method: Literal["concave", "segments"] = "concave",
     ax=None,
@@ -57,7 +57,10 @@ def plot_phase_diagram(
         fig = ax.figure
 
     # The default color map
-    color_map = dict(zip(df.phase.unique(), sns.palettes.SEABORN_PALETTES["pastel"]))
+    color_map = dict(
+        zip(df.phase.unique(), sns.palettes.SEABORN_PALETTES["pastel"], strict=False)
+    )
+    color_override = {} if color_override is None else color_override
     color_override = {p: c for p, c in color_override.items() if p in color_map}
 
     duplicates_map = {c: color_map[o] for o, c in color_override.items()}
@@ -67,13 +70,16 @@ def plot_phase_diagram(
     # Cluster the phase data
     df = cluster_phase(df)
     if (df.phase_unit == -1).any():
-        warn("Clustering of phase points failed for some points, dropping them.")
+        warn(
+            "Clustering of phase points failed for some points, dropping them.",
+            stacklevel=2,
+        )
         df = df.query("phase_unit >= 0")
 
     # Polygon construction
     if "refined" in df.columns and poly_method == "segments":
         df.loc[:, "phase"] = df.phase_id
-        tdf = get_transitions(df)
+        tdf = landau.plot.get_transitions(df)
         tdf["phase_unit"] = tdf.phase.str.rsplit("_", n=1).map(lambda x: int(x[1]))
         tdf["phase"] = tdf.phase.str.rsplit("_", n=1).map(lambda x: x[0])
         polys = tdf.groupby(["phase", "phase_unit"]).apply(
@@ -87,7 +93,7 @@ def plot_phase_diagram(
         )
 
     # Draw polygons
-    for i, (phase, p) in enumerate(polys.items()):
+    for phase, p in polys.items():
         p.zorder = 1 / p.get_extents().size.prod()
         rep = phase[1] if isinstance(phase, tuple) else 0
         phase_name = phase[0] if isinstance(phase, tuple) else phase
@@ -99,7 +105,7 @@ def plot_phase_diagram(
     # Tielines
     if tielines:
         if "refined" in df.columns:
-            tdf = get_transitions(df)
+            tdf = landau.plot.get_transitions(df)
 
             def plot_tie(dd):
                 Tmin = dd["T"].min()
@@ -159,9 +165,9 @@ def TransitionTemperature(
     dmu: float = 0,
     plot: bool = True,
 ) -> float:
-    import seaborn as sns
     import matplotlib.pyplot as plt
     import numpy as np
+    import seaborn as sns
     from IPython.display import display
 
     df = landau.calculate.calc_phase_diagram(
@@ -219,10 +225,8 @@ def guess_mu_range(phases, Tmax, samples):
         array of chemical potentials that likely cover the whole concentration space
     """
 
-    import landau
-    import scipy.optimize as so
-    import scipy.interpolate as si
     import numpy as np
+    import scipy.interpolate as si
 
     # semigrand canonical "average" concentration
     # use this to avoid discontinuities and be phase agnostic
@@ -247,9 +251,9 @@ def guess_mu_range(phases, Tmax, samples):
         mu1 += 0.05
     cc = np.array(cc)
     mm = np.array(mm)
-    I = cc.argsort()
-    cc = cc[I]
-    mm = mm[I]
+    sorted_indices = cc.argsort()
+    cc = cc[sorted_indices]
+    mm = mm[sorted_indices]
     return si.interp1d(cc, mm)(np.linspace(min(cc), max(cc), samples))
 
 
@@ -273,7 +277,7 @@ def CalcPhaseDiagram(
     Returns:
         dataframe with phase data
     """
-    import matplotlib.pyplot as plt
+
     import landau
 
     if isinstance(chemical_potentials, int):
@@ -331,8 +335,8 @@ def PlotConcPhaseDiagram(
             will be plotted as a rectangle
     """
     import matplotlib.pyplot as plt
-    import seaborn as sns
     import numpy as np
+    import seaborn as sns
 
     # Create a clean figure and axis
     fig, ax = plt.subplots()
@@ -380,8 +384,8 @@ def PlotMuPhaseDiagram(phase_data):
     phase_data should originate from CalcPhaseDiagram.
     Returns a matplotlib Figure object.
     """
-    import seaborn as sns
     import matplotlib.pyplot as plt
+    import seaborn as sns
 
     fig, ax = plt.subplots()
 
@@ -409,8 +413,8 @@ def PlotIsotherms(phase_data):
     phase_data should originate from CalcPhaseDiagram.
     Returns a matplotlib Figure object.
     """
-    import seaborn as sns
     import matplotlib.pyplot as plt
+    import seaborn as sns
 
     fig, ax = plt.subplots()
 
@@ -430,8 +434,8 @@ def PlotPhiMuDiagram(phase_data):
     phase_data should originate from CalcPhaseDiagram.
     Returns a matplotlib Figure object.
     """
-    import seaborn as sns
     import matplotlib.pyplot as plt
+    import seaborn as sns
 
     fig, ax = plt.subplots()
 
@@ -453,8 +457,8 @@ def CheckTemperatureInterpolation(
     """Check and visualize temperature interpolation of line phase free energies.
     Returns a matplotlib Figure object.
     """
-    import numpy as np
     import matplotlib.pyplot as plt
+    import numpy as np
 
     if Tmin is None:
         Tmin = np.min(phase.temperatures) * 0.9
@@ -464,14 +468,14 @@ def CheckTemperatureInterpolation(
     fig, ax = plt.subplots()
 
     Ts = np.linspace(Tmin, Tmax, 50)
-    (l,) = ax.plot(Ts, phase.line_free_energy(Ts), label="interpolation")
+    (line,) = ax.plot(Ts, phase.line_free_energy(Ts), label="interpolation")
 
     # Try to plot about 50 points
     n = max(int(len(phase.temperatures) // 50), 1)
     ax.scatter(
         phase.temperatures[::n],
         phase.free_energies[::n],
-        c=l.get_color(),
+        c=line.get_color(),
         label="data",
     )
 

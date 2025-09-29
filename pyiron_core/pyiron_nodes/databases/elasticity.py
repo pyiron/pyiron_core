@@ -11,10 +11,11 @@ def DeJong(max_index: int | None = None, file_name="ec.json"):
 
     :return:
     """
-    import pandas as pd
     import io
-    from ase.io import read
     import os
+
+    import pandas as pd
+    from ase.io import read
 
     module_dir = os.path.dirname(os.path.realpath(__file__))
     file_path = os.path.join(module_dir, file_name)
@@ -23,7 +24,6 @@ def DeJong(max_index: int | None = None, file_name="ec.json"):
     df = pd.read_json(file_path)
 
     structures = []
-    # count = 0
     if max_index is None:
         max_index = len(df.structure)
 
@@ -32,10 +32,6 @@ def DeJong(max_index: int | None = None, file_name="ec.json"):
         f = io.StringIO(structure)
         atoms = read(f, format="cif")
         structures.append(atoms)
-
-        # count += 1
-        # if count == max_index:
-        #     break
 
     df["atoms"] = structures
 

@@ -1,7 +1,8 @@
-from pyiron_core.pyiron_workflow import as_function_node, Node, as_out_dataclass_node
 from dataclasses import field
-from typing import Optional
+
 import numpy as np
+
+from pyiron_core.pyiron_workflow import Node, as_function_node, as_out_dataclass_node
 
 
 @as_out_dataclass_node
@@ -49,8 +50,8 @@ def OptimizeMeasurements(
 
 @as_function_node("plot")
 def PlotData(coordinates, values, size: int = 1):
-    import numpy as np
     import matplotlib.pylab as plt
+    import numpy as np
 
     x, y = np.array(coordinates).T
     plt.scatter(x, y, c=values, s=size)

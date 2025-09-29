@@ -1,12 +1,12 @@
-from pyiron_core.pyiron_workflow import as_function_node
 from pyiron_core.pyiron_nodes.atomistic.calculator.data import InputCalcMD
+from pyiron_core.pyiron_workflow import as_function_node
 
 
 @as_function_node
 def Equilibrate(
     solvated_electrode,
     water_potential,
-    parameters: InputCalcMD = InputCalcMD().run(),
+    parameters=None,
     store: bool = True,
 ):
     """
@@ -20,8 +20,12 @@ def Equilibrate(
     Returns:
         None
     """
-    from pyiron_atomistics import Project
+    parameters = InputCalcMD().run() if parameters is None else parameters
+
     from dataclasses import asdict
+
+    from pyiron_atomistics import Project
+
     from pyiron_core.pyiron_nodes.atomistic.calculator.data import OutputCalcMD
 
     # Create a job for LAMMPS equilibration

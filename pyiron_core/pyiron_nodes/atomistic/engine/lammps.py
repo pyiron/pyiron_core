@@ -1,27 +1,24 @@
 from __future__ import annotations
 
-from typing import Optional, TYPE_CHECKING
-
-from pyiron_atomistics.lammps.control import LammpsControl
-from pyiron_core.pyiron_workflow import (
-    as_function_node,
-    as_out_dataclass_node,
-    as_macro_node,
-    as_inp_dataclass_node,
-)
-
-from pyiron_core.pyiron_nodes.atomistic.calculator.data import (
-    # InputCalcMinimize,
-    InputCalcMD,
-    InputCalcStatic,
-    OutputCalcMD,
-)
-from pyiron_core.pyiron_nodes.dev_tools import FileObject, parse_input_kwargs
 from dataclasses import asdict
+from typing import Optional
 
 # if TYPE_CHECKING:
 from ase import Atoms
 from pandas import DataFrame
+from pyiron_atomistics.lammps.control import LammpsControl
+
+from pyiron_core.pyiron_nodes.atomistic.calculator.data import (
+    InputCalcMD,
+    InputCalcStatic,
+)
+from pyiron_core.pyiron_nodes.dev_tools import FileObject
+from pyiron_core.pyiron_workflow import (
+    as_function_node,
+    as_inp_dataclass_node,
+    as_macro_node,
+    as_out_dataclass_node,
+)
 
 as_inp_dataclass_node()
 
@@ -63,7 +60,6 @@ def CalcStatic(calculator_input: Optional[InputCalcStatic] = None):
     if calculator_input is None:
         calculator_input = InputCalcStatic().run()
 
-    # print('calculator_input: ', calculator_input.run())
     calculator_kwargs = asdict(calculator_input)
     calculator = LammpsControl()
     calculator.calc_static(**calculator_kwargs)
@@ -78,7 +74,6 @@ def CalcMinimize(calculator_input: Optional[InputCalcMinimizeLammps] = None):
     if calculator_input is None:
         calculator_input = InputCalcMinimizeLammps().run()
 
-    # print('calculator_input: ', calculator_input.run())
     calculator_kwargs = asdict(calculator_input)
     calculator = LammpsControl()
     calculator.calc_minimize(**calculator_kwargs)
@@ -95,10 +90,7 @@ def CalcMD(calculator_input: Optional[InputCalcMD] = None):
     if calculator_input is None:
         calculator_input = InputCalcMD().run()
 
-    # print('calculator_input: ', calculator_input.run())
     calculator_kwargs = asdict(calculator_input)
-    # print('kwargs: ', calculator_kwargs)
-    # calculator_kwargs = parse_input_kwargs(calculator_input, InputCalcMD)
     calculator = LammpsControl()
     calculator.calc_md(**calculator_kwargs)
     calculator.mode = "md"
@@ -117,9 +109,8 @@ def InitLammps(
     create_dir: bool = True,
 ):
     import os
-    from pyiron_atomistics.lammps.potential import LammpsPotential, LammpsPotentialFile
 
-    # print('structure: ', structure)
+    from pyiron_atomistics.lammps.potential import LammpsPotential, LammpsPotentialFile
 
     if create_dir:
         os.makedirs(working_directory, exist_ok=True)
@@ -149,7 +140,6 @@ def InitLammps(
 def ParseLogFile(log_file):
     from pymatgen.io.lammps.outputs import parse_lammps_log
 
-    # print(f"parse log file:  {type(log_file)})")
     log = parse_lammps_log(log_file.path)
     if len(log) == 0:
         print(f"check {log_file.path}")
@@ -166,7 +156,6 @@ def ParseDumpFile(dump_file):
     return dump
 
 
-# @wf_data_class()
 @as_out_dataclass_node
 class ShellOutput:
     stdout: str = ""
@@ -184,7 +173,6 @@ def Shell(
     arguments: Optional[list] = None,
 ):
     arguments = ["-in", "control.inp"] if arguments is None else arguments
-    # -> (ShellOutput, FileObject, FileObject):  TODO: fails -> why
     import os
     import subprocess
 
@@ -195,8 +183,6 @@ def Shell(
 
     environ = dict(os.environ)
     environ.update({k: str(v) for k, v in environment.items()})
-    # print ([str(command), *map(str, arguments)], working_directory, environment)
-    # print("start shell")
     proc = subprocess.run(
         [command, *map(str, arguments)],
         capture_output=True,
@@ -204,7 +190,6 @@ def Shell(
         encoding="utf8",
         env=environ,
     )
-    # print("end shell")
 
     output = ShellOutput()
     output.stdout = proc.stdout
@@ -216,7 +201,6 @@ def Shell(
     return output, dump, log
 
 
-# @wf_data_class()
 @as_out_dataclass_node
 class GenericOutput:
     energy_pot = []
@@ -228,14 +212,14 @@ class GenericOutput:
 def Collect(
     out_dump,
     out_log,
-    calc_mode,  # : str | LammpsControl | InputCalcMinimizeLammps | InputCalcMD | InputCalcStatic,
+    calc_mode,
 ):
     import numpy as np
 
     from pyiron_core.pyiron_nodes.atomistic.calculator.data import (
-        OutputCalcStatic,
-        OutputCalcMinimize,
         OutputCalcMD,
+        OutputCalcMinimize,
+        OutputCalcStatic,
     )
 
     log = out_log[0]
@@ -251,8 +235,6 @@ def Collect(
 
     if calc_mode == "static":
         generic = OutputCalcStatic().dataclass()
-        # print("output Collect: ", generic, isinstance(generic, OutputCalcStatic))
-        # if isinstance(generic, OutputCalcStatic):
         generic.energy_pot = log["PotEng"].values[0]
         generic.force = np.array([o.data[["fx", "fy", "fz"]] for o in out_dump])[0]
 
@@ -276,7 +258,6 @@ def Collect(
         pressures = np.array([Pxx, Pxy, Pxz, Pxy, Pyy, Pyz, Pxz, Pyz, Pzz])
         generic.pressures = pressures.reshape(-1, 3, 3)
 
-        # generic.energies_kin = log["TotEng"].values - generic.energies_pot
         generic.forces = np.array([o.data[["fx", "fy", "fz"]] for o in out_dump])
         generic.positions = np.array([o.data[["xu", "yu", "zu"]] for o in out_dump])
 
@@ -309,7 +290,7 @@ def ListPotentials(structure):
 
 
 def get_calculators():
-    calc_dict = dict()
+    calc_dict = {}
     calc_dict["md"] = CalcMD
     calc_dict["minimize"] = CalcMinimize
     calc_dict["static"] = CalcStatic
@@ -319,49 +300,36 @@ def get_calculators():
 
 @as_function_node("generic")
 def GetEnergyPot(generic, i_start: int = 0, i_end: int = -1):
-    # print("energies_pot: ", generic.energies_pot)
     return generic.energies_pot[i_start:i_end]
 
 
 @as_macro_node("generic")
 def Code(
     structure: Atoms,
-    calculator,  # =InputCalcStatic(),  # TODO: Don't use mutable defaults
+    calculator,
     potential: Optional[str] = None,
     working_dir: str = "test2",
 ):
 
     from pyiron_core.pyiron_workflow import Workflow
 
-    # print("structure: ", structure)
-
     wf = Workflow("LammpsMacro")
-
-    # wf.Potential = Potential(structure=structure, name=potential)
-
-    # wf.ListPotentials = ListPotentials(structure=structure)
-
-    # wf.calc = CalcMD(calculator)
 
     wf.InitLammps = InitLammps(
         structure=structure,
-        potential=potential,  # wf.Potential,
-        # calculator=wf.calc,
+        potential=potential,
         calculator=calculator,
         working_directory=working_dir,
     )
 
-    wf.Shell = Shell(
-        # command=ExecutablePathResolver(module="lammps", code="lammps").path(),
-        working_directory=wf.InitLammps,
-    )
+    wf.Shell = Shell(working_directory=wf.InitLammps)
 
     wf.ParseLogFile = ParseLogFile(log_file=wf.Shell.outputs.log)
     wf.ParseDumpFile = ParseDumpFile(dump_file=wf.Shell.outputs.dump)
     wf.Collect = Collect(
         out_dump=wf.ParseDumpFile.outputs.dump,
         out_log=wf.ParseLogFile.outputs.log,
-        calc_mode="md",  # wf.calc,
+        calc_mode="md",
     )
 
     return wf.Collect
@@ -375,7 +343,7 @@ def DummyNode(structure1: Atoms, structure2: Atoms):
 @as_macro_node(labels=["generic", "path"])
 def Code1(
     structure: Atoms,
-    calculator,  # =InputCalcStatic(),  # TODO: Don't use mutable defaults
+    calculator,
     potential: Optional[str] = None,
     working_dir: str = "test2",
 ):
@@ -385,31 +353,24 @@ def Code1(
     wf = Workflow("LammpsMacro")
 
     wf.Potential = Potential(structure=structure, name=potential)
-    # wf.DummyNode = DummyNode(structure1=structure, structure2=structure)
 
     wf.ListPotentials = ListPotentials(structure=structure)
-
-    # wf.calc = CalcMD(calculator)
 
     wf.InitLammps = InitLammps(
         structure=structure,
         potential=wf.Potential,
-        # calculator=wf.calc,
         calculator=calculator,
         working_directory=working_dir,
     )
 
-    wf.Shell = Shell(
-        # command=ExecutablePathResolver(module="lammps", code="lammps").path(),
-        working_directory=wf.InitLammps,
-    )
+    wf.Shell = Shell(working_directory=wf.InitLammps)
 
     wf.ParseLogFile = ParseLogFile(log_file=wf.Shell.outputs.log)
     wf.ParseDumpFile = ParseDumpFile(dump_file=wf.Shell.outputs.dump)
     wf.Collect = Collect(
         out_dump=wf.ParseDumpFile.outputs.dump,
         out_log=wf.ParseLogFile.outputs.log,
-        calc_mode="md",  # wf.calc,
+        calc_mode="md",
     )
 
     return wf.Collect, wf.InitLammps.outputs.path
@@ -418,7 +379,7 @@ def Code1(
 @as_macro_node("generic")
 def Lammps(
     structure: Atoms,
-    calculator,  # =InputCalcStatic(),  # TODO: Don't use mutable defaults
+    calculator,
     potential: Optional[str] = None,
     working_dir: str = "test2",
     store: bool = False,
@@ -429,31 +390,24 @@ def Lammps(
     wf = Workflow("LammpsMacro")
 
     wf.Potential = Potential(structure=structure, name=potential)
-    # wf.DummyNode = DummyNode(structure1=structure, structure2=structure)
 
     wf.ListPotentials = ListPotentials(structure=structure)
-
-    # wf.calc = CalcMD(calculator)
 
     wf.InitLammps = InitLammps(
         structure=structure,
         potential=wf.Potential,
-        # calculator=wf.calc,
         calculator=calculator,
         working_directory=working_dir,
     )
 
-    wf.Shell = Shell(
-        # command=ExecutablePathResolver(module="lammps", code="lammps").path(),
-        working_directory=wf.InitLammps,
-    )
+    wf.Shell = Shell(working_directory=wf.InitLammps)
 
     wf.ParseLogFile = ParseLogFile(log_file=wf.Shell.outputs.log)
     wf.ParseDumpFile = ParseDumpFile(dump_file=wf.Shell.outputs.dump)
     wf.Collect = Collect(
         out_dump=wf.ParseDumpFile.outputs.dump,
         out_log=wf.ParseLogFile.outputs.log,
-        calc_mode="md",  # calculator,
+        calc_mode="md",
     )
 
     return wf.Collect

@@ -1,24 +1,13 @@
-__author__ = "Joerg Neugebauer"
-__copyright__ = (
-    "Copyright 2024, Max-Planck-Institut for Sustainable Materials GmbH - "
-    "Computational Materials Design (CM) Department"
-)
-__version__ = "0.1"
-__maintainer__ = ""
-__email__ = ""
-__status__ = "development"
-__date__ = "Nov 20, 2024"
-
 """
 # wf_graph_tools Module
-This module provides a collection of tools to convert and manipulate workflow graphs. 
-A workflow graph is represented by a set of nodes and edges, and this module offers 
-various functions to transform these graphs into different representations, such as 
+This module provides a collection of tools to convert and manipulate workflow graphs.
+A workflow graph is represented by a set of nodes and edges, and this module offers
+various functions to transform these graphs into different representations, such as
 executable workflow code.
 
-Additionally, this module includes helper tools to assist with tasks such as sorting 
+Additionally, this module includes helper tools to assist with tasks such as sorting
 the order of nodes in the graph, making it easier to work with and analyze workflow graphs.
-The tools provided in this module are designed to be flexible and reusable, allowing users 
+The tools provided in this module are designed to be flexible and reusable, allowing users
 to easily integrate them into their own workflow processing pipelines.
 
 # Key Features
@@ -61,17 +50,27 @@ To use this module, simply import it and access the various functions and tools 
     sorted_graph = gt.topological_sort(graph)
 """
 
-from collections import defaultdict
 import dataclasses
-import pathlib
 import json
+import pathlib
+from collections import defaultdict
+from typing import TYPE_CHECKING, List, Tuple
 
 import pyiron_core.pyironflow.api as pyironflow
 
-from typing import TYPE_CHECKING, List, Tuple
-
 if TYPE_CHECKING:
     from pyiron_core.pyiron_workflow import Workflow
+
+__author__ = "Joerg Neugebauer"
+__copyright__ = (
+    "Copyright 2024, Max-Planck-Institut for Sustainable Materials GmbH - "
+    "Computational Materials Design (CM) Department"
+)
+__version__ = "0.1"
+__maintainer__ = ""
+__email__ = ""
+__status__ = "development"
+__date__ = "Nov 20, 2024"
 
 
 @dataclasses.dataclass
@@ -145,7 +144,7 @@ def _edges_from_dict(edges_dict):
     return edges
 
 
-def get_nodes_from_wf(wf, keys_to_keep=["data/label", "data/import_path"]):
+def get_nodes_from_wf(wf, keys_to_keep=("data/label", "data/import_path")):
     key_mapping = {"data__label": "label", "data__import_path": "import_path"}
     nodes_dict = _filter_and_flatten_nested_dict_keys(
         pyironflow.get_nodes(wf), keys_to_keep
@@ -230,7 +229,7 @@ def topological_sort(graph: WorkflowGraph):
     edges = _convert_to_integer_representation(graph)
     nodes = range(len(graph.nodes))
 
-    in_degree = {node: 0 for node in nodes}
+    in_degree = dict.fromkeys(nodes, 0)
 
     # Build the graph and count in-degrees
     for edge in edges:
@@ -292,15 +291,15 @@ def get_graph_from_wf(wf: "Workflow") -> WorkflowGraph:
             handle = node["data__target_labels"][i]
             if value not in ("NonPrimitive", "NotData"):
                 inp_node_label = f"var_{label}__{handle}"
-                edge = dict(
-                    target=label,
-                    targetHandle=handle,
-                    source=inp_node_label,
-                    sourceHandle=value,
-                )
+                edge = {
+                    "target": label,
+                    "targetHandle": handle,
+                    "source": inp_node_label,
+                    "sourceHandle": value,
+                }
 
                 edges.append(edge)
-                inp_node = dict(label=inp_node_label, data__import_path=value)
+                inp_node = {"label": inp_node_label, "data__import_path": value}
                 nodes_non_default_inp_param.append(inp_node)
 
         nodes = get_nodes_from_wf(
@@ -374,8 +373,7 @@ wf = Workflow('{graph.label}')
                             code += f"""{target_handle}=wf.{source}"""
                         else:
                             code += f"""{target_handle}=wf.{source}.outputs.{source_handle}"""
-            code += f""") \n"""
-            # code += '\n' + 'print(wf.run()) \n'
+            code += """) \n"""
 
     formatted_code = black.format_str(code, mode=black.FileMode())
 
@@ -434,13 +432,9 @@ def pull_node(wf: "Workflow", node_label: str):
     input_nodes = _find_input_nodes(graph, node_index)
     input_nodes_labels = [node_labels[i] for i in input_nodes]
 
-    # try:
     for input_node_label in input_nodes_labels:
         out = wf._nodes[input_node_label].run()
     return out
-    # except Exception as e:
-    #     print(f"Error running node '{input_node_label}': {e}")
-    #     return False
 
 
 def graph_edges_to_wf_edges(graph_edges: List[Tuple[str, str]]):
@@ -450,12 +444,12 @@ def graph_edges_to_wf_edges(graph_edges: List[Tuple[str, str]]):
         target, target_handle = edge_target.split("/")
         source, source_handle = edge_source.split("/")
         if not source.startswith("var_"):
-            edge_dict = dict(
-                source=source,
-                sourceHandle=source_handle,
-                target=target,
-                targetHandle=target_handle,
-            )
+            edge_dict = {
+                "source": source,
+                "sourceHandle": source_handle,
+                "target": target,
+                "targetHandle": target_handle,
+            }
             wf_edges.append(edge_dict)
     return wf_edges
 
@@ -469,7 +463,7 @@ def get_wf_from_graph(graph: WorkflowGraph) -> "Workflow":
         label, import_path = node
 
         if not label.startswith("var_"):
-            kwargs = dict()
+            kwargs = {}
 
             # Add non-default arguments to node
             for edge in graph.edges:
@@ -483,7 +477,6 @@ def get_wf_from_graph(graph: WorkflowGraph) -> "Workflow":
                             kwargs[target_handle] = source_handle[6:]
                         else:
                             kwargs[target_handle] = eval(source_handle)
-                    # kwargs[target_handle] = source_handle
 
             new_node = pyironflow.get_node_from_path(import_path)(**kwargs)
             wf.add_node(label, new_node)

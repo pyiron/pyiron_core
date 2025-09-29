@@ -2,10 +2,10 @@ import contextlib
 import os
 import unittest
 
+from static.nodes import AddOne
+
 from pyiron_core.pyiron_workflow.api import serial
 from pyiron_core.pyiron_workflow.graph import base, graph_json, group, run
-
-from static.nodes import AddOne
 
 
 class TestSaveLoad(unittest.TestCase):
@@ -120,8 +120,8 @@ class TestSaveLoad(unittest.TestCase):
 
         gu = base.uncollapse_node(gc, "group2")
         self.assertSetEqual(
-            set(label for label in g.nodes),
-            set(label for label in gu.nodes),
+            set(g.nodes),
+            set(gu.nodes),
             msg="Uncollapsing node should cause graph to recover original nodes",
         )
         self.assertEqual(
@@ -134,8 +134,8 @@ class TestSaveLoad(unittest.TestCase):
             return (edge.source, edge.target, edge.sourceHandle, edge.targetHandle)
 
         self.assertSetEqual(
-            set(hashable_edge(edge) for edge in g.edges),
-            set(hashable_edge(edge) for edge in gu.edges),
+            {hashable_edge(edge) for edge in g.edges},
+            {hashable_edge(edge) for edge in gu.edges},
             msg="Uncollapsing node should cause graph to recover original edges",
         )
         self.assertEqual(
@@ -146,8 +146,8 @@ class TestSaveLoad(unittest.TestCase):
 
         guu = base.uncollapse_node(gu, "group2")
         self.assertSetEqual(
-            set(label for label in g.nodes),
-            set(label for label in guu.nodes),
+            set(g.nodes),
+            set(guu.nodes),
             msg="Repeatedly un-collapsing should have no effect",
         )
         self.assertEqual(
@@ -156,8 +156,8 @@ class TestSaveLoad(unittest.TestCase):
             msg="Repeatedly un-collapsing should have no effect",
         )
         self.assertSetEqual(
-            set(hashable_edge(edge) for edge in g.edges),
-            set(hashable_edge(edge) for edge in guu.edges),
+            {hashable_edge(edge) for edge in g.edges},
+            {hashable_edge(edge) for edge in guu.edges},
             msg="Repeatedly un-collapsing should have no effect",
         )
         self.assertEqual(

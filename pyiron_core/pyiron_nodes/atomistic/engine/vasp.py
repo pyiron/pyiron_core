@@ -1,30 +1,22 @@
 from __future__ import annotations
 
 import os
-import warnings
-from pathlib import Path
 import shutil
 import subprocess
-from typing import Optional
+import warnings
 from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Optional
 
 import pandas as pd
-
+from pyiron_atomistics.vasp.output import parse_vasp_output as pvo
+from pyiron_snippets.logger import logger
 from pymatgen.core import Structure
 from pymatgen.io.vasp.inputs import Incar, Kpoints
 from pymatgen.io.vasp.outputs import Vasprun
 
-from ase import Atoms
-
+from pyiron_core.pyiron_nodes.dev_tools import FileObject
 from pyiron_core.pyiron_workflow import Workflow
-from pyiron_core.pyiron_nodes.dev_tools import VarType, FileObject
-from pyiron_atomistics.vasp.output import parse_vasp_output as pvo
-
-from pyiron_snippets.logger import logger
-
-# from pyiron_snippets.resources import ResourceResolver
-
-from pyiron_core.pyiron_nodes.atomistic.engine.lammps import Shell
 
 
 class Storage:
@@ -256,7 +248,8 @@ def create_WorkingDirectory(workdir: str, quiet: bool = False) -> str:
         logger.info(f"made directory '{workdir}'")
     else:
         warnings.warn(
-            f"Directory '{workdir}' already exists. Existing files may be overwritten."
+            f"Directory '{workdir}' already exists. Existing files may be overwritten.",
+            stacklevel=2,
         )
     return workdir
 
@@ -322,21 +315,21 @@ def check_convergence(
     try:
         vr = Vasprun(filename=os.path.join(workdir, filename_vasprun))
         converged = vr.converged
-    except:
+    except Exception:
         try:
             converged = isLineInFile.node_function(
                 filepath=os.path.join(workdir, filename_vasplog),
                 line=line_converged,
                 exact_match=False,
             )
-        except:
+        except Exception:
             try:
                 converged = isLineInFile.node_function(
                     filepath=os.path.join(workdir, backup_vasplog),
                     line=line_converged,
                     exact_match=False,
                 )
-            except:
+            except Exception:
                 pass
 
     return converged
@@ -367,7 +360,6 @@ def vasp_job(
 
 
 def stack_element_string(structure) -> tuple[list[str], list[int]]:
-    # site_element_list = [atom.symbol for atom in atoms]
     site_element_list = [site.species_string for site in structure]
     past_element = site_element_list[0]
     element_list = [past_element]
@@ -390,13 +382,20 @@ def stack_element_string(structure) -> tuple[list[str], list[int]]:
 def get_default_POTCAR_paths(
     structure: Structure,
     pseudopot_lib_path: str,
-    potcar_df: pd.DataFrame = pd.read_csv(POTCAR_default_specification_data),
+    potcar_df: pd.DataFrame | None = None,
 ) -> list[str]:
+    potcar_df = (
+        pd.read_csv(POTCAR_default_specification_data)
+        if potcar_df is None
+        else potcar_df
+    )
     ele_list, _ = stack_element_string(structure)
     potcar_paths = []
     for element in ele_list:
         ele_default_potcar_path = potcar_df[
-            (potcar_df["symbol"] == element) & (potcar_df["default"] == True)
+            (potcar_df["symbol"] == element)
+            & (potcar_df["default"] == True)  # noqa: E712
+            # Dataframe columns are not strongly typed, so keep the robust comparison
         ].potential_name.values[0]
         potcar_paths.append(
             os.path.join(pseudopot_lib_path, ele_default_potcar_path, "POTCAR")

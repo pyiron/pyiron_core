@@ -50,8 +50,6 @@ def pull_node(graph: base.Graph, node_label: str, db=None):
         graph (base.Graph): The graph containing the node.
         node_label (str): The label of the node to pull.
     """
-    # TODO: implement
-    # opt_graph = _optimize_graph_connections(graph)
     opt_graph = base.copy_graph(graph)
 
     # closures are not part of the execution pipeline (called inside the function!)
@@ -90,6 +88,5 @@ def _find_node_inputs(graph: base.Graph) -> List[simple_workflow.Port]:
             for i in indices:
                 target_handle = graph_node.node.inputs.data["label"][i]
                 node_inputs.append((target, target_handle))
-                # print(target, target_handle, i)
 
     return node_inputs

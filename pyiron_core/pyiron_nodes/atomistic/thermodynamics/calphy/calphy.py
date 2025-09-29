@@ -1,17 +1,17 @@
-from dataclasses import dataclass, asdict, field
-from typing import Optional, Union, Tuple, List
-import numpy as np
 import os
 import random
 import string
+from dataclasses import asdict
+from typing import Optional, Tuple
+
+import numpy as np
+import pandas as pd
+from ase import Atoms
+
 from pyiron_core.pyiron_workflow import (
     as_function_node,
-    as_macro_node,
-    as_out_dataclass_node,
     as_inp_dataclass_node,
 )
-from ase import Atoms
-import pandas as pd
 
 
 @as_function_node("potentials")
@@ -219,8 +219,8 @@ def _prepare_potential_and_structure(potential, structure):
 
 
 def _prepare_input(inp, potential, structure, mode="fe", reference_phase="solid"):
+
     from calphy.input import Calculation
-    import os
 
     pair_style, pair_coeff, elements, masses, file_name = (
         _prepare_potential_and_structure(potential, structure)
@@ -275,8 +275,8 @@ def _prepare_input(inp, potential, structure, mode="fe", reference_phase="solid"
 
 
 def _run_cleanup(simfolder, lattice, delete_folder=False):
-    import shutil
     import os
+    import shutil
 
     os.remove(lattice)
     if delete_folder:
@@ -304,12 +304,11 @@ def SolidFreeEnergy(
     float
         Free energy in eV/atom
     """
-    from calphy.solid import Solid
+
     from calphy.routines import routine_fe
-    import os
+    from calphy.solid import Solid
 
     calc = _prepare_input(inp, potential, structure, mode="fe", reference_phase="solid")
-    # os.chdir()
     simfolder = calc.create_folders()
     job = Solid(calculation=calc, simfolder=simfolder)
     job = routine_fe(job)
@@ -371,8 +370,8 @@ def SolidFreeEnergyWithTemp(
     Tuple[np.ndarray, np.ndarray]
         Temperature and free energy in K and eV/atom, respectively.
     """
-    from calphy.solid import Solid
     from calphy.routines import routine_ts
+    from calphy.solid import Solid
 
     calc = _prepare_input(inp, potential, structure, mode="ts", reference_phase="solid")
     simfolder = calc.create_folders()
@@ -468,8 +467,9 @@ def CalcPhaseTransformationTemp(
     float
         Phase transformation temperature
     """
-    import matplotlib.pyplot as plt
     import warnings
+
+    import matplotlib.pyplot as plt
 
     # do some fitting to determine temps
     t1min = np.min(temp_A)
@@ -482,9 +482,9 @@ def CalcPhaseTransformationTemp(
 
     # warn about extrapolation
     if not t1min == t2min:
-        warnings.warn(f"free energy is being extrapolated!")
+        warnings.warn("free energy is being extrapolated!", stacklevel=2)
     if not t1max == t2max:
-        warnings.warn(f"free energy is being extrapolated!")
+        warnings.warn("free energy is being extrapolated!", stacklevel=2)
 
     # now fit
     f1fit = np.polyfit(temp_A, fe_A, fit_order)
@@ -501,9 +501,13 @@ def CalcPhaseTransformationTemp(
 
     # warn if the temperature is shady
     if np.abs(transition_temp - tmin) < 1e-3:
-        warnings.warn("It is likely there is no intersection of free energies")
+        warnings.warn(
+            "It is likely there is no intersection of free energies", stacklevel=2
+        )
     elif np.abs(transition_temp - tmax) < 1e-3:
-        warnings.warn("It is likely there is no intersection of free energies")
+        warnings.warn(
+            "It is likely there is no intersection of free energies", stacklevel=2
+        )
 
     # plot
     c1lo = "#ef9a9a"
@@ -511,8 +515,8 @@ def CalcPhaseTransformationTemp(
     c2lo = "#90caf9"
     c2hi = "#0d47a1"
 
-    plt.plot(fit_t, fit_f1, color=c1lo, label=f"phase A fit")
-    plt.plot(fit_t, fit_f2, color=c2lo, label=f"phase B fit")
+    plt.plot(fit_t, fit_f1, color=c1lo, label="phase A fit")
+    plt.plot(fit_t, fit_f2, color=c2lo, label="phase B fit")
     plt.plot(temp_A, fe_A, color=c1hi, label="phase A", ls="dashed")
     plt.plot(temp_B, fe_B, color=c2hi, label="phase B", ls="dashed")
     plt.axvline(transition_temp, ls="dashed", c="#37474f")

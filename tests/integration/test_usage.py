@@ -3,8 +3,7 @@ import os
 import unittest
 
 import pyiron_core.pyiron_workflow as pwf
-from pyiron_core.pyiron_workflow.graph import base, graph_json, group, run, labelling
-
+from pyiron_core.pyiron_workflow.graph import base, graph_json, group, labelling, run
 from static import nodes, other_nodes
 
 

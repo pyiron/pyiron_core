@@ -47,7 +47,7 @@ def get_wf_from_graph(graph: base.Graph) -> simple_workflow.Workflow:
         label, import_path = node.label, node.import_path
 
         if not label.startswith("va_i_"):
-            kwargs = dict()
+            kwargs = {}
 
             # Add non-default arguments to node
             for edge in graph.edges:
@@ -58,7 +58,6 @@ def get_wf_from_graph(graph: base.Graph) -> simple_workflow.Workflow:
                             kwargs[edge.targetHandle] = edge.sourceHandle[6:]
                         else:
                             kwargs[edge.targetHandle] = eval(edge.sourceHandle)
-                    # kwargs[target_handle] = source_handle
 
             new_node = base.get_node_from_path(import_path)(**kwargs)
             wf.add_node(label, new_node)
@@ -92,8 +91,8 @@ def update_input_values(graph: base.Graph, node_label: str, values: list):
 def run_macro_node(macro_node):
     macro_graph = base.get_graph_from_macro_node(macro_node)
 
-    output_nodes = list()
-    output_labels = dict()
+    output_nodes = []
+    output_labels = {}
     for edge in macro_graph.edges:
         if f"va_o_{macro_node.label}__" in edge.target:
             output_nodes.append(edge.source)
@@ -104,18 +103,13 @@ def run_macro_node(macro_node):
     for graph_node in macro_graph.nodes.values():
         values = graph_node.node.inputs.data["value"]
         labels = graph_node.node.inputs.data["label"]
-        for port_label, port_value in zip(labels, values):
-            # print('label: ', port_label)
+        for port_label, port_value in zip(labels, values, strict=False):
             if isinstance(port_value, (simple_workflow.Port)):
-                # print(port_label, type(port_value.value))
                 if isinstance(port_value.value, (simple_workflow.Port)):
-                    # print('double: ', port_value.value.label, port_value.value.node.label)
                     graph_node.node.inputs.__setattr__(port_label, port_value.value)
 
-    outputs = list()
-    # output_labels = macro_node.outputs.data["label"]
+    outputs = []
     for out_label in set(output_nodes):
-        # print(f"output node {out_label} of macro {macro_node.label}")
         outputs.append(
             run.pull_node(macro_graph, out_label)
         )  # use graph theory to avoid recalculating nodes (or use ready)
@@ -123,14 +117,12 @@ def run_macro_node(macro_node):
     if len(outputs) == 1:
         return outputs[0]  # works only for nodes with single output
     else:
-        outputs = list()
+        outputs = []
         for label in macro_node.outputs.data["label"]:
-            # print(f"output label {label}")
             o_source, o_handle = output_labels[label]
             out = macro_graph.nodes[o_source].node.outputs.__getattr__(o_handle)
             outputs.append(out.value)
 
-        # raise NotImplementedError("Multiple outputs not yet implemented. Sort sequence by macro output labels.")
         return outputs
 
 

@@ -10,6 +10,8 @@ import functools
 
 from pyiron_core.pyiron_workflow.graph.base import (
     GraphEdge as _GraphEdge,
+)
+from pyiron_core.pyiron_workflow.graph.base import (
     GraphNode as _GraphNode,
 )
 from pyiron_core.pyiron_workflow.simple_workflow import identity as _identity

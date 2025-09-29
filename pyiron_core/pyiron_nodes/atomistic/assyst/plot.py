@@ -1,25 +1,21 @@
-from typing import TYPE_CHECKING, Iterable
+from typing import Iterable
 
-from pyiron_core.pyiron_workflow import Workflow, as_function_node
-
-from ase import Atoms
-from matplotlib.axis import Axis
 import pandas as pd
+from ase import Atoms
+
+from pyiron_core.pyiron_workflow import as_function_node
 
 
 @as_function_node
-# def PlotSPG(structures: list[Atoms]) -> tuple[Axis, list[int]]:
 def PlotSPG(structures: list[Atoms]) -> list[int]:
     """Plot a histogram of space groups in input list."""
-    from structuretoolkit.analyse import get_symmetry
     import matplotlib.pyplot as plt
+    from structuretoolkit.analyse import get_symmetry
 
     spacegroups = []
     for structure in structures:
         spacegroups.append(get_symmetry(structure).info["number"])
     plt.hist(spacegroups)
-    # ax = plt.gca()
-    # return ax, spacegroups
     return spacegroups
 
 
@@ -67,31 +63,31 @@ def PlotAtomsCells(
                         - V: volume of the cell
                         - N: number of atoms in the cell
     """
-    import pandas as pd
     import matplotlib.pyplot as plt
     import numpy as np
+    import pandas as pd
 
     N = np.array([len(s) for s in structures])
     C = np.array([s.cell.array for s in structures])
 
-    # def get_angle(cell, idx=0):
-    get_angle = lambda cell, idx=0: np.arccos(
-        np.dot(cell[idx], cell[(idx + 1) % 3])
-        / np.linalg.norm(cell[idx])
-        / np.linalg.norm(cell[(idx + 1) % 3])
-    )
+    def get_angle(cell, idx):
+        return np.arccos(
+            np.dot(cell[idx], cell[(idx + 1) % 3])
+            / np.linalg.norm(cell[idx])
+            / np.linalg.norm(cell[(idx + 1) % 3])
+        )
 
-    # def extract(n, c):
-    extract = lambda n, c: {
-        "a": np.linalg.norm(c[0]),
-        "b": np.linalg.norm(c[1]),
-        "c": np.linalg.norm(c[2]),
-        "alpha": get_angle(c, 0),
-        "beta": get_angle(c, 1),
-        "gamma": get_angle(c, 2),
-    }
+    def extract(c):
+        return {
+            "a": np.linalg.norm(c[0]),
+            "b": np.linalg.norm(c[1]),
+            "c": np.linalg.norm(c[2]),
+            "alpha": get_angle(c, 0),
+            "beta": get_angle(c, 1),
+            "gamma": get_angle(c, 2),
+        }
 
-    df = pd.DataFrame([extract(n, c) for n, c in zip(N, C)])
+    df = pd.DataFrame([extract(c) for c in C])
     df["V"] = np.linalg.det(C)
     df["N"] = N
     if angle_in_degrees:
@@ -123,7 +119,6 @@ def PlotAtomsCells(
         label = r"$\alpha,\beta,\gamma$ [rad]"
     plt.xlabel(label)
 
-    # return df
     return plt.show()
 
 
@@ -140,9 +135,9 @@ def PlotDistances(
         structures (list of Atoms): structures to plot
         bins (int or iterable of floats): if int number of bins; if iterable of floats bin edges
     """
-    from structuretoolkit import get_neighbors
     import matplotlib.pyplot as plt
     import numpy as np
+    from structuretoolkit import get_neighbors
 
     distances = []
     for structure in structures:

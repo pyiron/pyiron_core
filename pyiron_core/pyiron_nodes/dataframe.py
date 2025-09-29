@@ -4,7 +4,8 @@ This module provides functions to manipulate and analyze pandas DataFrames
 """
 
 import pandas as pd
-from pyiron_core.pyiron_workflow import as_function_node, Node
+
+from pyiron_core.pyiron_workflow import Node, as_function_node
 
 
 @as_function_node("df")
@@ -65,7 +66,6 @@ def ApplyFunctionToSeries(series: pd.Series, func: Node, store: bool = False):
     """
     import numpy as np
 
-    # print ('map apply: ', func._func, series.iloc[0])
     kwargs = func.kwargs
     first_arg = list(kwargs.keys())[0]
     del kwargs[first_arg]
@@ -82,7 +82,6 @@ def ApplyFunctionToSeriesNew(series: pd.Series, function: Node, store: bool = Fa
     """
     import numpy as np
 
-    # print ('map apply: ', func._func, series.iloc[0])
     kwargs = function.kwargs
     first_arg = list(kwargs.keys())[0]
     del kwargs[first_arg]

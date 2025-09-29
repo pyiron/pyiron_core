@@ -1,9 +1,12 @@
-from pyiron_core.pyiron_workflow import Workflow
-import pandas as pd
-from dataclasses import dataclass, field, asdict
+from dataclasses import field
 from typing import Optional
-from pyiron_core.pyiron_workflow import as_function_node, as_inp_dataclass_node
-import numpy as np
+
+import pandas as pd
+
+from pyiron_core.pyiron_workflow import (
+    as_function_node,
+    as_inp_dataclass_node,
+)
 
 
 @as_inp_dataclass_node
@@ -75,8 +78,9 @@ def remove_none(d):
 @as_function_node("empty_basis_config")
 def CreateEmptyBasisFunctions(potential_config: PotentialConfig):
 
-    from pyace import create_multispecies_basis_config
     from dataclasses import asdict
+
+    from pyace import create_multispecies_basis_config
 
     potential_config_dict = remove_none(asdict(potential_config))
     bconf = create_multispecies_basis_config(potential_config_dict)
@@ -87,8 +91,8 @@ def CreateEmptyBasisFunctions(potential_config: PotentialConfig):
 @as_function_node
 def ReadPickledDatasetAsDataframe(file_path: str, compression: str = None):
 
-    from pyiron_atomistics import Atoms as pyironAtoms
     from ase.atoms import Atoms as aseAtoms
+    from pyiron_atomistics import Atoms as pyironAtoms
 
     df = pd.read_pickle(file_path, compression=compression)
 
@@ -141,9 +145,6 @@ def SplitTrainingAndTesting(df, training_frac: float = 0.2, random_state: int = 
     return df_train, df_test
 
 
-import pandas as pd
-
-
 @as_function_node
 def PrepareLinearACEdataset(
     bconf, df_train: pd.DataFrame, df_test: pd.DataFrame, verbose: bool = False
@@ -171,7 +172,6 @@ def PrepareLinearACEdataset(
     return train_ds, test_ds
 
 
-# linear_fit = LinearACEFit(train_dataset=train_ds)
 @as_function_node
 def LinearACEFit(train_dataset, fit: bool = True):
     from pyace.linearacefit import LinearACEFit
@@ -182,25 +182,16 @@ def LinearACEFit(train_dataset, fit: bool = True):
     return linear_fit
 
 
-# # linear_fit.fit()
-# @as_function_node("fit")
-# def Fit(linear_fit):
-#     return linear_fit.fit()
-
-
-# linear_fit.compute_errors(test_ds)
 @as_function_node("errors")
 def ComputeErrors(linear_fit, ds):
     return linear_fit.compute_errors(ds)
 
 
-# basis = linear_fit.get_bbasis()
 @as_function_node("basis")
 def GetBasis(linear_fit):
     return linear_fit.get_bbasis()
 
 
-# e_pred,f_pred = linear_fit.predict(test_ds, reshape_forces=True)
 @as_function_node
 def Predict(linear_fit, ds, reshape_forces: bool = True):
     e_pred, f_pred = linear_fit.predict(ds, reshape_forces=reshape_forces)
@@ -248,9 +239,8 @@ def DesignMatrix(
         LinearACEDataset: The constructed design matrix for the training dataset.
     """
 
-    from pyace.linearacefit import LinearACEDataset
     from pyace import create_multispecies_basis_config
-
+    from pyace.linearacefit import LinearACEDataset
     from pyiron_snippets.logger import logger
 
     logger.setLevel(30)
@@ -281,10 +271,7 @@ def GetMatrix(
     min_index: int = 0,
     max_index: int = None,
 ):
-    import numpy as np
-
     num_structures = len(df)
-    num_atoms = np.sum(df.NUMBER_OF_ATOMS)
 
     if max_index is None:
         max_index = num_structures

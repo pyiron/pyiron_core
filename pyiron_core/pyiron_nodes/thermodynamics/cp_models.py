@@ -1,14 +1,13 @@
+from dataclasses import dataclass, field
+
 import numpy as np
 
 from pyiron_core.pyiron_workflow import (
-    as_function_node,
-    as_out_dataclass_node,
-    as_inp_dataclass_node,
-    as_macro_node,
     Workflow,
+    as_function_node,
+    as_macro_node,
+    as_out_dataclass_node,
 )
-
-from dataclasses import field, dataclass
 
 kB_meV = 8.617333262145e-2  # Boltzmann's constant in eV/K
 

@@ -1,8 +1,9 @@
-from pyiron_core.pyiron_workflow import as_function_node
+from typing import Literal, Optional
 
-from ase import Atoms as _Atoms
 import numpy as np
-from typing import Optional, Union, Literal
+from ase import Atoms as _Atoms
+
+from pyiron_core.pyiron_workflow import as_function_node
 
 
 @as_function_node("plot")
@@ -16,7 +17,6 @@ def Plot3d(
     distance_from_camera: Optional[float] = 1.0,
 ):
     """Display atomistic structure (ase.Atoms) using nglview"""
-    from structuretoolkit import plot3d
 
     if view_plane is None:
         view_plane = [1, 1, 1]

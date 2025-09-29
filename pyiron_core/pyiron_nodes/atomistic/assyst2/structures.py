@@ -1,16 +1,14 @@
+from collections.abc import Sequence
 from dataclasses import dataclass, field
-from collections.abc import Generator, Sequence
-from numbers import Integral
 from itertools import product
-
-from pyiron_core.pyiron_workflow import (
-    Workflow,
-    as_inp_dataclass_node,
-    as_function_node,
-)
 
 import pandas as pd
 from ase import Atoms
+
+from pyiron_core.pyiron_workflow import (
+    as_function_node,
+    as_inp_dataclass_node,
+)
 
 
 @dataclass(frozen=True)
@@ -38,7 +36,7 @@ class Stoichiometry(Sequence):
             other.elements
         ), "Can only or stoichiometries of different elements!"
         s = ()
-        for me, you in zip(self.stoichiometry, other.stoichiometry):
+        for me, you in zip(self.stoichiometry, other.stoichiometry, strict=False):
             s += (me | you,)
         return Stoichiometry(s)
 
@@ -98,14 +96,17 @@ class SpaceGroupInput:
 @as_function_node
 def SpaceGroupSampling(input: SpaceGroupInput) -> list[Atoms]:
     from warnings import catch_warnings
+
     from structuretoolkit.build.random import pyxtal
     from tqdm.auto import tqdm
 
     structures = []
     with catch_warnings(category=UserWarning, action="ignore"):
         for stoich in (bar := tqdm(input.stoichiometry)):
-            elements, num_ions = zip(*stoich.items())
-            stoich_str = "".join(f"{s}{n}" for s, n in zip(elements, num_ions))
+            elements, num_ions = zip(*stoich.items(), strict=False)
+            stoich_str = "".join(
+                f"{s}{n}" for s, n in zip(elements, num_ions, strict=False)
+            )
             bar.set_description(stoich_str)
             structures += [
                 s["atoms"] for s in pyxtal(input.spacegroups, elements, num_ions)
@@ -148,8 +149,9 @@ def SaveStructures(structures: list[Atoms], filename: str):
         structures (list of Atoms): structures to save
         filename (str): path where the dataframe is written to
     """
-    import pandas as pd
     import os.path
+
+    import pandas as pd
 
     df = pd.DataFrame(
         [

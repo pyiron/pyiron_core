@@ -1,4 +1,4 @@
-from pyiron_core.pyiron_workflow import Node, as_function_node, as_inp_dataclass_node
+from pyiron_core.pyiron_workflow import Node, as_function_node
 
 
 @as_function_node("Executor")
@@ -34,24 +34,16 @@ def IterNode(
 
     # TODO: add to node ._hash_parent (with hash of this node)
     from concurrent.futures import as_completed
-    from pyiron_core.pyiron_workflow.api.graph import run_node
-    from copy import copy
+
     from pandas import DataFrame
 
-    # import numpy as np
+    from pyiron_core.pyiron_workflow.api.graph import run_node
 
-    # kwarg_initial = node.inputs[kwarg_name].value
-    # print("kwarg_initial", kwarg_initial)
-
-    out_dict = dict()
+    out_dict = {}
     if Executor is None:
         for el in kwarg_list:
-            # print('iter kwargs: ', node.kwargs)
             node.to_inputs(**{kwarg_name: el})
             out_dict[el] = node.run(db=_db)
-            # if hasattr(node, "_hash_parent"):
-            #     print("node._hash_parent", el, node._hash_parent)
-            # print("iter_node: ", node.inputs, node_run.inputs)
     elif _db is not None:
         raise ValueError(
             "Communicating with the database is not supported for IterNode while using "
@@ -63,7 +55,7 @@ def IterNode(
     else:
         with Executor as executor:
             # Start the load operations and mark each future with its index
-            futures = dict()
+            futures = {}
             if hasattr(node, "_graph_node"):
                 graph_node = node._graph_node
                 print("graph_node", graph_node.label)
@@ -81,7 +73,6 @@ def IterNode(
 
     # create dataframe, keep the order of the input list
     results = [out_dict[el] for el in kwarg_list]
-    # node.inputs[kwarg_name] = kwarg_initial
 
     df = DataFrame({kwarg_name: kwarg_list, "result": results})
     return df

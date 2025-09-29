@@ -1,4 +1,4 @@
-from pyiron_core.pyiron_workflow import as_function_node, Node
+from pyiron_core.pyiron_workflow import Node, as_function_node
 
 
 @as_function_node
@@ -32,28 +32,10 @@ def DeleteDB(db):
     return db
 
 
-# @as_function_node
-# def remove_row(db, index: int):
-#     from pyiron_core.pyiron_nodes.development import hash_based_storage as hs
-
-#     hs.remove_nodes_from_db(db, indices=[index])
-#     db = hs.create_nodes_table(echo=False)
-#     return db
-
-
-# @as_function_node
-# def query_db(db, query: str):
-#     from pyiron_core.pyiron_nodes.development import hash_based_storage as hs
-#     import json
-
-#     res = hs.db_query_dict(db, json.loads(query))
-#     return res
-
-
 @as_function_node
 def ShowTable(db):
-    from sqlalchemy.orm import sessionmaker
     import pandas as pd
+    from sqlalchemy.orm import sessionmaker
 
     Session = sessionmaker(bind=db.engine)
     session = Session()
@@ -70,10 +52,11 @@ def GetGraph(db, node_id: int):
     """
     Get the graph of a node with id *node_id from the database.
     """
+    import pandas as pd
+    from sqlalchemy.orm import sessionmaker
+
     import pyiron_core.pyiron_database.api as pyiron_database
     from pyiron_core.pyiron_workflow.api.gui import GuiGraph
-    from sqlalchemy.orm import sessionmaker
-    import pandas as pd
 
     Session = sessionmaker(bind=db.engine)
     session = Session()

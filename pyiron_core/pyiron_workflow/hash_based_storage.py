@@ -1,34 +1,36 @@
 from __future__ import annotations
 
-# Define functions needed to construct and utilize a hash based database for node storage
-# Could/should be later moved to pyiron_core.pyiron_workflows
-
-from sqlalchemy import Column, Integer, String, DateTime, JSON, Boolean
-from sqlalchemy import MetaData
-from sqlalchemy.orm import declarative_base
-from sqlalchemy import create_engine
-from sqlalchemy.engine import reflection
-
+import getpass
+import hashlib
+import importlib
+import json
+import os
+import sys
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 
-# from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy import text
-from dataclasses import dataclass
-
-import sqlalchemy
-import hashlib
-import json
 import cloudpickle as pickle
 import pandas as pd
-import os
-import sys
-import importlib
-import getpass
+import sqlalchemy
+
+# Define functions needed to construct and utilize a hash based database for node storage
+# Could/should be later moved to pyiron_core.pyiron_workflows
+from sqlalchemy import (
+    JSON,
+    Boolean,
+    Column,
+    DateTime,
+    Integer,
+    MetaData,
+    String,
+    create_engine,
+    text,
+)
+from sqlalchemy.engine import reflection
+from sqlalchemy.orm import declarative_base, sessionmaker
 
 username = getpass.getuser()
-# username = 'joerg'
 
 
 def compute_hash_value(input_dict, length=256):
@@ -67,7 +69,6 @@ def compute_hash_value(input_dict, length=256):
 
     # Return the hexadecimal representation of the hash
     hash_value = hasher.hexdigest()
-    # print('hash: ', hash_value, input_dict)
     return hash_value
 
 
@@ -82,8 +83,6 @@ class Node(Base):
     hash_value = Column(String)
     lib_path = Column(String)
     creation_date = Column(DateTime, default=datetime.utcnow)
-    # creation_date = Column(DateTime, default=datetime.now(datetime.UTC))
-    # data = Column(JSON)
     inputs = Column(JSON)
     outputs = Column(JSON)
     output_ready = Column(Boolean)
@@ -107,9 +106,7 @@ class Node(Base):
 
         self.name = name
         self.hash_value = compute_hash_value(input_dict, length=length)
-        # print('Node_init: ', input_dict)
-        self.lib_path = path  # str(Path(path).resolve())
-        # self.data = input_dict['inputs']
+        self.lib_path = path
         self.inputs = input_dict["inputs"]
         self.output_ready = False
         self.file_path = ""
@@ -199,8 +196,6 @@ def add_node_dict_to_db(db, inputs, name="", path=".", length=256):
     # Close session
     session.close()
 
-    # If the node was added, return it; otherwise return None
-    # return new_node if not exists else None
     return exists
 
 
@@ -274,7 +269,6 @@ def remove_nodes_from_db(db, indices=None, verbose=False):
         Database: The original Database instance passed in.
     """
     # Extract Session and Node classes from Database instance
-    # Session = db.Session
     Node = db.Node
 
     # Start a new session
@@ -296,7 +290,6 @@ def remove_nodes_from_db(db, indices=None, verbose=False):
                 if verbose:
                     print(f"Row with id {index} does not exist.")
             else:
-                # print("file path: ", node.file_path)
                 remove_directory_if_contains_file(node.file_path)
                 ids_to_delete.append(int(index))
 
@@ -393,10 +386,6 @@ def drop_table(db, table_name):
 
 
 def db_query_dict(db, column="inputs", **kwargs):
-    # Extract Session and Node classes from Database instance
-    # Session = db.Session
-    # Node = db.Node
-
     # Start a new session
     session = db.Session()
 
@@ -427,7 +416,6 @@ def db_query_dict(db, column="inputs", **kwargs):
 
     session.close()
 
-    # return the DataFrame
     return df
 
 
@@ -504,13 +492,10 @@ def extract_node_input(node, db):
     """
 
     inp_node_dict = get_all_connected_input_nodes(node)
-    # print(inp_node_dict.keys())
 
     ic = node.inputs.channel_dict
-    # print('ic: ', ic)
-    input_dict = dict()
+    input_dict = {}
     for k, v in ic.items():
-        # print('extract: ', k, v)
         if k in inp_node_dict:
             inp_node = inp_node_dict[k]
             input_dict[k] = "hash_" + get_node_hash(inp_node, db)
@@ -521,7 +506,7 @@ def extract_node_input(node, db):
 
             save_node(inp_node, db, file_output=False)
         else:
-            input_dict[k] = str(v.value)  # ["value"]
+            input_dict[k] = str(v.value)
     return input_dict
 
 
@@ -535,21 +520,15 @@ def extract_node_output(node, as_string=True):
     Returns:
     A dictionary where each key-value pair is the name of a channel and its corresponding value.
     """
-
-    # from pyiron_core.pyiron_workflow.channels import NotData
-
-    output_dict = dict()
+    output_dict = {}
     for k in node.outputs.channel_dict.keys():
         val = node.outputs[k].value
         if hasattr(val, "_serialize"):
             # convert dataclass objects into nested dictionaries that can be jsonified
             # TODO: dataclasses should be serializable and node-like, so that they can be imported
-            # print ('extract_output_serialize: ')
             val = val._serialize(str(val))
         elif as_string:
             val = str(val)
-        # if isinstance(val, NotData):
-        #     val = 'NotData'
         elif hasattr(val, "keys"):
             # assumption: val object behaves like a dict
             val = dict(val)
@@ -645,28 +624,17 @@ def add_node_to_db(node, db):
 
     # extract input + node identifier dictionary from node
     node_dic = extract_node_dictionary(node, db)
-    # print('add: ', node_dic)
-
-    # Convert node_identifier to a path format by replacing '.' with '/'
-    path_format = get_node_storage_path(
-        node
-    )  # (node_dic["node_identifier"].replace(".", "/"))
+    path_format = get_node_storage_path(node)
 
     # Add the node's metadata to the database
     exists = add_node_dict_to_db(db, inputs=node_dic, path=path_format)
-
-    # # if node instance is not yet in db save it as file (make sure that output exists)
-    # if not exists:
-    #     # check if node output is available/ready
-    #     if not node.outputs.ready:
-    #         node.pull()
 
     return exists
 
 
 def save_node(
     node, db, file_output=None, db_output=None, node_pull=True, json_size_limit=1000
-):  # , node_id):
+):
     """
     This function stores a node by setting its storage_directory attribute to a certain path.
     An additional directory is added to this path, named with the given database ID.
@@ -683,7 +651,6 @@ def save_node(
     """
 
     path = get_node_storage_path(node)
-    # print ('path: ', path)
     node_id = get_node_db_id(node, db)
     if node_id is None:
         add_node_to_db(node, db)
@@ -706,12 +673,9 @@ def save_node(
                 db_output = True
 
     if file_output:
-        # print('save: node_id: ', node_id)
         # Create a Path object and add the database id as a new directory
         file_path = Path(path) / str(node_id)
 
-        # Set the node's storage_directory path
-        # node.storage_directory.path = file_path
         if not node.outputs.ready:
             run()
 
@@ -719,7 +683,6 @@ def save_node(
             db, node_id, output_ready=node.outputs.ready, file_path=file_path
         )
         node_to_pickle(node, file_path, db)
-        # node.save()
     if db_output:
         if not node.outputs.ready:
             run()
@@ -794,9 +757,6 @@ def load_node_from_pickle(node, file_path, db=None, verbose=False):
     Returns:
     None
     """
-
-    # import numpy as np
-
     # Define the path to the project.json file
     file_path = os.path.join(file_path, "project.pkl")
 
@@ -854,9 +814,6 @@ def load_data_from_json(node, file_path, db, verbose=False):
     Returns:
     json data
     """
-
-    # import numpy as np
-
     # Define the path to the project.json file
     json_file_path = os.path.join(file_path, "project.json")
 
@@ -878,9 +835,6 @@ def load_node_from_json(node, file_path, db, verbose=False):
     Returns:
     None
     """
-
-    # import numpy as np
-
     # Define the path to the project.json file
     json_file_path = os.path.join(file_path, "project.json")
 
@@ -888,14 +842,9 @@ def load_node_from_json(node, file_path, db, verbose=False):
     with open(json_file_path, "r") as json_file:
         data = json.load(json_file)
 
-    # Load the inputs and outputs into the node
-    #     for key, value in data['inputs']['channels'].items():
-    #         node.inputs[key] = eval_db_value(value['value'], db)
     set_node_input(node, data["inputs"], db)
 
     for key, value in data["outputs"]["channels"].items():
-        # val = value['value'].replace('array', 'np.array')
-        # node.outputs[key] = eval(val)
         val = eval_db_value(value["value"], db)
         node.outputs[key] = val
 
@@ -917,10 +866,6 @@ def get_node_db_id(node, db):
     hash_value = get_node_hash(node, db)
 
     q = session.query(db.Node).filter(db.Node.hash_value == hash_value).all()
-    # alternative solution (fster by about a factor 2 but less pythonic)
-    # query = f"SELECT * FROM node WHERE hash_value = '{hash}'"
-    # result = session.execute(text(query)).fetchall()
-    # result[0][0]
     session.close()
 
     if len(q) == 0:
@@ -988,19 +933,18 @@ def eval_db_value(value, db):
             val = new_node.outputs[output_port_label]
 
     elif value.startswith("array"):
-        import numpy as np
+        import numpy as np  # noqa: F401
 
         val = value.replace("array", "np.array")
     else:
         # If the value is not a hash, simply evaluate it
         try:
             from pyiron_core.pyiron_nodes.atomistic.property.elastic import (
-                DataStructureContainer,
+                DataStructureContainer,  # noqa: F401
             )
 
             val = eval(value)
-        except Exception as e:
-            # print("eval exception: ", e, value)
+        except Exception:
             if isinstance(value, str):
                 val = value
             else:
@@ -1026,30 +970,18 @@ def get_node_from_db_id(node_id, db, data_only=False):
 
     node = None
     if q is not None:
-        # print('query: ', q.node_id, q.hash_value)
         lib_path = q.lib_path
 
-        # print('path: ', node_lib_path)
         if not lib_path.startswith("None"):
             # node class defined in library
-            node_lib_path = ".".join(lib_path.split("/"))  # [1:])
-            # print('node_lib_path: ', node_lib_path)
+            node_lib_path = ".".join(lib_path.split("/"))
             node = create_node(node_lib_path)
 
             if q.file_path != "":
                 file_path = Path(q.file_path)
-
-                # Set the node's storage_directory path
-                # node.storage_directory.path = file_path
-                # node.load()
-                # if data_only:
-                #     # mainly for debugging to analyze the json data
-                #     node = load_data_from_json(node, file_path, db)
-                # else:
                 node = load_node_from_pickle(node, file_path)
             else:
                 # load input from database
-                # print('q: ', q)
                 node = set_node_input(node, q.inputs, db)
                 if q.outputs is not None:
                     node = set_node_output(node, q, db)
@@ -1145,21 +1077,10 @@ def get_all_connected_input_nodes(node):
     Returns:
     dict: A dictionary where the key is the name of the input channel, and the value is the Node object connected to it.
     """
-
-    from pyiron_core.pyiron_workflow.topology import get_nodes_in_data_tree
-
-    # Get channel_dict dictionary containing all input channels
-    # channel_dict = node.inputs.channel_dict
-
-    # Get the nodes in the data tree of the given node
-    nodes_in_data_tree = get_nodes_in_data_tree(node)
-
     connected_nodes = {}
 
     # Iterate over each input channel
     for label in node.inputs.labels:
-        # print ('label: ', node.label, label)
-        # print ('node: ', id(node))
         if node.inputs[label].connected:
             connections = node.inputs[label].connections
             connected_nodes[label] = connections[0].owner
@@ -1180,8 +1101,8 @@ def _bracketed_split(string, delimiter, strip_brackets=False):
 
     openers = "[{(<"
     closers = "]})>"
-    opener_to_closer = dict(zip(openers, closers))
-    opening_bracket = dict()
+    opener_to_closer = dict(zip(openers, closers, strict=True))
+    opening_bracket = {}
     current_string = ""
     depth = 0
     for c in string:
@@ -1228,14 +1149,9 @@ def _split_func_and_args(input_string):
 
     args = args[1:-1]  # remove first '(' and last ‘)‘
     if "array" in func_name:
-        # print ('func_array: ', func_name)
         return None
     if "[" in func_name:
-        # print('func_array: ', func_name)
         return None
-
-        # print ('func: ', func_name)
-
     return args
 
 
@@ -1243,7 +1159,7 @@ def _strip_args(input_string):
     inp_str = _split_func_and_args(input_string)
     if inp_str is None:
         return None
-    return [s for s in _bracketed_split(inp_str, delimiter=",")]
+    return list(_bracketed_split(inp_str, delimiter=","))
 
 
 def str_to_dict(input_string):
@@ -1254,14 +1170,12 @@ def str_to_dict(input_string):
         input_string2 = 'my_obj(k1=1, k2=my_obj2(k11=1, k22=2), k3=my_obj3(k21=1, k22=array([[1,2], [2,3]])), k4=array([[(1,2)], [2,3]]), k5=[[(1, 2), (1, 2)]])'
         str_to_dict(input_string2)
     """
-    arg_dict = dict()
+    arg_dict = {}
     if _strip_args(input_string) is None:
-        # print ('input_str: ', input_string)
         return input_string
 
     for arg in _strip_args(input_string):
         if "=" not in arg:
-            # print(arg)
             return None
         key, val = arg.split("=", 1)
         key = key.strip()
@@ -1289,6 +1203,6 @@ def clone_node_with_inputs(node):
     lib_path = ".".join(node.package_identifier.split("."))  # [1:])
     node_lib_path = ".".join([lib_path, node.label])
     new_node = create_node(node_lib_path)
-    for k, v in node.inputs.to_dict()["channels"].items():
+    for k in node.inputs.to_dict()["channels"]:
         new_node.inputs[k] = node.inputs[k].value
     return new_node

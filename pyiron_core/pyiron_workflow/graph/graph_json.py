@@ -27,7 +27,6 @@ def _compact_graph(graph: base.Graph):
             and (node.parent_id is None)
             and (node.import_path is not None)
         ):
-            # print("collapse: ", k)
             new_node = base.GraphNode(
                 node=node.node,
                 id=node.id,
@@ -57,7 +56,6 @@ def _uncompact_graph_from_state(state: dict):
     graph = base.Graph(label=state["label"])
     for k, node_state in state["nodes"].items():
         if isinstance(node_state, dict):
-            # print(k, type(node_state))
             graph_node = base.GraphNode().__setstate__(node_state)
             if (graph_node.node is None) and (graph_node.import_path is not None):
                 node = simple_workflow.Node().__setstate__(node_state["node"])
@@ -72,7 +70,6 @@ def _uncompact_graph_from_state(state: dict):
                     graph = base.uncollapse_node(graph, k)
 
     for edge_state in state["edges"]["values"]:
-        # print(edge_state)
         graph += base.GraphEdge(**edge_state)
 
     return graph

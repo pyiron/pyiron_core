@@ -1,13 +1,10 @@
-from pyiron_core.pyiron_workflow import as_function_node, Node
+from typing import Optional
 
 from pyiron_core.pyiron_nodes.atomistic.calculator.data import (
-    InputCalcMinimize,
-    InputCalcMD,
     InputCalcStatic,
     OutputSEFS,
 )
-
-from typing import Optional
+from pyiron_core.pyiron_workflow import Node, as_function_node
 
 
 @as_function_node("generic")

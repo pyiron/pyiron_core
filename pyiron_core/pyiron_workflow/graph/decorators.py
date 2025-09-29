@@ -27,7 +27,6 @@ def as_dotdict_dataclass(
     __setstate__=None,
     **kwargs,
 ):
-    # def wf_data_class(*args, doc_func=None, keys_to_store=None, **kwargs):
     """
     Extension of the python default dataclass to include methods and functionality needed for pyiron_core.pyiron_workflows
 
@@ -46,16 +45,16 @@ def as_dotdict_dataclass(
             cls.__doc__ = doc_func.__doc__
 
         if _repr_html_ is not None:
-            setattr(cls, "_repr_html_", _repr_html_)
+            cls._repr_html_ = _repr_html_
 
         if __add__ is not None:
-            setattr(cls, "__add__", __add__)
+            cls.__add__ = __add__
 
         if __getstate__ is not None:
-            setattr(cls, "__getstate__", __getstate__)
+            cls.__getstate__ = __getstate__
 
         if __setstate__ is not None:
-            setattr(cls, "__setstate__", __setstate__)
+            cls.__setstate__ = __setstate__
 
         # Add new methods
         def keys(self):
@@ -79,15 +78,15 @@ def as_dotdict_dataclass(
 
         def select(self, keys_to_store=None):
             if keys_to_store is None:
-                keys_to_store = self.keys()  # cls._keys_to_store
+                keys_to_store = self.keys()
             return {k: self[k] for k in keys_to_store}
 
-        setattr(cls, "keys", keys)
-        setattr(cls, "items", items)
-        setattr(cls, "asdict", asdict)
-        setattr(cls, "__getitem__", __getitem__)
-        setattr(cls, "__setitem__", __setitem__)
-        setattr(cls, "select", select)
+        cls.keys = keys
+        cls.items = items
+        cls.asdict = asdict
+        cls.__getitem__ = __getitem__
+        cls.__setitem__ = __setitem__
+        cls.select = select
 
         return cls
 
@@ -96,7 +95,7 @@ def as_dotdict_dataclass(
 
 def transpose_dict_of_dicts(nested_dict: dict) -> dict:
     transposed = {}
-    for outer_key, inner_dict in nested_dict.items():
+    for inner_dict in nested_dict.values():
         for inner_key, value in inner_dict.items():
             if inner_key not in transposed:
                 transposed[inner_key] = []
@@ -116,7 +115,7 @@ class NestedDict(OrderedDict):
 
     @property
     def _index_dict(self):
-        return {i: k for i, k in enumerate(self.keys())}
+        return dict(enumerate(self.keys()))
 
     def __setitem__(self, key, value):
         super().__setitem__(key, value)
@@ -160,12 +159,10 @@ class NestedDict(OrderedDict):
         if self._obj_type is None:
             if "_obj_type" in state:
                 self._obj_type = imports.get_object_from_path(state["_obj_type"])
-                # del state["_obj_type"]
 
             # convert the state to a dictionary of objects
 
         if self._obj_type is not None:
-            # print('convert obj: ', self._obj_type, state.keys())
             self.update(
                 {
                     k: self._obj_type().__setstate__(v)
@@ -209,7 +206,7 @@ class NestedList(list):
         return self.df._repr_html_()
 
     def __getstate__(self):
-        state = dict(values=[v.__getstate__() for v in self])
+        state = {"values": [v.__getstate__() for v in self]}
         if self._obj_type is not None:
             state.update(
                 obj_type=imports.get_import_path_from_type(self._obj_type),
@@ -236,7 +233,6 @@ class NestedList(list):
         # Ensure each element is deeply copied
         for item in self:
             new_list.append(copy.deepcopy(item, memo))
-        # print("deepcopy: ", memo)
         return new_list
 
     def __copy__(self):

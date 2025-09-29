@@ -1,13 +1,7 @@
-from typing import Optional, TYPE_CHECKING
-from pyiron_core.pyiron_workflow.api.graph import Graph, GraphNode
-
-# import numpy as np
-# import pandas as pd
+from typing import Optional
 
 from pyiron_core.pyiron_workflow import as_function_node
-
-# if TYPE_CHECKING:
-#     from pyiron_core.pyiron_workflow.graph import Node, Graph
+from pyiron_core.pyiron_workflow.api.graph import Graph, GraphNode
 
 
 @as_function_node
@@ -30,6 +24,7 @@ def LoadGraph(path: str):
         The deserialized workflow graph.
     """
     import os
+
     from pyiron_core.pyiron_workflow.api.graph import _load_graph
 
     # 1️⃣  Is the supplied path already absolute?
@@ -111,7 +106,8 @@ def NodeInput(node: GraphNode):
 @as_function_node
 def DisplayGraphAsJson(graph: Graph):
     import json
-    from IPython.display import display, JSON
+
+    from IPython.display import JSON
 
     graph_json = JSON(json.dumps(graph.__getstate__(), indent=2), exanded=True)
 
@@ -123,8 +119,6 @@ def OptimizeGraphConnections(graph: Graph):
     raise NotImplementedError(
         "pyiron_core.pyiron_workflow.graph.base._optimize_graph_connections did not exist at time of refactoring"
     )
-    # graph = base._optimize_graph_connections(graph)
-    # return graph
 
 
 @as_function_node
@@ -142,17 +136,13 @@ def MarkNodeAsExpanded(graph: Graph, node_label: str, expanded: Optional[bool] =
     return graph
 
 
-# def get_graph_from_macro(macro_node: Node) -> Graph:
 @as_function_node
 def GetGraphFromMacro(macro_node):
     raise NotImplementedError(
         "pyiron_core.pyiron_workflow.graph.base._get_graph_from_macro did not exist at time of refactoring"
     )
-    # graph = base.get_graph_from_macro(macro_node)
-    # return graph
 
 
-# def _get_active_nodes(graph: Graph) -> Nodes:
 @as_function_node
 def GetActiveNodes(graph: Graph):
     from pyiron_core.pyiron_workflow.api.gui import _get_active_nodes
@@ -190,8 +180,8 @@ def GetFunctionFromNode(graph_node):
 @as_function_node
 def DisplayCode(code):
     from pygments import highlight
-    from pygments.lexers import Python2Lexer
     from pygments.formatters import TerminalFormatter
+    from pygments.lexers import Python2Lexer
 
     print(highlight(code, Python2Lexer(), TerminalFormatter()))
 

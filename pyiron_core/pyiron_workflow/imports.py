@@ -44,7 +44,6 @@ def get_object_from_path(import_path, log=None):
 
 
 def _bagofholding_import_from_string(library_path: str) -> typing.Any:
-    # https://github.com/pyiron/bagofholding/blob/071aa2ebece51de0342f5ebd8d966f2bdc590527/bagofholding/retrieve.py#L13-L22
     split_path = library_path.split(".", 1)
     if len(split_path) == 1:
         module_name, path = split_path[0], ""
@@ -52,5 +51,17 @@ def _bagofholding_import_from_string(library_path: str) -> typing.Any:
         module_name, path = split_path
     obj = importlib.import_module(module_name)
     for k in path.split("."):
-        obj = getattr(obj, k)
+        try:
+            obj = getattr(obj, k)
+        except AttributeError:
+            # Try importing as a submodule
+            # This can be necessary of an __init__.py is empty and nothing else has
+            # referenced the module yet
+            current_path = f"{obj.__name__}.{k}"
+            try:
+                obj = importlib.import_module(current_path)
+            except ImportError as e:
+                raise AttributeError(
+                    f"module '{obj.__name__}' has no attribute '{k}'"
+                ) from e
     return obj

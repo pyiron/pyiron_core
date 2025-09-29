@@ -14,15 +14,13 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     pass
 
-import anywidget
 import pathlib
-import traitlets
 
-# import os
+import anywidget
+import traitlets
 
 
 class ReactFlowWidget(anywidget.AnyWidget):
-    # path = pathlib.Path(os.getcwd()) / 'static'
     path = pathlib.Path(__file__).parent.parent.parent / "static"
     _esm = path / "widget.js"
     _css = path / "widget.css"

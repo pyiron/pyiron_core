@@ -22,8 +22,8 @@ class TestGraphJson(unittest.TestCase):
             gsl = graph_json._load_graph(fname, workflow_dir=str(here))
 
             self.assertSetEqual(
-                set(label for label in g.nodes),
-                set(label for label in gsl.nodes),
+                set(g.nodes),
+                set(gsl.nodes),
                 msg="Uncollapsing node should cause graph to recover original nodes",
             )
             self.assertEqual(
@@ -36,8 +36,8 @@ class TestGraphJson(unittest.TestCase):
                 return (edge.source, edge.target, edge.sourceHandle, edge.targetHandle)
 
             self.assertSetEqual(
-                set(hashable_edge(edge) for edge in g.edges),
-                set(hashable_edge(edge) for edge in gsl.edges),
+                {hashable_edge(edge) for edge in g.edges},
+                {hashable_edge(edge) for edge in gsl.edges},
                 msg="Uncollapsing node should cause graph to recover original edges",
             )
             self.assertEqual(

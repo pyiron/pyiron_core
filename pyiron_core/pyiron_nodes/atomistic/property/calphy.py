@@ -1,18 +1,19 @@
-from dataclasses import dataclass, asdict, field
-from typing import Optional, Union, Tuple, List
-import numpy as np
 import os
 import random
 import string
+import warnings
+from dataclasses import asdict
+from typing import Optional, Tuple
+
+import numpy as np
+import pandas as pd
+from ase import Atoms
+
 from pyiron_core.pyiron_workflow import (
     as_function_node,
     as_inp_dataclass_node,
     as_macro_node,
-    Workflow,
 )
-from ase import Atoms
-import pandas as pd
-import warnings
 
 
 @as_inp_dataclass_node
@@ -171,7 +172,6 @@ def _prepare_potential_and_structure(potential, structure):
     from pyiron_atomistics.lammps.potential import LammpsPotential, LammpsPotentialFile
     from pyiron_lammps.structure import (
         LammpsStructure,
-        UnfoldingPrism,
         structure_to_lammps,
     )
 
@@ -235,7 +235,6 @@ def _prepare_input(inp, potential, structure, mode="fe", reference_phase="solid"
         "cores": inpdict["cores"],
     }
     del inpdict["cores"]
-    # inpdict["folder_prefix"] = folder_prefix
 
     if inpdict["md"] is None:
         inpdict["md"] = {
@@ -291,8 +290,8 @@ def SolidFreeEnergy(inp, structure: Atoms, potential: str) -> float:
     float
         Free energy in eV/atom
     """
-    from calphy.solid import Solid
     from calphy.routines import routine_fe
+    from calphy.solid import Solid
 
     calc = _prepare_input(inp, potential, structure, mode="fe", reference_phase="solid")
     simfolder = calc.create_folders()
@@ -355,8 +354,8 @@ def SolidFreeEnergyWithTemperature(
     Tuple[np.ndarray, np.ndarray]
         Temperature and free energy in K and eV/atom, respectively.
     """
-    from calphy.solid import Solid
     from calphy.routines import routine_ts
+    from calphy.solid import Solid
 
     calc = _prepare_input(inp, potential, structure, mode="ts", reference_phase="solid")
     simfolder = calc.create_folders()
@@ -452,9 +451,9 @@ def CalculatePhaseTransformationTemperature(
 
     # warn about extrapolation
     if not t1min == t2min:
-        warnings.warn(f"free energy is being extrapolated!")
+        warnings.warn("free energy is being extrapolated!", stacklevel=2)
     if not t1max == t2max:
-        warnings.warn(f"free energy is being extrapolated!")
+        warnings.warn("free energy is being extrapolated!", stacklevel=2)
 
     # now fit
     f1fit = np.polyfit(t1, f1, fit_order)
@@ -471,9 +470,13 @@ def CalculatePhaseTransformationTemperature(
 
     # warn if the temperature is shady
     if np.abs(transition_temp - tmin) < 1e-3:
-        warnings.warn("It is likely there is no intersection of free energies")
+        warnings.warn(
+            "It is likely there is no intersection of free energies", stacklevel=2
+        )
     elif np.abs(transition_temp - tmax) < 1e-3:
-        warnings.warn("It is likely there is no intersection of free energies")
+        warnings.warn(
+            "It is likely there is no intersection of free energies", stacklevel=2
+        )
 
     # plot
     if plot:
@@ -482,8 +485,8 @@ def CalculatePhaseTransformationTemperature(
         c2lo = "#90caf9"
         c2hi = "#0d47a1"
 
-        plt.plot(fit_t, fit_f1, color=c1lo, label=f"data1 fit")
-        plt.plot(fit_t, fit_f2, color=c2lo, label=f"data2 fit")
+        plt.plot(fit_t, fit_f1, color=c1lo, label="data1 fit")
+        plt.plot(fit_t, fit_f2, color=c2lo, label="data2 fit")
         plt.plot(t1, f1, color=c1hi, label="data1", ls="dashed")
         plt.plot(t2, f2, color=c2hi, label="data2", ls="dashed")
         plt.axvline(transition_temp, ls="dashed", c="#37474f")
