@@ -1,1 +1,24 @@
 pip install . --no-deps --no-build-isolation
+
+# clean up
+mv ${HOME}/.binder/demo.ipynb .
+mv ${HOME}/stored_workflows/demos/* .
+
+rm -r   ${HOME}/.binder \
+        ${HOME}/.ci_support \
+        ${HOME}/.github \
+        ${HOME}/decisions \
+        ${HOME}/devbooks \
+        ${HOME}/js \
+        ${HOME}/notebooks \
+        ${HOME}/pyiron_core \
+        ${HOME}/stored_workflows \
+        ${HOME}/.gitignore \
+        ${HOME}/jest.config.js \
+        ${HOME}/LICENSE \
+        ${HOME}/local_postgres.zsh \
+        ${HOME}/package.json \
+        ${HOME}/project-env.yml \
+        ${HOME}/pyproject.toml \
+        ${HOME}/README.md \
+        ${HOME}/tsconfig.json
