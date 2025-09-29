@@ -4,9 +4,7 @@ from typing import Any
 
 
 def get_type(cls: Any) -> tuple[str, str, str]:
-    # print("get_type", cls)
     if hasattr(cls, "_func"):  # pyiron function node
-        # print("pyiron function node")
         module = cls._func.__module__
         qualname = cls._func.__qualname__
     else:
@@ -80,11 +78,8 @@ def deserialize_obj(serialized_obj: dict[str, Any]) -> Any:
     from types import FunctionType as function
 
     if isinstance(serialized_obj, dict):
-        # print("deserialization needed", serialized_obj)
         if "__import_path__" not in serialized_obj:
-            # print("return original object")
             return serialized_obj
-        # print("recreate object", serialized_obj)
         import_path = serialized_obj["__import_path__"]
         module = import_path["module"]
         qualname = import_path["qualname"]
@@ -99,13 +94,11 @@ def deserialize_obj(serialized_obj: dict[str, Any]) -> Any:
             print("return recreated node object")
             return recreated_type(**serialized_obj["__getstate__"])
 
-        # print("recreate object", recreated_type)
         new_obj = recreated_type()
         new_obj.__setstate__(serialized_obj["__getstate__"])
         return new_obj
 
     else:
-        # print("return original object")
         return serialized_obj
 
 
