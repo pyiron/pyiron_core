@@ -22,3 +22,8 @@ rm -r   ${HOME}/.binder \
         ${HOME}/pyproject.toml \
         ${HOME}/README.md \
         ${HOME}/tsconfig.json
+
+
+# download datasets for the demos
+wget https://github.com/pyiron-workshop/DPG-tutorial-2025/raw/351eeca736cce45f9bc3bfca84ab05de049e38c2/data/mgca.pckl.tgz
+wget https://github.com/pyiron-workshop/DPG-tutorial-2025/raw/351eeca736cce45f9bc3bfca84ab05de049e38c2/data/MgCaFreeEnergies.pckl.gz
