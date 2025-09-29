@@ -66,7 +66,6 @@ def ApplyFunctionToSeries(series: pd.Series, func: Node, store: bool = False):
     """
     import numpy as np
 
-    # print ('map apply: ', func._func, series.iloc[0])
     kwargs = func.kwargs
     first_arg = list(kwargs.keys())[0]
     del kwargs[first_arg]
@@ -83,7 +82,6 @@ def ApplyFunctionToSeriesNew(series: pd.Series, function: Node, store: bool = Fa
     """
     import numpy as np
 
-    # print ('map apply: ', func._func, series.iloc[0])
     kwargs = function.kwargs
     first_arg = list(kwargs.keys())[0]
     del kwargs[first_arg]

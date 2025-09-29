@@ -32,24 +32,6 @@ def DeleteDB(db):
     return db
 
 
-# @as_function_node
-# def remove_row(db, index: int):
-#     from pyiron_core.pyiron_nodes.development import hash_based_storage as hs
-
-#     hs.remove_nodes_from_db(db, indices=[index])
-#     db = hs.create_nodes_table(echo=False)
-#     return db
-
-
-# @as_function_node
-# def query_db(db, query: str):
-#     from pyiron_core.pyiron_nodes.development import hash_based_storage as hs
-#     import json
-
-#     res = hs.db_query_dict(db, json.loads(query))
-#     return res
-
-
 @as_function_node
 def ShowTable(db):
     import pandas as pd

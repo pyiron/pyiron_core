@@ -60,8 +60,6 @@ class GenericOptimizerSettings:
 
 class RelaxMode(Enum):
     VOLUME = "volume"
-    # CELL = "cell"
-    # POSITION = "position"
     FULL = "full"
 
     def apply_filter_and_constraints(self, structure):
@@ -69,8 +67,6 @@ class RelaxMode(Enum):
             case RelaxMode.VOLUME:
                 structure.set_constraint(FixAtoms(np.ones(len(structure), dtype=bool)))
                 return FrechetCellFilter(structure, hydrostatic_strain=True)
-            # case RelaxMode.CELL:
-            #     return FrechetCellFilter(structure, constant_volume=True)
             case RelaxMode.FULL:
                 return FrechetCellFilter(structure)
             case _:
@@ -79,7 +75,6 @@ class RelaxMode(Enum):
                 )
 
 
-# @as_function_node
 def Relax(
     calculator: AseCalculatorConfig,
     opt: GenericOptimizerSettings,

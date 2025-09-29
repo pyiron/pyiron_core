@@ -9,7 +9,6 @@ from pyiron_core.pyiron_workflow import as_function_node
 
 @as_function_node("structure")
 def Repeat(structure: Atoms, repeat_scalar: int = 1) -> Atoms:
-    # print("Repeat: ", type(repeat_scalar), repeat_scalar)
     return structure.repeat(int(repeat_scalar))
 
 
@@ -56,15 +55,3 @@ def RotateAxisAngle(
     structure_rotated = structure.copy()
     structure_rotated.rotate(a=angle, v=axis, center=center, rotate_cell=rotate_cell)
     return structure_rotated
-
-
-# @as_function_node
-# def ase_to_pyiron(structure: Atoms) -> Atoms:
-#     """
-#     Convert an ASE Atoms object to a pyiron Atoms object.
-
-#     :param structure: ASE Atoms object.
-#     :return: pyiron Atoms object.
-#     """
-#     from pyiron import
-#     return PyironAtoms(structure)

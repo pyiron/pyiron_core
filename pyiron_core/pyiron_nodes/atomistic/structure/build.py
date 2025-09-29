@@ -6,8 +6,6 @@ from ase.atoms import Atoms
 
 from pyiron_core.pyiron_workflow import as_function_node, as_macro_node
 
-# from pyiron_core.pyiron_workflow.workflow import Workflow
-
 
 @as_function_node("structure")
 def Bulk(
@@ -228,5 +226,3 @@ def Surface(
             surface.cell[2, 2] = z_max + vacuum
         surface.pbc = pbc
     return ase_to_pyiron(surface)
-    # else:
-    #     raise ValueError(f"Surface type {surface_type} not recognized.")

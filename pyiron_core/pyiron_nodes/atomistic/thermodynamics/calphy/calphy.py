@@ -309,7 +309,6 @@ def SolidFreeEnergy(
     from calphy.solid import Solid
 
     calc = _prepare_input(inp, potential, structure, mode="fe", reference_phase="solid")
-    # os.chdir()
     simfolder = calc.create_folders()
     job = Solid(calculation=calc, simfolder=simfolder)
     job = routine_fe(job)

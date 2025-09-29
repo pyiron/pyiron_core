@@ -235,7 +235,6 @@ def _prepare_input(inp, potential, structure, mode="fe", reference_phase="solid"
         "cores": inpdict["cores"],
     }
     del inpdict["cores"]
-    # inpdict["folder_prefix"] = folder_prefix
 
     if inpdict["md"] is None:
         inpdict["md"] = {

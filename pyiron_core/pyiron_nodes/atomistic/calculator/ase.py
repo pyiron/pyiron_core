@@ -36,7 +36,6 @@ def StaticEnergy(
     structure: Atoms,
     engine: OutputEngine,
 ):
-    # print("structure: ", structure, engine)
     structure.calc = engine.calculator
     energy = structure.get_potential_energy()
 
@@ -51,8 +50,6 @@ def Minimize(
     from ase.optimize import BFGS
 
     from pyiron_core.pyiron_nodes.atomistic.calculator.data import OutputCalcStaticList
-
-    # import numpy as np
 
     if engine is None:
         from ase.calculators.emt import EMT

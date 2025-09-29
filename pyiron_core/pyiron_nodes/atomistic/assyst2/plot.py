@@ -4,11 +4,8 @@ from ase import Atoms
 
 from pyiron_core.pyiron_workflow import as_function_node
 
-# from matplotlib.axis import Axis
-
 
 @as_function_node("plot", use_cache=False)
-# def PlotSPG(structures: list[Atoms]) -> tuple[Axis, list[int]]:
 def PlotSPG(structures: list[Atoms]):
     """Plot a histogram of space groups in input list."""
     import matplotlib.pyplot as plt

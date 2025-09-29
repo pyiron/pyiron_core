@@ -1,10 +1,6 @@
-# from __future__ import annotations
-
 from dataclasses import field
 from typing import Optional
 
-# from pyiron_core.pyiron_nodes.dev_tools import wf_data_class, wfMetaData
-# from pyiron_core.pyiron_nodes.development.node_dataclass import as_output_node
 from pyiron_core.pyiron_workflow import as_inp_dataclass_node, as_out_dataclass_node
 from pyiron_core.pyiron_workflow.data_fields import DataArray, EmptyArrayField
 
@@ -50,7 +46,6 @@ class OutputCalcStatic:
 
 @as_out_dataclass_node
 class OutputCalcStaticList:
-    # from ase import Atoms
     import numpy as np
 
     energies_pot: Optional[np.ndarray] = field(
@@ -69,7 +64,6 @@ class OutputCalcStaticList:
 
 @as_out_dataclass_node
 class OutputCalcMinimize:
-    # energies: Optional[np.ndarray] = field(default=None, metadata=wfMetaData(log_level=0))
     initial: Optional[OutputCalcStatic] = field(
         default_factory=lambda: OutputCalcStatic().dataclass(),
         metadata=wfMetaData(log_level=0),
@@ -147,6 +141,5 @@ class InputCalcMinimize:
 
 @as_inp_dataclass_node()
 class InputCalcStatic:
-    # keys_to_store: Optional[list] = field(default_factory=list)
     pass  # LammpsControl.calc_static takes exactly zero arguments, and currently we
     # have the input objects matching their respective LammpsControl counterparts

@@ -15,7 +15,6 @@ from pymatgen.core import Structure
 from pymatgen.io.vasp.inputs import Incar, Kpoints
 from pymatgen.io.vasp.outputs import Vasprun
 
-# from pyiron_snippets.resources import ResourceResolver
 from pyiron_core.pyiron_nodes.dev_tools import FileObject
 from pyiron_core.pyiron_workflow import Workflow
 
@@ -361,7 +360,6 @@ def vasp_job(
 
 
 def stack_element_string(structure) -> tuple[list[str], list[int]]:
-    # site_element_list = [atom.symbol for atom in atoms]
     site_element_list = [site.species_string for site in structure]
     past_element = site_element_list[0]
     element_list = [past_element]
