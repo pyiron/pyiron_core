@@ -15,7 +15,6 @@ NotData = "NotData"
 
 def get_import_path(obj):
     module = obj.__module__ if hasattr(obj, "__module__") else obj.__class__.__module__
-    # name = obj.__name__ if hasattr(obj, "__name__") else obj.__class__.__name__
     name = obj.__name__ if "__name__" in dir(obj) else obj.__class__.__name__
     path = f"{module}.{name}"
     if path == "numpy.ndarray":
@@ -40,7 +39,6 @@ def dict_to_node(dict_node, log):
     if "position" in dict_node:
         x, y = dict_node["position"].values()
         node.position = (x, y)
-        # print('position exists: ', node.label, node.position)
     else:
         print("no position: ", node.label)
 
@@ -103,8 +101,6 @@ def get_node_types(node_io):
 def get_node_position(node, id_num, node_width=200, y0=100, x_spacing=30):
     if "position" in dir(node):
         x, y = node.position
-        # if isinstance(x, str):
-        #     x, y = 0, 0
     else:
         x = id_num * (node_width + x_spacing)
         y = y0
@@ -119,7 +115,6 @@ def _to_jsonifyable(obj):
         return obj.tolist()
     elif isinstance(obj, Port):
         value = obj.value
-        # print("value: ", obj._to_dict())
         if isinstance(value, (str, int, float, bool)):
             return value
         else:
@@ -151,8 +146,6 @@ def get_node_dict(node, id_num, key=None):
         for v in node.inputs.data["value"]
     ]
     is_connected = [_is_connected(v) for v in node.inputs.data["value"]]
-    # print("is_connected: ", is_connected)
-    # source_values = [v if not isinstance(v, Node) else 'NotData' for v in node.outputs.data['value']]
     source_values = [NotData for _ in node.outputs.data["value"]]
     # TODO: set to None if it contains an edge (include connected parameter)
     target_types = [
@@ -160,7 +153,6 @@ def get_node_dict(node, id_num, key=None):
         for t, connected in zip(node.inputs.data["type"], is_connected, strict=True)
     ]
     import_path = node.function["import_path"]
-    # print('import_path: ', import_path)
 
     return {
         "id": node.label,
@@ -191,7 +183,6 @@ def get_node_dict(node, id_num, key=None):
 def get_nodes(wf):
     nodes = []
     for i, (key, node) in enumerate(wf._nodes.items()):
-        # print(node_dict)
         nodes.append(get_node_dict(node, id_num=i, key=key))
     return nodes
 
@@ -199,7 +190,6 @@ def get_nodes(wf):
 def get_node_from_path(import_path, log=None):
     # Split the path into module and object part
     module_path, _, name = import_path.rpartition(".")
-    # print('module_path: ', module_path)
     # Import the module
     try:
         module = importlib.import_module(module_path)

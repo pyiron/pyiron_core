@@ -72,7 +72,6 @@ class TreeView:
         if isinstance(self.path, str):
             self.path = Path(root_path)
 
-        # print ('TreeView: ', self.path)
         self.flow_widget = flow_widget
         self.log = log  # logging widget
 
@@ -104,7 +103,6 @@ class TreeView:
         self._handle_click_is_last_event = False
 
         selected_node = event["owner"]
-        # self.log.append_stdout(f'handle_click ({selected_node.path}, {selected_node.name}) \n')
 
         if selected_node.icon in ["codepen", "table"]:
             selected_node.on_click(selected_node)
@@ -112,14 +110,12 @@ class TreeView:
             self.add_nodes(selected_node, selected_node.path)
 
     def on_click(self, node):
-        # self.log.append_stdout(f'on_click.add_node_init ({node.path}, {node.path.name}) \n')
         path = (
             get_rel_path_for_last_occurrence(node.path.path, "pyiron_core")
             / node.path.name
         )
         path_str = str(path).replace("/", ".")
         if self.flow_widget is not None:
-            # self.log.append_stdout(f'on_click.add_node ({str(path_str)}, {node.path.name}) \n')
             print(f"on_click.add_node ({str(path_str)}, {node.path.name})")
             self.flow_widget.add_node(str(path_str), node.path.name)
 
@@ -234,7 +230,6 @@ class TreeView:
 
         for node in ast.walk(tree):
             if isinstance(node, (ast.FunctionDef, ast.ClassDef)):
-                # print('node: ', node, isinstance(node, ast.FunctionDef), isinstance(node, ast.ClassDef))
                 for decorator in node.decorator_list:
                     # check if decorator is a function call like @as_function_node()
                     if (
@@ -242,7 +237,6 @@ class TreeView:
                         and hasattr(decorator.func, "id")
                         and decorator.func.id in decorators
                     ):
-                        # print('decorator.func.id: ', decorator.func.id, node.name)
                         node_name = node.name
                         if isinstance(node, ast.ClassDef):
                             func_node = DataClassNode(
@@ -255,7 +249,6 @@ class TreeView:
                         nodes.append(func_node)
                     # check if decorator is a simple attribute like @as_function_node
                     elif hasattr(decorator, "id") and decorator.id in decorators:
-                        # print('decorator.class.id: ', decorator.id, node.name)
                         node_name = node.name
                         if isinstance(node, ast.ClassDef):
                             func_node = DataClassNode(
