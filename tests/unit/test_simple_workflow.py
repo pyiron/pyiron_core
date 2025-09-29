@@ -4,6 +4,8 @@ import time
 import unittest
 from collections import OrderedDict
 
+from static import nodes, not_nodes
+
 import pyiron_core.pyiron_database.api as pyiron_database
 from pyiron_core.pyiron_workflow.simple_workflow import (
     PORT_LABEL,
@@ -16,7 +18,6 @@ from pyiron_core.pyiron_workflow.simple_workflow import (
     make_node_decorator,
     value_to_string,
 )
-from static import nodes, not_nodes
 
 
 @as_function_node

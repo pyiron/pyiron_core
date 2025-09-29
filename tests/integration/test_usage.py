@@ -2,9 +2,10 @@ import contextlib
 import os
 import unittest
 
+from static import nodes, other_nodes
+
 import pyiron_core.pyiron_workflow as pwf
 from pyiron_core.pyiron_workflow.graph import base, graph_json, group, labelling, run
-from static import nodes, other_nodes
 
 
 class TestUsage(unittest.TestCase):

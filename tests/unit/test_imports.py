@@ -1,8 +1,9 @@
 import unittest
 
+from static import nodes
+
 from pyiron_core.pyiron_workflow import imports
 from pyiron_core.pyiron_workflow.api import serial
-from static import nodes
 
 
 def pseudo_subgraph(): ...
