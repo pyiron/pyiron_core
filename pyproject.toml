@@ -127,6 +127,8 @@ select = [
     "I",
     # flake8-comprehensions
     "C4",
+    # eradicate
+    "ERA",
 ]
 ignore = [
     # ignore line-length violations -- let black care about this
