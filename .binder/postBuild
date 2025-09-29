@@ -1,5 +1,9 @@
 pip install . --no-deps --no-build-isolation
 
+# setup customized kernel
+mkdir -p ${HOME}/.local/share/jupyter/kernels/pyiron_core
+cp ${HOME}/.binder/kernel.json ${HOME}/.local/share/jupyter/kernels/pyiron_core
+
 # clean up
 mv ${HOME}/.binder/demo.ipynb .
 mv ${HOME}/stored_workflows/demos/* .
@@ -25,7 +29,6 @@ rm -r   ${HOME}/.binder \
         ${HOME}/pyproject.toml \
         ${HOME}/README.md \
         ${HOME}/tsconfig.json
-
 
 # download datasets for the demos
 wget https://github.com/pyiron-workshop/DPG-tutorial-2025/raw/351eeca736cce45f9bc3bfca84ab05de049e38c2/data/mgca.pckl.tgz
