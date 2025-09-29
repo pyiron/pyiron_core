@@ -3,6 +3,7 @@ channels:
 dependencies:
 # Let's sort dependencies with comments -- but take the sorting with a grain of salt
 # Build and develop
+- python >=3.11,<3.14
 - hatchling =1.27.0
 - hatch-vcs =0.5.0
 - hatch-jupyter-builder >=0.5.0
