@@ -77,8 +77,7 @@ assyst = [
 [tool.hatch.build]
 only-packages = true
 artifacts = [
-    "pyiron_core/*",
-    "static/*",
+    "pyiron_core/static/*",
 ]
 
 [tool.hatch.build.hooks.vcs]
@@ -91,10 +90,10 @@ path = "pyiron_core/_version.py"
 [tool.hatch.build.hooks.jupyter-builder]
 build-function = "hatch_jupyter_builder.npm_builder"
 ensured-targets = [
-    "static/widget.js",
-    "static/widget.css"
+    "pyiron_core/static/widget.js",
+    "pyiron_core/static/widget.css"
 ]
-skip-if-exists = ["static/widget.js"]
+skip-if-exists = ["pyiron_core/static/widget.js"]
 dependencies = ["hatch-jupyter-builder>=0.5.0"]
 
 [tool.hatch.build.hooks.jupyter-builder.build-kwargs]
