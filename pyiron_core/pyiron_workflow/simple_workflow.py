@@ -22,10 +22,7 @@ PORT_VALUE = "value"
 PORT_DEFAULT = "default"
 PORT_TYPE = "type"
 
-# class NotData:
-#     def __repr__(self):
-#         return 'empty port'
-NotData = "NotData"  # __empty"
+NotData = "NotData"
 
 
 class DotDict(collections.OrderedDict):
@@ -131,20 +128,6 @@ def extract_output_parameters_from_function(func):
 
     return output_dict
 
-
-# class NoDefaultValue:
-#     def __repr__(self):
-#         return 'empty'
-
-#     def to_dict(self):
-#         return {
-#             '__class__': self.__class__.__name__,
-#             'representation': str(self)
-#         }
-
-
-# Define a sentinel value. This should be a unique object that you're sure won't be used as a real default value.
-# no_default = "__empty"  # NoDefaultValue()
 
 PortTypeValue: TypeAlias = Literal[
     "int",
@@ -267,15 +250,13 @@ def extract_input_parameters_from_function(function: callable) -> dict:
         type_hint = type_hints.get(
             name, _NotHinted
         )  # TODO: keep here the full type info (use type_hint_to_string only when converting to gui)
-        # print("type_hint: ", type_hint)
         labels.append(name)
         types.append(type_hint_to_string(type_hint))
 
         if parameter.default is inspect.Parameter.empty:
-            defaults.append(NotData)  # no_default)
+            defaults.append(NotData)
         else:
             defaults.append(parameter.default)
-    # print('types: ', types)
     output_dict = {}
     output_dict[PORT_LABEL] = labels
     output_dict[PORT_TYPE] = types
@@ -343,8 +324,6 @@ class Attribute:
 
     def __setattr__(self, key, value):
         logging.debug("Attribute.__setattr__", key, value)
-        # if self.__read_only:
-        #     raise AttributeError("This Attribute instance is read-only")
         if key.startswith("_Attribute__"):
             self.__dict__[key] = value
         else:
@@ -361,7 +340,6 @@ class Attribute:
 
     def __repr__(self):
         return pd.Series(self._to_dict()).__repr__()
-        # return self._to_dict().__repr__()
 
 
 class Port(Attribute):
@@ -372,9 +350,6 @@ class Port(Attribute):
     def value_changed(self, value):
         self.ready = True
         logging.debug("value changed: value", value)
-
-    # def __repr__(self):
-    #     return f"<Port id={self.labels} value={self.value} ready={self.ready}>"
 
 
 @dataclasses.dataclass
@@ -416,10 +391,6 @@ class DataElement:
             upstream_node = self.value.node
             upstream_port_label = self.value.label
         elif isinstance(self.value, Node):
-            # if self.type == "Node":
-            #     raise NotImplementedError(
-            #         "Cf. https://github.com/JNmpi/pyiron_core/issues/19"
-            #     )
             upstream_node = self.value
             upstream_port_label = self.value.inputs.data[PORT_LABEL][0]
         return [Connection(upstream_node, upstream_port_label)]
@@ -427,13 +398,11 @@ class DataElement:
     def type_hint(self, v):
 
         if isinstance(self.type, str):
-            # print('type: ', self.type, v)
             if self.type == "builtins.NoneType":
                 # let the deserializer handle NoneType
                 return v
             if self.type.endswith(NODE_CLASS_NAME_POSTFIX):
                 my_type = self.type.replace(NODE_CLASS_NAME_POSTFIX, "")
-                # print('type: ', my_type, v)
                 return eval(my_type)().dataclass(**v["__getstate__"])
             return eval(self.type)(v)
         return self.type(v)
@@ -446,7 +415,6 @@ class Data:
         self._attribute = attribute
 
     def __getattr__(self, key):
-        # print('Data.__getattr__: ', key, self.data[PORT_LABEL])
         if key not in self.data[PORT_LABEL]:
             raise AttributeError(f"No attribute named {key}")
 
@@ -459,7 +427,6 @@ class Data:
             raise AttributeError(f"No attribute named {key}")
         else:
             attribute = self.__getattr__(key)
-            # print("Data.__setattr__: ", key, id(attribute))
             attribute.__setattr__(PORT_VALUE, value)
 
     def __setitem__(self, key, value):
@@ -486,7 +453,6 @@ class Data:
         element = DataElement(
             label=key,
             type=self.data[PORT_TYPE][index],
-            # value=self.data[PORT_VALUE][index],
             ready=self.data["ready"][index],
             _data=self.data,
         )
@@ -574,7 +540,6 @@ class Node:
                 zip(outs, output_labels, strict=True)
             ):
                 if label_outs is None:
-                    # self.outputs.data[PORT_LABEL][i] = label_out
                     outs[i] = label_out
 
         # validate that all output labels are given and unique
@@ -586,9 +551,6 @@ class Node:
             )
         if None in self.outputs.data[PORT_LABEL]:
             raise ValueError("Node creator: Output labels must be given")
-
-        # print("node_output_labels: ", output_labels)
-        # print("node_outputs_labels: ", self.outputs.data[PORT_LABEL], self.label)
 
     @property
     def kwargs(self):
@@ -609,10 +571,8 @@ class Node:
         return len(self.inputs.data[PORT_LABEL])
 
     def _get_value(self, inp_port, inp_type):
-        # print("get_value: ", inp_type, type(inp_port))
         # this is the function that realizes nodes as inputs
-        # -> analogous to higher order functions in functional programming"
-        # node_type_as_str = imports.get_import_path_from_type(Node)
+        # -> analogous to higher order functions in functional programming
         if isinstance(inp_port, Node):
             # check whether input type is a node (provide node rather than node output value)
             if inp_type == "Node":  # node_type_as_str:
@@ -622,13 +582,11 @@ class Node:
 
                 try:
                     hash = pyiron_database.get_hash(inp_port)
-                    # inp_port._hash_parent = hash
                 except Exception as e:
                     print("Error getting hash for node:", inp_port.label, e)
                     hash = None
                 inp_port._hash_parent = hash
                 print("copy node: ", val.label, inp_port._hash_parent)
-                # print("copy node: ", val.label)
             else:
                 val = inp_port.outputs.data["value"][0]
         elif isinstance(inp_port, Port):
@@ -642,7 +600,6 @@ class Node:
                 hash = pyiron_database.get_hash(val)
                 val._hash_parent = hash
                 print("copy node (port): ", val.label, val._hash_parent)
-                # print("copy port: ", val.label, val.inputs)
             else:
                 val = inp_port.value
 
@@ -666,13 +623,6 @@ class Node:
         out = self.run()
         return out  # self.run()
 
-    # def __getstate__(self):
-    #     state = dict(
-    #         label=self.label,
-    #         import_path=self.function.import_path,
-    #     )
-    #     return state
-
     def _set_state(self, state):
         pass
 
@@ -687,7 +637,6 @@ class Node:
                 restored = False
                 try:
                     restored = pyiron_database.restore_node_outputs(self)
-                    # print("restored: ", restored)
                 except FileNotFoundError:
                     print("No stored data found for node: ", self.label)
                 except Exception as e:
@@ -699,7 +648,6 @@ class Node:
                         return self.outputs.data[PORT_VALUE][0]
                     # TODO: check if tuple rather than list is needed
                     return self.outputs.data[PORT_VALUE]
-            # print("node_0: ", self.inputs.node.value.node.inputs)
 
         self._start_time = datetime.now()
         self._validate_input()
@@ -764,18 +712,15 @@ class Node:
             self.outputs.data["ready"][i] = True
 
     def _run(self):
-        # print("node_run: ", self.label, self.kwargs, self._func)
         return self._func(**self.kwargs)
 
     # TODO: quick fix only, needs serious update based on workflow graph analysis
     def pull(self):
         if self._workflow is not None:
             out = wf_graph_tools.pull_node(self._workflow, self.label)
-            # self._workflow.run()
         else:
             out = self.run()
         return out
-        # return self.outputs.data[PORT_VALUE]
 
     def _get_non_default_input(self):
         return {
@@ -807,7 +752,6 @@ class Node:
     @classmethod
     def from_dict(cls, node_dict):
         node = get_node_from_path(node_dict["function"])(**node_dict["inputs"])
-        # print("inputs: ", node_dict["inputs"], node.inputs)
         return node
 
     def copy(self):
@@ -867,12 +811,10 @@ def get_inputs_data(func, extract_input_parameters, *args, **kwargs):
     data = add_field(
         data=extract_input_parameters(func), ready=False, value=NotData  # PORT_VALUE
     )
-    # print("default: ", data[PORT_DEFAULT])
     values_default = [
         (default if not _is_equal_to_string(default, NotData) else NotData)
         for default in data[PORT_DEFAULT]
     ]
-    # print("default: ", data[PORT_DEFAULT], values_default)
 
     args_list = list(args)  # Convert args (a tuple) into a list
 
@@ -888,7 +830,6 @@ def get_inputs_data(func, extract_input_parameters, *args, **kwargs):
     ]
 
     ready = [not _is_equal_to_string(value, NotData) for value in values]
-    # print("values: ", values, args_list, kwargs, ready, values_default)
 
     data = add_field(data, value=values, ready=ready)  # PORT_VALUE
     inputs = Data(data, attribute=Port)
@@ -928,15 +869,11 @@ def make_node_decorator(inner_wrap_return_func, node_type="function_node"):
     """
 
     def _node_decorator(*args, **kwargs):
-        # label = None
 
         def wrapper(func=None):
-            # func_print = func
             if kwargs and "labels" in kwargs:
-                # print("kwargs", kwargs)
                 output_labels = kwargs["labels"]
             elif args:
-                # print("args", args, isinstance(args[0], str))
                 if isinstance(args[0], str):
                     output_labels = list(args)
                 elif isinstance(args[0], list):
@@ -944,37 +881,27 @@ def make_node_decorator(inner_wrap_return_func, node_type="function_node"):
                 else:
                     output_labels = None
             else:
-                # print("no labels")
                 output_labels = None
 
             if isinstance(output_labels, str):
                 output_labels = [output_labels]
-            # print("output_labels: ", output_labels)
-
-            # print('output_labels',  output_labels)
-            # print('all: ', args, type(args), len(args), kwargs, output_labels, func)
 
             @functools.wraps(func)
             def inner_wrapper(*f_args, **f_kwargs):
                 import copy
 
-                # print('inner: ', f_args, f_kwargs, inspect.getsource(func))
                 if hasattr(func, "__wrapped__"):
                     print("wrapped: ", func.__wrapped__)
 
                 cf_kwargs = copy.copy(f_kwargs)
-                # print("inner_wrapper: ", inner_wrap_return_func)
                 label = None
                 if "label" in f_kwargs:
                     label = f_kwargs["label"]
                     del cf_kwargs["label"]
-                # print('inner2: ', f_args, f_kwargs, cf_kwargs)
                 return inner_wrap_return_func(
                     func, label, output_labels, node_type, *f_args, **cf_kwargs
                 )
 
-            # if hasattr(func, "__wrapped__"):
-            #     print('wrapped: ', func.__wrapped__)
             inner_wrapper.__name__ += NODE_CLASS_NAME_POSTFIX
             inner_wrapper.__qualname__ += NODE_CLASS_NAME_POSTFIX
 
@@ -985,11 +912,9 @@ def make_node_decorator(inner_wrap_return_func, node_type="function_node"):
         else:  # decorating with arguments
             return wrapper
 
-    # print("_node_decorator", _node_decorator)
     return _node_decorator
 
 
-# as_function_node decorator
 def _return_as_function_node(
     func, label, output_labels, node_type, *f_args, **f_kwargs
 ):
@@ -1009,7 +934,6 @@ def _return_as_function_node(
 as_function_node = make_node_decorator(_return_as_function_node, "function_node")
 
 
-# as_inp_dataclass_node decorator
 def _return_as_inp_dataclass_node(
     func, label, output_labels, node_type, *f_args, **f_kwargs
 ):
@@ -1042,7 +966,6 @@ as_inp_dataclass_node = make_node_decorator(
 )
 
 
-# as_out_dataclass_node decorator
 def _return_as_out_dataclass_node(
     func, label, output_labels, node_type, *f_args, **f_kwargs
 ):
@@ -1068,7 +991,6 @@ def _return_as_out_dataclass_node(
         else:
             return dataclasses.dataclass(func)()
 
-    # print("func: ", func(), is_dataclass(func()))
     return Node(
         func=func_dataclass,
         inputs=Data(
@@ -1098,7 +1020,6 @@ as_out_dataclass_node = make_node_decorator(
 
 # macro node decorator
 def _return_as_macro_node(func, label, output_labels, node_type, *f_args, **f_kwargs):
-    # print("macro: ", inspect.getsource(func))
     node = _return_as_function_node(
         func, label, output_labels, node_type, *f_args, **f_kwargs
     )
@@ -1124,13 +1045,10 @@ class Workflow:
         super().__setattr__("_nodes", collections.OrderedDict())
         super().__setattr__("_edges", [])
         super().__setattr__("label", label)
-        # super().__setattr__("workflow_dir", workflow_dir)
         super().__setattr__("_protected_names", ["add_node", "label", "run"])
 
     def add_node(self, label, node):
-        # print(f"Adding node with value: {node} {self.child_labels}")
         if label in self.child_labels:
-            # print(f"Node with label {label} already exists")
             # Split the original label and the counter if it ends with a number
             parts = label.rsplit("_", 1)
             if len(parts) > 1 and parts[-1].isdigit():
@@ -1146,14 +1064,11 @@ class Workflow:
                 counter += 1
                 label = f"{base_label}_{counter}"
 
-            # print(f"New label: {label}")
-
         node.label = label
         node._workflow = self
 
         self._nodes[label] = node
         super().__setattr__(label, node)
-        # print(f"Node added: {label} {self.child_labels} {node.label}")
         self._get_edges(node)
 
     def remove_node(self, label):
@@ -1185,24 +1100,20 @@ class Workflow:
             if label in self.child_labels:
                 raise ValueError(f"Node with label {label} already exists")
             self.add_node(label=label, node=value)
-            # else:
-            # If the attribute is not "node", use the regular attribute setting mechanism
             super().__setattr__(label, value)
 
     def _get_edges(self, node):
         values = node.inputs.data[PORT_VALUE]
         labels = node.inputs.data[PORT_LABEL]
         for label, value in zip(labels, values, strict=True):
-            # print('ports: ', l, type(v))
             if isinstance(value, Port):
                 source = value.node.label
                 sourceHandle = value.label
                 target = node.label
-                targetHandle = label  # v.label
+                targetHandle = label
             elif isinstance(value, Node):
                 source_node = value
                 source = source_node.label
-                # print('source_node: ', source_node, source_node.outputs.data[PORT_LABEL], node.label)
                 if source_node.n_out_labels == 1:
                     sourceHandle = source_node.outputs.data["label"][0]
                 else:
@@ -1222,7 +1133,6 @@ class Workflow:
                 "targetHandle": targetHandle,
             }
             self._edges.append(edge)
-            # print(f"{source}/{sourceHandle} -> {target}/{targetHandle}")
             logging.info(f"{source}/{sourceHandle} -> {target}/{targetHandle}")
 
     def _set_edges(self, value):
@@ -1238,10 +1148,7 @@ class Workflow:
             target_node = self._nodes[target]
 
             ind_label = target_node.inputs.data[PORT_LABEL].index(targetHandle)
-            num_outputs = (
-                source_node.n_out_labels
-            )  # len(source_node.outputs.data[PORT_LABEL])
-            # print('set_edges: ', source, target, targetHandle, ind_label, num_outputs, source_node.outputs.data[PORT_LABEL])
+            num_outputs = source_node.n_out_labels
             if num_outputs == 1:
                 target_node.inputs.data[PORT_VALUE][ind_label] = source_node
             elif num_outputs > 1:

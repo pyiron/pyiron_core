@@ -75,19 +75,12 @@ def rename_node(graph: base.Graph, old_label: str, new_label: str):
     for node in new_graph.nodes.values():
         if node.parent_id == old_label:
             node.parent_id = new_label
-        # if node.label.startswith("va_"):
-        #     label = node.label.split("__")[0][len("va_i_"):]
-        #     param = node.label.split("__")[1:]
-        #     print("label:", label, "param:", param)
 
-    # updated_edges = []
     for e in new_graph.edges:
         if e.source == old_label:
             e.source = new_label
         if e.target == old_label:
             e.target = new_label
-        # updated_edges.append(e)
-    # new_graph.edges = updated_edges
     return new_graph
 
 
@@ -143,7 +136,7 @@ class PyironFlowWidget:
         self.tree_widget.flow_widget = self
 
         self.accordion_widget = widgets.Accordion(
-            layout={  # 'border': '1px solid black',
+            layout={
                 "height": f"{gui_layout.flow_widget_height}px",
                 "overflow": "auto",
             },
@@ -181,7 +174,6 @@ class PyironFlowWidget:
 
         import logging
 
-        # self.out_widget.clear_output()
         out = None
         with self.log_widget:
             with warnings.catch_warnings():
@@ -190,7 +182,6 @@ class PyironFlowWidget:
                 # Suppress DEBUG messages from pyiron_log
                 logging.getLogger("pyiron_log").setLevel(logging.WARNING)
 
-                # print("command: ", change["new"])
                 command, node_name = change["new"].split(":", 1)
                 command = command.strip()
                 node_name = node_name.rsplit("-", 1)[0].strip()
@@ -233,7 +224,6 @@ class PyironFlowWidget:
                     self.update_gui()  # ???
                 elif command == "selected_nodes":
                     self._selected_nodes = node_name.split(",")
-                    # print("selected_nodes: ", self._selected_nodes)
                 elif command == "groupSelectedNodes":
                     print("group_nodes: ", self._selected_nodes)
                     self.graph = group.create_group(self.graph, self._selected_nodes)
@@ -245,7 +235,6 @@ class PyironFlowWidget:
                 elif command == "add_edge":
                     print("add_edge: ", node_name)
                     self.graph += self._parse_edge_string(node_name)
-                    # self.update_gui()
                     self.main_widget.redraw()
                 elif command == "delete_node":
                     print("delete_node: ", node_name)
@@ -293,7 +282,6 @@ class PyironFlowWidget:
                             base.get_updated_graph(self.graph), node.label, db=self.db
                         )
 
-                        # display(out)
                     elif command in ["expand", "collapse"]:
                         if self.graph.nodes[node_name].expanded:
                             self.graph = _mark_node_as_collapsed(self.graph, node_name)
@@ -374,10 +362,8 @@ class PyironFlow:
         if wf_list is None:
             wf_list = [base.Graph(label="Workflow")]
 
-        # self._gui_layout = gui_layout
         self.hash_nodes = hash_nodes
         if hash_nodes:
-            # self.db = hs.create_nodes_table(echo=False)
             self.db = create_db() if db is None else db
             print(f"Database created: {self.db}")
         else:
@@ -410,7 +396,7 @@ class PyironFlow:
             display(wf.accordion_widget)
 
         self.h_scroll = widgets.IntSlider(
-            value=10,  # gui_layout.output_widget_width,
+            value=10,
             min=0,
             max=gui_layout.flow_widget_width + gui_layout.output_widget_width,
             readout=False,
@@ -500,7 +486,6 @@ class PyironFlow:
                     list(self.tab_widget.titles[:-2])
                     + [self.wf_widgets[-1].graph.label, "+"]
                 ):
-                    # print(f"Setting title {i} to {title}")
                     self.tab_widget.set_title(i, title)
 
             selected_index = self.tab_widget.selected_index
@@ -520,7 +505,6 @@ class PyironFlow:
         wf_widget.update_graph_view(sleep_time=0.1)
         time.sleep(0.2)
         print("redraw_reset: ", wf_widget.graph.label)
-        # wf_widget.graph = base.get_updated_graph(graph)
         wf_widget.graph = graph
         wf_widget.update_graph_view()
 
@@ -576,7 +560,6 @@ def _to_jsonifyable(obj):
         return obj.tolist()
     elif isinstance(obj, simple_workflow.Port):
         value = obj.value
-        # print("value: ", obj._to_dict())
         if isinstance(value, (str, int, float, bool)):
             return value
         else:
@@ -638,7 +621,6 @@ def _nodes_to_gui(graph: base.Graph, remove_none=True) -> decorators.NestedList:
     node_width = 280
     nodes = decorators.NestedList()
     active_nodes = _get_active_nodes(graph)
-    # determine max_x pos
     max_x = max(
         (getattr(v, "position", {}).get("x", 0) for v in active_nodes.values()),
         default=0,
@@ -685,7 +667,6 @@ def _nodes_to_gui(graph: base.Graph, remove_none=True) -> decorators.NestedList:
             # light blue
             node_dict.style["backgroundColor"] = "rgba(100, 100, 255, 0.3)"
 
-        # if not v.expanded:  # for testing automated layout
         nodes.append(node_dict.asdict(remove_none=remove_none))
     return nodes
 
@@ -697,56 +678,6 @@ def _get_node_height(node: simple_workflow.Node) -> int | float:
         n_max_ports = max(node.n_out_labels, node.n_inp_labels)
         height = 30 + 20 * n_max_ports
     return height
-
-
-# def _nodes_to_gui(graph: base.Graph, remove_none=True) -> decorators.NestedList:
-#     node_width = 280
-
-#     nodes = decorators.NestedList()
-#     active_nodes = _get_active_nodes(graph)
-#     for i, (k, v) in enumerate(active_nodes.items()):
-#         # print("gui node: ", k, v.label, v.expanded)
-#         # print('node: ', k, v.label, v.node.label)
-#         node_dict = GuiNode(
-#             id=k,
-#             data=gui_data(v.node, key=k, expanded=v.expanded).asdict(
-#                 remove_none=remove_none
-#             ),
-#             position=dict(x=i * (node_width + 20), y=0),
-#             style=GuiStyle(width=node_width, height=_get_node_height(v.node)).asdict(
-#                 remove_none=remove_none
-#             ),
-#             targetPosition="left",
-#             sourcePosition="right",
-#             type=v.widget_type,
-#             expanded=v.expanded,
-#         )
-#         if v.expanded:
-#             node_dict["type"] = "customNode"
-#             node_dict["data"] = GuiData(label=v.label, expanded=True).asdict(
-#                 remove_none=remove_none
-#             )
-#         if v.parent_id is not None:
-#             node_dict.parentId = v.parent_id
-#             node_dict.extent = "parent"
-
-#         if v.node_type == "graph":
-#             node_dict.type = "customNode"  # None
-#             node_dict.style["backgroundColor"] = "rgba(255, 165, 0, 0.3)"
-#         elif labelling.is_virtual(v.label):
-#             node_dict.style["border"] = "1px black dashed"
-#             node_dict.style["backgroundColor"] = "rgba(50, 50, 50, 0.1)"
-#         elif v.node.node_type == "out_dataclass_node":
-#             # light purple
-#             node_dict.style["backgroundColor"] = "rgba(200, 200, 255, 0.3)"
-#         elif v.node.node_type == "inp_dataclass_node":
-#             # light blue
-#             node_dict.style["backgroundColor"] = "rgba(100, 100, 255, 0.3)"
-
-#         # if not v.expanded:  # for testing automated layout
-#         nodes.append(node_dict.asdict(remove_none=remove_none))
-
-#     return nodes
 
 
 def _get_child_dict(graph, node):
@@ -869,11 +800,9 @@ class GuiGraph:
         self._sleep = sleep
 
     def on_value_change(self, change):
-        # print("print command: ", change["new"])
         command, node_name = change["new"].split(":")
         if command == "finished":
             self._reactflow_widget_status = "done"
-            # print("done")
 
     def _update_graph_view(self, w):
         w.observe(self.on_value_change, names="commands")
@@ -881,7 +810,6 @@ class GuiGraph:
 
         opt_graph = base.copy_graph(self.graph)
         data = {
-            #    label=graph.label,
             "nodes": _nodes_to_gui(opt_graph),
             "edges": _edges_to_gui(opt_graph),
             "graph": _graph_to_gui(opt_graph),

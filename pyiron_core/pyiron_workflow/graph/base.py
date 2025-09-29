@@ -47,7 +47,6 @@ from pyiron_core.pyiron_workflow.simple_workflow import (
 def get_node_from_path(import_path, log=None):
     # Split the path into module and object part
     module_path, _, name = import_path.rpartition(".")
-    # print('module_path: ', module_path)
     # Import the module
     try:
         module = importlib.import_module(module_path)
@@ -67,7 +66,6 @@ def _getstate__graph_node(self):
     node_dict = {k: self[k] for k in self.keys() if k != "node"}
     if self.node is not None:
         node_dict["node"] = self.node.__getstate__()
-    # node_dict["node"] = self.node.__getstate__()
     if self.graph is not None:
         node_dict["graph"] = self.graph.__getstate__()
     return node_dict
@@ -81,21 +79,16 @@ def _setstate__graph_node(self, state):
             )
         elif k == "graph":
             if v is not None:
-                # print(f"Setting graph: {v}")
                 self.graph = Graph().__setstate__(v)
-            # print("setting graph: ", v, state)
-            # self.graph = Graph().__setstate__(v)
         else:
             self[k] = v
 
     if self.node is None:
-        # print(f"node is None: {self}")
         if self.graph is not None and not is_virtual(self.graph.label):
             self.label = self.graph.label
             self.node = graph_to_node(self.graph)
 
     if self.node is not None:
-        # print(f"node is not None: set NodeGraph {self.node.label}, {self.label}")
         self.node._graph_node = self
 
     return self
@@ -117,8 +110,6 @@ class GraphNode:
     expanded: bool = False  # expanded or collapsed state
 
 
-# Nodes = NestedDict[str, GraphNode]
-# Edges = NestedList[str, GraphEdge]
 class Nodes(NestedDict):
     def __init__(self, obj_type=GraphNode):
         super().__init__(obj_type=obj_type)
@@ -162,7 +153,6 @@ def _setstate__graph(self, state):
     # instantiate virtual macros in node.node using node.graph
     for key, node in self.nodes.items():
         if node is not None and node["node"] is None and not is_virtual(key):
-            # print(f"key: {key}, node: {node}")
             graph = node.graph
             node.node = graph_to_node(graph)
     return self
@@ -221,7 +211,6 @@ def add_node(
 
     if isinstance(node, Node):
         if node.node_type == "macro_node":
-            # print(f"Adding macro node {label}")
             macro_graph = get_graph_from_macro_node(node)
             new_graph = _add_graph_instance(
                 graph,
@@ -328,7 +317,6 @@ def _add_node_instance(graph: Graph, node, label):
 def _add_graph_instance(graph: Graph, sub_graph: Graph, label: str = None, node=None):
     new_graph = copy_graph(graph)
     sub_graph.label = label
-    # print('sub_graph: ', sub_graph.label, sub_graph.label)
 
     if node is None:
         if sub_graph.root_node is None:
@@ -338,7 +326,6 @@ def _add_graph_instance(graph: Graph, sub_graph: Graph, label: str = None, node=
             sub_graph_node = sub_graph.root_node
 
         node = sub_graph_node
-        # node = sub_graph.root_node
         import_path = None
     else:
         import_path = imports.get_import_path_from_type(node._func)
@@ -393,7 +380,6 @@ def _update_target_port(graph: Graph, edge: GraphEdge):
             edge.sourceHandle
         )
         graph.nodes[edge.target].node.inputs.__setattr__(edge.targetHandle, source_port)
-    # print(f"updated target port {edge.targetHandle} in node {edge.target}, {source_port}")
     return graph
 
 
@@ -421,7 +407,6 @@ def _expand_node(graph, node_label: str):
 ####################################################################################################
 def remove_node_with_reconnected_edges(graph: Graph, node_label: str) -> Graph:
     new_graph = copy_graph(graph)
-    # node = new_graph.nodes[node_label]
     # find single target edge to node
     source_nodes = []
     source_node_labels = []
@@ -429,7 +414,6 @@ def remove_node_with_reconnected_edges(graph: Graph, node_label: str) -> Graph:
         if edge.target == node_label:
             source_node = new_graph.nodes[edge.source]
             if source_node.label in source_node_labels:
-                # print(f"Source node {source_node.label} already connected to {node_label}")
                 continue
             source_node_labels.append(source_node.label)
             source_nodes.append(source_node)
@@ -442,7 +426,6 @@ def remove_node_with_reconnected_edges(graph: Graph, node_label: str) -> Graph:
 
     if len(source_nodes) == 1:
         source_node = source_nodes[0]
-        # print(f"Found source node {source_node.label}", inner_edge)
 
         for edge in new_graph.edges:
             if edge.source == node_label:
@@ -452,12 +435,9 @@ def remove_node_with_reconnected_edges(graph: Graph, node_label: str) -> Graph:
                     source_handle,
                     edge.targetHandle,
                 )
-                # print(f"Rewiring edge {edge} to {new_edge}")
                 new_graph.edges.append(new_edge)
 
         remove_edge(new_graph, inner_edge)
-    # else:
-    #     print(f"Node {node_label} has no source nodes")
 
     del new_graph.nodes[node_label]
     return new_graph
@@ -477,13 +457,11 @@ def get_graph_from_wf(
     if wf_label is None:
         wf_label = wf.label
 
-    # print("wf_label: ", wf_label)
     graph = Graph(label=wf_label)
 
     for label, node in wf._nodes.items():
         # TODO: node input changes due to rewiring edges!
         # Should be copied but in the present implementation deepcopy does not work
-        # print(f"Adding node {label}")
         graph = add_node(graph, node, label=label)
 
         data = node.inputs.data
@@ -495,10 +473,8 @@ def get_graph_from_wf(
             handle = data["label"][i]
             if not isinstance(value, (Node, Port)):
                 if isinstance(value, str) and is_virtual_input(value):
-                    # print(f"Adding input node {handle}", value)
                     inp_node_label = value
                     if inp_node_label not in graph.nodes:
-                        # print(f"Adding input node {inp_node_label}")
                         graph += identity(label=inp_node_label)
 
                     edge = GraphEdge(
@@ -513,7 +489,6 @@ def get_graph_from_wf(
     for edge in wf._edges:
         graph += GraphEdge(**edge)
 
-    # print(f"Adding output nodes {out_labels}")
     for out_label, wf_output in zip(out_labels, wf_outputs, strict=True):
         out_node_label = virtual_output_label(wf_label, out_label)
         graph += identity(label=out_node_label)
@@ -538,7 +513,6 @@ def get_graph_from_wf(
             targetHandle="x",  # input label of identity node
         )
 
-        # print("target: ", target, target_handle)
         graph += edge
 
     sorted_graph = topological_sort(graph)
@@ -564,7 +538,6 @@ def get_graph_from_macro_node(macro_node: Node) -> Graph:
     if isinstance(out[0], Port):
         out_0 = out_0.node
     wf = out_0._workflow
-    # print("label: ", wf.label, macro_node.label)
     wf.label = macro_node.label
 
     out_labels = macro_node.outputs.data["label"]
@@ -574,13 +547,11 @@ def get_graph_from_macro_node(macro_node: Node) -> Graph:
     )
     # restore original kwargs
 
-    # print("new_graph: ", new_graph.label)
     for node in new_graph.nodes.values():
         # iterate over all non-virtual nodes
         if not is_virtual(node.label):
             for i, value in enumerate(node.node.inputs.data["value"]):
                 if value in orig_values:
-                    # print(f"Setting value {value} to {orig_values[value]}")
                     node.node.inputs.data["value"][i] = orig_values[value]
 
     return new_graph
@@ -594,9 +565,6 @@ def get_full_graph_from_wf(wf: Workflow) -> Graph:
         if node.node_type == "macro_node":
             node.label = label
             graph += node
-            # new_node = get_graph_from_macro_node(node)
-            # graph = add_node(graph, new_node, label=label)
-            # graph.nodes[node.label].node = node
             macro_node_labels.append(label)
         else:
             graph = add_node(graph, node, label=label)
@@ -708,13 +676,6 @@ def expand_node(
         graph_node.expanded = True
         inner_graph = graph_node.graph
 
-        # # Add inner nodes to the graph
-        # for inner_node_label, inner_node in inner_graph.nodes.items():
-        #     print(f"Adding inner node {inner_node_label}", type(inner_node))
-        #     inner_node.parent_id = node_label
-        #     inner_node.level += 1
-        #     new_graph.nodes[inner_node_label] = inner_node
-
         # Rewire edges
         new_edges = Edges()
         # Add inner edges
@@ -754,14 +715,12 @@ def collapse_node(
     graph_node = new_graph.nodes[node_label]
 
     if graph_node.node_type == "graph":
-        # print(f"Collapsing node {node_label}")
         graph_node.expanded = False
         for edge in new_graph.edges:
             if _is_parent_in_node_label(edge.source, node_label):
                 source = handle_to_parent_label(edge.source)
                 edge.sourceHandle = handle_to_port_label(edge.source)
                 edge.source = source
-                # print(f"rewiring edge {edge.source}/{edge.sourceHandle}")
             if _is_parent_in_node_label(edge.target, node_label):
                 target = handle_to_parent_label(edge.target)
                 edge.targetHandle = handle_to_port_label(edge.target)
@@ -950,9 +909,6 @@ def get_inputs_of_graph(graph: Graph, exclude_unconnected_default_ports=False) -
     for node_label, port_label in get_unconnected_input_ports(graph):
         node = graph.nodes[node_label]
         port = get_node_input_port(node, port_label)
-        # ensure that label is unique
-        # if port_label in labels:
-        #   port_label = f"{node_label}__{port_label}"
         if (
             exclude_unconnected_default_ports
             and (node_label, port_label) not in include_ports
@@ -1036,7 +992,6 @@ def _convert_to_integer_representation(graph: Graph):
 
 
 def graph_to_node(graph: Graph, exclude_unconnected_default_ports=True) -> Node:
-    # print("graph_to_node: ", _build_function_parameters(graph, use_node_default=False))
     function_string = get_code_from_graph(
         graph, sort_graph=True, use_node_default=False
     )
@@ -1045,7 +1000,6 @@ def graph_to_node(graph: Graph, exclude_unconnected_default_ports=True) -> Node:
     virtual_namespace = {}
 
     # Execute the function string in the local namespace
-    # print("function_string: ", function_string)
     exec(function_string, globals(), virtual_namespace)
 
     # Retrieve the function from the local namespace
@@ -1131,7 +1085,6 @@ def update_execution_graph(graph: Graph, debug=False) -> Graph:
     """
     Update the execution graph after changing node expansions or collapses
     """
-    # graph = copy_graph(graph)
     for edge in graph.edges:
         source_node = graph.nodes[edge.source]
 
@@ -1163,7 +1116,6 @@ def update_execution_graph(graph: Graph, debug=False) -> Graph:
                 source_node.node,
             )
             print("connected to node (self)")
-        # print(f"Updated input {graph.nodes[edge.target].label} in node {edge.target}", graph.nodes[edge.target].node.inputs)
 
     return graph
 
@@ -1342,7 +1294,6 @@ def _process_nodes_and_edges(
         imports += f"    from {module_path} import {class_name}\n"
         code += f"    wf.{node.label} = {class_name}("
         code += _dict_to_kwargs(kwargs) + ")\n"
-    # code = imports + "\n" + code
 
     return return_args, code, imports
 
