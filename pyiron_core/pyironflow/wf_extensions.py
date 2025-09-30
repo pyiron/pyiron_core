@@ -8,6 +8,7 @@ import typing
 
 import numpy as np
 
+from pyiron_core.pyiron_workflow.graph.not_data import NotData
 from pyiron_core.pyironflow.themes import get_color
 
 NotData = "NotData"
