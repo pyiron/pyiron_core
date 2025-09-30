@@ -537,7 +537,7 @@ class Node:
         if output_labels is not None:
             outs = self.outputs.data[PORT_LABEL]
             for i, (label_outs, label_out) in enumerate(
-                zip(outs, output_labels, strict=True)
+                zip(outs, output_labels, strict=False)
             ):
                 if label_outs is None:
                     outs[i] = label_out
