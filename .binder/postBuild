@@ -6,7 +6,7 @@ cp ${HOME}/.binder/kernel.json ${HOME}/.local/share/jupyter/kernels/pyiron_core
 
 # clean up
 mv ${HOME}/.binder/demo.ipynb .
-mv ${HOME}/stored_workflows/demos/* .
+mv ${HOME}/stored_workflows/demos/* ${HOME}/workflow_files
 
 rm -r   ${HOME}/.binder \
         ${HOME}/.ci_support \
