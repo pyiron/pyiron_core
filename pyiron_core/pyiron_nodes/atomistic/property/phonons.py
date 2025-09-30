@@ -145,9 +145,13 @@ def GetDynamicalMatrix(phonopy, q=None):
 
     q = [0, 0, 0] if q is None else q
     if phonopy.dynamical_matrix is None:
+        print("GetDynamicalMatrix dynamical matrix is None")
         phonopy.produce_force_constants()
+        print("Produced force constants")
         phonopy.dynamical_matrix.run(q=q)
+        print("Ran dynamical matrix with q=", q)
     dynamical_matrix = np.real_if_close(phonopy.dynamical_matrix.dynamical_matrix)
+    print("Got dynamical matrix", dynamical_matrix)
     return dynamical_matrix, phonopy
 
 
