@@ -145,13 +145,9 @@ def GetDynamicalMatrix(phonopy, q=None):
 
     q = [0, 0, 0] if q is None else q
     if phonopy.dynamical_matrix is None:
-        print("GetDynamicalMatrix dynamical matrix is None")
         phonopy.produce_force_constants()
-        print("Produced force constants")
         phonopy.dynamical_matrix.run(q=q)
-        print("Ran dynamical matrix with q=", q)
     dynamical_matrix = np.real_if_close(phonopy.dynamical_matrix.dynamical_matrix)
-    print("Got dynamical matrix", dynamical_matrix)
     return dynamical_matrix, phonopy
 
 
@@ -221,27 +217,21 @@ def GetThermalProperties(
     """Get thermal properties from phonopy."""
     from pint import UnitRegistry
 
-    print("Running with phonopy", phonopy)
     ureg = UnitRegistry()
     _, phonopy_new = GetDynamicalMatrix(phonopy).run()
-    print("Got dynamical matrix and new phonopy", phonopy_new)
     phonopy_new.run_mesh([mesh, mesh, mesh])
-    print("Ran with mesh")
     phonopy_new.run_thermal_properties(
         t_min=t_min,
         t_max=t_max,
         t_step=t_step,
     )
-    print("Go thermals")
 
     tp_dict = phonopy_new.get_thermal_properties_dict()
-    print("Thermals dict =", tp_dict)
     # Convert the dictionary to a ThermalProperties dataclass
     thermal_properties = ThermalProperties().dataclass(**tp_dict)
     thermal_properties.free_energy *= (
         (1 * ureg.kilojoule / ureg.avogadro_number).to("eV").magnitude
     )
-    print("Thermal dataclass", thermal_properties)
     return thermal_properties
 
 
