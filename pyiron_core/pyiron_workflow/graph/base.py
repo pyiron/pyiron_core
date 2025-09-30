@@ -16,6 +16,8 @@ import textwrap
 from collections import defaultdict
 from typing import List, Optional, Tuple, Union  # noqa: F401
 
+from pyiron_core import not_data
+
 # We need Optional for later execking of code strings
 from pyiron_core.pyiron_workflow import imports, simple_workflow
 from pyiron_core.pyiron_workflow.graph.decorators import (
@@ -34,7 +36,6 @@ from pyiron_core.pyiron_workflow.graph.labelling import (
     virtual_input_label,
     virtual_output_label,
 )
-from pyiron_core.pyiron_workflow.graph.not_data import NotData
 from pyiron_core.pyiron_workflow.simple_workflow import (
     Data,
     Node,
@@ -817,7 +818,7 @@ def _different_indices(default, value):
     return [
         i
         for i in range(len(default))
-        if (str(default[i]) != str(value[i])) or (str(value[i]) in (NotData))
+        if (str(default[i]) != str(value[i])) or (str(value[i]) in (not_data.NotData))
     ]
 
 
@@ -1124,9 +1125,9 @@ def port_to_code(port: Port, use_default: bool = False, scope: str = None):
     name = port.label if scope is None else concatenate(scope, port.label)
     hint = "" if port.type in ("NotHinted", "NonPrimitive") else f": {port.type}"
 
-    if port.value is not NotData and not use_default:
+    if port.value is not not_data.NotData and not use_default:
         value_str = simple_workflow.value_to_string(port.value)
-    elif port.default is not NotData:
+    elif port.default is not not_data.NotData:
         value_str = simple_workflow.value_to_string(port.default)
     else:
         value_str = None
@@ -1236,7 +1237,7 @@ def _build_function_parameters(
                         scope=node.label if scope_labels else None,
                     )
                     value = port.default if use_node_default else port.value
-                    param_has_default = None if value is NotData else True
+                    param_has_default = None if value is not_data.NotData else True
                     parameters.append((param, param_has_default))
 
     # Sort parameters: args (no default) first, kwargs (with default) last

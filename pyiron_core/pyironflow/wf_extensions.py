@@ -8,10 +8,8 @@ import typing
 
 import numpy as np
 
-from pyiron_core.pyiron_workflow.graph.not_data import NotData
+from pyiron_core import not_data
 from pyiron_core.pyironflow.themes import get_color
-
-NotData = "NotData"
 
 
 def get_import_path(obj):
@@ -31,7 +29,7 @@ def dict_to_node(dict_node, log):
         target_labels = data["target_labels"]
         target_dict = {}
         for k, v in zip(target_labels, target_values, strict=True):
-            if v not in ("NonPrimitive", NotData):
+            if v not in ("NonPrimitive", not_data.NotData):
                 target_dict[k] = v
 
     node = get_node_from_path(data["import_path"], log=log)(
@@ -63,8 +61,8 @@ def get_node_values(channel_dict):
     values = []
     for v in channel_dict.values():
         value = v.value
-        if value != NotData:
-            value = NotData
+        if value != not_data.NotData:
+            value = not_data.NotData
         elif not is_primitive(value):
             value = "NonPrimitive"
 
@@ -119,13 +117,13 @@ def _to_jsonifyable(obj):
         if isinstance(value, (str, int, float, bool)):
             return value
         else:
-            return NotData
+            return not_data.NotData
     elif isinstance(obj, Node):
-        return NotData
+        return not_data.NotData
     elif isinstance(obj, (str, int, float, bool, type(None))):
         return obj
     else:
-        return NotData
+        return not_data.NotData
 
 
 def _is_connected(obj):
@@ -143,11 +141,11 @@ def get_node_dict(node, id_num, key=None):
         label = f"{node.label}: {key}"
 
     target_values = [
-        _to_jsonifyable(v) if not isinstance(v, Node) else "NotData"
+        _to_jsonifyable(v) if not isinstance(v, Node) else not_data.NotData
         for v in node.inputs.data["value"]
     ]
     is_connected = [_is_connected(v) for v in node.inputs.data["value"]]
-    source_values = [NotData for _ in node.outputs.data["value"]]
+    source_values = [not_data.NotData for _ in node.outputs.data["value"]]
     # TODO: set to None if it contains an edge (include connected parameter)
     target_types = [
         "None" if (t == "builtins.NoneType") or connected else t
