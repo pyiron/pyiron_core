@@ -15,14 +15,13 @@ from typing import Any, Literal, TypeAlias, Union, get_args, get_origin, get_typ
 
 import pandas as pd
 
+from pyiron_core import not_data
 from pyiron_core.pyiron_workflow import imports, wf_graph_tools
 
 PORT_LABEL = "label"
 PORT_VALUE = "value"
 PORT_DEFAULT = "default"
 PORT_TYPE = "type"
-
-NotData = "NotData"
 
 
 class DotDict(collections.OrderedDict):
@@ -254,7 +253,7 @@ def extract_input_parameters_from_function(function: callable) -> dict:
         types.append(type_hint_to_string(type_hint))
 
         if parameter.default is inspect.Parameter.empty:
-            defaults.append(NotData)
+            defaults.append(not_data.NotData)
         else:
             defaults.append(parameter.default)
     output_dict = {}
@@ -362,8 +361,8 @@ class Connection:
 class DataElement:
     label: str
     type: str
-    default: Any = NotData
-    value: Any = NotData
+    default: Any = not_data.NotData
+    value: Any = not_data.NotData
     ready: bool = False
     _data: dict = None
 
@@ -731,7 +730,7 @@ class Node:
                 self.inputs.data[PORT_DEFAULT],
                 strict=True,
             )
-            if ((default == NotData) or (str(default) != str(v)))
+            if ((default == not_data.NotData) or (str(default) != str(v)))
             and not isinstance(v, (Node, Port))
         }
 
@@ -809,10 +808,16 @@ def _is_equal_to_string(obj, target_string):
 
 def get_inputs_data(func, extract_input_parameters, *args, **kwargs):
     data = add_field(
-        data=extract_input_parameters(func), ready=False, value=NotData  # PORT_VALUE
+        data=extract_input_parameters(func),
+        ready=False,
+        value=not_data.NotData,  # PORT_VALUE
     )
     values_default = [
-        (default if not _is_equal_to_string(default, NotData) else NotData)
+        (
+            default
+            if not _is_equal_to_string(default, not_data.NotData)
+            else not_data.NotData
+        )
         for default in data[PORT_DEFAULT]
     ]
 
@@ -829,7 +834,7 @@ def get_inputs_data(func, extract_input_parameters, *args, **kwargs):
         )
     ]
 
-    ready = [not _is_equal_to_string(value, NotData) for value in values]
+    ready = [not _is_equal_to_string(value, not_data.NotData) for value in values]
 
     data = add_field(data, value=values, ready=ready)  # PORT_VALUE
     inputs = Data(data, attribute=Port)

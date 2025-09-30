@@ -15,6 +15,7 @@ from IPython.display import display
 
 import pyiron_core.pyiron_database.api as pyiron_database
 import pyiron_core.pyironflow.api as pyironflow
+from pyiron_core import not_data
 from pyiron_core.pyiron_workflow import simple_workflow
 from pyiron_core.pyiron_workflow.graph import (
     base,
@@ -23,7 +24,6 @@ from pyiron_core.pyiron_workflow.graph import (
     graph_json,
     group,
     labelling,
-    not_data,
     run,
 )
 
