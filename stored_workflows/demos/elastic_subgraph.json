@@ -1,5 +1,5 @@
 {
-    "label": "elastic",
+    "label": "elastic_subgraph",
     "nodes": {
         "subgraph": {
             "id": "subgraph",
