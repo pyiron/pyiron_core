@@ -16,4 +16,5 @@ static/
 *.yaml
 package-lock.json
 pyiron.log
+pyiron_core/static/
 tests/integration/test_notebooks.py

@@ -1,0 +1,17 @@
+{
+ "argv": [
+  "/srv/conda/envs/notebook/bin/python",
+  "-m",
+  "ipykernel_launcher",
+  "-f",
+  "{connection_file}"
+ ],
+ "display_name": "pyiron_core",
+ "language": "python",
+ "metadata": {
+  "debugger": true
+ },
+ "env": {
+    "PYTHONPATH": "/home/jovyan:${PYTHONPATH}"
+  }
+}

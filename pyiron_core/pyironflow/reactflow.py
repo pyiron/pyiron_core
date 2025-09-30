@@ -21,7 +21,7 @@ import traitlets
 
 
 class ReactFlowWidget(anywidget.AnyWidget):
-    path = pathlib.Path(__file__).parent.parent.parent / "static"
+    path = pathlib.Path(__file__).parent.parent / "static"
     _esm = path / "widget.js"
     _css = path / "widget.css"
     nodes = traitlets.Unicode("[]").tag(sync=True)

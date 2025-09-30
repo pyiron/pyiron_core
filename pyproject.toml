@@ -42,6 +42,8 @@ dependencies = [
     "nglview==3.1.4",
     "numpy==1.26.4",
     "pandas==2.2.3",
+    "phonopy==2.43.2",
+    "pint==0.24.4",
     "psycopg2==2.9.9",
     "pyiron_atomistics==0.7.18",
     "pyiron_base==0.14.3",
@@ -77,8 +79,7 @@ assyst = [
 [tool.hatch.build]
 only-packages = true
 artifacts = [
-    "pyiron_core/*",
-    "static/*",
+    "pyiron_core/static/*",
 ]
 
 [tool.hatch.build.hooks.vcs]
@@ -91,10 +92,10 @@ path = "pyiron_core/_version.py"
 [tool.hatch.build.hooks.jupyter-builder]
 build-function = "hatch_jupyter_builder.npm_builder"
 ensured-targets = [
-    "static/widget.js",
-    "static/widget.css"
+    "pyiron_core/static/widget.js",
+    "pyiron_core/static/widget.css"
 ]
-skip-if-exists = ["static/widget.js"]
+skip-if-exists = ["pyiron_core/static/widget.js"]
 dependencies = ["hatch-jupyter-builder>=0.5.0"]
 
 [tool.hatch.build.hooks.jupyter-builder.build-kwargs]

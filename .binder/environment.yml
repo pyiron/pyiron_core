@@ -1,6 +1,7 @@
 channels:
 - conda-forge
 dependencies:
+- python >=3.11,<3.14
 - hatchling =1.27.0
 - hatch-vcs =0.5.0
 - hatch-jupyter-builder >=0.5.0
@@ -26,6 +27,8 @@ dependencies:
 - matplotlib =3.10.0
 - nglview =3.1.4
 - pandas =2.2.3
+- phonopy =2.43.2
+- pint =0.24.4
 - psycopg2 =2.9.9
 - pyiron_atomistics =0.7.18
 - pyiron_base =0.14.3

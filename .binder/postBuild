@@ -1,1 +1,36 @@
 pip install . --no-deps --no-build-isolation
+
+# setup customized kernel
+mkdir -p ${HOME}/.local/share/jupyter/kernels/pyiron_core
+cp ${HOME}/.binder/kernel.json ${HOME}/.local/share/jupyter/kernels/pyiron_core
+
+# clean up
+mv ${HOME}/.binder/demo.ipynb .
+mkdir -p ${HOME}/workflow_files
+mv ${HOME}/stored_workflows/demos/* ${HOME}/workflow_files
+
+rm -r   ${HOME}/.binder \
+        ${HOME}/.ci_support \
+        ${HOME}/.github \
+        ${HOME}/decisions \
+        ${HOME}/devbooks \
+        ${HOME}/js \
+        ${HOME}/node_modules \
+        ${HOME}/notebooks \
+        ${HOME}/pyiron_core \
+        ${HOME}/stored_workflows \
+        ${HOME}/tests \
+        ${HOME}/.gitignore \
+        ${HOME}/jest.config.js \
+        ${HOME}/LICENSE \
+        ${HOME}/local_postgres.zsh \
+        ${HOME}/package.json \
+        ${HOME}/package-lock.json \
+        ${HOME}/project-env.yml \
+        ${HOME}/pyproject.toml \
+        ${HOME}/README.md \
+        ${HOME}/tsconfig.json
+
+# download datasets for the demos
+wget https://github.com/pyiron-workshop/DPG-tutorial-2025/raw/351eeca736cce45f9bc3bfca84ab05de049e38c2/data/mgca.pckl.tgz
+wget https://github.com/pyiron-workshop/DPG-tutorial-2025/raw/351eeca736cce45f9bc3bfca84ab05de049e38c2/data/MgCaFreeEnergies.pckl.gz

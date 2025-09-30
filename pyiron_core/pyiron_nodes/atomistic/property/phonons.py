@@ -232,7 +232,6 @@ def GetThermalProperties(
     thermal_properties.free_energy *= (
         (1 * ureg.kilojoule / ureg.avogadro_number).to("eV").magnitude
     )
-
     return thermal_properties
 
 
