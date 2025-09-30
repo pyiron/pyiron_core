@@ -32,7 +32,7 @@ dependencies:
 - nglview =3.1.4
 - pandas =2.2.3
 - phonopy =2.43.2
-- pint =0.24.4,
+- pint =0.24.4
 - psycopg2 =2.9.9
 - pyiron_atomistics =0.7.18
 - pyiron_base =0.14.3
