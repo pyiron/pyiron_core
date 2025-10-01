@@ -66,7 +66,7 @@ def store_node_outputs(
                 raise ValueError(
                     f"Failed to store output '{k}' of node '{node.label}': {e}"
                 ) from e
-    return output_path
+    return str(output_path)
 
 
 def restore_node_outputs(
