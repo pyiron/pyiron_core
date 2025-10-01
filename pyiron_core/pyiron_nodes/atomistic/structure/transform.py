@@ -29,7 +29,6 @@ def Repeat(structure: Atoms, repeat_scalar: int = 1) -> Atoms:
     Use this node when the workflow requires building a larger supercell
     from a primitive cell (e.g., “create a 2×2×2 bulk Al supercell”).
     """
-    # print("Repeat: ", type(repeat_scalar), repeat_scalar)
     return structure.repeat(int(repeat_scalar))
 
 

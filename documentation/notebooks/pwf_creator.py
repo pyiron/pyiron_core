@@ -1,14 +1,8 @@
-import requests
 import json
 import re
-import subprocess
-import tempfile
-import os
 from pathlib import Path
 
-# from pwf_creator import load_extra_files, extract_code, ask_ollama, get_workflow
-from IPython.display import display, Markdown, Code
-import ipywidgets as widgets
+import requests
 
 
 def load_extra_files(file_paths):
@@ -26,10 +20,6 @@ def load_extra_files(file_paths):
         except Exception as e:
             print(f"Error reading {file_path}: {e}")
     return combined_content
-
-
-import requests
-import json
 
 
 def ask_ollama(prompt, model="gpt-oss:120b", temperature: float = 0.2):
