@@ -1,0 +1,143 @@
+{
+    "label": "water",
+    "nodes": {
+        "WaterPotential": {
+            "id": "WaterPotential",
+            "import_path": "pyiron_core.pyiron_nodes.electrochemistry.structure.equilibrate.WaterPotential",
+            "label": "WaterPotential",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "WaterPotential",
+                "function": "pyiron_core.pyiron_nodes.electrochemistry.structure.equilibrate.WaterPotential",
+                "inputs": {}
+            }
+        },
+        "Equilibrate": {
+            "id": "Equilibrate",
+            "import_path": "pyiron_core.pyiron_nodes.electrochemistry.structure.equilibrate.Equilibrate",
+            "label": "Equilibrate",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "Equilibrate",
+                "function": "pyiron_core.pyiron_nodes.electrochemistry.structure.equilibrate.Equilibrate",
+                "inputs": {}
+            }
+        },
+        "add_water_film": {
+            "id": "add_water_film",
+            "import_path": "pyiron_core.pyiron_nodes.electrochemistry.structure.build.add_water_film",
+            "label": "add_water_film",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "add_water_film",
+                "function": "pyiron_core.pyiron_nodes.electrochemistry.structure.build.add_water_film",
+                "inputs": {}
+            }
+        },
+        "Surface": {
+            "id": "Surface",
+            "import_path": "pyiron_core.pyiron_nodes.atomistic.structure.build.Surface",
+            "label": "Surface",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "Surface",
+                "function": "pyiron_core.pyiron_nodes.atomistic.structure.build.Surface",
+                "inputs": {
+                    "element": "Al",
+                    "surface_type": "fcc111",
+                    "size": "6 8 6",
+                    "vacuum": 30,
+                    "orthogonal": true
+                }
+            }
+        },
+        "Plot3d": {
+            "id": "Plot3d",
+            "import_path": "pyiron_core.pyiron_nodes.atomistic.structure.view.Plot3d",
+            "label": "Plot3d",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "Plot3d",
+                "function": "pyiron_core.pyiron_nodes.atomistic.structure.view.Plot3d",
+                "inputs": {}
+            }
+        },
+        "InputCalcMD": {
+            "id": "InputCalcMD",
+            "import_path": "pyiron_core.pyiron_nodes.atomistic.calculator.data.InputCalcMD",
+            "label": "InputCalcMD",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "InputCalcMD",
+                "function": "pyiron_core.pyiron_nodes.atomistic.calculator.data.InputCalcMD",
+                "inputs": {}
+            }
+        },
+        "_obj_type": "pyiron_core.pyiron_workflow.api.serial.GraphNode"
+    },
+    "edges": {
+        "values": [
+            {
+                "source": "Surface",
+                "target": "add_water_film",
+                "sourceHandle": "structure",
+                "targetHandle": "electrode"
+            },
+            {
+                "source": "add_water_film",
+                "target": "Plot3d",
+                "sourceHandle": "electrochemical_cell",
+                "targetHandle": "structure"
+            },
+            {
+                "source": "add_water_film",
+                "target": "Equilibrate",
+                "sourceHandle": "electrochemical_cell",
+                "targetHandle": "solvated_electrode"
+            },
+            {
+                "source": "WaterPotential",
+                "target": "Equilibrate",
+                "sourceHandle": "water_potential",
+                "targetHandle": "water_potential"
+            },
+            {
+                "source": "InputCalcMD",
+                "target": "Equilibrate",
+                "sourceHandle": "dataclass",
+                "targetHandle": "parameters"
+            }
+        ],
+        "obj_type": "pyiron_core.pyiron_workflow.api.serial.GraphEdge"
+    }
+}

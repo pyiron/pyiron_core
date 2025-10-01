@@ -1,4 +1,4 @@
-import pyiron_workflow as pwf
+import pyiron_core.pyiron_workflow as pwf
 
 
 @pwf.as_function_node

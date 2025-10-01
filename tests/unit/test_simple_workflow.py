@@ -4,22 +4,20 @@ import time
 import unittest
 from collections import OrderedDict
 
-import pyiron_database.instance_database as idb
-from pyiron_workflow.simple_workflow import (
+from static import nodes, not_nodes
+
+import pyiron_core.pyiron_database.api as pyiron_database
+from pyiron_core.pyiron_workflow.simple_workflow import (
     PORT_LABEL,
     Node,
     Workflow,
     as_function_node,
-    as_inp_dataclass_node,
-    as_macro_node,
     extract_dataclass_parameters,
     extract_input_parameters_from_function,
     get_inputs_data,
     make_node_decorator,
     value_to_string,
 )
-
-from static.nodes import Identity, IdentityMacro
 
 
 @as_function_node
@@ -53,20 +51,19 @@ class TestSimpleWorkflow(unittest.TestCase):
         self.assertEqual(inp_labels, ["a", "b"])
         self.assertEqual(ready, [False, True])
         self.assertEqual(out_labels, ["result"])
-        # self.assertEqual(node._func, test_func)
 
     def test_make_node_decorator(self):
         def dummy_func():
             pass
 
-        decorator = make_node_decorator(dummy_func, "_postfix", "dummy_node")
+        decorator = make_node_decorator(dummy_func, "dummy_node")
         self.assertTrue(callable(decorator))
 
     def test_connections(self):
         wf = Workflow("single_value")
-        wf.upstream = Identity(0)
-        wf.downstream_by_port = Identity(wf.upstream.outputs.x)
-        wf.downstream_by_node = Identity(wf.upstream)
+        wf.upstream = nodes.Identity(0)
+        wf.downstream_by_port = nodes.Identity(wf.upstream.outputs.x)
+        wf.downstream_by_node = nodes.Identity(wf.upstream)
 
         con_by_port = wf.downstream_by_port.inputs["x"].connections[0]
         con_by_node = wf.downstream_by_node.inputs["x"].connections[0]
@@ -99,7 +96,7 @@ class TestSimpleWorkflow(unittest.TestCase):
         )
 
     def test_simple_macro(self):
-        m = IdentityMacro(x=42)
+        m = nodes.IdentityMacro(x=42)
         out = m.run()
         self.assertTupleEqual(
             (42, 42),
@@ -107,17 +104,6 @@ class TestSimpleWorkflow(unittest.TestCase):
             msg="the macro should be runnable and should allow channel-based and "
             "node-based (with single-returns) output formats",
         )
-
-    # def test_node_with_libpath(self):
-    #     @dataclass
-    #     class TestData:
-    #         data: np.ndarray = field(default_factory=lambda: np.array([]))
-
-    #     def test_func(data: TestData):
-    #         return data.data.sum()
-
-    #     node = Node(func=test_func, libpath="test/path")
-    #     self.assertEqual(node.libpath, "test/path")
 
     def test_storage(self):
         with self.subTest("Off"):
@@ -142,9 +128,27 @@ class TestSimpleWorkflow(unittest.TestCase):
                     delta=t_sleep / 10.0,
                 )
             finally:
-                storage_location = idb.store_node_outputs(n)
+                storage_location = pyiron_database.store_node_outputs(n)
                 os.unlink(storage_location)
-                os.rmdir(storage_location.split(os.sep)[0])
+
+    def test_decorator_name_mangling(self):
+        with self.subTest("Node classes should get mangled names"):
+            self.assertNotEqual(
+                not_nodes.Identity.__name__,
+                nodes.Identity.__name__,
+                msg="The decorated object should get a different name",
+            )
+            self.assertTrue(
+                nodes.Identity.__name__.startswith(not_nodes.Identity.__name__),
+                msg="The node class name should derive from the underlying class name",
+            )
+
+        with self.subTest("name/qualname alignment"):
+            self.assertEqual(
+                nodes.Identity.__name__,
+                nodes.Identity.__qualname__,
+                msg="For unqualified objects, name and qualname should match",
+            )
 
 
 class TestValueToString(unittest.TestCase):

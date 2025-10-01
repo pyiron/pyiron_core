@@ -1,7 +1,8 @@
 import unittest
 
-import pyiron_workflow.simple_workflow as swf
-from pyiron_workflow.graph import base
+import pyiron_core.pyiron_workflow.simple_workflow as swf
+from pyiron_core import not_data
+from pyiron_core.pyiron_workflow.graph import base
 
 
 @swf.as_function_node
@@ -12,7 +13,7 @@ def NonPrimitiveHint(x: tuple):
 
 class TestPortToCode(unittest.TestCase):
     @staticmethod
-    def make_port(label, type_, default=swf.NotData, value=swf.NotData):
+    def make_port(label, type_, default=not_data.NotData, value=not_data.NotData):
         port_data = {
             swf.PORT_LABEL: [label],
             swf.PORT_TYPE: [type_],
@@ -57,7 +58,8 @@ class TestPortToCode(unittest.TestCase):
             base.port_to_code(p, use_default=True, scope=None), "foo: bool = False"
         )
         self.assertEqual(
-            base.port_to_code(p, use_default=True, scope="bar"), "bar__foo: bool = False"
+            base.port_to_code(p, use_default=True, scope="bar"),
+            "bar__foo: bool = False",
         )
 
 

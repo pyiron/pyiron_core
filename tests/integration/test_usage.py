@@ -2,10 +2,10 @@ import contextlib
 import os
 import unittest
 
-import pyiron_workflow as pwf
-from pyiron_workflow.graph import base, graph_json, group, run, labelling
-
 from static import nodes, other_nodes
+
+import pyiron_core.pyiron_workflow as pwf
+from pyiron_core.pyiron_workflow.graph import base, graph_json, group, labelling, run
 
 
 class TestUsage(unittest.TestCase):
@@ -168,7 +168,7 @@ class TestUsage(unittest.TestCase):
             labelling.virtual_output_label("subgraph", "n1", "y"),
             "n2",
             "y",
-            "x"
+            "x",
         )
         explicit_result = run.pull_node(base.get_updated_graph(explicit_graph), "n2")
         self.assertEqual(

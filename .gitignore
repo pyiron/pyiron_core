@@ -4,9 +4,10 @@
 .storage/
 .vscode/
 node_modules/
-./static/
+static/
 .coverage
 .DS_Store
+.pre-commit-config.yaml
 *.pyc
 *.dat
 *.data
@@ -15,4 +16,5 @@ node_modules/
 *.yaml
 package-lock.json
 pyiron.log
+pyiron_core/static/
 tests/integration/test_notebooks.py

@@ -3,7 +3,7 @@
     "nodes": {
         "Bulk": {
             "id": "Bulk",
-            "import_path": "pyiron_nodes.atomistic.structure.build.Bulk",
+            "import_path": "pyiron_core.pyiron_nodes.atomistic.structure.build.Bulk",
             "label": "Bulk",
             "parent_id": null,
             "level": 0,
@@ -13,7 +13,7 @@
             "expanded": false,
             "node": {
                 "label": "Bulk",
-                "function": "pyiron_nodes.atomistic.structure.build.Bulk",
+                "function": "pyiron_core.pyiron_nodes.atomistic.structure.build.Bulk",
                 "inputs": {
                     "name": "Al"
                 }
@@ -21,7 +21,7 @@
         },
         "M3GNet": {
             "id": "M3GNet",
-            "import_path": "pyiron_nodes.atomistic.engine.ase.M3GNet",
+            "import_path": "pyiron_core.pyiron_nodes.atomistic.engine.ase.M3GNet",
             "label": "M3GNet",
             "parent_id": null,
             "level": 0,
@@ -31,13 +31,13 @@
             "expanded": false,
             "node": {
                 "label": "M3GNet",
-                "function": "pyiron_nodes.atomistic.engine.ase.M3GNet",
+                "function": "pyiron_core.pyiron_nodes.atomistic.engine.ase.M3GNet",
                 "inputs": {}
             }
         },
         "Static": {
             "id": "Static",
-            "import_path": "pyiron_nodes.atomistic.calculator.ase.Static",
+            "import_path": "pyiron_core.pyiron_nodes.atomistic.calculator.ase.Static",
             "label": "Static",
             "parent_id": null,
             "level": 0,
@@ -47,13 +47,13 @@
             "expanded": false,
             "node": {
                 "label": "Static",
-                "function": "pyiron_nodes.atomistic.calculator.ase.Static",
+                "function": "pyiron_core.pyiron_nodes.atomistic.calculator.ase.Static",
                 "inputs": {}
             }
         },
         "GetEnergyLast": {
             "id": "GetEnergyLast",
-            "import_path": "pyiron_nodes.atomistic.calculator.output.GetEnergyLast",
+            "import_path": "pyiron_core.pyiron_nodes.atomistic.calculator.output.GetEnergyLast",
             "label": "GetEnergyLast",
             "parent_id": null,
             "level": 0,
@@ -63,13 +63,15 @@
             "expanded": false,
             "node": {
                 "label": "GetEnergyLast",
-                "function": "pyiron_nodes.atomistic.calculator.output.GetEnergyLast",
-                "inputs": {}
+                "function": "pyiron_core.pyiron_nodes.atomistic.calculator.output.GetEnergyLast",
+                "inputs": {
+                    "store": true
+                }
             }
         },
         "CreateDB": {
             "id": "CreateDB",
-            "import_path": "pyiron_nodes.databases.node_hash_db.CreateDB",
+            "import_path": "pyiron_core.pyiron_nodes.databases.node_hash_db.CreateDB",
             "label": "CreateDB",
             "parent_id": null,
             "level": 0,
@@ -79,7 +81,7 @@
             "expanded": false,
             "node": {
                 "label": "CreateDB",
-                "function": "pyiron_nodes.databases.node_hash_db.CreateDB",
+                "function": "pyiron_core.pyiron_nodes.databases.node_hash_db.CreateDB",
                 "inputs": {
                     "user": "localuser",
                     "database": "localdb"
@@ -88,7 +90,7 @@
         },
         "ShowTable": {
             "id": "ShowTable",
-            "import_path": "pyiron_nodes.databases.node_hash_db.ShowTable",
+            "import_path": "pyiron_core.pyiron_nodes.databases.node_hash_db.ShowTable",
             "label": "ShowTable",
             "parent_id": null,
             "level": 0,
@@ -98,11 +100,11 @@
             "expanded": false,
             "node": {
                 "label": "ShowTable",
-                "function": "pyiron_nodes.databases.node_hash_db.ShowTable",
+                "function": "pyiron_core.pyiron_nodes.databases.node_hash_db.ShowTable",
                 "inputs": {}
             }
         },
-        "_obj_type": "pyiron_workflow.api.serial.GraphNode"
+        "_obj_type": "pyiron_core.pyiron_workflow.api.serial.GraphNode"
     },
     "edges": {
         "values": [
@@ -137,6 +139,6 @@
                 "targetHandle": "db"
             }
         ],
-        "obj_type": "pyiron_workflow.api.serial.GraphEdge"
+        "obj_type": "pyiron_core.pyiron_workflow.api.serial.GraphEdge"
     }
 }

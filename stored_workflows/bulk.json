@@ -3,7 +3,7 @@
     "nodes": {
         "Bulk": {
             "id": "Bulk",
-            "import_path": "pyiron_nodes.atomistic.structure.build.Bulk",
+            "import_path": "pyiron_core.pyiron_nodes.atomistic.structure.build.Bulk",
             "label": "Bulk",
             "parent_id": null,
             "level": 0,
@@ -13,16 +13,16 @@
             "expanded": false,
             "node": {
                 "label": "Bulk",
-                "function": "pyiron_nodes.atomistic.structure.build.Bulk",
+                "function": "pyiron_core.pyiron_nodes.atomistic.structure.build.Bulk",
                 "inputs": {
                     "name": "Al"
                 }
             }
         },
-        "_obj_type": "pyiron_workflow.api.serial.GraphNode"
+        "_obj_type": "pyiron_core.pyiron_workflow.api.serial.GraphNode"
     },
     "edges": {
         "values": [],
-        "obj_type": "pyiron_workflow.api.serial.GraphEdge"
+        "obj_type": "pyiron_core.pyiron_workflow.api.serial.GraphEdge"
     }
 }

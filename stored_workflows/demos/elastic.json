@@ -1,0 +1,243 @@
+{
+    "label": "elastic",
+    "nodes": {
+        "ComputeElasticConstants": {
+            "id": "ComputeElasticConstants",
+            "import_path": "pyiron_core.pyiron_nodes.atomistic.property.elastic.ComputeElasticConstants",
+            "label": "ComputeElasticConstants",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "ComputeElasticConstants",
+                "function": "pyiron_core.pyiron_nodes.atomistic.property.elastic.ComputeElasticConstants",
+                "inputs": {}
+            }
+        },
+        "GRACE": {
+            "id": "GRACE",
+            "import_path": "pyiron_core.pyiron_nodes.atomistic.engine.ase.GRACE",
+            "label": "GRACE",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "GRACE",
+                "function": "pyiron_core.pyiron_nodes.atomistic.engine.ase.GRACE",
+                "inputs": {
+                    "model": "GRACE-1L-MP-r6"
+                }
+            }
+        },
+        "InputElasticTensor": {
+            "id": "InputElasticTensor",
+            "import_path": "pyiron_core.pyiron_nodes.atomistic.property.elastic.InputElasticTensor",
+            "label": "InputElasticTensor",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "InputElasticTensor",
+                "function": "pyiron_core.pyiron_nodes.atomistic.property.elastic.InputElasticTensor",
+                "inputs": {}
+            }
+        },
+        "DeJong": {
+            "id": "DeJong",
+            "import_path": "pyiron_core.pyiron_nodes.databases.elasticity.DeJong",
+            "label": "DeJong",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "DeJong",
+                "function": "pyiron_core.pyiron_nodes.databases.elasticity.DeJong",
+                "inputs": {}
+            }
+        },
+        "GetColumnFromDataFrame": {
+            "id": "GetColumnFromDataFrame",
+            "import_path": "pyiron_core.pyiron_nodes.dataframe.GetColumnFromDataFrame",
+            "label": "GetColumnFromDataFrame",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "GetColumnFromDataFrame",
+                "function": "pyiron_core.pyiron_nodes.dataframe.GetColumnFromDataFrame",
+                "inputs": {
+                    "column_name": "atoms"
+                }
+            }
+        },
+        "GetRowsFromDataFrame": {
+            "id": "GetRowsFromDataFrame",
+            "import_path": "pyiron_core.pyiron_nodes.dataframe.GetRowsFromDataFrame",
+            "label": "GetRowsFromDataFrame",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "GetRowsFromDataFrame",
+                "function": "pyiron_core.pyiron_nodes.dataframe.GetRowsFromDataFrame",
+                "inputs": {
+                    "max_index": 20
+                }
+            }
+        },
+        "iterate": {
+            "id": "iterate",
+            "import_path": "pyiron_core.pyiron_nodes.controls.iterate",
+            "label": "iterate",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "iterate",
+                "function": "pyiron_core.pyiron_nodes.controls.iterate",
+                "inputs": {
+                    "input_label": "structure"
+                }
+            }
+        },
+        "Code": {
+            "id": "Code",
+            "import_path": "pyiron_core.pyiron_nodes.controls.Code",
+            "label": "Code",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "Code",
+                "function": "pyiron_core.pyiron_nodes.controls.Code",
+                "inputs": {
+                    "code": "[xx.BV for xx in x]"
+                }
+            }
+        },
+        "GetColumnFromDataFrame_1": {
+            "id": "GetColumnFromDataFrame_1",
+            "import_path": "pyiron_core.pyiron_nodes.dataframe.GetColumnFromDataFrame",
+            "label": "GetColumnFromDataFrame_1",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "GetColumnFromDataFrame_1",
+                "function": "pyiron_core.pyiron_nodes.dataframe.GetColumnFromDataFrame",
+                "inputs": {
+                    "column_name": "K_Voigt"
+                }
+            }
+        },
+        "LinearFittingCurve": {
+            "id": "LinearFittingCurve",
+            "import_path": "pyiron_core.pyiron_nodes.plotting.LinearFittingCurve",
+            "label": "LinearFittingCurve",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "LinearFittingCurve",
+                "function": "pyiron_core.pyiron_nodes.plotting.LinearFittingCurve",
+                "inputs": {}
+            }
+        },
+        "_obj_type": "pyiron_core.pyiron_workflow.api.serial.GraphNode"
+    },
+    "edges": {
+        "values": [
+            {
+                "source": "GRACE",
+                "target": "ComputeElasticConstants",
+                "sourceHandle": "out",
+                "targetHandle": "engine"
+            },
+            {
+                "source": "InputElasticTensor",
+                "target": "ComputeElasticConstants",
+                "sourceHandle": "dataclass",
+                "targetHandle": "input_elastic_tensor"
+            },
+            {
+                "source": "DeJong",
+                "target": "GetRowsFromDataFrame",
+                "sourceHandle": "df",
+                "targetHandle": "df"
+            },
+            {
+                "source": "GetRowsFromDataFrame",
+                "target": "GetColumnFromDataFrame",
+                "sourceHandle": "rows",
+                "targetHandle": "df"
+            },
+            {
+                "source": "GetColumnFromDataFrame",
+                "target": "iterate",
+                "sourceHandle": "column",
+                "targetHandle": "values"
+            },
+            {
+                "source": "ComputeElasticConstants",
+                "target": "iterate",
+                "sourceHandle": "elastic_constants",
+                "targetHandle": "node"
+            },
+            {
+                "source": "iterate",
+                "target": "Code",
+                "sourceHandle": "out_lst",
+                "targetHandle": "x"
+            },
+            {
+                "source": "GetRowsFromDataFrame",
+                "target": "GetColumnFromDataFrame_1",
+                "sourceHandle": "rows",
+                "targetHandle": "df"
+            },
+            {
+                "source": "Code",
+                "target": "LinearFittingCurve",
+                "sourceHandle": "y",
+                "targetHandle": "x"
+            },
+            {
+                "source": "GetColumnFromDataFrame_1",
+                "target": "LinearFittingCurve",
+                "sourceHandle": "column",
+                "targetHandle": "y"
+            }
+        ],
+        "obj_type": "pyiron_core.pyiron_workflow.api.serial.GraphEdge"
+    }
+}

@@ -3,7 +3,7 @@
     "nodes": {
         "ElementInput": {
             "id": "ElementInput",
-            "import_path": "pyiron_nodes.atomistic.assyst.structures.ElementInput",
+            "import_path": "pyiron_core.pyiron_nodes.atomistic.assyst.structures.ElementInput",
             "label": "ElementInput",
             "parent_id": null,
             "level": 0,
@@ -13,7 +13,7 @@
             "expanded": false,
             "node": {
                 "label": "ElementInput",
-                "function": "pyiron_nodes.atomistic.assyst.structures.ElementInput",
+                "function": "pyiron_core.pyiron_nodes.atomistic.assyst.structures.ElementInput",
                 "inputs": {
                     "num": 2
                 }
@@ -21,7 +21,7 @@
         },
         "SpaceGroupInput": {
             "id": "SpaceGroupInput",
-            "import_path": "pyiron_nodes.atomistic.assyst.structures.SpaceGroupInput",
+            "import_path": "pyiron_core.pyiron_nodes.atomistic.assyst.structures.SpaceGroupInput",
             "label": "SpaceGroupInput",
             "parent_id": null,
             "level": 0,
@@ -31,7 +31,7 @@
             "expanded": false,
             "node": {
                 "label": "SpaceGroupInput",
-                "function": "pyiron_nodes.atomistic.assyst.structures.SpaceGroupInput",
+                "function": "pyiron_core.pyiron_nodes.atomistic.assyst.structures.SpaceGroupInput",
                 "inputs": {
                     "max_structures": 100
                 }
@@ -39,7 +39,7 @@
         },
         "SpaceGroupSampling": {
             "id": "SpaceGroupSampling",
-            "import_path": "pyiron_nodes.atomistic.assyst.structures.SpaceGroupSampling",
+            "import_path": "pyiron_core.pyiron_nodes.atomistic.assyst.structures.SpaceGroupSampling",
             "label": "SpaceGroupSampling",
             "parent_id": null,
             "level": 0,
@@ -49,13 +49,13 @@
             "expanded": false,
             "node": {
                 "label": "SpaceGroupSampling",
-                "function": "pyiron_nodes.atomistic.assyst.structures.SpaceGroupSampling",
+                "function": "pyiron_core.pyiron_nodes.atomistic.assyst.structures.SpaceGroupSampling",
                 "inputs": {}
             }
         },
         "ApplyEngine": {
             "id": "ApplyEngine",
-            "import_path": "pyiron_nodes.atomistic.calculator.generic.ApplyEngine",
+            "import_path": "pyiron_core.pyiron_nodes.atomistic.calculator.generic.ApplyEngine",
             "label": "ApplyEngine",
             "parent_id": null,
             "level": 0,
@@ -65,13 +65,13 @@
             "expanded": false,
             "node": {
                 "label": "ApplyEngine",
-                "function": "pyiron_nodes.atomistic.calculator.generic.ApplyEngine",
+                "function": "pyiron_core.pyiron_nodes.atomistic.calculator.generic.ApplyEngine",
                 "inputs": {}
             }
         },
         "Static": {
             "id": "Static",
-            "import_path": "pyiron_nodes.atomistic.calculator.ase.Static",
+            "import_path": "pyiron_core.pyiron_nodes.atomistic.calculator.ase.Static",
             "label": "Static",
             "parent_id": null,
             "level": 0,
@@ -81,13 +81,13 @@
             "expanded": false,
             "node": {
                 "label": "Static",
-                "function": "pyiron_nodes.atomistic.calculator.ase.Static",
+                "function": "pyiron_core.pyiron_nodes.atomistic.calculator.ase.Static",
                 "inputs": {}
             }
         },
         "M3GNet": {
             "id": "M3GNet",
-            "import_path": "pyiron_nodes.atomistic.engine.ase.M3GNet",
+            "import_path": "pyiron_core.pyiron_nodes.atomistic.engine.ase.M3GNet",
             "label": "M3GNet",
             "parent_id": null,
             "level": 0,
@@ -97,13 +97,13 @@
             "expanded": false,
             "node": {
                 "label": "M3GNet",
-                "function": "pyiron_nodes.atomistic.engine.ase.M3GNet",
+                "function": "pyiron_core.pyiron_nodes.atomistic.engine.ase.M3GNet",
                 "inputs": {}
             }
         },
         "Bulk": {
             "id": "Bulk",
-            "import_path": "pyiron_nodes.atomistic.structure.build.Bulk",
+            "import_path": "pyiron_core.pyiron_nodes.atomistic.structure.build.Bulk",
             "label": "Bulk",
             "parent_id": null,
             "level": 0,
@@ -113,7 +113,7 @@
             "expanded": false,
             "node": {
                 "label": "Bulk",
-                "function": "pyiron_nodes.atomistic.structure.build.Bulk",
+                "function": "pyiron_core.pyiron_nodes.atomistic.structure.build.Bulk",
                 "inputs": {
                     "name": "Al"
                 }
@@ -121,7 +121,7 @@
         },
         "OutputSEFS": {
             "id": "OutputSEFS",
-            "import_path": "pyiron_workflow.api.serial.func_dataclass",
+            "import_path": "pyiron_core.pyiron_workflow.api.serial.func_dataclass",
             "label": "OutputSEFS",
             "parent_id": null,
             "level": 0,
@@ -131,13 +131,13 @@
             "expanded": false,
             "node": {
                 "label": "OutputSEFS",
-                "function": "pyiron_nodes.atomistic.calculator.data.OutputSEFS",
+                "function": "pyiron_core.pyiron_nodes.atomistic.calculator.data.OutputSEFS",
                 "inputs": {}
             }
         },
         "Plot": {
             "id": "Plot",
-            "import_path": "pyiron_nodes.plotting.Plot",
+            "import_path": "pyiron_core.pyiron_nodes.plotting.Plot",
             "label": "Plot",
             "parent_id": null,
             "level": 0,
@@ -147,13 +147,13 @@
             "expanded": false,
             "node": {
                 "label": "Plot",
-                "function": "pyiron_nodes.plotting.Plot",
+                "function": "pyiron_core.pyiron_nodes.plotting.Plot",
                 "inputs": {}
             }
         },
         "Histogram": {
             "id": "Histogram",
-            "import_path": "pyiron_nodes.plotting.Histogram",
+            "import_path": "pyiron_core.pyiron_nodes.plotting.Histogram",
             "label": "Histogram",
             "parent_id": null,
             "level": 0,
@@ -163,11 +163,11 @@
             "expanded": false,
             "node": {
                 "label": "Histogram",
-                "function": "pyiron_nodes.plotting.Histogram",
+                "function": "pyiron_core.pyiron_nodes.plotting.Histogram",
                 "inputs": {}
             }
         },
-        "_obj_type": "pyiron_workflow.api.serial.GraphNode"
+        "_obj_type": "pyiron_core.pyiron_workflow.api.serial.GraphNode"
     },
     "edges": {
         "values": [
@@ -226,6 +226,6 @@
                 "targetHandle": "x"
             }
         ],
-        "obj_type": "pyiron_workflow.api.serial.GraphEdge"
+        "obj_type": "pyiron_core.pyiron_workflow.api.serial.GraphEdge"
     }
 }

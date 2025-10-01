@@ -1,10 +1,9 @@
 import unittest
 
-import pyiron_workflow.simple_workflow as swf
-from pyiron_workflow.graph import base
-from pyiron_workflow.graph.group import create_group
-
 from static.nodes import AddOne
+
+from pyiron_core.pyiron_workflow.graph import base
+from pyiron_core.pyiron_workflow.graph.group import create_group
 
 
 class TestPortToCode(unittest.TestCase):
@@ -29,5 +28,5 @@ class TestPortToCode(unittest.TestCase):
             g_by_id.nodes["sg"].node.graph,
             g_by_name.nodes["sg"].node.graph,
             msg="Subgroups should be equivalent regardless of whether created by index "
-                "or label"
+            "or label",
         )

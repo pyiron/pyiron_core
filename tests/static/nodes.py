@@ -1,4 +1,4 @@
-import pyiron_workflow as pwf
+import pyiron_core.pyiron_workflow as pwf
 
 
 @pwf.as_function_node
@@ -26,3 +26,9 @@ def ParallelIdentityMacro(x):
 def AddOne(x):
     y = x + 1
     return y
+
+
+class SomethingNested:
+    @staticmethod
+    def the_nested_thing():
+        return "this thing has a nontrivial qualname"

@@ -1,7 +1,43 @@
 # Overview
 
-# Transient technical details
+`pyiron_core` is a workflow management system for Python that leverages a graph-based system -- including a visual scripting GUI -- to develop and execute workflows.
 
-This project amalgamates multiple sources, including modified versions of [`pyironflow`](https://github.com/pyiron/pyironFlow/) and [`pyiron_nodes`](https://github.com/pyiron/pyiron_nodes).
-Python requirements across all components are collected in `project.env`.
-With a suitable python environment in place, generate a development build of the Javascript components with `npm install; npm run dev`.
+## Getting started
+
+The user-facing API is found directly in the `pyiron_core` namespace, and after installation you can get running with `import pyiron_core as pc` and explore the dot-completion menu `pc...` for key tools.
+
+To jump in with the graphical interface, just spin up the binder demo and start exploring a selection of materials science-oriented workflows!
+
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/pyiron/pyiron_core/main?urlpath=%2Fdoc%2Ftree%2Fdemo.ipynb)
+
+## Installation
+
+For a development installation, or to stay fresh with the bleeding edge of `pyiron_core`, install the conda environment locally and build the GUI:
+
+```bash
+git clone https://github.com/pyiron/pyiron_core.git
+cd pyiron_core
+conda env create -f project-env.yml
+conda activate pyiron_core
+npm install; npm run build
+```
+
+Don't forget to modify your start-up script to add the `pyiron_core` location to your `PYTHONPATH`.
+
+Alternatively, you can pip-install the current version to have it accessible in your existing python environment:
+
+```bash
+git clone https://github.com/pyiron/pyiron_core.git
+cd pyiron_core
+pip install .
+```
+
+In both cases you will need `npm` on your local machine to build the GUI.
+If you're going the `conda` route, this can be easily installed in your environment with `conda install -c conda-forge nodejs=18`.
+
+Similarly, for full functionality you will also want `postgres`.
+Again, with `conda` this can be installed with `conda install -c conda-forge postgresql`.
+[`pyiron_core.pyiron_workflow.api.util.LocalPostgres`](./pyiron_core/pyiron_workflow/util.py) is a helper tool for configuring your local postgres instance, and is leveraged in the educational notebooks.
+
+Windows is not currently supported.
+Osx ARM machines should be able to install the package, but may encounter hiccups using some workflow nodes.
