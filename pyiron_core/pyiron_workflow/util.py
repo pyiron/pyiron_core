@@ -83,17 +83,21 @@ class LocalPostgres:
         )
 
     def _stop(self):
-        self._run("pg_ctl", "-D", self.dbdir, "stop")
+        if self._is_running():
+            self._run("pg_ctl", "-D", self.dbdir, "stop")
 
     def _status(self):
-        self._run("pg_ctl", "-D", self.dbdir, "status")
+        return self._run(
+            "pg_ctl", "-D", self.dbdir, "status", check=False, capture_output=True
+        )
+
+    def _is_running(self):
+        result = self._status()
+        return result is not None and result.returncode == 0
 
     def _remove(self):
-        try:
-            self._run("pg_ctl", "-D", self.dbdir, "status", capture_output=True)
+        if self._is_running():
             self._run("pg_ctl", "-D", self.dbdir, "stop")
-        except subprocess.CalledProcessError:
-            pass
         shutil.rmtree(self.dbdir, ignore_errors=True)
 
     @property
