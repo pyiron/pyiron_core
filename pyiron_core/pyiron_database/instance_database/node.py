@@ -4,6 +4,7 @@ import os
 from collections.abc import Iterable
 from typing import Any
 
+from pyiron_core import paths
 from pyiron_core.pyiron_database.generic_storage import HDF5Storage, JSONGroup
 from pyiron_core.pyiron_database.obj_reconstruction.util import (
     deserialize_obj,
@@ -18,7 +19,7 @@ from pyiron_core.pyiron_workflow.api.graph import Graph, GraphEdge
 
 from .InstanceDatabase import InstanceDatabase
 
-PyironStoragePath: str = os.path.expanduser("~/pyiron_core/.storage")
+PyironStoragePath: str = str(paths.DATA_STORAGE)
 
 
 def store_node_outputs(node: Node, storage_path: str = PyironStoragePath) -> str:

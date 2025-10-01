@@ -15,7 +15,7 @@ from IPython.display import display
 
 import pyiron_core.pyiron_database.api as pyiron_database
 import pyiron_core.pyironflow.api as pyironflow
-from pyiron_core import not_data
+from pyiron_core import not_data, paths
 from pyiron_core.pyiron_workflow import simple_workflow
 from pyiron_core.pyiron_workflow.graph import (
     base,
@@ -348,9 +348,7 @@ class PyironFlow:
         hash_nodes=False,
         gui_layout: GUILayout | None = None,
         db: pyiron_database.PostgreSQLInstanceDatabase | None = None,
-        workflow_path: str = os.path.expanduser(
-            "~/pyiron_core/pyiron_workflows"
-        ),  # rooth path to directory where .json graph workflows are stored
+        workflow_path: str = str(paths.WORKFLOW_STORAGE),
     ):
         gui_layout = GUILayout() if gui_layout is None else gui_layout
 
