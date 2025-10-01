@@ -5,6 +5,7 @@ import subprocess
 import tempfile
 import os
 from pathlib import Path
+
 # from pwf_creator import load_extra_files, extract_code, ask_ollama, get_workflow
 from IPython.display import display, Markdown, Code
 import ipywidgets as widgets
@@ -30,6 +31,7 @@ def load_extra_files(file_paths):
 import requests
 import json
 
+
 def ask_ollama(prompt, model="gpt-oss:120b", temperature: float = 0.2):
     """
     Send a prompt to Ollama and return the collected response text.
@@ -41,8 +43,8 @@ def ask_ollama(prompt, model="gpt-oss:120b", temperature: float = 0.2):
     model : str, optional
         The Ollama model ID to use. Default is "gpt-oss:120b".
     temperature : float, optional
-        Creativity/randomness in generation. 
-        Lower values (~0.0) = more deterministic, 
+        Creativity/randomness in generation.
+        Lower values (~0.0) = more deterministic,
         higher values (~1.0) = more random. Default is 0.7.
 
     Returns
@@ -56,9 +58,9 @@ def ask_ollama(prompt, model="gpt-oss:120b", temperature: float = 0.2):
             "model": model,
             "prompt": prompt,
             "temperature": temperature,
-            "stream": True
+            "stream": True,
         },
-        stream=True
+        stream=True,
     )
 
     output_text = ""
@@ -88,15 +90,15 @@ def extract_code(text):
 def get_workflow():
     import importlib
     import sys
-    
+
     # Make sure the module is in sys.modules (import it if it isn’t yet)
     if "workflow" not in sys.modules:
-        import workflow          # first‑time import
+        import workflow  # first‑time import
     else:
-        import workflow          # module already present
-    
+        import workflow  # module already present
+
     # Reload the module so any changes on disk are picked up
     importlib.reload(workflow)
-    
+
     # Grab the refreshed `wf` attribute
     return workflow.wf
