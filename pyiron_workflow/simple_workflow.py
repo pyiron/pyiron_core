@@ -169,6 +169,7 @@ PortTypeValue: TypeAlias = Literal[
 
 # from typing import Any, Literal, Union, Type, get_origin, get_args
 
+
 # ----------------------------------------------------------------------
 # Helper that turns a literal value into the identifier string we want.
 # ----------------------------------------------------------------------
@@ -184,14 +185,16 @@ def _clean_literal_value(val: Any) -> str:
     * Numbers, bools, ``None`` etc. are returned via ``repr``.
     """
     if isinstance(val, str):
-        return val.strip('\'"')
+        return val.strip("'\"")
     return repr(val)
 
 
 # ----------------------------------------------------------------------
 # Main conversion routine (drop‑in replacement for the original one)
 # ----------------------------------------------------------------------
-def type_hint_to_string(type_hint: Any) -> str:   # PortTypeValue is assumed to be ``str``
+def type_hint_to_string(
+    type_hint: Any,
+) -> str:  # PortTypeValue is assumed to be ``str``
     """Convert a Python type hint to the string representation used by pyiron‑workflow.
 
     The function recognises primitive types, ``Node``/``_NotHinted``,
@@ -211,9 +214,9 @@ def type_hint_to_string(type_hint: Any) -> str:   # PortTypeValue is assumed to 
         return "bool"
     if type_hint is None or type_hint is type(None):
         return "None"
-    if type_hint is Node:                     # type: ignore[name-defined]
+    if type_hint is Node:  # type: ignore[name-defined]
         return "Node"
-    if type_hint is _NotHinted:               # type: ignore[name-defined]
+    if type_hint is _NotHinted:  # type: ignore[name-defined]
         # print("Not hinted: ", type_hint)
         return "NotHinted"
 
@@ -237,7 +240,7 @@ def type_hint_to_string(type_hint: Any) -> str:   # PortTypeValue is assumed to 
     # Literal handling (with or without quotes)
     # ------------------------------------------------------------------
     if origin is Literal:
-        raw_vals = get_args(type_hint)               # e.g. (fcc, bcc, "hcp")
+        raw_vals = get_args(type_hint)  # e.g. (fcc, bcc, "hcp")
         cleaned = [_clean_literal_value(v) for v in raw_vals]
         return f"Literal[{', '.join(cleaned)}]"
 
@@ -314,6 +317,8 @@ def add_field(data, **kwargs):
     for key, value in kwargs.items():
         if isinstance(value, list):
             data[key] = value
+        elif isinstance(value, tuple):
+            print("Tuple not supported for field values: ", data, kwargs)
         else:
             ref_key = list(data.keys())[0]
             data[key] = [value for _ in data[ref_key]]
@@ -577,7 +582,9 @@ class Node:
                 f"Node creator: Output labels must be unique: {self.outputs.data[PORT_LABEL]}"
             )
         if None in self.outputs.data[PORT_LABEL]:
-            raise ValueError("Node creator: Output labels must be given")
+            raise ValueError(
+                f"Node creator ({self.label}): Output labels must be given {output_labels}"
+            )
 
         # print("node_output_labels: ", output_labels)
         # print("node_outputs_labels: ", self.outputs.data[PORT_LABEL], self.label)

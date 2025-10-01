@@ -164,12 +164,13 @@ def GetEigenvalues(matrix):
     return ew
 
 
-@as_macro_node
-def CheckConsistency(self, phonopy: Phonopy, tolerance: float = 1e-10):
-    self.dyn_matrix = GetDynamicalMatrix(phonopy).run()
-    self.ew = GetEigenvalues(self.dyn_matrix)
-    self.has_imaginary_modes = HasImaginaryModes(self.ew, tolerance)
-    return self.has_imaginary_modes
+# @as_macro_node
+# def CheckConsistency(self, phonopy: Phonopy, tolerance: float = 1e-10):
+#     self.dyn_matrix = GetDynamicalMatrix(phonopy).run()
+#     self.ew = GetEigenvalues(self.dyn_matrix)
+#     self.has_imaginary_modes = HasImaginaryModes(self.ew, tolerance)
+#     has_imaginary_modes = self.has_imaginary_modes
+#     return has_imaginary_modes
 
 
 @as_function_node

@@ -161,4 +161,8 @@ def SaveStructures(structures: list[Atoms], filename: str):
         filename += ".pckl.gz"
     dirname = os.path.dirname(filename)
     os.makedirs(dirname, exist_ok=True)
-    df.to_pickle(filename)
+    status = df.to_pickle(filename)
+
+    return status
+
+    

@@ -287,23 +287,24 @@ def CalcPhaseDiagram(
 
 
 @as_macro_node("phase_data")
-def ComputPhaseDiagram(
+def ComputePhaseDiagram(
     filename: str = "MgCaFreeEnergies.pckl.gz",
     T_min: int = 300,
     T_max: int = 1100,
     T_steps=20,
 ):
     import pyiron_nodes as pn
+    import pyiron_nodes.atomistic.thermodynamics.landau.phases as phases
 
     wf = Workflow("PhaseDiagram")
     wf.read_data = pn.utilities.ReadDataFrame(filename=filename, compression="gzip")
-    wf.phases_from_df = pn.atomistic.thermodynamics.landau.phases.PhasesFromDataFrame(
+    wf.phases_from_df = phases.PhasesFromDataFrame(
         dataframe=wf.read_data
     )
     wf.temperatures = pn.math.Linspace(
         x_min=T_min, x_max=T_max, num_points=T_steps, endpoint=True
     )
-    wf.calc_phase_diagram = pn.atomistic.thermodynamics.landau.plot.CalcPhaseDiagram(
+    wf.calc_phase_diagram = CalcPhaseDiagram(
         phases=wf.phases_from_df.outputs.phase_list,
         temperatures=wf.temperatures,
         refine=True,

@@ -210,7 +210,7 @@ def ComputeElasticConstantsMacro(
     #     raise ValueError(f"Unknown calculator: '{calculator}' {test1} {test2}")
 
     wf.print = Print(f"calculator: {calculator}")
-    # wf.calculator = StaticEnergy(structure=structure, engine=engine)
+    wf.calculator = StaticEnergy(structure=structure, engine=engine)
     # wf.calculator = GetFreeEnergy(structure=structure, engine=engine)
     # print(f"Using calculator: {wf.calculator}")
     # print(f"Input calculator: {calculator}")

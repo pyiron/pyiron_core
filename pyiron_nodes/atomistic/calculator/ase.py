@@ -8,6 +8,28 @@ def Static(
     structure: Atoms,
     engine=None,
 ):
+    """Calculate static properties of a structure using ASE.
+
+    This node evaluates the potential energy and forces of a given
+    ``Atoms`` object with a specified calculator (engine). It is
+    typically used for single‑point energy evaluations or as a building
+    block in larger workflows where only the static configuration is of
+    interest.
+
+    Parameters
+    ----------
+    structure : ase.Atoms
+        The atomic configuration to be evaluated.
+    engine : OutputEngine, optional
+        An ``OutputEngine`` wrapping an ASE calculator. If ``None`` a
+        default EMT calculator is instantiated.
+
+    Returns
+    -------
+    OutputCalcStaticList
+        Dataclass containing ``energies_pot`` (array of potential
+        energies) and ``forces`` (array of force vectors).
+    """
     import numpy as np
     from pyiron_nodes.atomistic.calculator.data import OutputCalcStaticList
 
@@ -33,7 +55,25 @@ def StaticEnergy(
     structure: Atoms,
     engine: OutputEngine,
 ):
-    # print("structure: ", structure, engine)
+    """Return the potential energy of a structure.
+
+    A lightweight wrapper around ASE's ``get_potential_energy`` that
+    expects an ``OutputEngine`` providing a calculator. Useful when only
+    the scalar energy value is required, for example in optimization or
+    screening workflows.
+
+    Parameters
+    ----------
+    structure : ase.Atoms
+        Atomic configuration.
+    engine : OutputEngine
+        Engine containing the ASE calculator to be used.
+
+    Returns
+    -------
+    float
+        The potential energy of the structure.
+    """
     structure.calc = engine.calculator
     energy = structure.get_potential_energy()
 
@@ -44,11 +84,34 @@ def StaticEnergy(
 def Minimize(
     structure: Atoms = None, engine=None, fmax: float = 0.005, log_file: str = "tmp.log"
 ):
+    """Relax a structure to a local minimum using BFGS optimization.
+
+    The node performs geometry optimization with ASE's BFGS optimizer,
+    recording energies, forces, and intermediate structures. It is
+    commonly employed to obtain relaxed configurations before further
+    property calculations.
+
+    Parameters
+    ----------
+    structure : ase.Atoms, optional
+        Initial atomic configuration. Must be provided.
+    engine : OutputEngine, optional
+        Engine wrapping an ASE calculator. If ``None`` a default EMT
+        calculator is used.
+    fmax : float, default 0.005
+        Convergence criterion for the maximum force component.
+    log_file : str, default "tmp.log"
+        Path to the optimizer log file. Use ``"-"`` to write to stdout.
+
+    Returns
+    -------
+    OutputCalcStaticList
+        Dataclass containing energies, forces, structures, convergence
+        flag, and number of optimization steps.
+    """
     from ase.optimize import BFGS
     from ase.io.trajectory import Trajectory
     from pyiron_nodes.atomistic.calculator.data import OutputCalcStaticList
-
-    # import numpy as np
 
     if engine is None:
         from ase.calculators.emt import EMT
