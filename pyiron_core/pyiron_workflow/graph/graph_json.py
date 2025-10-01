@@ -78,7 +78,7 @@ def _uncompact_graph_from_state(state: dict):
 def _save_graph(
     graph: base.Graph,
     filename: str | pathlib.Path = None,
-    workflow_dir: str = ".",
+    workflow_dir: str | pathlib.Path = ".",
     overwrite: bool = False,
 ):
     if filename is None:
@@ -104,7 +104,7 @@ def _save_graph(
     return True
 
 
-def _load_graph(filename: str | pathlib.Path, workflow_dir: str = "."):
+def _load_graph(filename: str | pathlib.Path, workflow_dir: str | pathlib.Path = "."):
     # check if filename has extension json, if not add it
     if isinstance(filename, str):
         if not filename.endswith(".json"):
@@ -113,7 +113,7 @@ def _load_graph(filename: str | pathlib.Path, workflow_dir: str = "."):
     if isinstance(filename, str):
         filename = pathlib.Path(filename)
 
-    wf_file = workflow_dir / filename
+    wf_file = pathlib.Path(workflow_dir) / filename
     if not wf_file.exists():
         raise FileNotFoundError(f"File '{filename}' not found in dir {workflow_dir}.")
 

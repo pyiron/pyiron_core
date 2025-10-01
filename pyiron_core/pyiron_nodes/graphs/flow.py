@@ -28,7 +28,7 @@ def LoadGraph(path: str):
 
     # 1️⃣  Is the supplied path already absolute?
     if not pathlib.Path(path).is_absolute():
-        path = str(paths.WORKFLOW_STORAGE / path)
+        path = paths.WORKFLOW_STORAGE / path
 
     # 4️⃣  Load and return the graph
     graph = _load_graph(path)

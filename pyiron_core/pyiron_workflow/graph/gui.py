@@ -2,6 +2,7 @@ import dataclasses
 import inspect
 import json
 import os
+import pathlib
 import threading
 import time
 import warnings
@@ -348,7 +349,7 @@ class PyironFlow:
         hash_nodes=False,
         gui_layout: GUILayout | None = None,
         db: pyiron_database.PostgreSQLInstanceDatabase | None = None,
-        workflow_path: str = str(paths.WORKFLOW_STORAGE),
+        workflow_path: str | pathlib.Path = paths.WORKFLOW_STORAGE,
     ):
         gui_layout = GUILayout() if gui_layout is None else gui_layout
 
@@ -372,7 +373,7 @@ class PyironFlow:
         self.wf_widgets = []  # list of PyironFlowWidget objects
         for wf in wf_list:
             if isinstance(wf, str):
-                wf = graph_json._load_graph(f"{workflow_path}/{wf}")
+                wf = graph_json._load_graph(pathlib.Path(workflow_path) / wf)
             self.wf_widgets.append(
                 PyironFlowWidget(
                     wf=wf,
