@@ -18,7 +18,7 @@ from pyiron_core.pyiron_workflow.api.graph import Graph, GraphEdge
 
 from .InstanceDatabase import InstanceDatabase
 
-PyironStoragePath: str = os.path.expanduser("~/.storage")
+PyironStoragePath: str = os.path.expanduser("~/pyiron_core/.storage")
 # create storage path if it does not exist
 if not os.path.exists(PyironStoragePath):
     os.makedirs(PyironStoragePath)

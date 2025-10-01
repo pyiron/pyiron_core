@@ -29,8 +29,8 @@ def LoadGraph(path: str):
 
     # 1️⃣  Is the supplied path already absolute?
     if not os.path.isabs(path):
-        # 2️⃣  Resolve ``~/pyiron_core.pyiron_workflows`` → absolute directory
-        base_dir = os.path.expanduser("~/pyiron_core.pyiron_workflows")
+        # 2️⃣  Resolve ``~/pyiron_core/pyiron_workflows`` → absolute directory
+        base_dir = os.path.expanduser("~/pyiron_core/pyiron_workflows")
         # 3️⃣  Join the base directory with the user‑provided relative path
         path = os.path.join(base_dir, path)
 

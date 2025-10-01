@@ -349,7 +349,7 @@ class PyironFlow:
         gui_layout: GUILayout | None = None,
         db: pyiron_database.PostgreSQLInstanceDatabase | None = None,
         workflow_path: str = os.path.expanduser(
-            "~/pyiron_core.pyiron_workflows"
+            "~/pyiron_core/pyiron_workflows"
         ),  # rooth path to directory where .json graph workflows are stored
     ):
         gui_layout = GUILayout() if gui_layout is None else gui_layout
