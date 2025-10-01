@@ -19,9 +19,6 @@ from pyiron_core.pyiron_workflow.api.graph import Graph, GraphEdge
 from .InstanceDatabase import InstanceDatabase
 
 PyironStoragePath: str = os.path.expanduser("~/pyiron_core/.storage")
-# create storage path if it does not exist
-if not os.path.exists(PyironStoragePath):
-    os.makedirs(PyironStoragePath)
 
 
 def store_node_outputs(node: Node, storage_path: str = PyironStoragePath) -> str:
@@ -39,6 +36,10 @@ def store_node_outputs(node: Node, storage_path: str = PyironStoragePath) -> str
     """
     node_hash = get_hash(node)
     output_path = f"{storage_path}/{node_hash}.hdf5"
+    # create storage path if it does not exist
+    if not os.path.exists(storage_path):
+        os.makedirs(storage_path)
+
     with HDF5Storage(output_path, "w") as storage:
         for k, v in node.outputs.items():
             is_default_check = v.value == v.default
