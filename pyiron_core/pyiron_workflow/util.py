@@ -4,16 +4,14 @@ import shutil
 import subprocess
 import time
 
+from pyiron_core import paths
+
 
 class LocalPostgres:
     def __init__(self):
         self._ci_mode = os.environ.get("GITHUB_ACTIONS") == "true"
 
-        self.dbdir = str(
-            (
-                pathlib.Path(__file__).parent.parent.parent / ".pycor" / "pgdata"
-            ).absolute()
-        )
+        self.dbdir = str(paths.PYIRON_CORE_ROOT / ".local_postgres" / "pgdata")
         self.logfile = os.path.join(self.dbdir, "logfile")
         self.port = str(5432)
         self.user = "localuser"
