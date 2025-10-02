@@ -2,6 +2,15 @@
 
 `pyiron_core` is a workflow management system for Python that leverages a graph-based system -- including a visual scripting GUI -- to develop and execute workflows.
 
+Key features:
+- **Hybrid workflow creation** -- Code or visual scripting? Mix-and-match text-based and GUI design to best fit where you are in the development process.
+- **Jupyter-native** -- Create, inspect, and execute `pyiron_core` nodes without ever leaving your notebook.
+- **Boilerplate-free** -- Convert your regular python functions into graph nodes with a single decorator.
+- **Hash-based caching** -- Workflows patterns can be identified by hashes of input data and graph edges to re-load results from a cache for rapid iteration
+- **Inclusive node library** -- Get rolling quickly with a pre-built library of nodes, and extend your capabilities with easy node creation
+
+[![DEMO](./documentation/pyiron_core_demo.gif)](./documentation/pyiron_core_demo.mp4)
+
 ## Getting started
 
 The user-facing API is found directly in the `pyiron_core` namespace, and after installation you can get running with `import pyiron_core as pc` and explore the dot-completion menu `pc...` for key tools.
