@@ -5,7 +5,7 @@ mkdir -p ${HOME}/.local/share/jupyter/kernels/pyiron_core
 cp ${HOME}/.binder/kernel.json ${HOME}/.local/share/jupyter/kernels/pyiron_core
 
 # Bring key content to root
-mv ${HOME}/.binder/demo.ipynb .
+mv ${HOME}/demo/* .
 
 # clean up
 rm -r   ${HOME}/.binder \
