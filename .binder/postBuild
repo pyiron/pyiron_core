@@ -1,3 +1,4 @@
+#!/bin/bash
 pip install . --no-deps --no-build-isolation
 
 # Save the stuff we actually need for binder
