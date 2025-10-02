@@ -9,7 +9,7 @@ Key features:
 - **Hash-based caching** -- Workflows patterns can be identified by hashes of input data and graph edges to re-load results from a cache for rapid iteration
 - **Inclusive node library** -- Get rolling quickly with a pre-built library of nodes, and extend your capabilities with easy node creation
 
-[![DEMO](./documentation/pyiron_core_demo.gif)](./documentation/pyiron_core_demo.mp4)
+![DEMO](./documentation/pyiron_core_demo_snippet.gif)
 
 ## Getting started
 
@@ -18,6 +18,8 @@ The user-facing API is found directly in the `pyiron_core` namespace, and after 
 To jump in with the graphical interface, just spin up the binder demo and start exploring a selection of materials science-oriented workflows!
 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/pyiron/pyiron_core/main?urlpath=%2Fdoc%2Ftree%2Fdemo.ipynb)
+
+You can download a tutorial mp4 [from this repo](https://github.com/pyiron/pyiron_core/raw/main/documentation/pyiron_core_demo.mp4) to see a demonstration of key features.
 
 ## Installation
 
