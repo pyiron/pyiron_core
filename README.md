@@ -9,7 +9,7 @@ Key features:
 - **Hash-based caching** -- Workflows patterns can be identified by hashes of input data and graph edges to re-load results from a cache for rapid iteration
 - **Inclusive node library** -- Get rolling quickly with a pre-built library of nodes, and extend your capabilities with easy node creation
 
-[![DEMO](./documentation/pyiron_core_demo.gif)](./documentation/pyiron_core_demo.mp4)
+![DEMO](./documentation/pyiron_core_demo_snippet.gif)
 
 ## Getting started
 
