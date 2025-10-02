@@ -11,9 +11,11 @@ mv ${HOME}/demo/* .
 rm -r   ${HOME}/.binder \
         ${HOME}/.ci_support \
         ${HOME}/.github \
+        ${HOME}/__mocks__ \
         ${HOME}/decisions \
         ${HOME}/demo \
         ${HOME}/devbooks \
+        ${HOME}/documentation \
         ${HOME}/js \
         ${HOME}/node_modules \
         ${HOME}/notebooks \
@@ -22,6 +24,7 @@ rm -r   ${HOME}/.binder \
         ${HOME}/tests \
         ${HOME}/.gitignore \
         ${HOME}/jest.config.js \
+        ${HOME}/jest.config.cjs \
         ${HOME}/LICENSE \
         ${HOME}/local_postgres.zsh \
         ${HOME}/package.json \
@@ -29,6 +32,7 @@ rm -r   ${HOME}/.binder \
         ${HOME}/project-env.yml \
         ${HOME}/pyproject.toml \
         ${HOME}/README.md \
+        ${HOME}/setupTests.ts \
         ${HOME}/tsconfig.json
 
 # download datasets for the demos
