@@ -2,6 +2,7 @@ import dataclasses
 import inspect
 import json
 import os
+import pathlib
 import threading
 import time
 import warnings
@@ -15,7 +16,7 @@ from IPython.display import display
 
 import pyiron_core.pyiron_database.api as pyiron_database
 import pyiron_core.pyironflow.api as pyironflow
-from pyiron_core import not_data
+from pyiron_core import not_data, paths
 from pyiron_core.pyiron_workflow import simple_workflow
 from pyiron_core.pyiron_workflow.graph import (
     base,
@@ -338,7 +339,6 @@ class PyironFlowWidget:
 ############################################################################################################
 # pyironflow_widget
 ############################################################################################################
-############################################################################################################
 
 
 class PyironFlow:
@@ -348,9 +348,7 @@ class PyironFlow:
         hash_nodes=False,
         gui_layout: GUILayout | None = None,
         db: pyiron_database.PostgreSQLInstanceDatabase | None = None,
-        workflow_path: str = os.path.expanduser(
-            "~/pyiron_core.pyiron_workflows"
-        ),  # rooth path to directory where .json graph workflows are stored
+        workflow_path: str | pathlib.Path = paths.WORKFLOW_STORAGE,
     ):
         gui_layout = GUILayout() if gui_layout is None else gui_layout
 
@@ -374,7 +372,7 @@ class PyironFlow:
         self.wf_widgets = []  # list of PyironFlowWidget objects
         for wf in wf_list:
             if isinstance(wf, str):
-                wf = graph_json._load_graph(f"{workflow_path}/{wf}")
+                wf = graph_json._load_graph(pathlib.Path(workflow_path) / wf)
             self.wf_widgets.append(
                 PyironFlowWidget(
                     wf=wf,
@@ -563,13 +561,13 @@ def _to_jsonifyable(obj):
         if isinstance(value, (str, int, float, bool)):
             return value
         else:
-            return not_data.NotData
+            return "NonPrimitive"
     elif isinstance(obj, simple_workflow.Node):
-        return not_data.NotData
+        return "NonPrimitive"
     elif isinstance(obj, (str, int, float, bool, type(None))):
         return obj
     else:
-        return not_data.NotData
+        return "NonPrimitive"
 
 
 def gui_data(

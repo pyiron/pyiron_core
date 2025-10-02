@@ -1,5 +1,7 @@
+import pathlib
 from typing import Optional
 
+from pyiron_core import paths
 from pyiron_core.pyiron_workflow import as_function_node
 from pyiron_core.pyiron_workflow.api.graph import Graph, GraphNode
 
@@ -9,9 +11,8 @@ def LoadGraph(path: str):
     """
     Load a workflow graph from *path*.
 
-    If *path* is not an absolute path, it is interpreted as relative to
-    the directory ``~/pyiron_core.pyiron_workflows`` (the ``~`` is expanded to the
-    current user's home directory).
+    If *path* is not an absolute path, it is interpreted as relative to the default
+    workflow storage location.
 
     Parameters
     ----------
@@ -23,16 +24,11 @@ def LoadGraph(path: str):
     pyiron_core.pyiron_workflow.api.graph.Graph
         The deserialized workflow graph.
     """
-    import os
-
     from pyiron_core.pyiron_workflow.api.graph import _load_graph
 
     # 1️⃣  Is the supplied path already absolute?
-    if not os.path.isabs(path):
-        # 2️⃣  Resolve ``~/pyiron_core.pyiron_workflows`` → absolute directory
-        base_dir = os.path.expanduser("~/pyiron_core.pyiron_workflows")
-        # 3️⃣  Join the base directory with the user‑provided relative path
-        path = os.path.join(base_dir, path)
+    if not pathlib.Path(path).is_absolute():
+        path = paths.WORKFLOW_STORAGE / path
 
     # 4️⃣  Load and return the graph
     graph = _load_graph(path)

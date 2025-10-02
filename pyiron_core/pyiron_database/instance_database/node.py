@@ -1,9 +1,10 @@
 import hashlib
 import json
-import os
+import pathlib
 from collections.abc import Iterable
 from typing import Any
 
+from pyiron_core import paths
 from pyiron_core.pyiron_database.generic_storage import HDF5Storage, JSONGroup
 from pyiron_core.pyiron_database.obj_reconstruction.util import (
     deserialize_obj,
@@ -18,13 +19,11 @@ from pyiron_core.pyiron_workflow.api.graph import Graph, GraphEdge
 
 from .InstanceDatabase import InstanceDatabase
 
-PyironStoragePath: str = os.path.expanduser("~/.storage")
-# create storage path if it does not exist
-if not os.path.exists(PyironStoragePath):
-    os.makedirs(PyironStoragePath)
 
-
-def store_node_outputs(node: Node, storage_path: str = PyironStoragePath) -> str:
+def store_node_outputs(
+    node: Node,
+    storage_path: str | pathlib.Path = paths.DATA_STORAGE,
+) -> str:
     """
     Store a node's outputs into an HDF5 file.
 
@@ -38,8 +37,11 @@ def store_node_outputs(node: Node, storage_path: str = PyironStoragePath) -> str
         ValueError: If any output of the node is NOT_DATA.
     """
     node_hash = get_hash(node)
-    output_path = f"{storage_path}/{node_hash}.hdf5"
-    with HDF5Storage(output_path, "w") as storage:
+    output_path = storage_path / f"{node_hash}.hdf5"
+    storage_path = pathlib.Path(storage_path)
+    storage_path.mkdir(parents=True, exist_ok=True)
+
+    with HDF5Storage(str(output_path), "w") as storage:
         for k, v in node.outputs.items():
             is_default_check = v.value == v.default
             if isinstance(is_default_check, Iterable):
@@ -64,10 +66,13 @@ def store_node_outputs(node: Node, storage_path: str = PyironStoragePath) -> str
                 raise ValueError(
                     f"Failed to store output '{k}' of node '{node.label}': {e}"
                 ) from e
-    return output_path
+    return str(output_path)
 
 
-def restore_node_outputs(node: Node, storage_path: str = PyironStoragePath) -> bool:
+def restore_node_outputs(
+    node: Node,
+    storage_path: str | pathlib.Path = paths.DATA_STORAGE,
+) -> bool:
     """
     Restore a node's outputs from a stored HDF5 file, given by node.hash.
 
@@ -81,11 +86,11 @@ def restore_node_outputs(node: Node, storage_path: str = PyironStoragePath) -> b
     import pathlib
 
     node_hash = get_hash(node)
-    output_path = f"{storage_path}/{node_hash}.hdf5"
+    output_path = storage_path / f"{node_hash}.hdf5"
     print(
         f"Restoring node outputs  {node_hash} {node.label} {pathlib.Path(output_path).exists()}"
     )
-    with HDF5Storage(output_path, "r") as storage:
+    with HDF5Storage(str(output_path), "r") as storage:
         for k, v in storage.items():
             node.outputs[k]._value = deserialize_obj(
                 node.outputs[k].type_hint(pickle_load(v))

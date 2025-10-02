@@ -77,47 +77,62 @@ def _uncompact_graph_from_state(state: dict):
 
 def _save_graph(
     graph: base.Graph,
-    filename: str | pathlib.Path = None,
-    workflow_dir: str = ".",
+    filename: str | pathlib.Path | None = None,
+    workflow_dir: str | pathlib.Path | None = None,
     overwrite: bool = False,
 ):
-    if filename is None:
-        filename = f"{graph.label}.json"
+    filepath = _get_absolute_file_path(
+        graph.label if filename is None else filename, workflow_dir
+    )
 
-    if isinstance(filename, str):
-        # check if filename has extension json, if not add it
-        if not filename.endswith(".json"):
-            filename = f"{filename}.json"
-
-        filename = pathlib.Path(filename)
-
-    file = pathlib.Path(workflow_dir) / filename
-    if file.exists() and not overwrite:
+    if filepath.exists() and not overwrite:
         raise FileExistsError(
             f"File '{filename}' already exists in dir {workflow_dir}."
         )
 
-    with open(file, "w") as f:
+    filepath.parent.mkdir(parents=True, exist_ok=True)
+
+    with open(filepath, "w") as f:
         state = _compact_graph(graph).__getstate__()
         f.write(json.dumps(state, indent=4))
 
     return True
 
 
-def _load_graph(filename: str | pathlib.Path, workflow_dir: str = "."):
-    # check if filename has extension json, if not add it
-    if isinstance(filename, str):
-        if not filename.endswith(".json"):
-            filename = f"{filename}.json"
+def _get_absolute_file_path(
+    filename: str | pathlib.Path,
+    workflow_dir: str | pathlib.Path | None,
+):
+    filename = pathlib.Path(filename)
+    workflow_dir = pathlib.Path(workflow_dir) if workflow_dir is not None else None
 
-    if isinstance(filename, str):
-        filename = pathlib.Path(filename)
+    if filename.is_absolute():
+        if workflow_dir is not None:
+            raise ValueError(
+                f"Got an absolute filename '{filename}' and a non-None workflow_dir "
+                f"'{workflow_dir}'. When the filename is absolute, the workflow_dir "
+                f"will be ignored -- please provide only one or the other."
+            )
+        filepath = filename
+    elif workflow_dir is not None:
+        filepath = workflow_dir / filename
+    else:
+        filepath = pathlib.Path.cwd() / filename
 
-    wf_file = workflow_dir / filename
-    if not wf_file.exists():
-        raise FileNotFoundError(f"File '{filename}' not found in dir {workflow_dir}.")
+    return filepath.with_suffix(".json").absolute()
 
-    with open(wf_file, "r") as f:
+
+def _load_graph(
+    filename: str | pathlib.Path, workflow_dir: str | pathlib.Path | None = None
+):
+    filepath = _get_absolute_file_path(filename, workflow_dir)
+    if not filepath.exists():
+        raise FileNotFoundError(
+            f"Could not find file {filepath} constructed from filename '{filename}' "
+            f"and workflow_dir '{workflow_dir}'."
+        )
+
+    with open(filepath, "r") as f:
         state = json.load(f)
     graph = _uncompact_graph_from_state(state)
 
