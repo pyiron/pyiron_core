@@ -26,7 +26,7 @@ For a development installation, or to stay fresh with the bleeding edge of `pyir
 ```bash
 git clone https://github.com/pyiron/pyiron_core.git
 cd pyiron_core
-conda env create -f project-env.yml
+conda env create -n pyiron_core -f project-env.yml
 conda activate pyiron_core
 npm install; npm run build
 ```
