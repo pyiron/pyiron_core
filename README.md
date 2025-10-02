@@ -19,6 +19,8 @@ To jump in with the graphical interface, just spin up the binder demo and start 
 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/pyiron/pyiron_core/main?urlpath=%2Fdoc%2Ftree%2Fdemo.ipynb)
 
+You can download a tutorial mp4 [from this repo](https://github.com/pyiron/pyiron_core/raw/main/documentation/pyiron_core_demo.mp4) to see a demonstration of key features.
+
 ## Installation
 
 For a development installation, or to stay fresh with the bleeding edge of `pyiron_core`, install the conda environment locally and build the GUI:
