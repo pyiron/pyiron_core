@@ -8,7 +8,7 @@ for item in "${KEEP[@]}"; do
 done
 
 # Now clean up everything else
-find ${HOME} -mindepth 1 -maxdepth 1 ! -name '.temp_keep' -exec rm -rf {}
+find ${HOME} -mindepth 1 -maxdepth 1 ! -name '.temp_keep' -exec rm -rf {} +
 
 # Restore the kept material
 mv ${HOME}/.temp_keep/* ${HOME}/
