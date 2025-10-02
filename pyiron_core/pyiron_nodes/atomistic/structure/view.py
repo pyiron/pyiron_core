@@ -16,7 +16,33 @@ def Plot3d(
     view_plane: Optional[list] = None,
     distance_from_camera: Optional[float] = 1.0,
 ):
-    """Display atomistic structure (ase.Atoms) using nglview"""
+    """
+    Display atomistic structure (ase.Atoms) using nglview.
+
+    Task
+    ----
+    Visualise a static atomic structure, e.g., after building a bulk cell,
+    creating a surface slab, or after a geometry optimisation. This node is
+    typically used when the user wants to inspect the geometry, defects, or
+    surface features directly in a Jupyter notebook.
+
+    Parameters
+    ----------
+    structure: ase.Atoms
+        The atomic structure to visualise.
+    camera: str, optional
+        Camera mode, either "orthographic" or "perspective".
+    particle_size: float, optional
+        Size of the rendered atoms.
+    background: {"white", "black"}, optional
+        Background colour of the view.
+    select_atoms: np.ndarray or list, optional
+        Indices of atoms to highlight.
+    view_plane: list, optional
+        Plane normal for the view.
+    distance_from_camera: float, optional
+        Distance of the camera from the structure.
+    """
 
     if view_plane is None:
         view_plane = [1, 1, 1]
@@ -44,11 +70,19 @@ def Animate(
     """
     Animate a series of atomic structures.
 
+    Task
+    ----
+    Create an animation of a trajectory of structures, for example to
+    visualise the time evolution of a molecular dynamics run, monitor defect
+    migration, or generate a presentation of structural changes. This node is
+    useful when the user needs a dynamic view of multiple frames rather than a
+    single static plot.
+
     Parameters
     ----------
     trajectory : Trajectory‑like object
-        An object that provides ``positions`` (e.g. a pyiron
-        ``Trajectory`` or any object with a ``positions`` attribute).
+        An object that provides ``positions`` (e.g. a pyiron ``Trajectory``
+        or any object with a ``positions`` attribute).
     initial_structure : Structure‑like object
         The reference structure that defines the atomic species,
         lattice vectors, etc.
@@ -67,19 +101,6 @@ def Animate(
         The actual radius is ``particle_size * atomic_number``.
     camera : {{'orthographic', 'perspective'}}, default='orthographic'
         Camera perspective to be used for the animation.
-
-    Returns
-    -------
-    nglview.IPythonWidget
-        An interactive NGLView widget that can be displayed in a
-        Jupyter notebook (``display(widget)``).
-
-    Notes
-    -----
-    The function simply builds a :class:`pyiron_atomistics.Trajectory`
-    from the supplied ``trajectory`` and ``initial_structure`` and then
-    forwards all animation‑related arguments to
-    ``Trajectory.animate_structures``.
     """
     from pyiron_atomistics.atomistics.job.atomistic import Trajectory
 

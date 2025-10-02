@@ -1,6 +1,3 @@
-/* --------------------------------------------------------------- */
-/*  CustomNode.tsx – node component used by react‑flow            */
-/* --------------------------------------------------------------- */
 import React, { memo, useEffect, useState, useContext } from "react";
 import {
   Handle,
@@ -8,7 +5,7 @@ import {
   NodeToolbar,
   Position,
 } from "@xyflow/react";
-import { useModel } from "@anywidget/react";               // ← fixed import
+import { useModel } from "@anywidget/react";
 import { UpdateDataContext } from "./widget";
 import {
   OptionalLiteralSelect,
@@ -17,14 +14,8 @@ import {
 import { parseLiteralType } from "./utils";
 import { Checkbox } from "./Checkbox";
 
-/* --------------------------------------------------------------- */
-/*  👉 1️⃣ Import the stylesheet that contains the custom rules     */
-/* --------------------------------------------------------------- */
 import "./CustomNode.css";
 
-/* --------------------------------------------------------------- */
-/*  Styling constants – unchanged                                   */
-/* --------------------------------------------------------------- */
 const STYLE_VARS = {
   inputHeight: OLS_STYLE_VARS.inputHeight,
   inputFontSize: OLS_STYLE_VARS.inputFontSize,
@@ -39,9 +30,6 @@ const STYLE_VARS = {
   highlightColor: OLS_STYLE_VARS.highlightColor,
 };
 
-/* --------------------------------------------------------------- */
-/*  Adjustable self‑handle placement (unchanged)                    */
-/* --------------------------------------------------------------- */
 export const SELF_OFFSET = { top: 9, right: 9 };
 
 const stateColors: Record<string, string> = {
@@ -51,9 +39,6 @@ const stateColors: Record<string, string> = {
   LoadedFromCache: "yellow",
 };
 
-/* --------------------------------------------------------------- */
-/*  👉 2️⃣ CustomHandle – adds a CSS class **and** a data‑attribute  */
-/* --------------------------------------------------------------- */
 const CustomHandle = ({
   position,
   type,
@@ -62,34 +47,11 @@ const CustomHandle = ({
   highlighted,
   isNodeType,
   customStyle,
-}: {
-  position: Position;
-  type: "source" | "target";
-  index: number;
-  label: string;
-  highlighted?: boolean;
-  isNodeType?: boolean;
-  customStyle?: React.CSSProperties;
-}) => {
-  // ---- DEBUG ----------------------------------------------------
-  console.log("🔧 CustomHandle – render", {
-    position,
-    type,
-    index,
-    label,
-    isNodeType,
-    className: isNodeType ? "node-type-handle" : undefined,
-    dataAttr: isNodeType ? { "data-nodetype": "true" } : undefined,
-  });
-  // --------------------------------------------------------------
-
+}: any) => {
   const offsetStyle = position === Position.Left ? { left: -6 } : { right: -6 };
-
-  // className for the CSS selector, data‑attribute for extra specificity
   const className = isNodeType ? "node-type-handle" : undefined;
   const dataAttrs = isNodeType ? { "data-nodetype": "true" } : {};
 
-  // Only the vertical offset (and optional highlight colour) stay inline.
   const inlineStyle: React.CSSProperties = {
     top:
       index >= 0
@@ -114,9 +76,6 @@ const CustomHandle = ({
   );
 };
 
-/* --------------------------------------------------------------- */
-/*  NodeLabel – unchanged                                            */
-/* --------------------------------------------------------------- */
 const NodeLabel = ({
   text,
   onRename,
@@ -169,9 +128,30 @@ const NodeLabel = ({
   );
 };
 
-/* --------------------------------------------------------------- */
-/*  👉 3️⃣ InputHandle – added debug prints & passes isNodeType     */
-/* --------------------------------------------------------------- */
+/**
+ * Renders an input handle for a custom node, supporting various input types and connection states.
+ *
+ * @param label - The label to display for the input.
+ * @param type - The type of the input (e.g., "int", "float", "bool", "Node", "NonPrimitive", etc.).
+ * @param value - The current value of the input.
+ * @param index - The index of the input within the node.
+ * @param context - Callback function to update the input value.
+ * @param data - Additional data for the node, including connection state.
+ * @param onHoverChange - Callback for hover state changes.
+ * @param highlighted - Whether the input is currently highlighted.
+ *
+ * The component adapts its rendering based on the input type:
+ * - For literal and optional types, renders a select or input with optional checkbox.
+ * - For boolean types, renders a toggleable checkbox.
+ * - For primitive types, renders a text or number input.
+ * - For non-primitive types, disables editing and displays a gray label.
+ *
+ * Visual cues:
+ * - Red border and asterisk indicate mandatory fields.
+ * - Green text indicates a connected input.
+ * - Gray color (`color: "gray"` or `color: "#555"`) is used for non-editable, non-primitive types.
+ *   - `#555` is a darker gray for better contrast and accessibility.
+ */
 const InputHandle = ({
   label,
   type,
@@ -182,25 +162,22 @@ const InputHandle = ({
   onHoverChange,
   highlighted = false,
 }: any) => {
-  // ---- DEBUG ----------------------------------------------------
-  console.log("🔎 InputHandle – props", {
-    label,
-    type,
-    value,
-    index,
-    isNodeType: type === "Node",
-    isConnected: data.target_connected?.[index],
-  });
-  // --------------------------------------------------------------
-
   const { optional, options, mode, baseType } = parseLiteralType(type);
   const isLiteral = options.length > 0;
   const isNodeType = type === "Node";
   const isConnected = data.target_connected && data.target_connected[index];
 
-  // === Mandatory condition check ===
+  // NEW: detect non-primitive types
+  const isNonPrimitive =
+    baseType === "nonprimitive" || type === "NonPrimitive";
+
   const isMandatory = !isConnected && value === "NotData";
   const displayValue = isMandatory ? "" : value ?? "";
+
+  const [editValue, setEditValue] = useState(displayValue || "");
+  useEffect(() => {
+    setEditValue(displayValue || "");
+  }, [displayValue]);
 
   const pushValue = (raw: any) => {
     const conv = convertInput(raw, type);
@@ -223,26 +200,35 @@ const InputHandle = ({
       onMouseEnter={() => onHoverChange(index, true, "left")}
       onMouseLeave={() => onHoverChange(index, false, "left")}
     >
-      {/* ----------------------------------------------------------- */}
-      {/*  Label (with mandatory star)                                 */}
-      {/* ----------------------------------------------------------- */}
       <span
         style={{
           marginLeft: STYLE_VARS.inputMarginLeft,
-          opacity: isConnected ? 0.6 : 1,
-          fontStyle: isConnected ? "italic" : "normal",
+          opacity: isConnected || isNonPrimitive ? 0.6 : 1,
+          fontStyle:
+            isConnected || isNonPrimitive ? "italic" : "normal",
+          color: isNonPrimitive ? "gray" : "inherit",
+          cursor: isNonPrimitive ? "not-allowed" : "default",
         }}
+        title={
+          isNonPrimitive
+            ? "This value is not editable. Connect it to a node that provides a value with matching type."
+            : ""
+        }
       >
         {label}
-        {isMandatory && <span style={{ color: "red", marginLeft: 2 }}> *</span>}
+        {isMandatory && (
+          <span style={{ color: "red", marginLeft: 2 }}> *</span>
+        )}
         {isConnected && (
           <span style={{ color: "green" }}>(connected)</span>
         )}
+        {isNonPrimitive && (
+            <span style={{ color: "#555", marginLeft: 4 }}>
+            {/* (non-editable) */}
+            </span>
+        )}
       </span>
 
-      {/* ----------------------------------------------------------- */}
-      {/*  The handle – now gets the extra class & data‑attribute       */}
-      {/* ----------------------------------------------------------- */}
       <CustomHandle
         position={Position.Left}
         type="target"
@@ -252,15 +238,17 @@ const InputHandle = ({
         isNodeType={isNodeType}
       />
 
-      {/* ----------------------------------------------------------- */}
-      {/*  Input widget – unchanged                                    */}
-      {/* ----------------------------------------------------------- */}
-      {!isConnected && (
+      {!isConnected && !isNonPrimitive && (
         optional || isLiteral ? (
           <OptionalLiteralSelect
-            value={displayValue || null}
+            value={editValue || null}
             options={isLiteral ? (options as string[]) : []}
-            onChange={(newVal) => pushValue(newVal)}
+            onChange={(newVal, commit = false) => {
+              setEditValue(newVal ?? "");
+              if (commit) {
+                pushValue(newVal ?? "");
+              }
+            }}
             highlighted={highlighted}
             showCheckbox={optional}
             mode={mode || (isLiteral ? "select" : "input")}
@@ -272,9 +260,13 @@ const InputHandle = ({
             style={{
               width: STYLE_VARS.inputWidth,
               boxSizing: "border-box",
-              border: isMandatory ? "1px solid red" : "1px solid #ccc",
+              border: isMandatory
+                ? "1px solid red"
+                : "1px solid #ccc",
               color: isMandatory ? "gray" : "black",
-              backgroundColor: isMandatory ? "#fff8c4" : "white",
+              backgroundColor: isMandatory
+                ? "#fff8c4"
+                : "white",
             }}
             placeholder={isMandatory ? "required" : ""}
           />
@@ -288,8 +280,12 @@ const InputHandle = ({
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              border: isMandatory ? "1px solid red" : "1px solid #ccc",
-              backgroundColor: isMandatory ? "#fffacd" : "white",
+              border: isMandatory
+                ? "1px solid red"
+                : "1px solid #ccc",
+              backgroundColor: isMandatory
+                ? "#fffacd"
+                : "white",
               cursor: "pointer",
               paddingLeft: "4px",
               boxSizing: "border-box",
@@ -313,19 +309,31 @@ const InputHandle = ({
           </div>
         ) : (
           <input
-            type={baseType === "int" || baseType === "float" ? "number" : "text"}
+            type={
+              baseType === "int" || baseType === "float"
+                ? "number"
+                : "text"
+            }
+            step={baseType === "float" ? "any" : undefined}
             value={displayValue}
             placeholder={isMandatory ? "mandatory" : ""}
-            onChange={(e) => pushValue(e.target.value)}
+            onChange={(e) =>
+              context(data.label, index, e.target.value)
+            }
+            onBlur={(e) => pushValue(e.target.value.trim())}
             style={{
               width: STYLE_VARS.inputWidth,
               height: STYLE_VARS.inputHeight,
               fontSize: STYLE_VARS.inputFontSize,
-              border: isMandatory ? "1px solid red" : "1px solid #ccc",
+              border: isMandatory
+                ? "1px solid red"
+                : "1px solid #ccc",
               boxSizing: "border-box",
               padding: "0 4px",
               color: isMandatory ? "gray" : "black",
-              backgroundColor: isMandatory ? "#fffacd" : "white",
+              backgroundColor: isMandatory
+                ? "#fffacd"
+                : "white",
             }}
           />
         )
@@ -334,9 +342,6 @@ const InputHandle = ({
   );
 };
 
-/* --------------------------------------------------------------- */
-/*  👉 4️⃣ OutputHandle – unchanged (still uses CustomHandle)      */
-/* --------------------------------------------------------------- */
 const OutputHandle = ({
   label,
   index,
@@ -344,14 +349,6 @@ const OutputHandle = ({
   highlighted,
   type,
 }: any) => {
-  // ---- DEBUG ----------------------------------------------------
-  console.log("🔎 OutputHandle – props", {
-    label,
-    type,
-    isNodeType: type === "Node",
-  });
-  // --------------------------------------------------------------
-
   const isNodeType = type === "Node";
   return (
     <div
@@ -378,9 +375,6 @@ const OutputHandle = ({
   );
 };
 
-/* --------------------------------------------------------------- */
-/*  NodeComponent – unchanged apart from the CSS import at the top   */
-/* --------------------------------------------------------------- */
 const NodeComponent: React.FC<{ data: any }> = memo(({ data }) => {
   const updateNodeInternals = useUpdateNodeInternals();
   const model = useModel();
@@ -389,13 +383,19 @@ const NodeComponent: React.FC<{ data: any }> = memo(({ data }) => {
   const sendRenameCommand = (newName: string) => {
     model.set(
       "commands",
-      `renameNode: ${JSON.stringify({ oldLabel: data.label, newLabel: newName })} - ${Date.now()}`
+      `renameNode: ${JSON.stringify({
+        oldLabel: data.label,
+        newLabel: newName,
+      })} - ${Date.now()}`
     );
     model.save_changes();
   };
 
   const sendNodeCommand = (cmd: string) => {
-    model.set("commands", `${cmd}: ${data.label} - ${Date.now()}`);
+    model.set(
+      "commands",
+      `${cmd}: ${data.label} - ${Date.now()}`
+    );
     model.save_changes();
   };
 
@@ -403,10 +403,19 @@ const NodeComponent: React.FC<{ data: any }> = memo(({ data }) => {
     data.source_labels.length,
     data.target_labels.length
   );
-  const [hoverState, setHoverState] = useState<Record<string, boolean>>({});
+  const [hoverState, setHoverState] = useState<
+    Record<string, boolean>
+  >({});
 
-  const handleHoverChange = (idx: number, state: boolean, side: string) => {
-    setHoverState((prev) => ({ ...prev, [`${side}-${idx}`]: state }));
+  const handleHoverChange = (
+    idx: number,
+    state: boolean,
+    side: string
+  ) => {
+    setHoverState((prev) => ({
+      ...prev,
+      [`${side}-${idx}`]: state,
+    }));
   };
 
   useEffect(() => {
@@ -423,11 +432,13 @@ const NodeComponent: React.FC<{ data: any }> = memo(({ data }) => {
     <div
       style={{
         height:
-          STYLE_VARS.customHandleTop + numHandles * STYLE_VARS.verticalRowSpacing,
+          STYLE_VARS.customHandleTop +
+          numHandles * STYLE_VARS.verticalRowSpacing,
         position: "relative",
       }}
     >
       <NodeLabel text={data.label} onRename={sendRenameCommand} />
+
       {selfIndex !== -1 && (
         <Handle
           type="source"
@@ -453,7 +464,8 @@ const NodeComponent: React.FC<{ data: any }> = memo(({ data }) => {
               height: 8,
               borderRadius: "50%",
               backgroundColor:
-                stateColors[data.source_values[selfIndex]] || "white",
+                stateColors[data.source_values[selfIndex]] ||
+                "white",
             }}
           ></div>
         </Handle>
@@ -504,10 +516,14 @@ const NodeComponent: React.FC<{ data: any }> = memo(({ data }) => {
         position={data.toolbarPosition}
       >
         <button onClick={() => sendNodeCommand("run")}>Run</button>
-        <button onClick={() => sendNodeCommand("source")}>Source</button>
+        <button onClick={() => sendNodeCommand("source")}>
+          Source
+        </button>
         <button
           onClick={() =>
-            sendNodeCommand(data.expanded ? "collapse" : "expand")
+            sendNodeCommand(
+              data.expanded ? "collapse" : "expand"
+            )
           }
         >
           {data.expanded ? "Collapse" : "Expand"}
@@ -519,21 +535,27 @@ const NodeComponent: React.FC<{ data: any }> = memo(({ data }) => {
 
 export default NodeComponent;
 
-/* --------------------------------------------------------------- */
-/*  Helper – unchanged                                              */
-/* --------------------------------------------------------------- */
-function convertInput(value: any, inpType: string) {
-  const trimmedValue = typeof value === "string" ? value.trim() : value;
-  switch (inpType) {
-    case "int": {
-      const i = parseInt(trimmedValue, 10);
-      return isNaN(i) ? { value: trimmedValue, error: true } : { value: i };
-    }
-    case "float": {
-      const f = parseFloat(trimmedValue);
-      return isNaN(f) ? { value: trimmedValue, error: true } : { value: f };
-    }
+export function unwrapOptionalType(typeStr: string): string {
+  let cleaned = typeStr.replace(/['"]/g, "").trim();
+  if (cleaned.toLowerCase().startsWith("optional[")) {
+    cleaned = cleaned.substring(
+      "optional[".length,
+      cleaned.length - 1
+    ).trim();
+  }
+  return cleaned.toLowerCase();
+}
+
+export function convertInput(value: any, inpType: string) {
+  const base = unwrapOptionalType(inpType);
+  switch (base) {
+    case "int":
+      const i = parseInt(value, 10);
+      return isNaN(i) ? { value, error: true } : { value: i };
+    case "float":
+      const f = parseFloat(value);
+      return isNaN(f) ? { value, error: true } : { value: f };
     default:
-      return { value: trimmedValue };
+      return { value };
   }
 }

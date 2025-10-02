@@ -1,9 +1,8 @@
-// Checkbox.tsx
 import React from "react";
 
 interface CheckboxProps {
   checked: boolean;
-  inputHeight: number; // pass STYLE_VARS.inputHeight
+  inputHeight: number;
   onToggle?: () => void;
   borderColor?: string;
 }
@@ -14,11 +13,12 @@ export const Checkbox: React.FC<CheckboxProps> = ({
   onToggle,
   borderColor = "#333",
 }) => {
-  const innerSize = inputHeight - 6; // matches OptionalLiteralSelect
-  const checkSize = innerSize - 4;   // matches the SVG size from OptionalLiteralSelect
+  const innerSize = inputHeight - 6;
+  const checkSize = innerSize - 4;
 
   return (
     <div
+      data-testid="checkbox-wrapper"
       className="nodrag"
       draggable={false}
       onClick={(e) => {
@@ -26,8 +26,8 @@ export const Checkbox: React.FC<CheckboxProps> = ({
         onToggle?.();
       }}
       style={{
-        width: inputHeight, // identical outer clickable width
-        height: "100%",     // height from parent = STYLE_VARS.inputHeight
+        width: inputHeight,
+        height: "100%",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -48,6 +48,7 @@ export const Checkbox: React.FC<CheckboxProps> = ({
       >
         {checked && (
           <svg
+            data-testid="checkbox-svg"
             xmlns="http://www.w3.org/2000/svg"
             width={checkSize}
             height={checkSize}

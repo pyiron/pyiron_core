@@ -411,3 +411,21 @@ def Lammps(
     )
 
     return wf.Collect
+
+
+@as_function_node
+def ParseOutput(working_directory, structure, potential, units="metal"):
+
+    from pyiron_lammps import parse_lammps_output_files
+
+    parse_dict = parse_lammps_output_files(
+        working_directory,
+        structure,
+        potential_elements=potential.Species,
+        units=units,
+        dump_h5_file_name="dump.h5",
+        dump_out_file_name="dump.out",
+        log_lammps_file_name="log.lammps",
+    )
+
+    return parse_dict

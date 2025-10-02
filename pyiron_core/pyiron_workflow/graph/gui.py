@@ -339,7 +339,6 @@ class PyironFlowWidget:
 ############################################################################################################
 # pyironflow_widget
 ############################################################################################################
-############################################################################################################
 
 
 class PyironFlow:
@@ -562,13 +561,13 @@ def _to_jsonifyable(obj):
         if isinstance(value, (str, int, float, bool)):
             return value
         else:
-            return not_data.NotData
+            return "NonPrimitive"
     elif isinstance(obj, simple_workflow.Node):
-        return not_data.NotData
+        return "NonPrimitive"
     elif isinstance(obj, (str, int, float, bool, type(None))):
         return obj
     else:
-        return not_data.NotData
+        return "NonPrimitive"
 
 
 def gui_data(
