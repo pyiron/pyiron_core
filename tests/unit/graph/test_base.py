@@ -198,6 +198,6 @@ class TestSaveLoad(unittest.TestCase):
             msg="Removing the edge should remove it from the graph edges",
         )
         self.assertFalse(
-            n2_inp.connected,
+            g.nodes["n2"].node.inputs["x"].connected,
             msg="Removing the edge should remove it from the underlying model",
         )
