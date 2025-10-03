@@ -227,6 +227,11 @@ class TestSaveLoad(unittest.TestCase):
             self.assertTrue(
                 g.nodes["n3"].node.inputs["x"].connected, msg="Sanity check"
             )
+            self.assertFalse(
+                g.nodes["va_o_group__n2__x"].node.outputs["x"].connected,
+                msg="The virtual ports never get connected -- this test is not "
+                "intended to encode policy, but is just examining current behaviour",
+            )
             n_edges = len(g.edges)
 
             self.assertListEqual(
