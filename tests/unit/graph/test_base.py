@@ -5,7 +5,7 @@ import unittest
 from static.nodes import AddOne
 
 from pyiron_core.pyiron_workflow.api import serial
-from pyiron_core.pyiron_workflow.graph import base, graph_json, group, run
+from pyiron_core.pyiron_workflow.graph import base, edges, graph_json, group, run
 
 
 class TestSaveLoad(unittest.TestCase):
@@ -164,4 +164,40 @@ class TestSaveLoad(unittest.TestCase):
             len(g.edges),
             len(guu.edges),
             msg="Repeatedly un-collapsing should have no effect",
+        )
+
+    def test_remove_edge(self):
+        g = base.Graph("test")
+        g = base.add_node(g, base.identity(label="n1", x=0))
+        g = base.add_node(g, base.identity(label="n2"))
+        self.assertEqual(len(g.edges), 0, msg="Sanity check")
+        new_edge = edges.GraphEdge("n1", "n2", "x", "x")
+        g = base.add_edge(
+            g,
+            new_edge.source,
+            new_edge.target,
+            new_edge.sourceHandle,
+            new_edge.targetHandle,
+        )
+
+        # Grab data elements from underlying model
+        n2_inp = g.nodes["n2"].node.inputs["x"]
+        n1 = g.nodes["n1"].node
+
+        # Verify starting conditions
+        self.assertEqual(len(g.edges), 1, msg="Sanity check")
+        self.assertEqual(g.edges[0], new_edge, msg="Sanity check")
+        self.assertTrue(n2_inp.connected, msg="Sanity check")
+        self.assertEqual(len(n2_inp.connections), 1, msg="Sanity check")
+        self.assertIs(n2_inp.connections[0].owner, n1, msg="Sanity check")
+
+        g = base.remove_edge(g, new_edge)
+        self.assertEqual(
+            len(g.edges),
+            0,
+            msg="Removing the edge should remove it from the graph edges",
+        )
+        self.assertFalse(
+            n2_inp.connected,
+            msg="Removing the edge should remove it from the underlying model",
         )
