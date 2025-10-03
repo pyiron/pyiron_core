@@ -5,7 +5,14 @@ import unittest
 from static.nodes import AddOne
 
 from pyiron_core.pyiron_workflow.api import serial
-from pyiron_core.pyiron_workflow.graph import base, edges, graph_json, group, run
+from pyiron_core.pyiron_workflow.graph import (
+    base,
+    edges,
+    graph_json,
+    group,
+    labelling,
+    run,
+)
 
 
 class TestSaveLoad(unittest.TestCase):
@@ -167,37 +174,72 @@ class TestSaveLoad(unittest.TestCase):
         )
 
     def test_remove_edge(self):
-        g = base.Graph("test")
-        g = base.add_node(g, base.identity(label="n1", x=0))
-        g = base.add_node(g, base.identity(label="n2"))
-        self.assertEqual(len(g.edges), 0, msg="Sanity check")
-        new_edge = edges.GraphEdge("n1", "n2", "x", "x")
-        g = base.add_edge(
-            g,
-            new_edge.source,
-            new_edge.target,
-            new_edge.sourceHandle,
-            new_edge.targetHandle,
-        )
+        with self.subTest("Non-virtual edge"):
+            g = base.Graph("test")
+            g = base.add_node(g, base.identity(label="n1", x=0))
+            g = base.add_node(g, base.identity(label="n2"))
+            self.assertEqual(len(g.edges), 0, msg="Sanity check")
+            new_edge = edges.GraphEdge("n1", "n2", "x", "x")
+            g = base.add_edge(
+                g,
+                new_edge.source,
+                new_edge.target,
+                new_edge.sourceHandle,
+                new_edge.targetHandle,
+            )
 
-        # Grab data elements from underlying model
-        n2_inp = g.nodes["n2"].node.inputs["x"]
-        n1 = g.nodes["n1"].node
+            # Grab data elements from underlying model
+            n2_inp = g.nodes["n2"].node.inputs["x"]
+            n1 = g.nodes["n1"].node
 
-        # Verify starting conditions
-        self.assertEqual(len(g.edges), 1, msg="Sanity check")
-        self.assertEqual(g.edges[0], new_edge, msg="Sanity check")
-        self.assertTrue(n2_inp.connected, msg="Sanity check")
-        self.assertEqual(len(n2_inp.connections), 1, msg="Sanity check")
-        self.assertIs(n2_inp.connections[0].owner, n1, msg="Sanity check")
+            # Verify starting conditions
+            self.assertEqual(len(g.edges), 1, msg="Sanity check")
+            self.assertEqual(g.edges[0], new_edge, msg="Sanity check")
+            self.assertTrue(n2_inp.connected, msg="Sanity check")
+            self.assertEqual(len(n2_inp.connections), 1, msg="Sanity check")
+            self.assertIs(n2_inp.connections[0].owner, n1, msg="Sanity check")
 
-        g = base.remove_edge(g, new_edge)
-        self.assertEqual(
-            len(g.edges),
-            0,
-            msg="Removing the edge should remove it from the graph edges",
-        )
-        self.assertFalse(
-            g.nodes["n2"].node.inputs["x"].connected,
-            msg="Removing the edge should remove it from the underlying model",
-        )
+            g = base.remove_edge(g, new_edge)
+            self.assertEqual(
+                len(g.edges),
+                0,
+                msg="Removing the edge should remove it from the graph edges",
+            )
+            self.assertFalse(
+                g.nodes["n2"].node.inputs["x"].connected,
+                msg="Removing the edge should remove it from the underlying model",
+            )
+
+        with self.subTest("Virtual edge"):
+            g = base.Graph("test")
+            g = base.add_node(g, base.identity(label="n1", x=0))
+            g = base.add_node(g, base.identity(label="n2"))
+            g = base.add_node(g, base.identity(label="n3"))
+            g = base.add_edge(g, "n1", "n2", "x", "x")
+            g = base.add_edge(g, "n2", "n3", "x", "x")
+            g = group.create_group(g, ["n1", "n2"], label="group")
+
+            virtual_edge = edges.GraphEdge("va_o_group__n2__x", "n3", "x", "x")
+            self.assertIn(
+                virtual_edge,
+                g.edges,
+                msg="Sanity check that we've got the labelling right after making group",
+            )
+            self.assertTrue(
+                g.nodes["n3"].node.inputs["x"].connected, msg="Sanity check"
+            )
+            n_edges = len(g.edges)
+
+            g = base.remove_edge(g, virtual_edge)
+            self.assertEqual(
+                len(g.edges),
+                n_edges - 1,
+                msg="Removing the edge should remove it from the graph edges",
+            )
+            self.assertNotIn(
+                virtual_edge, g.edges, msg="Make sure we removed the right one"
+            )
+            self.assertFalse(
+                g.nodes["n3"].node.inputs["x"].connected,
+                msg="Removing the edge should remove it from the underlying model",
+            )

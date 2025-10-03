@@ -279,8 +279,7 @@ def remove_edge(graph: Graph, edge: GraphEdge) -> Graph:
         new_graph.edges.remove(edge)
     else:
         raise ValueError(f"Edge {edge} not found in graph")
-    if not (is_virtual(edge.source) or is_virtual(edge.target)):
-        new_graph = _disconnect_port(new_graph, edge)
+    new_graph = _disconnect_port(new_graph, edge)
     return new_graph
 
 
