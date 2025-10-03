@@ -220,7 +220,7 @@ class TestSaveLoad(unittest.TestCase):
                 msg="Without the edge, we should get the default back",
             )
 
-        with self.subTest("Virtual edge"):
+        with self.subTest("Virtual source"):
             g = base.Graph("test")
             g = base.add_node(g, base.identity(label="n1", x=0))
             g = base.add_node(g, base.identity(label="n2"))
@@ -285,4 +285,87 @@ class TestSaveLoad(unittest.TestCase):
                 run.pull_node(base.get_updated_graph(g), "n3"),
                 not_data.NotData,
                 msg="Without the edge present, we expect to get the default",
+            )
+
+        with self.subTest("Virtual target"):
+            g = base.Graph("test")
+            g = base.add_node(g, base.identity(label="n1", x=0))
+            g = base.add_node(g, base.identity(label="n2"))
+            g = base.add_node(g, base.identity(label="n3"))
+            g = base.add_edge(g, "n2", "n3", "x", "x")
+            g = group.create_group(g, ["n2", "n3"], label="group")
+
+            virtual_edge = edges.GraphEdge("n1", "va_i_group__n2__x", "x", "x")
+            g = base.add_edge(
+                g,
+                virtual_edge.source,
+                virtual_edge.target,
+                virtual_edge.sourceHandle,
+                virtual_edge.targetHandle,
+            )
+            # Need to add edge after group creation
+            # https://github.com/pyiron/pyiron_core/issues/44
+
+            self.assertIn(
+                virtual_edge,
+                g.edges,
+                msg="Sanity check that we've got the labelling right after making group",
+            )
+            n_edges = len(g.edges)
+            self.assertIn(
+                edges.GraphEdge("n1", "group", "x", "n2__x"),
+                base.get_updated_graph(g).edges,
+                msg="Check edge persists to updated graph",
+            )
+            self.assertFalse(
+                g.nodes["va_i_group__n2__x"].node.inputs["x"].connected,
+                msg="The virtual ports never get connected -- this test is not "
+                "intended to encode policy, but is just examining current behaviour",
+            )
+            self.assertTrue(
+                base.get_updated_graph(g).nodes["group"].node.inputs["n2__x"].connected,
+                msg="Ensure that updated graph has the connection in the underlying "
+                "model",
+            )
+            self.assertEqual(
+                run.pull_node(base.get_updated_graph(g), "group"),
+                0,
+                msg="With the edge present, we expect to be able to run",
+            )
+
+            g = base.remove_edge(g, virtual_edge)
+
+            self.assertEqual(
+                len(g.edges),
+                n_edges - 1,
+                msg="Removing the edge should remove it from the graph edges",
+            )
+            self.assertNotIn(
+                virtual_edge, g.edges, msg="Make sure we removed the right one"
+            )
+            self.assertFalse(
+                g.nodes["va_i_group__n2__x"].node.inputs["x"].connected,
+                msg="Removing the edge should remove it from the underlying model",
+            )  # Easy right now, because it was never there
+            self.assertListEqual(
+                [],
+                base.get_updated_graph(g).edges,
+                msg="Check edge is removed in updated graph (recall internal edges get "
+                "hidden in the updated format)",
+            )
+
+            # THESE TEST VERIFY EXISTING BUGS
+            # WE _WANT_ THESE TESTS TO START FAILING
+            # Ideally, these should be `assertFalse` and `assertIs`
+            # Possibly related to: https://github.com/pyiron/pyiron_core/issues/44
+            self.assertTrue(
+                base.get_updated_graph(g).nodes["group"].node.inputs["n2__x"].connected,
+                msg="WANT OPPOSITE OF TEST -- Updated graph should lose connection in "
+                "the underlying model",
+            )
+            self.assertIsNot(
+                run.pull_node(base.get_updated_graph(g), "group"),
+                not_data.NotData,
+                msg="WANT OPPOSITE OF TEST -- Without the edge present, we expect to "
+                "get the default",
             )
