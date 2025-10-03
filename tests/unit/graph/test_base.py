@@ -10,7 +10,6 @@ from pyiron_core.pyiron_workflow.graph import (
     edges,
     graph_json,
     group,
-    labelling,
     run,
 )
 
