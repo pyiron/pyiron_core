@@ -229,6 +229,12 @@ class TestSaveLoad(unittest.TestCase):
             )
             n_edges = len(g.edges)
 
+            self.assertListEqual(
+                [edges.GraphEdge("group", "n3", "n2__x", "x")],
+                base.get_updated_graph(g).edges,
+                msg="Check edge persists to updated graph",
+            )
+
             g = base.remove_edge(g, virtual_edge)
             self.assertEqual(
                 len(g.edges),
@@ -241,4 +247,16 @@ class TestSaveLoad(unittest.TestCase):
             self.assertFalse(
                 g.nodes["n3"].node.inputs["x"].connected,
                 msg="Removing the edge should remove it from the underlying model",
+            )
+
+            self.assertListEqual(
+                [],
+                base.get_updated_graph(g).edges,
+                msg="Check edge is removed in updated graph (recall internal edges get "
+                "hidden in the updated format)",
+            )
+            self.assertFalse(
+                base.get_updated_graph(g).nodes["n3"].node.inputs["x"].connected,
+                msg="Removing the edge should remove it from the underlying model"
+                "in the updated graph too",
             )
