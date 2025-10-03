@@ -179,7 +179,7 @@ class TestSaveLoad(unittest.TestCase):
         )
 
         with self.subTest("Non-virtual edge"):
-            g = base.Graph("test")
+            g = base.Graph("flat")
             g = base.add_node(g, base.identity(label="n1", x=0))
             g = base.add_node(g, base.identity(label="n2"))
             self.assertEqual(len(g.edges), 0, msg="Sanity check")
@@ -221,7 +221,7 @@ class TestSaveLoad(unittest.TestCase):
             )
 
         with self.subTest("Virtual source"):
-            g = base.Graph("test")
+            g = base.Graph("virtual_source")
             g = base.add_node(g, base.identity(label="n1", x=0))
             g = base.add_node(g, base.identity(label="n2"))
             g = base.add_node(g, base.identity(label="n3"))
@@ -288,7 +288,7 @@ class TestSaveLoad(unittest.TestCase):
             )
 
         with self.subTest("Virtual target"):
-            g = base.Graph("test")
+            g = base.Graph("virtual_target")
             g = base.add_node(g, base.identity(label="n1", x=0))
             g = base.add_node(g, base.identity(label="n2"))
             g = base.add_node(g, base.identity(label="n3"))
