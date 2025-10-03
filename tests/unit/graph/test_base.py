@@ -4,6 +4,7 @@ import unittest
 
 from static.nodes import AddOne
 
+from pyiron_core import not_data
 from pyiron_core.pyiron_workflow.api import serial
 from pyiron_core.pyiron_workflow.graph import (
     base,
@@ -173,6 +174,10 @@ class TestSaveLoad(unittest.TestCase):
         )
 
     def test_remove_edge(self):
+        self.assertIs(
+            base.identity().inputs["x"].default, not_data.NotData, msg="Sanity check"
+        )
+
         with self.subTest("Non-virtual edge"):
             g = base.Graph("test")
             g = base.add_node(g, base.identity(label="n1", x=0))
@@ -197,6 +202,7 @@ class TestSaveLoad(unittest.TestCase):
             self.assertTrue(n2_inp.connected, msg="Sanity check")
             self.assertEqual(len(n2_inp.connections), 1, msg="Sanity check")
             self.assertIs(n2_inp.connections[0].owner, n1, msg="Sanity check")
+            self.assertEqual(run.pull_node(g, "n2"), 0, msg="Sanity check")
 
             g = base.remove_edge(g, new_edge)
             self.assertEqual(
@@ -207,6 +213,11 @@ class TestSaveLoad(unittest.TestCase):
             self.assertFalse(
                 g.nodes["n2"].node.inputs["x"].connected,
                 msg="Removing the edge should remove it from the underlying model",
+            )
+            self.assertIs(
+                run.pull_node(g, "n2"),
+                not_data.NotData,
+                msg="Without the edge, we should get the default back",
             )
 
         with self.subTest("Virtual edge"):
@@ -239,6 +250,11 @@ class TestSaveLoad(unittest.TestCase):
                 base.get_updated_graph(g).edges,
                 msg="Check edge persists to updated graph",
             )
+            self.assertEqual(
+                run.pull_node(base.get_updated_graph(g), "n3"),
+                0,
+                msg="With the edge present, we expect to be able to run",
+            )
 
             g = base.remove_edge(g, virtual_edge)
             self.assertEqual(
@@ -264,4 +280,9 @@ class TestSaveLoad(unittest.TestCase):
                 base.get_updated_graph(g).nodes["n3"].node.inputs["x"].connected,
                 msg="Removing the edge should remove it from the underlying model"
                 "in the updated graph too",
+            )
+            self.assertIs(
+                run.pull_node(base.get_updated_graph(g), "n3"),
+                not_data.NotData,
+                msg="Without the edge present, we expect to get the default",
             )
