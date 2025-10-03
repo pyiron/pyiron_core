@@ -279,11 +279,11 @@ def remove_edge(graph: Graph, edge: GraphEdge) -> Graph:
         new_graph.edges.remove(edge)
     else:
         raise ValueError(f"Edge {edge} not found in graph")
-    new_graph = _disconnect_port(new_graph, edge)
+    new_graph = _disconnect_receiving_port(new_graph, edge)
     return new_graph
 
 
-def _disconnect_port(graph: Graph, edge: GraphEdge) -> Graph:
+def _disconnect_receiving_port(graph: Graph, edge: GraphEdge) -> Graph:
     if edge.sourceHandle == "self":
         raise NotImplementedError()
     else:
