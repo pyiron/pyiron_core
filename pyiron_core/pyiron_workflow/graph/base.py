@@ -279,7 +279,17 @@ def remove_edge(graph: Graph, edge: GraphEdge) -> Graph:
         new_graph.edges.remove(edge)
     else:
         raise ValueError(f"Edge {edge} not found in graph")
+    new_graph = _disconnect_receiving_port(new_graph, edge)
     return new_graph
+
+
+def _disconnect_receiving_port(graph: Graph, edge: GraphEdge) -> Graph:
+    if edge.sourceHandle == "self":
+        raise NotImplementedError()
+    else:
+        default = graph.nodes[edge.target].node.inputs[edge.targetHandle].default
+        graph.nodes[edge.target].node.inputs.__setattr__(edge.targetHandle, default)
+    return graph
 
 
 def _get_label(node, label):
