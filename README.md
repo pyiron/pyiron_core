@@ -30,12 +30,13 @@ git clone https://github.com/pyiron/pyiron_core.git
 cd pyiron_core
 conda env create -n pyiron_core -f project-env.yml
 conda activate pyiron_core
+conda install -c conda-forge nodejs=18  # unless you already have npm available
 npm install; npm run build
 ```
 
 Don't forget to modify your start-up script to add the `pyiron_core` location to your `PYTHONPATH`.
 
-Alternatively, you can pip-install the current version to have it accessible in your existing python environment:
+Alternatively, you can pip-install the current version to have it accessible in your existing python environment. First, make sure [you have `npm` installed](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm), then:
 
 ```bash
 git clone https://github.com/pyiron/pyiron_core.git
@@ -43,11 +44,8 @@ cd pyiron_core
 pip install .
 ```
 
-In both cases you will need `npm` on your local machine to build the GUI.
-If you're going the `conda` route, this can be easily installed in your environment with `conda install -c conda-forge nodejs=18`.
-
-Similarly, for full functionality you will also want `postgres`.
-Again, with `conda` this can be installed with `conda install -c conda-forge postgresql`.
+For full functionality you will also want `postgres`.
+With `conda` this can be installed with `conda install -c conda-forge postgresql`.
 [`pyiron_core.pyiron_workflow.api.util.LocalPostgres`](./pyiron_core/pyiron_workflow/util.py) is a helper tool for configuring your local postgres instance, and is leveraged in the educational notebooks.
 
 Windows is not currently supported.
