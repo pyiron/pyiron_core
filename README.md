@@ -19,6 +19,8 @@ To jump in with the graphical interface, just spin up the binder demo and start 
 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/pyiron/pyiron_core/main?urlpath=%2Fdoc%2Ftree%2Fdemo.ipynb)
 
+Binder links to our [demo notebook](./demo/demo.ipynb) and [stored workflows](./demo/demo_workflows).
+
 You can download a tutorial mp4 [from this repo](https://github.com/pyiron/pyiron_core/raw/main/documentation/pyiron_core_demo.mp4) to see a demonstration of key features.
 
 ## Installation
