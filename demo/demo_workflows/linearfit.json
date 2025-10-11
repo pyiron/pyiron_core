@@ -1,0 +1,157 @@
+{
+    "label": "linearfit",
+    "nodes": {
+        "ReadPickledDatasetAsDataframe": {
+            "id": "ReadPickledDatasetAsDataframe",
+            "import_path": "pyiron_core.pyiron_nodes.atomistic.ml_potentials.fitting.linearfit.ReadPickledDatasetAsDataframe",
+            "label": "ReadPickledDatasetAsDataframe",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "ReadPickledDatasetAsDataframe",
+                "function": "pyiron_core.pyiron_nodes.atomistic.ml_potentials.fitting.linearfit.ReadPickledDatasetAsDataframe",
+                "inputs": {
+                    "file_path": "mgca.pckl.tgz"
+                }
+            }
+        },
+        "SplitTrainingAndTesting": {
+            "id": "SplitTrainingAndTesting",
+            "import_path": "pyiron_core.pyiron_nodes.atomistic.ml_potentials.fitting.linearfit.SplitTrainingAndTesting",
+            "label": "SplitTrainingAndTesting",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "SplitTrainingAndTesting",
+                "function": "pyiron_core.pyiron_nodes.atomistic.ml_potentials.fitting.linearfit.SplitTrainingAndTesting",
+                "inputs": {}
+            }
+        },
+        "RunLinearFit": {
+            "id": "RunLinearFit",
+            "import_path": "pyiron_core.pyiron_nodes.atomistic.ml_potentials.fitting.linearfit.RunLinearFit",
+            "label": "RunLinearFit",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "RunLinearFit",
+                "function": "pyiron_core.pyiron_nodes.atomistic.ml_potentials.fitting.linearfit.RunLinearFit",
+                "inputs": {}
+            }
+        },
+        "ParameterizePotentialConfig": {
+            "id": "ParameterizePotentialConfig",
+            "import_path": "pyiron_core.pyiron_nodes.atomistic.ml_potentials.fitting.linearfit.ParameterizePotentialConfig",
+            "label": "ParameterizePotentialConfig",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "ParameterizePotentialConfig",
+                "function": "pyiron_core.pyiron_nodes.atomistic.ml_potentials.fitting.linearfit.ParameterizePotentialConfig",
+                "inputs": {}
+            }
+        },
+        "PredictEnergiesAndForces": {
+            "id": "PredictEnergiesAndForces",
+            "import_path": "pyiron_core.pyiron_nodes.atomistic.ml_potentials.fitting.linearfit.PredictEnergiesAndForces",
+            "label": "PredictEnergiesAndForces",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "PredictEnergiesAndForces",
+                "function": "pyiron_core.pyiron_nodes.atomistic.ml_potentials.fitting.linearfit.PredictEnergiesAndForces",
+                "inputs": {}
+            }
+        },
+        "PlotEnergyFittingCurve": {
+            "id": "PlotEnergyFittingCurve",
+            "import_path": "pyiron_core.pyiron_nodes.atomistic.ml_potentials.fitting.linearfit.PlotEnergyFittingCurve",
+            "label": "PlotEnergyFittingCurve",
+            "parent_id": null,
+            "level": 0,
+            "graph": null,
+            "node_type": "node",
+            "widget_type": "customNode",
+            "expanded": false,
+            "node": {
+                "label": "PlotEnergyFittingCurve",
+                "function": "pyiron_core.pyiron_nodes.atomistic.ml_potentials.fitting.linearfit.PlotEnergyFittingCurve",
+                "inputs": {}
+            }
+        },
+        "_obj_type": "pyiron_core.pyiron_workflow.api.serial.GraphNode"
+    },
+    "edges": {
+        "values": [
+            {
+                "source": "ReadPickledDatasetAsDataframe",
+                "target": "SplitTrainingAndTesting",
+                "sourceHandle": "df",
+                "targetHandle": "data_df"
+            },
+            {
+                "source": "SplitTrainingAndTesting",
+                "target": "RunLinearFit",
+                "sourceHandle": "df_training",
+                "targetHandle": "df_train"
+            },
+            {
+                "source": "SplitTrainingAndTesting",
+                "target": "RunLinearFit",
+                "sourceHandle": "df_testing",
+                "targetHandle": "df_test"
+            },
+            {
+                "source": "ParameterizePotentialConfig",
+                "target": "RunLinearFit",
+                "sourceHandle": "potential_config",
+                "targetHandle": "potential_config"
+            },
+            {
+                "source": "RunLinearFit",
+                "target": "PredictEnergiesAndForces",
+                "sourceHandle": "basis",
+                "targetHandle": "basis"
+            },
+            {
+                "source": "SplitTrainingAndTesting",
+                "target": "PredictEnergiesAndForces",
+                "sourceHandle": "df_training",
+                "targetHandle": "df_train"
+            },
+            {
+                "source": "SplitTrainingAndTesting",
+                "target": "PredictEnergiesAndForces",
+                "sourceHandle": "df_testing",
+                "targetHandle": "df_test"
+            },
+            {
+                "source": "PredictEnergiesAndForces",
+                "target": "PlotEnergyFittingCurve",
+                "sourceHandle": "data_dict",
+                "targetHandle": "data_dict"
+            }
+        ],
+        "obj_type": "pyiron_core.pyiron_workflow.api.serial.GraphEdge"
+    }
+}
