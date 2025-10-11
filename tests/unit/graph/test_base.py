@@ -4,8 +4,15 @@ import unittest
 
 from static.nodes import AddOne
 
+from pyiron_core import not_data
 from pyiron_core.pyiron_workflow.api import serial
-from pyiron_core.pyiron_workflow.graph import base, graph_json, group, run
+from pyiron_core.pyiron_workflow.graph import (
+    base,
+    edges,
+    graph_json,
+    group,
+    run,
+)
 
 
 class TestSaveLoad(unittest.TestCase):
@@ -165,3 +172,200 @@ class TestSaveLoad(unittest.TestCase):
             len(guu.edges),
             msg="Repeatedly un-collapsing should have no effect",
         )
+
+    def test_remove_edge(self):
+        self.assertIs(
+            base.identity().inputs["x"].default, not_data.NotData, msg="Sanity check"
+        )
+
+        with self.subTest("Non-virtual edge"):
+            g = base.Graph("flat")
+            g = base.add_node(g, base.identity(label="n1", x=0))
+            g = base.add_node(g, base.identity(label="n2"))
+            self.assertEqual(len(g.edges), 0, msg="Sanity check")
+            new_edge = edges.GraphEdge("n1", "n2", "x", "x")
+            g = base.add_edge(
+                g,
+                new_edge.source,
+                new_edge.target,
+                new_edge.sourceHandle,
+                new_edge.targetHandle,
+            )
+
+            # Grab data elements from underlying model
+            n2_inp = g.nodes["n2"].node.inputs["x"]
+            n1 = g.nodes["n1"].node
+
+            # Verify starting conditions
+            self.assertEqual(len(g.edges), 1, msg="Sanity check")
+            self.assertEqual(g.edges[0], new_edge, msg="Sanity check")
+            self.assertTrue(n2_inp.connected, msg="Sanity check")
+            self.assertEqual(len(n2_inp.connections), 1, msg="Sanity check")
+            self.assertIs(n2_inp.connections[0].owner, n1, msg="Sanity check")
+            self.assertEqual(run.pull_node(g, "n2"), 0, msg="Sanity check")
+
+            g = base.remove_edge(g, new_edge)
+            self.assertEqual(
+                len(g.edges),
+                0,
+                msg="Removing the edge should remove it from the graph edges",
+            )
+            self.assertFalse(
+                g.nodes["n2"].node.inputs["x"].connected,
+                msg="Removing the edge should remove it from the underlying model",
+            )
+            self.assertIs(
+                run.pull_node(g, "n2"),
+                not_data.NotData,
+                msg="Without the edge, we should get the default back",
+            )
+
+        with self.subTest("Virtual source"):
+            g = base.Graph("virtual_source")
+            g = base.add_node(g, base.identity(label="n1", x=0))
+            g = base.add_node(g, base.identity(label="n2"))
+            g = base.add_node(g, base.identity(label="n3"))
+            g = base.add_edge(g, "n1", "n2", "x", "x")
+            g = base.add_edge(g, "n2", "n3", "x", "x")
+            g = group.create_group(g, ["n1", "n2"], label="group")
+
+            virtual_edge = edges.GraphEdge("va_o_group__n2__x", "n3", "x", "x")
+            self.assertIn(
+                virtual_edge,
+                g.edges,
+                msg="Sanity check that we've got the labelling right after making group",
+            )
+            self.assertTrue(
+                g.nodes["n3"].node.inputs["x"].connected, msg="Sanity check"
+            )
+            self.assertFalse(
+                g.nodes["va_o_group__n2__x"].node.outputs["x"].connected,
+                msg="The virtual ports never get connected -- this test is not "
+                "intended to encode policy, but is just examining current behaviour",
+            )
+            n_edges = len(g.edges)
+
+            self.assertListEqual(
+                [edges.GraphEdge("group", "n3", "n2__x", "x")],
+                base.get_updated_graph(g).edges,
+                msg="Check edge persists to updated graph",
+            )
+            self.assertEqual(
+                run.pull_node(base.get_updated_graph(g), "n3"),
+                0,
+                msg="With the edge present, we expect to be able to run",
+            )
+
+            g = base.remove_edge(g, virtual_edge)
+            self.assertEqual(
+                len(g.edges),
+                n_edges - 1,
+                msg="Removing the edge should remove it from the graph edges",
+            )
+            self.assertNotIn(
+                virtual_edge, g.edges, msg="Make sure we removed the right one"
+            )
+            self.assertFalse(
+                g.nodes["n3"].node.inputs["x"].connected,
+                msg="Removing the edge should remove it from the underlying model",
+            )
+
+            self.assertListEqual(
+                [],
+                base.get_updated_graph(g).edges,
+                msg="Check edge is removed in updated graph (recall internal edges get "
+                "hidden in the updated format)",
+            )
+            self.assertFalse(
+                base.get_updated_graph(g).nodes["n3"].node.inputs["x"].connected,
+                msg="Removing the edge should remove it from the underlying model"
+                "in the updated graph too",
+            )
+            self.assertIs(
+                run.pull_node(base.get_updated_graph(g), "n3"),
+                not_data.NotData,
+                msg="Without the edge present, we expect to get the default",
+            )
+
+        with self.subTest("Virtual target"):
+            g = base.Graph("virtual_target")
+            g = base.add_node(g, base.identity(label="n1", x=0))
+            g = base.add_node(g, base.identity(label="n2"))
+            g = base.add_node(g, base.identity(label="n3"))
+            g = base.add_edge(g, "n2", "n3", "x", "x")
+            g = group.create_group(g, ["n2", "n3"], label="group")
+
+            virtual_edge = edges.GraphEdge("n1", "va_i_group__n2__x", "x", "x")
+            g = base.add_edge(
+                g,
+                virtual_edge.source,
+                virtual_edge.target,
+                virtual_edge.sourceHandle,
+                virtual_edge.targetHandle,
+            )
+            # Need to add edge after group creation
+            # https://github.com/pyiron/pyiron_core/issues/44
+
+            self.assertIn(
+                virtual_edge,
+                g.edges,
+                msg="Sanity check that we've got the labelling right after making group",
+            )
+            n_edges = len(g.edges)
+            self.assertIn(
+                edges.GraphEdge("n1", "group", "x", "n2__x"),
+                base.get_updated_graph(g).edges,
+                msg="Check edge persists to updated graph",
+            )
+            self.assertFalse(
+                g.nodes["va_i_group__n2__x"].node.inputs["x"].connected,
+                msg="The virtual ports never get connected -- this test is not "
+                "intended to encode policy, but is just examining current behaviour",
+            )
+            self.assertTrue(
+                base.get_updated_graph(g).nodes["group"].node.inputs["n2__x"].connected,
+                msg="Ensure that updated graph has the connection in the underlying "
+                "model",
+            )
+            self.assertEqual(
+                run.pull_node(base.get_updated_graph(g), "group"),
+                0,
+                msg="With the edge present, we expect to be able to run",
+            )
+
+            g = base.remove_edge(g, virtual_edge)
+
+            self.assertEqual(
+                len(g.edges),
+                n_edges - 1,
+                msg="Removing the edge should remove it from the graph edges",
+            )
+            self.assertNotIn(
+                virtual_edge, g.edges, msg="Make sure we removed the right one"
+            )
+            self.assertFalse(
+                g.nodes["va_i_group__n2__x"].node.inputs["x"].connected,
+                msg="Removing the edge should remove it from the underlying model",
+            )  # Easy right now, because it was never there
+            self.assertListEqual(
+                [],
+                base.get_updated_graph(g).edges,
+                msg="Check edge is removed in updated graph (recall internal edges get "
+                "hidden in the updated format)",
+            )
+
+            # THESE TEST VERIFY EXISTING BUGS
+            # WE _WANT_ THESE TESTS TO START FAILING
+            # Ideally, these should be `assertFalse` and `assertIs`
+            # Possibly related to: https://github.com/pyiron/pyiron_core/issues/44
+            self.assertTrue(
+                base.get_updated_graph(g).nodes["group"].node.inputs["n2__x"].connected,
+                msg="WANT OPPOSITE OF TEST -- Updated graph should lose connection in "
+                "the underlying model",
+            )
+            self.assertIsNot(
+                run.pull_node(base.get_updated_graph(g), "group"),
+                not_data.NotData,
+                msg="WANT OPPOSITE OF TEST -- Without the edge present, we expect to "
+                "get the default",
+            )
