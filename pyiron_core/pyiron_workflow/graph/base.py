@@ -288,7 +288,7 @@ def _disconnect_receiving_port(graph: Graph, edge: GraphEdge) -> Graph:
         raise NotImplementedError()
     else:
         default = graph.nodes[edge.target].node.inputs[edge.targetHandle].default
-        graph.nodes[edge.target].node.inputs.__setattr__(edge.targetHandle, default)
+        update_input_value(graph, edge.target, edge.targetHandle, default)
     return graph
 
 
