@@ -354,18 +354,13 @@ class TestSaveLoad(unittest.TestCase):
                 "hidden in the updated format)",
             )
 
-            # THESE TEST VERIFY EXISTING BUGS
-            # WE _WANT_ THESE TESTS TO START FAILING
-            # Ideally, these should be `assertFalse` and `assertIs`
-            # Possibly related to: https://github.com/pyiron/pyiron_core/issues/44
-            self.assertTrue(
+            self.assertFalse(
                 base.get_updated_graph(g).nodes["group"].node.inputs["n2__x"].connected,
-                msg="WANT OPPOSITE OF TEST -- Updated graph should lose connection in "
-                "the underlying model",
+                msg="Updated graph should lose connection in the underlying model",
             )
-            self.assertIsNot(
+            with self.assertRaises(
+                ValueError,
+                msg="Without the edge present, we expect to get the default -- "
+                "non-data in this case, such that we can't run.",
+            ):
                 run.pull_node(base.get_updated_graph(g), "group"),
-                not_data.NotData,
-                msg="WANT OPPOSITE OF TEST -- Without the edge present, we expect to "
-                "get the default",
-            )
