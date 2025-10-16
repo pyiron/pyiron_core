@@ -385,11 +385,11 @@ def add_edge(
     new_graph = copy_graph(graph)
     new_graph.edges.append(edge)
     if not (is_virtual(source) or is_virtual(target)):
-        new_graph = _update_target_port(new_graph, new_graph.edges[-1])
+        new_graph = _connect_target_port(new_graph, new_graph.edges[-1])
     return new_graph
 
 
-def _update_target_port(graph: Graph, edge: GraphEdge):
+def _connect_target_port(graph: Graph, edge: GraphEdge):
     if edge.sourceHandle == "self":
         print("implement connect to self")
         pass
