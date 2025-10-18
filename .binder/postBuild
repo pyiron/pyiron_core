@@ -1,36 +1,30 @@
+#!/bin/bash
 pip install . --no-deps --no-build-isolation
+
+# Save the stuff we actually need for binder
+KEEP=(".binder" "demo")
+mkdir -p ${HOME}/.temp_keep
+for item in "${KEEP[@]}"; do
+    [ -e "${HOME}/${item}" ] && mv "${HOME}/${item}" ${HOME}/.temp_keep/
+done
+
+# Now clean up everything else
+find ${HOME} -mindepth 1 -maxdepth 1 ! -name '.temp_keep' -exec rm -rf {} +
+
+# Restore the kept material
+mv ${HOME}/.temp_keep/* ${HOME}/
+rmdir ${HOME}/.temp_keep
 
 # setup customized kernel
 mkdir -p ${HOME}/.local/share/jupyter/kernels/pyiron_core
 cp ${HOME}/.binder/kernel.json ${HOME}/.local/share/jupyter/kernels/pyiron_core
 
-# clean up
-mv ${HOME}/.binder/demo.ipynb .
-mkdir -p ${HOME}/workflow_files
-mv ${HOME}/stored_workflows/demos/* ${HOME}/workflow_files
-
-rm -r   ${HOME}/.binder \
-        ${HOME}/.ci_support \
-        ${HOME}/.github \
-        ${HOME}/decisions \
-        ${HOME}/devbooks \
-        ${HOME}/js \
-        ${HOME}/node_modules \
-        ${HOME}/notebooks \
-        ${HOME}/pyiron_core \
-        ${HOME}/stored_workflows \
-        ${HOME}/tests \
-        ${HOME}/.gitignore \
-        ${HOME}/jest.config.js \
-        ${HOME}/LICENSE \
-        ${HOME}/local_postgres.zsh \
-        ${HOME}/package.json \
-        ${HOME}/package-lock.json \
-        ${HOME}/project-env.yml \
-        ${HOME}/pyproject.toml \
-        ${HOME}/README.md \
-        ${HOME}/tsconfig.json
+# Bring key content to root
+mv ${HOME}/demo/* .
 
 # download datasets for the demos
 wget https://github.com/pyiron-workshop/DPG-tutorial-2025/raw/351eeca736cce45f9bc3bfca84ab05de049e38c2/data/mgca.pckl.tgz
 wget https://github.com/pyiron-workshop/DPG-tutorial-2025/raw/351eeca736cce45f9bc3bfca84ab05de049e38c2/data/MgCaFreeEnergies.pckl.gz
+
+# Clean up the remaining artifacts of what we kept
+rm -rf ${HOME}/.binder ${HOME}/demo
