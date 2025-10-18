@@ -279,7 +279,24 @@ def remove_edge(graph: Graph, edge: GraphEdge) -> Graph:
         new_graph.edges.remove(edge)
     else:
         raise ValueError(f"Edge {edge} not found in graph")
+    new_graph = _disconnect_target_port(new_graph, edge)
     return new_graph
+
+
+def _disconnect_target_port(graph: Graph, edge: GraphEdge) -> Graph:
+    if edge.sourceHandle == "self":
+        raise NotImplementedError()
+    else:
+        default = graph.nodes[edge.target].node.inputs[edge.targetHandle].default
+        update_input_value(graph, edge.target, edge.targetHandle, default)
+        if is_virtual_input(edge.target):
+            update_input_value(
+                graph,
+                handle_to_parent_label(edge.target),
+                handle_to_port_label(edge.target),
+                default,
+            )
+    return graph
 
 
 def _get_label(node, label):
@@ -368,11 +385,11 @@ def add_edge(
     new_graph = copy_graph(graph)
     new_graph.edges.append(edge)
     if not (is_virtual(source) or is_virtual(target)):
-        new_graph = _update_target_port(new_graph, new_graph.edges[-1])
+        new_graph = _connect_target_port(new_graph, new_graph.edges[-1])
     return new_graph
 
 
-def _update_target_port(graph: Graph, edge: GraphEdge):
+def _connect_target_port(graph: Graph, edge: GraphEdge):
     if edge.sourceHandle == "self":
         print("implement connect to self")
         pass
