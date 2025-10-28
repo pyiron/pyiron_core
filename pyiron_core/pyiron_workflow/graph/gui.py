@@ -245,6 +245,7 @@ class PyironFlowWidget:
                     print("delete_edge: ", node_name)
                     edge = self._parse_edge_string(node_name)
                     self.graph = base.remove_edge(self.graph, edge)
+                    self.update_gui()
                 elif command == "finished":
                     print("finished")
                 elif command == "change_node_value":
