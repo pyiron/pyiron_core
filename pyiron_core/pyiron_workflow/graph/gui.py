@@ -236,7 +236,7 @@ class PyironFlowWidget:
                 elif command == "add_edge":
                     print("add_edge: ", node_name)
                     self.graph += self._parse_edge_string(node_name)
-                    self.main_widget.redraw()
+                    self.update_gui()
                 elif command == "delete_node":
                     print("delete_node: ", node_name)
                     self.graph = base.remove_node(self.graph, node_name)
