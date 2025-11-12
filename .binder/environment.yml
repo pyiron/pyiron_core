@@ -20,6 +20,7 @@ dependencies:
 - bayesian-optimization =2.0.3
 - calphy =1.3.13
 - grace-tensorpotential =0.5.1
+- ipykernel =6.31.0
 - iprpy-data =2023.07.25
 - lammps =2024.08.29=*openmpi*
 - landau =1.3.4
