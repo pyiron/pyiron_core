@@ -95,11 +95,11 @@ class OutputCalcMD:
 
 @as_inp_dataclass_node
 class InputCalcMD:
-    temperature: Optional[int | float] = 300
+    temperature: float = 300
     n_ionic_steps: int = 10_000
     n_print: int = 100
     pressure: Optional[int | float] = None
-    time_step: Optional[int | float] = 1.0
+    time_step: float = 1.0
     temperature_damping_timescale: Optional[int | float] = 100.0
     pressure_damping_timescale: Optional[int | float] = 1000.0
     seed: Optional[int] = None

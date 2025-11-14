@@ -242,9 +242,14 @@ class PyironFlowWidget:
                     self.graph = base.remove_node(self.graph, node_name)
                     self.update_gui()
                 elif command == "delete_edge":
+                    # Delete an edge and make sure the UI reflects the change.
+                    # ``base.remove_edge`` resets the target port to its default
+                    # value, but the frontend must be refreshed explicitly.
                     print("delete_edge: ", node_name)
                     edge = self._parse_edge_string(node_name)
                     self.graph = base.remove_edge(self.graph, edge)
+                    # Update the GUI so the input field shows the default again
+                    self.update_gui()
                 elif command == "finished":
                     print("finished")
                 elif command == "change_node_value":

@@ -110,12 +110,47 @@ def Plot(
     axis: Optional[object] = None,
     title: Optional[str] = "",
     color: Literal[
-        "b", "g", "r", "c", "m", "y", "k", "w",
-        "blue", "green", "red", "cyan", "magenta", "yellow", "black", "white"
+        "b",
+        "g",
+        "r",
+        "c",
+        "m",
+        "y",
+        "k",
+        "w",
+        "blue",
+        "green",
+        "red",
+        "cyan",
+        "magenta",
+        "yellow",
+        "black",
+        "white",
     ] = "b",
     symbol: Literal[
-        ".", ",", "o", "v", "^", "<", ">", "1", "2", "3", "4",
-        "s", "p", "*", "h", "H", "+", "x", "X", "D", "d", "|", "_"
+        ".",
+        ",",
+        "o",
+        "v",
+        "^",
+        "<",
+        ">",
+        "1",
+        "2",
+        "3",
+        "4",
+        "s",
+        "p",
+        "*",
+        "h",
+        "H",
+        "+",
+        "x",
+        "X",
+        "D",
+        "d",
+        "|",
+        "_",
     ] = "o",
     legend_label: Optional[str] = "",
     log_x: bool = False,
@@ -204,25 +239,6 @@ def MultiPlot(
     return fig
 
 
-@as_function_node("linspace")
-def Linspace(
-    start: Optional[int | float] = 0.0,
-    stop: Optional[int | float] = 1.0,
-    num: Optional[int] = 50,
-    endpoint: Optional[bool] = True,
-):
-    from numpy import linspace
-
-    return linspace(start, stop, num, endpoint=endpoint)
-
-
-@as_function_node("mean")
-def Mean(numbers: list | np.ndarray | float | int):
-    import numpy as np
-
-    return np.mean(numbers)
-
-
 @as_function_node("axes")
 def Subplot(
     nrows: Optional[int] = 1,
@@ -246,6 +262,5 @@ def Title(axis: Optional[object] = None, title: Optional[str] = ""):
         fig, ax = plt.subplots()
     else:
         ax = axis
-        fig = ax.figure
     ax.set_title(title)
     return ax
