@@ -67,6 +67,16 @@ class TreeView:
             import pyiron_core.pyiron_nodes as pyiron_nodes
 
             root_path = pyiron_nodes.__path__[0]
+            self.node_path = "pyiron_core"
+        elif isinstance(root_path, Path):
+            if not root_path.is_absolute():
+                root_path = root_path.absolute()
+            self.node_path = root_path.name
+        elif isinstance(root_path, str):
+            root_path = Path(root_path).absolute()
+            self.node_path = root_path.name
+        else:
+            raise TypeError("root_path must be a string or Path object.")
 
         self.path = copy.copy(root_path)
         if isinstance(self.path, str):
@@ -111,7 +121,7 @@ class TreeView:
 
     def on_click(self, node):
         path = (
-            get_rel_path_for_last_occurrence(node.path.path, "pyiron_core")
+            get_rel_path_for_last_occurrence(node.path.path, self.node_path)
             / node.path.name
         )
         path_str = str(path).replace("/", ".")
