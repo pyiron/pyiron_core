@@ -373,6 +373,7 @@ class PyironFlow:
             self.db = None
 
         self.gui_layout = gui_layout
+        self.nodes_path = nodes_path
 
         self.wf_widgets = []  # list of PyironFlowWidget objects
         for wf in wf_list:
@@ -385,7 +386,7 @@ class PyironFlow:
                     main_widget=self,
                     db=self.db,
                     workflow_path=workflow_path,
-                    nodes_path=nodes_path,
+                    nodes_path=self.nodes_path,
                 )
             )
 
@@ -477,6 +478,7 @@ class PyironFlow:
                         wf=new_wf,
                         gui_layout=self.gui_layout,
                         main_widget=self,
+                        nodes_path=self.nodes_path,
                     )
                 )
 
