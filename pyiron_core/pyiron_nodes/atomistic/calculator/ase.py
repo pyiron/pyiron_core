@@ -84,7 +84,7 @@ def Minimize(
     atoms_relaxed.calc = None  # ase calculator is not pickable!!
     out.structures.append(atoms_relaxed)
 
-    out.is_converged = dyn.converged()
+    out.is_converged = dyn.converged(dyn.optimizable.get_gradient())
     out.iter_steps = dyn.nsteps
 
     return out
