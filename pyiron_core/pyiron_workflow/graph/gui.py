@@ -60,9 +60,9 @@ Connect graph with ReactflowWidget and other GUI elements for interactive graph/
 """
 
 
-### ADDED FOR CUSTOM FEATURES
 def rename_node(graph: base.Graph, old_label: str, new_label: str):
     """Rename node in graph and update edges that reference it"""
+    # print("rename node", old_label, new_label)
     new_graph = base.copy_graph(graph)
     if old_label not in new_graph.nodes:
         return new_graph
@@ -71,8 +71,15 @@ def rename_node(graph: base.Graph, old_label: str, new_label: str):
     node_obj.label = new_label
     node_obj.id = new_label
     node_obj.node.label = new_label
+
+    if node_obj.graph is not None:
+        print(
+            "rename node: ", node_obj.label, node_obj.graph.label, old_label, new_label
+        )
+        new_child_graph = rename_graph(node_obj.graph, old_label, new_label)
+        node_obj.graph = new_child_graph
     new_graph.nodes[new_label] = node_obj
-    # handle macro nodes
+
     for node in new_graph.nodes.values():
         if node.parent_id == old_label:
             node.parent_id = new_label
@@ -85,7 +92,14 @@ def rename_node(graph: base.Graph, old_label: str, new_label: str):
     return new_graph
 
 
-### END ADD
+def rename_graph(graph: base.Graph, old_label: str, new_label: str):
+    print("rename graph", old_label, new_label)
+    new_graph = base.copy_graph(graph)
+    new_graph.label = new_label
+    new_graph.id = new_label
+    for node in new_graph.nodes.values():
+        node.parent_id = new_label
+    return new_graph
 
 
 class PyironFlowWidget:

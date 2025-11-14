@@ -264,7 +264,11 @@ def remove_node(graph: Graph, label: str) -> Graph:
         edge for edge in graph.edges if edge.source == label or edge.target == label
     ]
     for edge in edges_to_remove:
-        new_graph.edges.remove(edge)
+        if edge.source == label and edge.target != label:
+            new_graph = _disconnect_target_port(new_graph, edge)
+
+        if edge in new_graph.edges:
+            new_graph.edges.remove(edge)
 
     print(f"Removed node {label} and its edges", new_graph.nodes.keys())
     # TODO: remove node from connected ports?
