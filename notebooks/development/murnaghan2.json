@@ -31,7 +31,7 @@
                     },
                     "M3GNet": {
                         "id": "M3GNet",
-                        "import_path": "pyiron_nodes.atomistic.engine.ase.M3GNet",
+                        "import_path": "pyiron_nodes.atomistic.engine.ase.GRACE",
                         "label": "M3GNet",
                         "parent_id": null,
                         "level": 0,
@@ -41,7 +41,7 @@
                         "expanded": false,
                         "node": {
                             "label": "M3GNet",
-                            "function": "pyiron_nodes.atomistic.engine.ase.M3GNet",
+                            "function": "pyiron_nodes.atomistic.engine.ase.GRACE",
                             "inputs": {}
                         }
                     },
