@@ -133,7 +133,9 @@ class PyironFlowWidget:
 
         self.out_widget = widgets.Output(layout=layout_accordion_widgets)
         self.tree_widget = pyironflow.TreeView(
-            log=self.log_widget, layout=layout_accordion_widgets, root_path=nodes_path,
+            log=self.log_widget,
+            layout=layout_accordion_widgets,
+            root_path=nodes_path,
         )
         self.tree_widget.flow_widget = self
 
