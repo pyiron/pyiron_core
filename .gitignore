@@ -14,6 +14,7 @@ static/
 *.gz
 *.log
 *.yaml
+package.json
 package-lock.json
 pyiron.log
 pyiron_core/static/
