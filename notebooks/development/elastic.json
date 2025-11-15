@@ -196,7 +196,7 @@
                 "targetHandle": "values"
             },
             {
-                "source": "M3GNet",
+                "source": "GRACE",
                 "target": "StaticEnergy",
                 "sourceHandle": "out",
                 "targetHandle": "engine"
