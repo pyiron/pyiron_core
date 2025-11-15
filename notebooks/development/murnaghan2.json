@@ -29,10 +29,10 @@
                             }
                         }
                     },
-                    "M3GNet": {
-                        "id": "M3GNet",
+                    "GRACE": {
+                        "id": "GRACE",
                         "import_path": "pyiron_nodes.atomistic.engine.ase.GRACE",
-                        "label": "M3GNet",
+                        "label": "GRACE",
                         "parent_id": null,
                         "level": 0,
                         "graph": null,
@@ -40,7 +40,7 @@
                         "widget_type": "customNode",
                         "expanded": false,
                         "node": {
-                            "label": "M3GNet",
+                            "label": "GRACE",
                             "function": "pyiron_nodes.atomistic.engine.ase.GRACE",
                             "inputs": {}
                         }
@@ -94,7 +94,7 @@
                             "targetHandle": "structure"
                         },
                         {
-                            "source": "M3GNet",
+                            "source": "GRACE",
                             "target": "Static",
                             "sourceHandle": "out",
                             "targetHandle": "engine"
@@ -168,8 +168,8 @@
                 }
             }
         },
-        "M3GNet": {
-            "id": "M3GNet",
+        "GRACE": {
+            "id": "GRACE",
             "import_path": "pyiron_nodes.atomistic.engine.ase.M3GNet",
             "label": "M3GNet",
             "parent_id": "subgraph",

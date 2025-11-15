@@ -32,9 +32,9 @@
                         "widget_type": "customNode",
                         "expanded": false
                     },
-                    "M3GNet": {
-                        "id": "M3GNet",
-                        "import_path": "pyiron_nodes.atomistic.engine.ase.M3GNet",
+                    "GRACE": {
+                        "id": "GRACE",
+                        "import_path": "pyiron_nodes.atomistic.engine.ase.GRACE",
                         "label": "M3GNet",
                         "parent_id": "BulkStaticEnergy",
                         "level": 1,
