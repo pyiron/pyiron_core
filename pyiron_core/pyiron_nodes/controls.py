@@ -47,7 +47,12 @@ def _iterate_node(
         # Sequential execution
         for value in values:
             node.inputs.__setattr__(input_label, value)
-            out = node.run()
+            # TODO: provide more elaborate options
+            try:
+                out = node.run()
+            except Exception as e:
+                print("execution error: ", e)
+                continue
             if copy_results:
                 out = copy(out)
             out_lst.append(out)
@@ -186,8 +191,9 @@ def InputVector(vec: str = ""):
 def Slice(matrix, slice: str = "::"):
     try:
         result = eval(f"matrix[{slice}]")
-    except Exception:
+    except Exception as e:
         result = None
+        print("Slice failed: ", e)
     return result
 
 
@@ -225,3 +231,15 @@ def Print(x):
     """Print the input value."""
     print(f"Input value: {x}")
     return x
+
+
+@as_function_node
+def GetMask(x: np.ndarray, index: int = 0):
+    mask = (np.array(x) == index)
+    return mask
+
+
+@as_function_node
+def Filter(x: np.ndarray, index_vec: np.ndarray):
+    result = x[:, index_vec]
+    return result

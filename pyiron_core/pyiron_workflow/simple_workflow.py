@@ -11,6 +11,7 @@ import functools
 import importlib
 import inspect
 import logging
+from pydoc import locate
 from typing import Any, Literal, TypeAlias, Union, get_args, get_origin, get_type_hints
 
 import pandas as pd
@@ -395,14 +396,15 @@ class DataElement:
         return [Connection(upstream_node, upstream_port_label)]
 
     def type_hint(self, v):
-
         if isinstance(self.type, str):
             if self.type == "builtins.NoneType":
                 # let the deserializer handle NoneType
                 return v
             if self.type.endswith(NODE_CLASS_NAME_POSTFIX):
                 my_type = self.type.replace(NODE_CLASS_NAME_POSTFIX, "")
-                return eval(my_type)().dataclass(**v["__getstate__"])
+
+                Cls = locate(my_type)
+                return Cls().dataclass(**v["__getstate__"])
             return eval(self.type)(v)
         return self.type(v)
 

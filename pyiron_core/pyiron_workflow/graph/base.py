@@ -288,18 +288,18 @@ def remove_edge(graph: Graph, edge: GraphEdge) -> Graph:
 
 
 def _disconnect_target_port(graph: Graph, edge: GraphEdge) -> Graph:
-    if edge.sourceHandle == "self":
-        raise NotImplementedError()
-    else:
-        default = graph.nodes[edge.target].node.inputs[edge.targetHandle].default
-        update_input_value(graph, edge.target, edge.targetHandle, default)
-        if is_virtual_input(edge.target):
-            update_input_value(
-                graph,
-                handle_to_parent_label(edge.target),
-                handle_to_port_label(edge.target),
-                default,
-            )
+    # if edge.sourceHandle == "self":
+    #     raise NotImplementedError()
+    # else:
+    default = graph.nodes[edge.target].node.inputs[edge.targetHandle].default
+    update_input_value(graph, edge.target, edge.targetHandle, default)
+    if is_virtual_input(edge.target):
+        update_input_value(
+            graph,
+            handle_to_parent_label(edge.target),
+            handle_to_port_label(edge.target),
+            default,
+        )
     return graph
 
 

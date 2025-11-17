@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict
-from typing import Optional
+from typing import Optional, List, Tuple
 
 # if TYPE_CHECKING:
 from ase import Atoms
@@ -100,6 +100,62 @@ def CalcMD(calculator_input: Optional[InputCalcMD] = None):
     return calculator
 
 
+def scale_number_in_string(s: str, scale: float, index: int) -> str:
+    """
+    Scale the number at a given index in the string by `scale`.
+
+    Parameters
+    ----------
+    s : str
+        Input string containing numbers.
+    scale : float
+        Scaling factor to multiply the selected number.
+    index : int
+        Index of the number to scale (0-based, can be negative).
+
+    Returns
+    -------
+    str
+        String with the selected number scaled.
+
+    Example
+    -------
+    >>> scale_number_in_string("all nvt temp 300.0 300.0 0.1", 1000, -1)
+    'all nvt temp 300.0 300.0 100.000000'
+    """
+    import re
+
+    # Find all numbers as they appear in the string
+    numbers = re.findall(r"[-+]?\d*\.\d+|\d+", s)
+    if not numbers:
+        return s  # no change if no numbers
+
+    # Handle negative indices
+    if index < 0:
+        index = len(numbers) + index
+    if index < 0 or index >= len(numbers):
+        raise IndexError("Index out of range for numbers in string")
+
+    # Scale the chosen number
+    old_num_str = numbers[index]
+    old_num_val = float(old_num_str)
+    new_num_val = old_num_val * scale
+
+    # Replace only the chosen occurrence
+    count = 0
+
+    def replace_nth(match):
+        nonlocal count
+        if count == index:
+            count += 1
+            return f"{new_num_val:.6f}"
+        count += 1
+        return match.group(0)
+
+    s_new = re.sub(r"[-+]?\d*\.\d+|\d+", replace_nth, s)
+    return s_new
+
+
 @as_function_node("path")
 def InitLammps(
     structure: Atoms,
@@ -124,16 +180,111 @@ def InitLammps(
         pot.df = LammpsPotentialFile().find_by_name(potential)
     elif isinstance(potential, DataFrame):
         pot.df = potential
-    print("Potential: ", pot.df)
+
+    units = None
+    if "units" in pot.keys():
+        from pyiron_atomistics import pyiron_to_ase
+
+        print("Potential contains structure block")
+        units = pot["units"]
+        calculator["units"] = pot["units"]
+        calculator["atom_style"] = pot["atom_style"]
+        calculator["dimension"] = pot["dimension"]
+        calculator["timestep"] *= 1000
+        calculator["fix___ensemble"] = scale_number_in_string(
+            calculator["fix___ensemble"], 1000, -1
+        )
+        print("timestep: ", calculator["timestep"])
+        print("fix___ensemble", calculator["fix___ensemble"])
+
+        pot.remove_structure_block()
+
+        # presently used only for TIP3P water
+        bonds, angles = compute_water_bonds_indices(structure)
+        structure = pyiron_to_ase(structure)
+        bonds_array = make_bonds_array(bonds, n_atoms=len(structure))
+        print("bonds_array: ", bonds_array)
+        structure.set_array("bonds", bonds_array)
+
+        angles_array = make_angles_array(angles, n_atoms=len(structure))
+        structure.set_array("angles", angles_array)
+
+    # print("Potential: ", pot.df)
     pot.write_file(file_name="potential.inp", cwd=working_directory)
     pot.copy_pot_files(working_directory)
 
     with open(os.path.join(working_directory, "structure.inp"), "w") as f:
-        structure.write(f, format="lammps-data", specorder=pot.get_element_lst())
+        if not units:
+            structure.write(f, format="lammps-data", specorder=pot.get_element_lst())
+        else:
+            charges = extract_charges_from_lammps_potential(pot.df.Config[0])
+            write_lammps_data_full(
+                f,
+                structure,
+                specorder=pot.get_element_lst(),
+                bonds=True,
+                atom_style="full",
+                units="real",
+                masses=True,
+                charges=charges,
+            )
 
     calculator.write_file(file_name="control.inp", cwd=working_directory)
 
     return os.path.abspath(working_directory)
+
+
+def compute_water_bonds_indices(
+    structure: Atoms,
+    cutoff: float = 1.2,
+):
+    """Return integer bond and angle connectivity for water molecules.
+
+    Uses :func:`structuretoolkit.get_neighbors` to obtain distances respecting
+    periodic boundary conditions.
+
+    Parameters
+    ----------
+    structure:
+        ASE ``Atoms`` object containing water molecules.
+    cutoff:
+        Maximum O–H distance (Å) to be considered a bond.
+
+    Returns
+    -------
+    tuple
+        ``(bonds, angles)`` where ``bonds`` is a list of ``(O_idx, H_idx)`` and
+        ``angles`` is a list of ``(O_idx, H1_idx, H2_idx)``.  Indices are zero‑based.
+    """
+
+    from structuretoolkit import get_neighbors
+
+    # Chemical symbols as a simple list; we locate O and H indices using
+    o_idxs = structure.select_index("O")
+    h_idxs = structure.select_index("H")
+
+    bonds: List[Tuple[int, int]] = []
+    angles: List[Tuple[int, int, int]] = []
+
+    # Loop over each oxygen atom and find hydrogen neighbors within ``cutoff``.
+    neigh_obj = get_neighbors(structure, num_neighbors=5, cutoff_radius=cutoff)
+    for o in o_idxs:
+        neighbor_ids = neigh_obj.indices[o]
+        neighbor_dists = neigh_obj.distances[o]
+
+        h_neighbors = [
+            int(idx) for idx, d in zip(neighbor_ids, neighbor_dists) if (d < cutoff) and (idx in h_idxs)
+        ]
+
+        for h in h_neighbors:
+            bonds.append((int(o), int(h)))
+
+        if len(h_neighbors) == 2:
+            angles.append((int(o), int(h_neighbors[0]), int(h_neighbors[1])))
+        print("bonds: ", o, h_neighbors)
+
+    print("bonds: ", bonds)
+    return bonds, angles
 
 
 @as_function_node("log")
@@ -262,6 +413,154 @@ def Collect(
         generic.positions = np.array([o.data[["xu", "yu", "zu"]] for o in out_dump])
 
     return generic
+
+
+# TIP3P water box generation
+@as_function_node("path")
+def Tip3pData(
+    working_directory: str,
+    n_mols: int = 3,
+    box_size: float = 15.0,
+    OH_distance: float = 0.9572,
+    HOH_angle: float = 104.52,
+):
+    """Create TIP3P water box LAMMPS data file and input script.
+    Writes ``tip3p.data`` and ``in.tip3p`` into ``working_directory`` and returns
+    the data file as a ``FileObject``.
+    """
+    import os
+    import numpy as np
+    from pyiron_core.pyiron_nodes.dev_tools import FileObject
+
+    os.makedirs(working_directory, exist_ok=True)
+
+    # Force field parameters (CHARMM TIP3P)
+    atom_masses = {1: 15.9994, 2: 1.008}
+    atom_charges = {1: -0.834, 2: 0.417}
+    bond_type_params = {1: (450.0, OH_distance)}
+    angle_type_params = {1: (55.0, HOH_angle)}
+    lj_params = {1: (0.1521, 3.1507), 2: (0.0, 0.0)}
+
+    atoms = []
+    bonds = []
+    angles = []
+
+    atom_id = 1
+    bond_id = 1
+    angle_id = 1
+    mol_id = 1
+
+    spacing = box_size / n_mols
+    angle_rad = np.deg2rad(HOH_angle)
+    for ix in range(n_mols):
+        for iy in range(n_mols):
+            for iz in range(n_mols):
+                Ox = ix * spacing + spacing / 2
+                Oy = iy * spacing + spacing / 2
+                Oz = iz * spacing + spacing / 2
+
+                H1x = Ox + OH_distance
+                H1y = Oy
+                H1z = Oz
+
+                H2x = Ox + OH_distance * np.cos(angle_rad)
+                H2y = Oy + OH_distance * np.sin(angle_rad)
+                H2z = Oz
+
+                atoms.append((atom_id, mol_id, 1, atom_charges[1], Ox, Oy, Oz))
+                atom_id += 1
+                atoms.append((atom_id, mol_id, 2, atom_charges[2], H1x, H1y, H1z))
+                atom_id += 1
+                atoms.append((atom_id, mol_id, 2, atom_charges[2], H2x, H2y, H2z))
+                atom_id += 1
+
+                bonds.append((bond_id, 1, atom_id - 3, atom_id - 2))
+                bond_id += 1
+                bonds.append((bond_id, 1, atom_id - 3, atom_id - 1))
+                bond_id += 1
+
+                angles.append((angle_id, 1, atom_id - 2, atom_id - 3, atom_id - 1))
+                angle_id += 1
+
+                mol_id += 1
+
+    # write data file
+    data_path = os.path.join(working_directory, "tip3p.data")
+    with open(data_path, "w") as f:
+        f.write("TIP3P water box\n\n")
+        f.write(f"{len(atoms)} atoms\n")
+        f.write(f"{len(bonds)} bonds\n")
+        f.write(f"{len(angles)} angles\n")
+        f.write("0 dihedrals\n0 impropers\n\n")
+        f.write(f"{len(atom_masses)} atom types\n")
+        f.write(f"{len(bond_type_params)} bond types\n")
+        f.write(f"{len(angle_type_params)} angle types\n\n")
+        f.write(f"0.0 {box_size} xlo xhi\n")
+        f.write(f"0.0 {box_size} ylo yhi\n")
+        f.write(f"0.0 {box_size} zlo zhi\n\n")
+        f.write("Masses\n\n")
+        for t, m in atom_masses.items():
+            f.write(f"{t} {m}\n")
+        f.write("\nBond Coeffs\n\n")
+        for t, (k, r0) in bond_type_params.items():
+            f.write(f"{t} {k} {r0}\n")
+        f.write("\nAngle Coeffs\n\n")
+        for t, (k, ang) in angle_type_params.items():
+            f.write(f"{t} {k} {ang}\n")
+        f.write("\nAtoms\n\n")
+        for atom in atoms:
+            id_, mol, type_, q, x, y, z = atom
+            f.write(f"{id_} {mol} {type_} {q} {x} {y} {z}\n")
+        f.write("\nBonds\n\n")
+        for bond in bonds:
+            id_, type_, a1, a2 = bond
+            f.write(f"{id_} {type_} {a1} {a2}\n")
+        f.write("\nAngles\n\n")
+        for angle in angles:
+            id_, type_, a1, a2, a3 = angle
+            f.write(f"{id_} {type_} {a1} {a2} {a3}\n")
+
+    # write input script
+    inp_path = os.path.join(working_directory, "control.inp")
+    with open(inp_path, "w") as f:
+        f.write("units real\n")
+        f.write("atom_style full\n")
+        f.write("boundary p p p\n\n")
+        f.write("bond_style harmonic\n")
+        f.write("angle_style harmonic\n")
+        f.write("pair_style lj/cut/coul/long 10.0\n")
+        f.write("pair_modify mix arithmetic\n")
+        f.write("kspace_style pppm 1e-4\n\n")
+        f.write("read_data tip3p.data\n\n")
+        for t, (eps, sig) in lj_params.items():
+            for t2, (eps2, sig2) in lj_params.items():
+                f.write(f"pair_coeff {t} {t2} {eps} {sig}\n")
+        f.write("neighbor 2.0 bin\n")
+        f.write("neigh_modify delay 0 every 1 check yes\n\n")
+        f.write("group water type 1 2\n")
+        # f.write("velocity all create 300.0 12345\n")
+        f.write("fix shake_w water shake 1e-6 100 0 b 1 a 1\n")
+        # f.write("thermo 100\n")
+        f.write("timestep 1.0\n")
+        # Append additional LAMMPS control statements required for the workflow
+        f.write("\n")
+        f.write("fix ensemble all nvt temp 3000.0 3000.0 0.1\n")
+        f.write("variable dumptime  equal 100\n")
+        f.write("variable thermotime  equal 100\n")
+        # f.write("timestep 0.001\n")
+        f.write("velocity all create 6000.0 10298 dist gaussian\n")
+        f.write(
+            "dump 1 all custom ${dumptime} dump.out id type xu yu zu fx fy fz vx vy vz\n"
+        )
+        f.write(
+            'dump_modify 1 sort id format line "%d %d %20.15g %20.15g %20.15g %20.15g %20.15g %20.15g %20.15g %20.15g %20.15g"\n'
+        )
+        f.write("thermo_style custom step temp pe etotal pxx pxy pxz pyy pyz pzz vol\n")
+        f.write("thermo_modify format float %20.15g\n")
+        f.write("thermo ${thermotime}\n")
+        f.write("run 1000\n")
+
+    return os.path.abspath(working_directory)
 
 
 @as_function_node("potential")
@@ -429,3 +728,342 @@ def ParseOutput(working_directory, structure, potential, units="metal"):
     )
 
     return parse_dict
+
+
+# helper functions (move later to separate library)
+from ase import Atoms
+
+
+def compute_water_bonds_and_angles(
+    structure: Atoms,
+    cutoff: float = 1.2,
+):
+    """Return integer bond and angle connectivity for water molecules.
+
+    Uses :func:`structuretoolkit.get_neighbors` to obtain distances respecting
+    periodic boundary conditions.
+
+    Parameters
+    ----------
+    structure:
+        ASE ``Atoms`` object containing water molecules.
+    cutoff:
+        Maximum O–H distance (Å) to be considered a bond.
+
+    Returns
+    -------
+    tuple
+        ``(bonds, angles)`` where ``bonds`` is a list of ``(O_idx, H_idx)`` and
+        ``angles`` is a list of ``(O_idx, H1_idx, H2_idx)``.  Indices are zero‑based.
+    """
+
+    from structuretoolkit import get_neighbors
+
+    # Chemical symbols as a simple list; we locate O and H indices using
+    o_idxs = structure.select_index("O")
+    h_idxs = structure.select_index("H")
+
+    bonds: List[Tuple[int, int]] = []
+    angles: List[Tuple[int, int, int]] = []
+
+    # Loop over each oxygen atom and find hydrogen neighbors within ``cutoff``.
+    neigh_obj = get_neighbors(structure, num_neighbors=5, cutoff_radius=cutoff)
+    for o in o_idxs:
+        neighbor_ids = neigh_obj.indices[o]
+        neighbor_dists = neigh_obj.distances[o]
+
+        h_neighbors = [
+            int(idx) for idx, d in zip(neighbor_ids, neighbor_dists) if d < cutoff
+        ]
+
+        for h in h_neighbors:
+            bonds.append((int(o), int(h)))
+
+        if len(h_neighbors) == 2:
+            angles.append((int(o), int(h_neighbors[0]), int(h_neighbors[1])))
+
+    return bonds, angles
+
+
+def make_bonds_array(atom_pairs, bond_type=1, n_atoms=None):
+    """Convert list of 0-based atom index pairs to ASE bonds array strings."""
+    import numpy as np
+
+    if n_atoms is None:
+        n_atoms = max(max(p) for p in atom_pairs) + 1
+    bonds_per_atom = [[] for _ in range(n_atoms)]
+    for a1, a2 in atom_pairs:
+        bonds_per_atom[a1].append(f"{a2}({bond_type})")
+    # Format strings, '_' if no bonds
+    return np.array([",".join(b) if b else "_" for b in bonds_per_atom])
+
+
+def make_angles_array(angle_triplets, angle_type=1, n_atoms=None):
+    """Convert list of (a1, central, a3) triplets into ASE angles array format."""
+    import numpy as np
+
+    if n_atoms is None:
+        n_atoms = max(max(trip) for trip in angle_triplets) + 1
+    angles_per_atom = [[] for _ in range(n_atoms)]
+    for a1, central, a3 in angle_triplets:
+        angles_per_atom[central].append(f"{a1}-{a3}({angle_type})")
+    return np.array([",".join(lst) if lst else "_" for lst in angles_per_atom])
+
+
+def extract_charges_from_lammps_potential(lines):
+    """
+    Extract charges for atom types from a LAMMPS potential file lines.
+
+    Parameters
+    ----------
+    lines : list of str
+        Lines from the potential file.
+
+    Returns
+    -------
+    list of float
+        Charges in order of atom type id (index 0 = type 1).
+        Missing charges are set to None.
+    """
+    import re
+
+    type_to_group = {}  # map type_id -> group_name
+    charges_dict = {}  # map group_name -> charge_value
+
+    # Regex patterns
+    group_pattern = re.compile(r"group\s+(\S+)\s+type\s+(\d+)", re.IGNORECASE)
+    charge_pattern = re.compile(
+        r"set\s+group\s+(\S+)\s+charge\s+(-?\d*\.?\d+)", re.IGNORECASE
+    )
+
+    for line in lines:
+        line = line.strip()
+        # match group lines
+        gmatch = group_pattern.match(line)
+        if gmatch:
+            group_name = gmatch.group(1)
+            type_id = int(gmatch.group(2))
+            type_to_group[type_id] = group_name
+        # match charge lines
+        cmatch = charge_pattern.match(line)
+        if cmatch:
+            group_name = cmatch.group(1)
+            charge_val = float(cmatch.group(2))
+            charges_dict[group_name] = charge_val
+
+    # Build list of charges ordered by type id
+    max_type = max(type_to_group.keys())
+    charges_list = [None] * max_type
+    for type_id, group_name in type_to_group.items():
+        charges_list[type_id - 1] = charges_dict.get(group_name, None)
+
+    return charges_list
+
+
+def write_lammps_data_full(
+    fd,
+    atoms,
+    *,
+    specorder=None,
+    reduce_cell=False,
+    force_skew=False,
+    prismobj=None,
+    write_image_flags=False,
+    masses=False,
+    velocities=False,
+    units="metal",
+    bonds=True,
+    atom_style="atomic",
+    charges=None,
+):
+    """Extended ASE LAMMPS writer with bonds, angles, dihedrals, impropers support.
+    charges : list or array of floats (optional)
+        If provided, overrides atom charges from `atoms.get_initial_charges()`.
+        Must be ordered by type-ID (type 1 first, then type 2, etc.).
+    """
+    import numpy as np
+    from ase.calculators.lammps.coordinatetransform import Prism
+    from ase.io.lammpsdata import _write_masses, convert
+
+    print("charges: ", charges)
+    if isinstance(atoms, list):
+        if len(atoms) > 1:
+            raise ValueError("Can only write one configuration to a LAMMPS data file!")
+        atoms = atoms[0]
+
+    fd.write("(written by ASE - extended)\n\n")
+
+    symbols = atoms.get_chemical_symbols()
+    n_atoms = len(symbols)
+    fd.write(f"{n_atoms} atoms\n")
+
+    if specorder is None:
+        species = sorted(set(symbols))
+    else:
+        species = specorder
+    n_atom_types = len(species)
+    fd.write(f"{n_atom_types} atom types\n\n")
+
+    # -------- Bonds counting -----------
+    bonds_in = []
+    if bonds and (atom_style == "full") and (atoms.arrays.get("bonds") is not None):
+        n_bonds = 0
+        n_bond_types = 1
+        for i, bondsi in enumerate(atoms.arrays["bonds"]):
+            if bondsi != "_":
+                for bond in bondsi.split(","):
+                    dummy1, dummy2 = bond.split("(")
+                    bond_type = int(dummy2.split(")")[0])
+                    at1 = i + 1
+                    at2 = int(dummy1) + 1
+                    bonds_in.append((bond_type, at1, at2))
+                    n_bonds += 1
+                    if bond_type > n_bond_types:
+                        n_bond_types = bond_type
+        fd.write(f"{n_bonds} bonds\n")
+        fd.write(f"{n_bond_types} bond types\n\n")
+    else:
+        n_bonds = 0
+        n_bond_types = 0
+
+    # -------- Angles counting ----------
+    angles_in = []
+    if atoms.arrays.get("angles") is not None:
+        n_angles = 0
+        n_angle_types = 1
+        for i, angsi in enumerate(atoms.arrays["angles"]):
+            if angsi != "_":
+                for angle in angsi.split(","):
+                    triple, ang_type_str = angle.split("(")
+                    ang_type = int(ang_type_str.split(")")[0])
+                    a1_str, a3_str = triple.split("-")
+                    center = i + 1
+                    a1 = int(a1_str) + 1
+                    a3 = int(a3_str) + 1
+                    angles_in.append((ang_type, a1, center, a3))
+                    n_angles += 1
+                    if ang_type > n_angle_types:
+                        n_angle_types = ang_type
+        fd.write(f"{n_angles} angles\n")
+        fd.write(f"{n_angle_types} angle types\n\n")
+    else:
+        n_angles = 0
+        n_angle_types = 0
+
+    # -------- Dihedrals counting -------
+    dihedrals_in = []
+    if atoms.arrays.get("dihedrals") is not None:
+        n_dihedrals = 0
+        n_dihedral_types = 1
+        for i, dihe in enumerate(atoms.arrays["dihedrals"]):
+            if dihe != "_":
+                for dih in dihe.split(","):
+                    quad, dih_type_str = dih.split("(")
+                    dih_type = int(dih_type_str.split(")")[0])
+                    a1_str, a2_str, a4_str = quad.split("-")
+                    a1 = int(a1_str) + 1
+                    a2 = i + 1
+                    a4 = int(a4_str) + 1
+                    dihedrals_in.append((dih_type, a1, a2, int(a2_str) + 1, a4))
+                    n_dihedrals += 1
+                    if dih_type > n_dihedral_types:
+                        n_dihedral_types = dih_type
+        fd.write(f"{n_dihedrals} dihedrals\n")
+        fd.write(f"{n_dihedral_types} dihedral types\n\n")
+    else:
+        n_dihedrals = 0
+        n_dihedral_types = 0
+
+    # -------- Impropers counting -------
+    impropers_in = []
+    if atoms.arrays.get("impropers") is not None:
+        n_impropers = 0
+        n_improper_types = 1
+        for i, impr in enumerate(atoms.arrays["impropers"]):
+            if impr != "_":
+                for imp in impr.split(","):
+                    quad, imp_type_str = imp.split("(")
+                    imp_type = int(imp_type_str.split(")")[0])
+                    a1_str, a2_str, a4_str = quad.split("-")
+                    a1 = int(a1_str) + 1
+                    a2 = i + 1
+                    a4 = int(a4_str) + 1
+                    impropers_in.append((imp_type, a1, a2, int(a2_str) + 1, a4))
+                    n_impropers += 1
+                    if imp_type > n_improper_types:
+                        n_improper_types = imp_type
+        fd.write(f"{n_impropers} impropers\n")
+        fd.write(f"{n_improper_types} improper types\n\n")
+    else:
+        n_impropers = 0
+        n_improper_types = 0
+
+    # -------- Cell dimensions ----------
+    if prismobj is None:
+        prismobj = Prism(atoms.get_cell(), reduce_cell=reduce_cell)
+    xhi, yhi, zhi, xy, xz, yz = convert(
+        prismobj.get_lammps_prism(), "distance", "ASE", units
+    )
+    fd.write(f"0.0 {xhi:23.17g}  xlo xhi\n")
+    fd.write(f"0.0 {yhi:23.17g}  ylo yhi\n")
+    fd.write(f"0.0 {zhi:23.17g}  zlo zhi\n")
+    if force_skew or prismobj.is_skewed():
+        fd.write(f"{xy:23.17g} {xz:23.17g} {yz:23.17g}  xy xz yz\n")
+    fd.write("\n")
+
+    if masses:
+        _write_masses(fd, atoms, species, units)
+
+    # -------- Atoms section ------------
+    fd.write(f"Atoms # {atom_style}\n\n")
+    pos = prismobj.vector_to_lammps(atoms.get_positions(), wrap=write_image_flags)
+    if atom_style == "atomic":
+        pos = convert(pos, "distance", "ASE", units)
+        for i, r in enumerate(pos):
+            s = species.index(symbols[i]) + 1
+            fd.write(f"{i+1:>6} {s:>3} {r[0]:23.17g} {r[1]:23.17g} {r[2]:23.17g}\n")
+    elif atom_style == "full":
+        # If charges list is provided, override atomic charges
+        if charges is not None:
+            charges_array = np.array(
+                [charges[species.index(symbol)] for symbol in symbols]
+            )
+        else:
+            charges_array = atoms.get_initial_charges()
+        charges_array = convert(charges_array, "charge", "ASE", units)
+        # print("charges array: ", charges_array)
+
+        molecules = np.ones(len(atoms), dtype=int)  # default molecule IDs
+        pos = convert(pos, "distance", "ASE", units)
+        for i, (m, q, r) in enumerate(zip(molecules, charges_array, pos)):
+            s = species.index(symbols[i]) + 1
+            # print('charge: ', i, s, q, f"{q:>9.6f}")
+            fd.write(
+                f"{i+1:>6} {m:>3} {s:>3} {q:>9.6f} {r[0]:23.17g} {r[1]:23.17g} {r[2]:23.17g}\n"
+            )
+
+    # -------- Bonds section ------------
+    if n_bonds > 0:
+        fd.write("\nBonds\n\n")
+        for idx, (bt, a1, a2) in enumerate(bonds_in, start=1):
+            fd.write(f"{idx:>3} {bt:>3} {a1:>3} {a2:>3}\n")
+
+    # -------- Angles section -----------
+    if n_angles > 0:
+        fd.write("\nAngles\n\n")
+        for idx, (atype, cen, a1, a3) in enumerate(angles_in, start=1):
+            fd.write(f"{idx:>3} {atype:>3} {a1:>3} {cen:>3} {a3:>3}\n")
+
+    # -------- Dihedrals section --------
+    if n_dihedrals > 0:
+        fd.write("\nDihedrals\n\n")
+        for idx, (dtype, a1, a2, a3, a4) in enumerate(dihedrals_in, start=1):
+            fd.write(f"{idx:>3} {dtype:>3} {a1:>3} {a2:>3} {a3:>3} {a4:>3}\n")
+
+    # -------- Impropers section --------
+    if n_impropers > 0:
+        fd.write("\nImpropers\n\n")
+        for idx, (itype, a1, a2, a3, a4) in enumerate(impropers_in, start=1):
+            fd.write(f"{idx:>3} {itype:>3} {a1:>3} {a2:>3} {a3:>3} {a4:>3}\n")
+
+    fd.flush()

@@ -160,8 +160,12 @@ def Plot(
     import pandas as pd
     from matplotlib import pyplot as plt
 
-    # If x is not provided, generate a default sequence
-    x = np.arange(len(y)) if x is None else x
+    print("plotting: ", len(np.shape(y)))
+    if len(np.shape(y)) == 1:
+        # If x is not provided, generate a default sequence
+        x = np.arange(len(y)) if x is None else x
+    else:
+        x = None
 
     if axis is None:
         fig, ax = plt.subplots()
@@ -171,7 +175,10 @@ def Plot(
         fig = ax.figure
 
     # Plot data
-    ax.plot(x, y, color=color, marker=symbol, label=legend_label)
+    if x is None:
+        ax.plot(y, color=color, marker=symbol, label=legend_label)
+    else:
+        ax.plot(x, y, color=color, marker=symbol, label=legend_label)
 
     # Log scales if needed
     if log_x:
@@ -264,3 +271,102 @@ def Title(axis: Optional[object] = None, title: Optional[str] = ""):
         ax = axis
     ax.set_title(title)
     return ax
+
+
+@as_function_node
+def AnalyseConvergencePlot(
+    y: "np.ndarray",
+    x: Optional["np.ndarray"] = None,
+    i_start: int = 0,
+    smoothen: bool = False,
+    window_size: int = 10,
+    mode: Literal[
+        "reflect", "mirror", "constant", "nearest", "wrap", "grid-constant"
+    ] = "nearest",
+    ref_to_min: bool = False,
+):
+    """
+    Plot the convergence of a scalar series ``y`` (e.g. energy, force norm)
+    as a function of an optional abscissa ``x`` (iteration number, time,
+    etc.).  The function is intended to be used as a pyiron node, therefore
+    it returns a single Matplotlib ``Figure`` object.
+
+    Parameters
+    ----------
+    y : np.ndarray
+        1‑D array containing the quantity to be analysed.
+    x : np.ndarray | None, optional
+        Optional abscissa.  If ``None`` a simple integer index
+        ``np.arange(len(y))`` is used.
+    i_start : int, default ``0``
+        Index from which the plot should start – useful to discard the
+        initial equilibration part of a trajectory.
+    smoothen : bool, default ``False``
+        If ``True`` a simple moving‑average (window = 5) is applied to ``y``
+        before plotting.  This helps visualise noisy data.
+    ref_to_min : bool, default ``False``
+        If ``True`` the plotted values are shifted by the minimum value in the
+        displayed range (i.e. ``y - min(y)``).  This is handy when one wants to
+        see how quickly the series approaches its lowest value.
+
+    Returns
+    -------
+    Figure
+        Matplotlib figure containing the convergence plot.
+    """
+    # ------------------------------------------------------------------
+    # Imports – kept inside the node so that the node can be imported
+    # without pulling heavy optional dependencies.
+    # ------------------------------------------------------------------
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from scipy.ndimage import uniform_filter1d
+
+    # ------------------------------------------------------------------
+    # Convert inputs to NumPy arrays and handle the optional x‑axis.
+    # ------------------------------------------------------------------
+    y = np.asarray(y).ravel()
+    if x is None:
+        x = np.arange(y.size)
+    else:
+        x = np.asarray(x).ravel()
+
+    # ------------------------------------------------------------------
+    # Slice the data from the requested start index.
+    # ------------------------------------------------------------------
+    y_plot = y[i_start:]
+    x_plot = x[i_start:]
+
+    # ------------------------------------------------------------------
+    # Optional smoothing (simple moving average with a fixed window).
+    # ------------------------------------------------------------------
+    if smoothen:
+        y_plot = uniform_filter1d(y_plot, size=window_size, mode=mode)
+
+    # ------------------------------------------------------------------
+    # Optional reference to the minimum value.
+    # ------------------------------------------------------------------
+    if ref_to_min:
+        min_val = np.min(y_plot)
+        y_plot = y_plot - min_val
+
+    # ------------------------------------------------------------------
+    # Build the figure.
+    # ------------------------------------------------------------------
+    fig, ax = plt.subplots(figsize=(4.5, 3))
+    ax.plot(x_plot, y_plot, marker="o", linestyle="-", color="tab:blue")
+    ax.set_xlabel("Iteration" if x is None else "x")
+    ylabel = "y"
+    if ref_to_min:
+        ylabel += " – min"
+    ax.set_ylabel(ylabel)
+    ax.set_title("Convergence")
+    ax.grid(True, which="both", ls=":", alpha=0.7)
+
+    # Highlight the final value with a horizontal line.
+    ax.axhline(
+        y_plot[-1], color="tab:red", ls="--", lw=1, label=f"final = {y_plot[-1]:.3e}"
+    )
+    ax.legend(fontsize="small", loc="best")
+
+    return fig

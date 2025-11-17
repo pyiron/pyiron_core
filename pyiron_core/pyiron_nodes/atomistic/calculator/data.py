@@ -91,6 +91,7 @@ class OutputCalcMD:
     unwrapped_positions: DataArray = EmptyArrayField()
     velocities: DataArray = EmptyArrayField()
     volumes: DataArray = EmptyArrayField()
+    species: DataArray = EmptyArrayField()
 
 
 @as_inp_dataclass_node

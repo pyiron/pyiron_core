@@ -35,8 +35,37 @@ class GUILayout:
     output_widget_width = 400
 
 
+def get_current_username() -> str:
+    """
+    Return the name of the user that runs the current Python process.
+
+    Tries, in order:
+      1. getpass.getuser()   – reliable, works on Windows & Unix.
+      2. os.getlogin()       – may raise OSError in headless contexts.
+      3. pathlib.Path.home().name – fallback to the home‑directory name.
+    """
+    import getpass
+    import os
+    from pathlib import Path
+
+    # 1️⃣ Preferred, never raises
+    try:
+        return getpass.getuser()
+    except Exception:
+        pass
+
+    # 2️⃣ May raise on systems without a controlling terminal
+    try:
+        return os.getlogin()
+    except Exception:
+        pass
+
+    # 3️⃣ Last resort – the folder name of the home directory
+    return Path.home().name
+
+
 def create_db(
-    user: str = "joerg",
+    user: str = get_current_username(),
     password: str = "none",
     host: str = "localhost",
     port: int = 5432,

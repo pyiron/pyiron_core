@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional, Union
+from typing import Optional, Union, List, Iterable, Set
 
 from ase import Atoms
 
@@ -129,3 +129,80 @@ def RotateAxisAngle(
     structure_rotated = structure.copy()
     structure_rotated.rotate(a=angle, v=axis, center=center, rotate_cell=rotate_cell)
     return structure_rotated
+
+
+@as_function_node
+def FixSpecies(
+    structure: Atoms,
+    fixed_species: Optional[str] = None,
+) -> Atoms:
+    """
+    Return a copy of *structure* with a ``FixAtoms`` constraint applied to the
+    requested chemical species.
+
+    Parameters
+    ----------
+    structure : ase.Atoms
+        Atomic configuration to be copied and (optionally) constrained.
+    fixed_species : None or str, optional
+        * ``None`` – no atoms are fixed.
+        * ``"Cu"`` – all copper atoms are fixed.
+        * ``'["O", "H"]'`` – a string that represents a list/tuple of symbols;
+          all oxygen **and** hydrogen atoms are fixed.
+
+    Returns
+    -------
+    ase.Atoms
+        A copy of *structure* with the appropriate ``FixAtoms`` constraint
+        attached (or the unchanged copy if *fixed_species* is ``None``).
+    """
+    import ast
+    from ase.constraints import FixAtoms
+
+    # ------------------------------------------------------------------
+    # 1️⃣ Normalise ``fixed_species`` to a *set* of element symbols.
+    # ------------------------------------------------------------------
+    species_set: Set[str] = set()          # default → nothing to fix
+
+    if fixed_species is not None:
+        # ``fixed_species`` is a string.  It may be a plain symbol
+        # (e.g. "Cu") or a string that looks like a Python container
+        # (e.g. '["O","H"]' or '("C","N")').
+        try:
+            parsed = ast.literal_eval(fixed_species)
+        except (SyntaxError, ValueError):
+            # Not a container literal → treat the whole string as a single symbol.
+            parsed = fixed_species
+
+        if isinstance(parsed, str):
+            species_set = {parsed}
+        elif isinstance(parsed, (list, tuple, set)):
+            # Ensure every entry is a string; otherwise raise a clear error.
+            if not all(isinstance(item, str) for item in parsed):
+                raise ValueError("All entries in the element list must be strings.")
+            species_set = set(parsed)
+        else:
+            raise ValueError(
+                "fixed_species must be None, a single element symbol, "
+                "or a string representation of a list/tuple of symbols."
+            )
+
+    # ------------------------------------------------------------------
+    # 2️⃣ Build the boolean mask required by ``FixAtoms``.
+    #    If ``species_set`` is empty the mask will be all ``False``.
+    # ------------------------------------------------------------------
+    mask: List[bool] = [atom.symbol in species_set for atom in structure]
+
+    # ------------------------------------------------------------------
+    # 3️⃣ Create a copy of the original structure and (optionally) attach the
+    #    constraint.  ``FixAtoms`` tolerates a mask that is all ``False``,
+    #    but we skip adding the constraint for a cleaner object.
+    # ------------------------------------------------------------------
+    new_structure = structure.copy()
+    if any(mask):                                   # at least one atom should be fixed
+        new_structure.set_constraint(FixAtoms(mask=mask))
+
+    # ------------------------------------------------------------------
+    # 4️⃣ Single return statement – the function’s result.
+    # ------------------------------------------------------------------
+    return new_structure
