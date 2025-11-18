@@ -101,7 +101,7 @@ def Equilibrate(
 
 
 @as_function_node
-def IonPotential_test(
+def IonPotential(
     metal: str = "Al",
     metal_charge: float = 0.0,
     cation: str = "Na",
