@@ -39,6 +39,7 @@ from pyiron_core.pyiron_workflow.graph.labelling import (
 from pyiron_core.pyiron_workflow.simple_workflow import (
     Data,
     Node,
+    SubGraphNode,
     Port,
     Workflow,
     identity,
@@ -1029,7 +1030,7 @@ def graph_to_node(graph: Graph, exclude_unconnected_default_ports=True) -> Node:
     # Retrieve the function from the local namespace
     func = virtual_namespace[graph.label]
 
-    node = Node(
+    node = SubGraphNode(
         func=func,
         label=graph.label,
         node_type="graph",

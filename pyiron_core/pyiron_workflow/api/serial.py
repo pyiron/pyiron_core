@@ -8,6 +8,10 @@ the original paths for the `__module__` of imported objects.
 
 import functools
 
+from pyiron_core.pyiron_workflow.graph.graph_json import _uncompact_graph_from_state
+from pyiron_core.pyiron_workflow.graph.base import graph_to_node
+
+
 from pyiron_core.pyiron_workflow.graph.base import (
     GraphEdge as _GraphEdge,
 )
@@ -43,7 +47,9 @@ def func_dataclass():
     )
 
 
-def subgraph():
+def subgraph(graph_dict: dict):
+    return graph_to_node(_uncompact_graph_from_state(state))
+
     raise NotImplementedError(
         "Prior to leveraging this API, the reference JSON workflows used to test the "
         "project contained references to "

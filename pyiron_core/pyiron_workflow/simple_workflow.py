@@ -781,6 +781,11 @@ class Node:
         )
 
 
+class SubGraphNode(Node):
+    def _get_non_default_input(self):
+        return self.graph.__getstate__()
+
+
 def get_node_from_path(import_path):
     # Split the path into module and object part
     module_path, _, name = import_path.rpartition(".")
