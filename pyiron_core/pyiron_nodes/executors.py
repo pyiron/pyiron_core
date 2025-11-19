@@ -9,6 +9,20 @@ def SingleNodeExecutor(max_workers: int = 1):
 
 
 @as_function_node("Executor")
+def FluxJobExecutor(max_workers: int = 1):
+    from executorlib import FluxJobExecutor as Executor
+
+    return Executor(max_workers=max_workers)
+
+
+@as_function_node("Executor")
+def FluxClusterExecutor(cache_directory: str = "./cache"):
+    from executorlib import FluxClusterExecutor as Executor
+
+    return Executor(cache_directory=cache_directory)
+
+
+@as_function_node("Executor")
 def ThreadPoolExecutor(max_workers: int = 1):
     from concurrent.futures import ThreadPoolExecutor as Executor
 
