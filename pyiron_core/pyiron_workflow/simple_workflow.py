@@ -515,6 +515,7 @@ class Node:
         )
 
         self._func = func
+
         self._workflow = None
         self._graph_node = _graph_node  # link to parent graph node
 
@@ -737,10 +738,16 @@ class Node:
         }
 
     def __getstate__(self):
+        if self.node_type in ("node", "function_node"):
+            inputs = self._get_non_default_input()
+        elif self.node_type == "graph":
+            inputs = self.graph.__getstate__()
+        else:
+            assert False, f"Invalid node type {self.node_type} should never be set."
         return {
             "label": self.label,
             "function": self.function["import_path"],
-            "inputs": self._get_non_default_input(),
+            "inputs": inputs,
         }
 
     # @classmethod
@@ -769,7 +776,7 @@ class Node:
             },
             attribute=Port,
         )
-        return Node(
+        return type(self)(
             func=self._func,
             inputs=inp_copy,
             outputs=self.outputs,
@@ -782,8 +789,42 @@ class Node:
 
 
 class SubGraphNode(Node):
+    """Node that contains a subgraph, ie. multiple other nodes that have been grouped in UI."""
+
+    def __init__(self, *args, graph, code, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.graph = graph
+        self._code = code
+
     def _get_non_default_input(self):
         return self.graph.__getstate__()
+
+    def copy(self):
+        # make a deep copy of the inputs
+        # only values need to be copied, all other node input attributes are immutable
+        inp_val_copy = list(self.inputs.data[PORT_VALUE])
+        inp_copy = Data(
+            {
+                PORT_LABEL: self.inputs.data[PORT_LABEL],
+                PORT_TYPE: self.inputs.data[PORT_TYPE],
+                PORT_DEFAULT: self.inputs.data[PORT_DEFAULT],
+                PORT_VALUE: inp_val_copy,
+                "ready": self.inputs.data["ready"],
+            },
+            attribute=Port,
+        )
+        return type(self)(
+            func=self._func,
+            inputs=inp_copy,
+            outputs=self.outputs,
+            label=self.label,
+            output_labels=None,
+            node_type=self.node_type,
+            orig_func=self._func,
+            _graph_node=self._graph_node,
+            graph=self.graph,
+            code=self._code,
+        )
 
 
 def get_node_from_path(import_path):

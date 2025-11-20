@@ -1036,10 +1036,9 @@ def graph_to_node(graph: Graph, exclude_unconnected_default_ports=True) -> Node:
         node_type="graph",
         inputs=get_inputs_of_graph(graph, exclude_unconnected_default_ports=True),
         outputs=get_outputs_of_graph(graph),
+        graph=graph,
+        code=function_string,
     )
-    node.label = graph.label  # should not be necessary
-    node._code = function_string  # TODO: add macro decorator with output labels
-    node.graph = graph
 
     return node
 
