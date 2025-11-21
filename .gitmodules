@@ -1,6 +1,0 @@
-[submodule "pyiron_core/pyiron_nodes/IPAM-ECH2025"]
-	path = pyiron_core/pyiron_nodes/IPAM_ECH2025
-	url = https://github.com/IPAM-ECH2025/WG1-nodes.git
-[submodule "WG1-hackathon"]
-	path = WG1-hackathon
-	url = https://github.com/IPAM-ECH2025/WG1-hackathon.git
