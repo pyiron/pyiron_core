@@ -25,8 +25,10 @@ plugins:
   - mkdocstrings:
       handlers:
         python:
-          import:
-            - pyiron_core
+          setup_commands:
+            - "import sys; sys.path.insert(0, '.')"
+            # If your module is in a src directory, use this instead:
+            # - "import sys; sys.path.insert(0, './src')"
           options:
             show_root_heading: true
             docstring_style: google
