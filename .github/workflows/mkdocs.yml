@@ -1,38 +1,51 @@
-site_name: pyiron_core
-nav:
-  - Home: index.md
-  - Quick-Start: quickstart.md
-  - User Guide:
-      - Nodes: guide/nodes.md
-      - Workflow: guide/workflow.md
-      - Higher-Order Nodes: guide/closures.md      
-      - GUI: guide/gui.md
-      - Graph Engine: guide/graph.md      
-      - Advanced Concepts: guide/advanced.md
-  - API Reference:
-      - Core: reference/pyiron_core.md
-      - Workflow: reference/pyiron_workflow.md
-  - Examples: examples/
-  - Development: dev.md
-theme:
-  name: material
-  palette:
-    - scheme: default
-      primary: indigo
-      accent: amber
-plugins:
-  - search
-  - mkdocstrings:
-      handlers:
-        python:
-          setup_commands:
-            - "import sys; sys.path.insert(0, '.')"
-            # If your module is in a src directory, use this instead:
-            # - "import sys; sys.path.insert(0, './src')"
-          options:
-            show_root_heading: true
-            docstring_style: google
-markdown_extensions:
-  - admonition
-  - pymdownx.superfences
-  - pymdownx.tabbed
+name: Deploy MkDocs to GitHub Pages
+
+on:
+  push:
+    branches: ["main", "IPAM_hackathon"]
+  workflow_dispatch:
+
+permissions:
+  contents: read        # to clone the repo
+  pages: write          # to deploy to GitHub Pages
+  id-token: write       # for OIDC token with GitHub Pages
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install MkDocs and plugins
+        run: |
+          python -m pip install --upgrade pip
+          pip install mkdocs mkdocs-material mkdocstrings[python]
+
+      - name: Build MkDocs site
+        run: mkdocs build --strict
+
+      # Deploy the generated site folder using the official Pages action
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # MkDocs outputs to the `site` directory by default
+          path: ./site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+        with:
+          # No additional options needed; defaults deploy to the `gh-pages` branch
+          # and make it the site source.
+          # The action automatically picks up the artifact from the previous step.
+          # Ensure the repository settings have GitHub Pages set to "Deploy from a
+          # GitHub Actions workflow".
+          # This job will fail if the repository does not have Pages enabled.
+          token: ${{ secrets.GITHUB_TOKEN }}
+
