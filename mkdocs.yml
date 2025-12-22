@@ -25,7 +25,7 @@ plugins:
   - mkdocstrings:
       handlers:
         python:
-          setup_commands:
+          setup:
             - "import sys; sys.path.insert(0, '.')"
             # If your module is in a src directory, use this instead:
             # - "import sys; sys.path.insert(0, './src')"
