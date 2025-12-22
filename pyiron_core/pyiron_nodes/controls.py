@@ -1,5 +1,6 @@
 from concurrent.futures import as_completed
 from copy import copy
+from typing import Any, List, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -89,12 +90,47 @@ def _iterate_node(
 def IterToDataFrame(
     node: Node,
     input_label: str,
-    values: list | np.ndarray,
+    values: Union[list, np.ndarray],
     debug: bool = False,
     executor=None,
+    store: bool = False,
 ) -> pd.DataFrame:
-    import pandas as pd
+    """
+    Iterate over ``values`` feeding each element into ``node`` under the name
+    ``input_label`` and collect the results in a pandas DataFrame.
 
+    New feature:
+        – If the node returns a *dataclass* instance, each field of the
+          dataclass becomes its own column in the DataFrame.
+
+    Parameters
+    ----------
+    node : Node
+        The node that will be executed for each value.
+    input_label : str
+        Name of the input attribute on ``node`` that receives each element of
+        ``values``.
+    values : list | np.ndarray
+        Iterable of input values.
+    debug : bool, optional
+        Print debugging information.
+    executor : concurrent.futures.Executor, optional
+        If supplied, the iteration runs in parallel using the executor.
+    store : bool, optional
+        Used by decorator to implement hash storage (if set to True)
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame where each column corresponds to an input or an output
+        field.  When the node returns a dataclass, each field of the
+        dataclass is a separate column.
+    """
+    from dataclasses import is_dataclass, fields
+
+    # ------------------------------------------------------------------
+    # 1️⃣ Run the node over all values
+    # ------------------------------------------------------------------
     out_lst, inp_lst = _iterate_node(
         node,
         input_label,
@@ -105,34 +141,86 @@ def IterToDataFrame(
         executor=executor,
     )
 
-    data_dict = {}
-    # Decide whether node returns a single value or tuple/list of values
-    first_out = out_lst[0] if out_lst else None
-    output_labels = list(node.outputs.keys())
-    multi_output = isinstance(first_out, (tuple, list, np.ndarray)) and len(
-        first_out
-    ) == len(output_labels)
+    # ------------------------------------------------------------------
+    # 2️⃣ Prepare a dict that will be fed to pd.DataFrame
+    # ------------------------------------------------------------------
+    data_dict: dict[str, List[Any]] = {}
 
-    # Ensure no column name conflict for input
+    # ------------------------------------------------------------------
+    # 2.1 Input column – avoid name clash with node outputs
+    # ------------------------------------------------------------------
+    output_labels = list(node.outputs.keys())
     if input_label in output_labels:
         data_dict[f"input_{input_label}"] = inp_lst
     else:
         data_dict[input_label] = inp_lst
 
-    if multi_output:
+    # ------------------------------------------------------------------
+    # 3️⃣ Analyse the first output to decide how to unpack the rest
+    # ------------------------------------------------------------------
+    first_out = out_lst[0] if out_lst else None
+
+    # Helper: is the result a dataclass instance?
+    def _is_dataclass_instance(obj: Any) -> bool:
+        return is_dataclass(obj) and not isinstance(obj, type)
+
+    # ------------------------------------------------------------------
+    # 3.1 Tuple / list / np.ndarray output (multiple scalar outputs)
+    # ------------------------------------------------------------------
+    multi_output = isinstance(first_out, (tuple, list, np.ndarray)) and len(
+        first_out
+    ) == len(output_labels)
+
+    # ------------------------------------------------------------------
+    # 3.2 Dataclass output – each field becomes a column
+    # ------------------------------------------------------------------
+    if _is_dataclass_instance(first_out):
+        # Extract field names once – they will be the column names
+        dc_fields = [f.name for f in fields(first_out)]
+
+        # Initialise a list for each field
+        for f_name in dc_fields:
+            data_dict[f_name] = []
+
+        # Fill the column lists
+        for out in out_lst:
+            # Defensive: if a particular iteration returned something else,
+            # fall back to NaN for all fields.
+            if _is_dataclass_instance(out):
+                for f_name in dc_fields:
+                    data_dict[f_name].append(getattr(out, f_name))
+            else:
+                for f_name in dc_fields:
+                    data_dict[f_name].append(np.nan)
+
+    # ------------------------------------------------------------------
+    # 3.3 Regular scalar / single‑value output
+    # ------------------------------------------------------------------
+    elif multi_output:
+        # Node returns a sequence that matches the declared output labels
         for idx, label in enumerate(output_labels):
             data_dict[label] = [out[idx] for out in out_lst]
+
     else:
+        # Node returns a single scalar (or a single object) per iteration
         if len(output_labels) == 1:
+            # Simple case – one declared output
             data_dict[output_labels[0]] = out_lst
         else:
-            data_dict.update(dict.fromkeys(output_labels, out_lst))
+            # Ambiguous case – more declared outputs than we can unpack.
+            # We store the whole object under each label (the original
+            # behaviour) – this mirrors the previous implementation.
+            for label in output_labels:
+                data_dict[label] = out_lst
 
+    # ------------------------------------------------------------------
+    # 4️⃣ Build the DataFrame (fallback to raw dict on error)
+    # ------------------------------------------------------------------
     try:
         df = pd.DataFrame(data_dict)
     except Exception as e:
         print(f"Error creating DataFrame: {e}")
-        df = data_dict
+        df = pd.DataFrame.from_dict(data_dict, orient="columns")
 
     return df
 
@@ -235,7 +323,7 @@ def Print(x):
 
 @as_function_node
 def GetMask(x: np.ndarray, index: int = 0):
-    mask = (np.array(x) == index)
+    mask = np.array(x) == index
     return mask
 
 

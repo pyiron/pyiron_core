@@ -149,10 +149,12 @@ def GetNeighbors(
 
     return neighbors
 
+
 @as_function_node
 def SelectedIndex(structure: Atoms, index: str):
     indices = structure.select_index(index)
     return indices
+
 
 @as_function_node
 def GetChemicalSpecies(structure: Atoms):

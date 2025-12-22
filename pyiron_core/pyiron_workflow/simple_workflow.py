@@ -515,6 +515,7 @@ class Node:
         )
 
         self._func = func
+
         self._workflow = None
         self._graph_node = _graph_node  # link to parent graph node
 
@@ -551,7 +552,9 @@ class Node:
                 f"Node creator: Output labels must be unique: {self.outputs.data[PORT_LABEL]}"
             )
         if None in self.outputs.data[PORT_LABEL]:
-            raise ValueError("Node creator: Output labels must be given")
+            raise ValueError(
+                f"Node creator: Output labels must be given ({self.outputs.data[PORT_LABEL]})"
+            )
 
     @property
     def kwargs(self):
@@ -737,10 +740,16 @@ class Node:
         }
 
     def __getstate__(self):
+        if self.node_type in ("node", "function_node", "inp_dataclass_node"):
+            inputs = self._get_non_default_input()
+        elif self.node_type == "graph":
+            inputs = self.graph.__getstate__()
+        else:
+            assert False, f"Invalid node type {self.node_type} should never be set."
         return {
             "label": self.label,
             "function": self.function["import_path"],
-            "inputs": self._get_non_default_input(),
+            "inputs": inputs,
         }
 
     # @classmethod
@@ -769,7 +778,7 @@ class Node:
             },
             attribute=Port,
         )
-        return Node(
+        return type(self)(
             func=self._func,
             inputs=inp_copy,
             outputs=self.outputs,
@@ -778,6 +787,45 @@ class Node:
             node_type=self.node_type,
             orig_func=self._func,
             _graph_node=self._graph_node,
+        )
+
+
+class SubGraphNode(Node):
+    """Node that contains a subgraph, ie. multiple other nodes that have been grouped in UI."""
+
+    def __init__(self, *args, graph, code, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.graph = graph
+        self._code = code
+
+    def _get_non_default_input(self):
+        return self.graph.__getstate__()
+
+    def copy(self):
+        # make a deep copy of the inputs
+        # only values need to be copied, all other node input attributes are immutable
+        inp_val_copy = list(self.inputs.data[PORT_VALUE])
+        inp_copy = Data(
+            {
+                PORT_LABEL: self.inputs.data[PORT_LABEL],
+                PORT_TYPE: self.inputs.data[PORT_TYPE],
+                PORT_DEFAULT: self.inputs.data[PORT_DEFAULT],
+                PORT_VALUE: inp_val_copy,
+                "ready": self.inputs.data["ready"],
+            },
+            attribute=Port,
+        )
+        return type(self)(
+            func=self._func,
+            inputs=inp_copy,
+            outputs=self.outputs,
+            label=self.label,
+            output_labels=None,
+            node_type=self.node_type,
+            orig_func=self._func,
+            _graph_node=self._graph_node,
+            graph=self.graph,
+            code=self._code,
         )
 
 
@@ -901,10 +949,25 @@ def make_node_decorator(inner_wrap_return_func, node_type="function_node"):
                     print("wrapped: ", func.__wrapped__)
 
                 cf_kwargs = copy.copy(f_kwargs)
+                # Define ALL supported keys for the function (update this list as needed)
+                SUPPORTED_KEYS = ["label"]  # Add all valid keys here
+
+                # Check for unsupported keys in f_kwargs (TODO: gives warning for argument free decorators)
+                # for key in list(f_kwargs.keys()):
+                #     if key not in SUPPORTED_KEYS:
+                #         import warnings
+                #         warnings.warn(
+                #             f"Ignoring unsupported keyword argument: '{key}'. "
+                #             f"Supported keys are: {SUPPORTED_KEYS}",
+                #             stacklevel=2
+                #         )
+
+                # Original label handling
                 label = None
                 if "label" in f_kwargs:
                     label = f_kwargs["label"]
                     del cf_kwargs["label"]
+
                 return inner_wrap_return_func(
                     func, label, output_labels, node_type, *f_args, **cf_kwargs
                 )
@@ -1109,6 +1172,13 @@ class Workflow:
             self.add_node(label=label, node=value)
             super().__setattr__(label, value)
 
+    def _is_node_port(self, node, input_label):
+        """
+        check whether the input port node.inputs.input_label expects a node rather than an output port
+        """
+        print("_is_node_port: ", node.inputs, input_label)
+        return False
+
     def _get_edges(self, node):
         values = node.inputs.data[PORT_VALUE]
         labels = node.inputs.data[PORT_LABEL]
@@ -1119,6 +1189,7 @@ class Workflow:
                 target = node.label
                 targetHandle = label
             elif isinstance(value, Node):
+                self._is_node_port(node, label)
                 source_node = value
                 source = source_node.label
                 if source_node.n_out_labels == 1:

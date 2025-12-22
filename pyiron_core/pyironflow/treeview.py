@@ -5,7 +5,7 @@ from pathlib import Path
 from ipytree import Node, Tree
 
 __author__ = "Joerg Neugebauer"
-__version__ = "1.0"  # final fully integrated version
+__version__ = "1.1"
 __status__ = "development"
 __date__ = "Feb 2025"
 
@@ -151,8 +151,17 @@ class TreeView:
             fn_tree.on_click = self.on_click
             fn_tree.observe(self.handle_click, "selected")
 
+    def add_error_detail_node(self, error_tree_node, error_node: ErrorNode):
+        """Add a child node showing error details for broken modules."""
+        # Show error message
+        msg_node = Node(f"Error: {error_node.error}")
+        msg_node.icon = "file-alt"
+        msg_node.icon_style = "danger"
+        msg_node.tooltip = str(error_node.path)  # show file path on hover
+        error_tree_node.add_node(msg_node)
+
     def list_nodes(self, node: Path):
-        """Return directories first, then Python files, both sorted alphabetically."""
+        """Return directories first, then Python files, sorted alphabetically."""
         dirs = []
         files = []
         if node.is_dir():

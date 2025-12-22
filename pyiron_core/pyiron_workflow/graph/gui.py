@@ -27,12 +27,14 @@ from pyiron_core.pyiron_workflow.graph import (
     labelling,
     run,
 )
+from dataclasses import dataclass
 
 
+@dataclass
 class GUILayout:
-    flow_widget_width = 1200
-    flow_widget_height = 800
-    output_widget_width = 400
+    flow_widget_width: int = 1200
+    flow_widget_height: int = 800
+    output_widget_width: int = 400
 
 
 def get_current_username() -> str:

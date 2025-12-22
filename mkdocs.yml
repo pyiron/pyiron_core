@@ -1,0 +1,36 @@
+site_name: pyiron_core
+nav:
+  - Home: index.md
+  - Quick-Start: quickstart.md
+  - User Guide:
+      - Nodes: guide/nodes.md
+      - Workflow: guide/workflow.md
+      - Higher-Order Nodes: guide/closures.md      
+      - GUI: guide/gui.md
+      - Graph Engine: guide/graph.md      
+      - Advanced Concepts: guide/advanced.md
+  - API Reference:
+      - Core: reference/pyiron_core.md
+      - Workflow: reference/pyiron_workflow.md
+  - Examples: examples/
+  - Development: dev.md
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: amber
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          import:
+            - pyiron_core
+          options:
+            show_root_heading: true
+            docstring_style: google
+markdown_extensions:
+  - admonition
+  - pymdownx.superfences
+  - pymdownx.tabbed
