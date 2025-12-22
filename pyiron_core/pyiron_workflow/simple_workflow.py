@@ -1171,11 +1171,30 @@ class Workflow:
             super().__setattr__(label, value)
 
     def _is_node_port(self, node, input_label):
+        """Return ``True`` if the *input_label* of ``node`` expects a ``Node``.
+
+        ``node.inputs`` stores three parallel lists: ``PORT_LABEL``, ``PORT_TYPE``
+        and ``PORT_VALUE``.  The type list describes what kind of object the
+        input expects – for example ``"float"`` or ``"Node"``.  This helper
+        looks up the type for ``input_label`` and returns ``True`` when the type
+        is ``"Node"`` (i.e. the workflow should receive a node object rather
+        than the value of one of its output ports).
+
+        A ``ValueError`` is raised if ``input_label`` is not defined for the
+        node, mirroring the behaviour of other validation helpers in the
+        module.
         """
-        check whether the input port node.inputs.input_label expects a node rather than an output port
-        """
-        print("_is_node_port: ", node.inputs, input_label)
-        return False
+        # Find the index of the requested label in the node's input definition.
+        try:
+            idx = node.inputs.data[PORT_LABEL].index(input_label)
+        except ValueError as exc:
+            raise ValueError(
+                f"Input label '{input_label}' not found for node '{node.label}'."
+            ) from exc
+
+        # Retrieve the corresponding type entry.
+        input_type = node.inputs.data[PORT_TYPE][idx]
+        return input_type == "Node"
 
     def _get_edges(self, node):
         values = node.inputs.data[PORT_VALUE]
@@ -1187,10 +1206,13 @@ class Workflow:
                 target = node.label
                 targetHandle = label
             elif isinstance(value, Node):
-                self._is_node_port(node, label)
+                # print("_is_node_port: ", node.label, label)
+                # print(self._is_node_port(node, label))
                 source_node = value
                 source = source_node.label
-                if source_node.n_out_labels == 1:
+                if self._is_node_port(node, label):
+                    sourceHandle = "self"
+                elif source_node.n_out_labels == 1:
                     sourceHandle = source_node.outputs.data["label"][0]
                 else:
                     raise ValueError(
