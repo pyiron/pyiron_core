@@ -12,6 +12,11 @@ permissions:
 
 jobs:
   build-and-deploy:
+    # THIS IS THE CRITICAL ADDITION - environment declaration
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+      
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -40,12 +45,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-        with:
-          # No additional options needed; defaults deploy to the `gh-pages` branch
-          # and make it the site source.
-          # The action automatically picks up the artifact from the previous step.
-          # Ensure the repository settings have GitHub Pages set to "Deploy from a
-          # GitHub Actions workflow".
-          # This job will fail if the repository does not have Pages enabled.
-          token: ${{ secrets.GITHUB_TOKEN }}
-
