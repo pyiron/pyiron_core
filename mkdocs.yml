@@ -12,7 +12,6 @@ nav:
   - API Reference:
       - Core: reference/pyiron_core.md
       - Workflow: reference/pyiron_workflow.md
-  - Examples: examples/
   - Development: dev.md
 theme:
   name: material
