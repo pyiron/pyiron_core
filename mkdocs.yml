@@ -1,24 +1,39 @@
 site_name: pyiron_core
+site_url: https://pyiron.org/pyiron_core/  # CRITICAL: Must end with trailing slash!
+repo_url: https://github.com/pyiron/pyiron_core
+docs_dir: docs
+use_directory_urls: false  # CRITICAL: Fixes asset path issues for GitHub Pages
+strict: true  # Fail build on broken links
+
 nav:
   - Home: index.md
   - Quick-Start: quickstart.md
   - User Guide:
       - Nodes: guide/nodes.md
       - Workflow: guide/workflow.md
-      - Higher-Order Nodes: guide/closures.md      
+      - Higher-Order Nodes: guide/closures.md
       - GUI: guide/gui.md
-      - Graph Engine: guide/graph.md      
+      - Graph Engine: guide/graph.md
       - Advanced Concepts: guide/advanced.md
   - API Reference:
       - Core: reference/pyiron_core.md
       - Workflow: reference/pyiron_workflow.md
   - Development: dev.md
+
 theme:
   name: material
   palette:
     - scheme: default
       primary: indigo
       accent: amber
+  features:  # CRITICAL: Add these for proper navigation
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - search.suggest
+    - search.highlight
+    - search.share
+
 plugins:
   - search
   - mkdocstrings:
@@ -27,6 +42,7 @@ plugins:
           options:
             show_root_heading: true
             docstring_style: google
+
 markdown_extensions:
   - admonition
   - pymdownx.superfences
