@@ -92,6 +92,7 @@ class PyironFlowWidget:
     def __init__(
         self,
         workflow_path: str,
+        nodes_path: str,
         wf: Optional[Union[simple_workflow.Workflow, base.Graph]] = None,
         gui_layout: GUILayout | None = None,
         main_widget=None,
@@ -132,7 +133,9 @@ class PyironFlowWidget:
 
         self.out_widget = widgets.Output(layout=layout_accordion_widgets)
         self.tree_widget = pyironflow.TreeView(
-            log=self.log_widget, layout=layout_accordion_widgets
+            log=self.log_widget,
+            layout=layout_accordion_widgets,
+            root_path=nodes_path,
         )
         self.tree_widget.flow_widget = self
 
@@ -350,6 +353,7 @@ class PyironFlow:
         gui_layout: GUILayout | None = None,
         db: pyiron_database.PostgreSQLInstanceDatabase | None = None,
         workflow_path: str | pathlib.Path = paths.WORKFLOW_STORAGE,
+        nodes_path: Optional[str | pathlib.Path] = None,
     ):
         gui_layout = GUILayout() if gui_layout is None else gui_layout
 
@@ -369,6 +373,7 @@ class PyironFlow:
             self.db = None
 
         self.gui_layout = gui_layout
+        self.nodes_path = nodes_path
 
         self.wf_widgets = []  # list of PyironFlowWidget objects
         for wf in wf_list:
@@ -381,6 +386,7 @@ class PyironFlow:
                     main_widget=self,
                     db=self.db,
                     workflow_path=workflow_path,
+                    nodes_path=self.nodes_path,
                 )
             )
 
@@ -472,6 +478,7 @@ class PyironFlow:
                         wf=new_wf,
                         gui_layout=self.gui_layout,
                         main_widget=self,
+                        nodes_path=self.nodes_path,
                     )
                 )
 
