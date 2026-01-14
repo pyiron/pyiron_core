@@ -953,8 +953,6 @@ def make_node_decorator(inner_wrap_return_func, node_type="function_node"):
                     print("wrapped: ", func.__wrapped__)
 
                 cf_kwargs = copy.copy(f_kwargs)
-                # Define ALL supported keys for the function (update this list as needed)
-                SUPPORTED_KEYS = ["label"]  # Add all valid keys here
 
                 # Original label handling
                 label = None
