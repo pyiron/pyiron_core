@@ -1,4 +1,4 @@
-from pyiron_core.pyiron_workflow import as_function_node, Node
+from pyiron_core.pyiron_workflow import Node, as_function_node
 
 
 @as_function_node
@@ -8,7 +8,7 @@ def ShellNode(
     stdin: str = "",
     environment: str = "",
     execution_directory: str = "~/.cache/pyiron_core",
-    conda: str = "conda"
+    conda: str = "conda",
 ):
     """Execute a command on the shell.
 
@@ -27,13 +27,13 @@ def ShellNode(
         str: captured stderr
         str: CalledProcessError on error, None otherwise."""
 
-    from pyiron_core.pyiron_database.api import get_hash
-    # from pyiron_core.pyiron_workflow.hash_based_storage import get_node_hash
-    from pathlib import Path
     from contextlib import chdir
     from hashlib import sha256
-    from subprocess import run, CalledProcessError
+    from pathlib import Path
     from shlex import split
+    from subprocess import run, CalledProcessError
+
+    from pyiron_core.pyiron_database.api import get_hash
 
     digest = sha256()
     digest.update(command.encode("utf8"))
@@ -76,6 +76,6 @@ def SingleFileWriter(
     content: str,
 ):
     """Write a single file to the current directory."""
-    with open(name, 'w') as f:
+    with open(name, "w") as f:
         f.write(content)
     return name
