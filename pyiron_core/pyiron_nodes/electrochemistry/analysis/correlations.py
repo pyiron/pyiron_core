@@ -100,19 +100,14 @@ def rotate_water_frame(
     # ------------------------------------------------------------------
     positions = md_output.positions
     # position in species list
-    # ind_H = list(md_output.species).index('H')
     ind_O = list(md_output.species).index("O")
     # all indeces of a given element in a structure/snapshot
-    # ind_hydrogen = np.argwhere(md_output.indices[0] == ind_H)
 
     xy = []
     ind_oxygens = np.argwhere(md_output.indices[0] == ind_O)[0]
     for i, ind_oxygen in enumerate(ind_oxygens):
         ind_hydrogen = [ind_oxygen - 1, ind_oxygen - 2]
         print("ind: ", ind_oxygen, ind_hydrogen)
-        # ind_hydrogen_1 = ind_oxygen + 1
-        # ind_hydrogen_2 = ind_oxygen + 2
-        # ind_hydrogen = np.append(ind_hydrogen_1, ind_hydrogen_2)
         if positions.ndim != 3 or positions.shape[2] != 3:
             raise ValueError(
                 "positions must have shape (n_steps, n_atoms, 3) with xyz as last axis."
@@ -124,9 +119,6 @@ def rotate_water_frame(
         # ------------------------------------------------------------------
         # Build orthogonal cell matrix (used for wrapping)
         # ------------------------------------------------------------------
-        # cell = np.array([a1, a2, a3], dtype=float)  # (3, 3)
-        # if not np.allclose(cell, np.diag(np.diag(cell))):
-        #     raise ValueError("The supplied cell vectors must be orthogonal (diagonal).")
         cell = md_output.cells[0]  # assume constant volume
 
         # ------------------------------------------------------------------
@@ -200,9 +192,7 @@ def rotate_water_frame(
         if i == 0:
             xy = xy_ox
         else:
-            # print("shape: ", np.shape(xy_ox), np.shape(xy))
             xy = np.concatenate((xy, xy_ox), axis=0)
-        # np.append(xy, xy_ox)
 
     # ------------------------------------------------------------------
     # 3️⃣  Determine the histogram range
@@ -219,9 +209,6 @@ def rotate_water_frame(
     x_edges = np.linspace(x_min - pad, x_max + pad, n_bins + 1)
     y_edges = np.linspace(y_min - pad, y_max + pad, n_bins + 1)
 
-    # from matplotlib.pylab import plt
-    # plt.hist2d(xy[:, 0], xy[:, 1], bins=(nbins, nbins))
-    #
     # ------------------------------------------------------------------
     # 4️⃣  Build the 2‑D histogram
     # ------------------------------------------------------------------

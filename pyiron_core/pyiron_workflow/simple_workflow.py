@@ -956,16 +956,6 @@ def make_node_decorator(inner_wrap_return_func, node_type="function_node"):
                 # Define ALL supported keys for the function (update this list as needed)
                 SUPPORTED_KEYS = ["label"]  # Add all valid keys here
 
-                # Check for unsupported keys in f_kwargs (TODO: gives warning for argument free decorators)
-                # for key in list(f_kwargs.keys()):
-                #     if key not in SUPPORTED_KEYS:
-                #         import warnings
-                #         warnings.warn(
-                #             f"Ignoring unsupported keyword argument: '{key}'. "
-                #             f"Supported keys are: {SUPPORTED_KEYS}",
-                #             stacklevel=2
-                #         )
-
                 # Original label handling
                 label = None
                 if "label" in f_kwargs:
@@ -1211,8 +1201,6 @@ class Workflow:
                 target = node.label
                 targetHandle = label
             elif isinstance(value, Node):
-                # print("_is_node_port: ", node.label, label)
-                # print(self._is_node_port(node, label))
                 source_node = value
                 source = source_node.label
                 if self._is_node_port(node, label):

@@ -98,7 +98,6 @@ def Equilibrate(
     out.velocities = job_out["velocities"]
     out.volumes = job_out["volume"]
     out.species = [e.Abbreviation for e in solvated_electrode.species]
-    # solvated_electrode.get_species_symbols()
 
     return out
 
@@ -425,7 +424,6 @@ def Charge_distribution_Ion(Data: dict, initial_structure):
 
     ax.set_ylabel(r"$\rho_\mathrm{e} $ (e/bohr$^3$)")  # \times 10^4
 
-    # fig.tight_layout()
     return fig
 
 
@@ -507,7 +505,6 @@ def Subplot_ion_d(Data: dict, xlabel="x", ylabel="y"):
         ax.set_xlabel(xlabel)
         ax.set_ylabel(ylabel)
         ax.grid(True, alpha=0.3)
-    # fig.tight_layout()
     return fig
 
 
@@ -525,7 +522,6 @@ def PlotIonDensity(Data: dict, xlabel="x", ylabel="y"):
     axes.set_xlabel(xlabel)
     axes.set_ylabel(ylabel)
     axes.grid(True, alpha=0.3)
-    # fig.tight_layout()
     return fig
 
 
@@ -539,7 +535,6 @@ def Subplot_element(Data: dict, element, xlabel="x", ylabel="y"):
     ax.set_title(f"Density of {element}")
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
-    # fig.tight_layout()
     return fig
 
 
