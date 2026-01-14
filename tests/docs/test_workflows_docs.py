@@ -1,14 +1,14 @@
-import numpy as np
 from typing import Literal, Tuple
+
+import numpy as np
 
 from pyiron_core.pyiron_workflow import (
     Workflow,
     as_function_node,
-    as_out_dataclass_node,
     as_inp_dataclass_node,
+    as_out_dataclass_node,
 )
 from pyiron_core.pyiron_workflow.data_fields import DataArray, EmptyArrayField
-
 
 # =============================================================================
 # NODE DEFINITIONS (MUST BE AT MODULE LEVEL, NOT INSIDE TEST FUNCTIONS)
