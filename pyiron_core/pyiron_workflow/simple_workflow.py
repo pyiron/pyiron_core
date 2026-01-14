@@ -745,7 +745,9 @@ class Node:
         elif self.node_type == "graph":
             inputs = self.graph.__getstate__()
         else:
-            assert False, f"Invalid node type {self.node_type} should never be set."
+            raise AssertionError(
+                f"Invalid node type {self.node_type} should never be set."
+            )
         return {
             "label": self.label,
             "function": self.function["import_path"],
