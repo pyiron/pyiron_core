@@ -531,7 +531,7 @@ def Tip3pData(
         f.write("kspace_style pppm 1e-4\n\n")
         f.write("read_data tip3p.data\n\n")
         for t, (eps, sig) in lj_params.items():
-            for t2, (eps2, sig2) in lj_params.items():
+            for t2, (_, _) in lj_params.items():
                 f.write(f"pair_coeff {t} {t2} {eps} {sig}\n")
         f.write("neighbor 2.0 bin\n")
         f.write("neigh_modify delay 0 every 1 check yes\n\n")
