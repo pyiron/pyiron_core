@@ -31,7 +31,8 @@ def ShellNode(
     from hashlib import sha256
     from pathlib import Path
     from shlex import split
-    from subprocess import run, CalledProcessError
+    from subprocess import CalledProcessError, run
+
     from pyiron_core.pyiron_database.api import get_hash
 
     digest = sha256()
