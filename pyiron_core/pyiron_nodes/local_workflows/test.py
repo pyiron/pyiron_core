@@ -8,9 +8,9 @@ def BulkStaticEnergy(name: str, a: float = None, store: bool = True, _db=None) -
     wf = Workflow("subgraph")
 
     wf.Bulk = pyiron_nodes.atomistic.structure.build.Bulk(name=name, a=a)
-    wf.M3GNet = pyiron_nodes.atomistic.engine.ase.M3GNet()
+    wf.GRACE = pyiron_nodes.atomistic.engine.ase.GRACE()
     wf.Static = pyiron_nodes.atomistic.calculator.ase.Static(
-        structure=wf.Bulk, engine=wf.M3GNet
+        structure=wf.Bulk, engine=wf.GRACE
     )
     wf.GetEnergyLast = pyiron_nodes.atomistic.calculator.output.GetEnergyLast(
         calculator=wf.Static
@@ -28,9 +28,9 @@ def BulkStaticEnergyF(name: str, a: float = None, store: bool = True, _db=None):
     wf = Workflow("subgraph")
 
     wf.Bulk = pyiron_nodes.atomistic.structure.build.Bulk(name=name, a=a)
-    wf.M3GNet = pyiron_nodes.atomistic.engine.ase.M3GNet()
+    wf.GRACE = pyiron_nodes.atomistic.engine.ase.GRACE()
     wf.Static = pyiron_nodes.atomistic.calculator.ase.Static(
-        structure=wf.Bulk, engine=wf.M3GNet
+        structure=wf.Bulk, engine=wf.GRACE
     )
     wf.GetEnergyLast = pyiron_nodes.atomistic.calculator.output.GetEnergyLast(
         calculator=wf.Static

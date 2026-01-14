@@ -32,7 +32,7 @@ To use this module, simply import it and access the various functions and tools 
 
     wf = Workflow("compute_elastic_constants")
 
-    wf.engine = pyiron_nodes.atomistic.engine.ase.M3GNet()
+    wf.engine = pyiron_nodes.atomistic.engine.ase.GRACE()
     wf.input_elastic = pyiron_nodes.atomistic.property.elastic.InputElasticTensor()
     wf.bulk = pyiron_nodes.atomistic.structure.build.Bulk(name=Pb, cubic=True)
     wf.elastic = pyiron_nodes.atomistic.property.elastic.ElasticConstants(
