@@ -759,6 +759,10 @@ class Node:
         self.__dict__.update(new_instance.__dict__)
         return new_instance
 
+    @property
+    def __name__(self):
+        return self.label
+
     @classmethod
     def from_dict(cls, node_dict):
         node = get_node_from_path(node_dict["function"])(**node_dict["inputs"])

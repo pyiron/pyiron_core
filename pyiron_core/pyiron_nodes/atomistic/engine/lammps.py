@@ -312,8 +312,6 @@ class ShellOutput:
     stdout: str = ""
     stderr: str = ""
     return_code: int = 0
-    dump: FileObject = FileObject()  # TODO: should be done in a specific lammps object
-    log: FileObject = FileObject()
 
 
 @as_function_node("output", "dump", "log")

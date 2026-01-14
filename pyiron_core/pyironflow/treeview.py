@@ -51,6 +51,7 @@ class TreeView:
                 if log:
                     log.append_stdout(f"Failed to import pyiron_nodes: {e}\n")
                 raise
+
             root_path = Path(pyiron_nodes.__path__[0])
             self.node_path = "pyiron_core"
         elif isinstance(root_path, (str, Path)):
