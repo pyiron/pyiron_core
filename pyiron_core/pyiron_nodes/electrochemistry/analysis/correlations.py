@@ -89,7 +89,7 @@ def rotate_water_frame(
     eps: float = 0.1,
     xy_max: Optional[float] = 5,
     as_log: bool = True,
-    n_bins: int = 100
+    n_bins: int = 100,
 ):
     """
     Rotate every MD frame so that the bisector of the two O‑H bonds points
@@ -101,11 +101,11 @@ def rotate_water_frame(
     # ------------------------------------------------------------------
     positions = md_output.positions
     # position in species list
-    # ind_H = list(md_output.species).index('H')  
-    ind_O = list(md_output.species).index('O')
+    # ind_H = list(md_output.species).index('H')
+    ind_O = list(md_output.species).index("O")
     # all indeces of a given element in a structure/snapshot
     # ind_hydrogen = np.argwhere(md_output.indices[0] == ind_H)
-    
+
     xy = []
     ind_oxygens = np.argwhere(md_output.indices[0] == ind_O)[0]
     for i, ind_oxygen in enumerate(ind_oxygens):
@@ -196,15 +196,14 @@ def rotate_water_frame(
             # 9) Apply rotation to *all* atoms (including O at origin)
             rotated[t] = rel @ R.T  # transpose because we want column vectors rotated
 
-        mat = rotated.reshape(-1, 3) 
+        mat = rotated.reshape(-1, 3)
         xy_ox = mat[np.abs(mat[:, 2]) < eps]
-        if i==0:
+        if i == 0:
             xy = xy_ox
-        else:    
+        else:
             # print("shape: ", np.shape(xy_ox), np.shape(xy))
             xy = np.concatenate((xy, xy_ox), axis=0)
-        # np.append(xy, xy_ox) 
-
+        # np.append(xy, xy_ox)
 
     # ------------------------------------------------------------------
     # 3️⃣  Determine the histogram range
@@ -222,16 +221,14 @@ def rotate_water_frame(
     y_edges = np.linspace(y_min - pad, y_max + pad, n_bins + 1)
 
     # from matplotlib.pylab import plt
-    # plt.hist2d(xy[:, 0], xy[:, 1], bins=(nbins, nbins))    
-    #   
+    # plt.hist2d(xy[:, 0], xy[:, 1], bins=(nbins, nbins))
+    #
     # ------------------------------------------------------------------
     # 4️⃣  Build the 2‑D histogram
     # ------------------------------------------------------------------
-    hist, x_edges, y_edges = np.histogram2d(
-        xy[:, 0], xy[:, 1], bins=[x_edges, y_edges]
-    )
+    hist, x_edges, y_edges = np.histogram2d(xy[:, 0], xy[:, 1], bins=[x_edges, y_edges])
 
-    print('edges: ', x_edges)
+    print("edges: ", x_edges)
     hist = hist.T
     if as_log:
         hist = np.log(hist + 1)

@@ -273,7 +273,9 @@ def compute_water_bonds_indices(
         neighbor_dists = neigh_obj.distances[o]
 
         h_neighbors = [
-            int(idx) for idx, d in zip(neighbor_ids, neighbor_dists) if (d < cutoff) and (idx in h_idxs)
+            int(idx)
+            for idx, d in zip(neighbor_ids, neighbor_dists)
+            if (d < cutoff) and (idx in h_idxs)
         ]
 
         for h in h_neighbors:

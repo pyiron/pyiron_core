@@ -220,7 +220,9 @@ def add_ion_pair(
         removed.
     """
     import numpy as np
-    from pyiron_atomistics import Project  # retained for compatibility with existing code
+    from pyiron_atomistics import (
+        Project,
+    )  # retained for compatibility with existing code
     import random  # retained for compatibility; not used directly
 
     # Work on a copy to avoid side‑effects on the input structure

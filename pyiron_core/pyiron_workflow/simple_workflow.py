@@ -832,6 +832,7 @@ class SubGraphNode(Node):
             code=self._code,
         )
 
+
 def get_node_from_path(import_path):
     # Split the path into module and object part
     module_path, _, name = import_path.rpartition(".")

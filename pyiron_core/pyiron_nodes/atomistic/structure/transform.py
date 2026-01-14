@@ -162,7 +162,7 @@ def FixSpecies(
     # ------------------------------------------------------------------
     # 1️⃣ Normalise ``fixed_species`` to a *set* of element symbols.
     # ------------------------------------------------------------------
-    species_set: Set[str] = set()          # default → nothing to fix
+    species_set: Set[str] = set()  # default → nothing to fix
 
     if fixed_species is not None:
         # ``fixed_species`` is a string.  It may be a plain symbol
@@ -199,7 +199,7 @@ def FixSpecies(
     #    but we skip adding the constraint for a cleaner object.
     # ------------------------------------------------------------------
     new_structure = structure.copy()
-    if any(mask):                                   # at least one atom should be fixed
+    if any(mask):  # at least one atom should be fixed
         new_structure.set_constraint(FixAtoms(mask=mask))
 
     # ------------------------------------------------------------------
