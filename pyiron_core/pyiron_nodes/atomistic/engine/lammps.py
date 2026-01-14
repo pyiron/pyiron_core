@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict
-from typing import Optional, List, Tuple
+from typing import List, Optional, Tuple
 
 # if TYPE_CHECKING:
 from ase import Atoms
@@ -274,7 +274,7 @@ def compute_water_bonds_indices(
 
         h_neighbors = [
             int(idx)
-            for idx, d in zip(neighbor_ids, neighbor_dists)
+            for idx, d in zip(neighbor_ids, neighbor_dists, strict=False)
             if (d < cutoff) and (idx in h_idxs)
         ]
 
@@ -429,8 +429,8 @@ def Tip3pData(
     the data file as a ``FileObject``.
     """
     import os
+
     import numpy as np
-    from pyiron_core.pyiron_nodes.dev_tools import FileObject
 
     os.makedirs(working_directory, exist_ok=True)
 
@@ -731,7 +731,6 @@ def ParseOutput(working_directory, structure, potential, units="metal"):
 
 
 # helper functions (move later to separate library)
-from ase import Atoms
 
 
 def compute_water_bonds_and_angles(
@@ -773,7 +772,9 @@ def compute_water_bonds_and_angles(
         neighbor_dists = neigh_obj.distances[o]
 
         h_neighbors = [
-            int(idx) for idx, d in zip(neighbor_ids, neighbor_dists) if d < cutoff
+            int(idx)
+            for idx, d in zip(neighbor_ids, neighbor_dists, strict=False)
+            if d < cutoff
         ]
 
         for h in h_neighbors:
@@ -1035,7 +1036,7 @@ def write_lammps_data_full(
 
         molecules = np.ones(len(atoms), dtype=int)  # default molecule IDs
         pos = convert(pos, "distance", "ASE", units)
-        for i, (m, q, r) in enumerate(zip(molecules, charges_array, pos)):
+        for i, (m, q, r) in enumerate(zip(molecules, charges_array, pos, strict=False)):
             s = species.index(symbols[i]) + 1
             # print('charge: ', i, s, q, f"{q:>9.6f}")
             fd.write(

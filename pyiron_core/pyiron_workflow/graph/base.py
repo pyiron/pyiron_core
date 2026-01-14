@@ -39,8 +39,8 @@ from pyiron_core.pyiron_workflow.graph.labelling import (
 from pyiron_core.pyiron_workflow.simple_workflow import (
     Data,
     Node,
-    SubGraphNode,
     Port,
+    SubGraphNode,
     Workflow,
     identity,
 )

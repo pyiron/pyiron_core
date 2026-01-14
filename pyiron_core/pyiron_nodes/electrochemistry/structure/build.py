@@ -1,6 +1,6 @@
 import ase.units as units
-
 from ase.atoms import Atoms
+
 from pyiron_core.pyiron_workflow import as_function_node
 
 
@@ -219,11 +219,8 @@ def add_ion_pair(
         The modified structure with ion pairs inserted and neighbouring atoms
         removed.
     """
+
     import numpy as np
-    from pyiron_atomistics import (
-        Project,
-    )  # retained for compatibility with existing code
-    import random  # retained for compatibility; not used directly
 
     # Work on a copy to avoid side‑effects on the input structure
     electrolyte = structure.copy()

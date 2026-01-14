@@ -2,6 +2,7 @@ import ast
 import importlib
 from dataclasses import dataclass
 from pathlib import Path
+
 from ipytree import Node, Tree
 
 __author__ = "Joerg Neugebauer"

@@ -8,16 +8,14 @@ the original paths for the `__module__` of imported objects.
 
 import functools
 
-from pyiron_core.pyiron_workflow.graph.graph_json import _uncompact_graph_from_state
-from pyiron_core.pyiron_workflow.graph.base import graph_to_node
-
-
 from pyiron_core.pyiron_workflow.graph.base import (
     GraphEdge as _GraphEdge,
 )
 from pyiron_core.pyiron_workflow.graph.base import (
     GraphNode as _GraphNode,
 )
+from pyiron_core.pyiron_workflow.graph.base import graph_to_node
+from pyiron_core.pyiron_workflow.graph.graph_json import _uncompact_graph_from_state
 from pyiron_core.pyiron_workflow.simple_workflow import identity as _identity
 
 

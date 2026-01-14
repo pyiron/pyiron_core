@@ -6,6 +6,7 @@ import pathlib
 import threading
 import time
 import warnings
+from dataclasses import dataclass
 from typing import Optional, Union
 
 import ipywidgets as widgets
@@ -27,7 +28,6 @@ from pyiron_core.pyiron_workflow.graph import (
     labelling,
     run,
 )
-from dataclasses import dataclass
 
 
 @dataclass

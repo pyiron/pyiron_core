@@ -1,7 +1,7 @@
-from typing import Literal, List
+from ase.atoms import Atoms
+
 from pyiron_core import as_function_node
 from pyiron_core.pyiron_nodes.atomistic.calculator.data import OutputCalcMD
-from ase.atoms import Atoms
 
 
 @as_function_node

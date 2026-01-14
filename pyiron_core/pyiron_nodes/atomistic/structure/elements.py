@@ -1,4 +1,5 @@
-from typing import Literal, List
+from typing import List, Literal
+
 from pyiron_core.pyiron_workflow import as_function_node
 
 

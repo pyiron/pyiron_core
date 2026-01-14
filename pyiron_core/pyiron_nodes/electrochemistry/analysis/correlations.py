@@ -1,10 +1,9 @@
-from typing import Sequence, Optional
+from typing import Optional
+
 import numpy as np
 
-from ase.atoms import Atoms
-from pyiron_core.pyiron_workflow import as_function_node
 from pyiron_core.pyiron_nodes.atomistic.calculator.data import OutputCalcMD
-
+from pyiron_core.pyiron_workflow import as_function_node
 
 """
 rotate_water.py

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional, Union, List, Iterable, Set
+from typing import List, Optional, Set, Union
 
 from ase import Atoms
 
@@ -157,6 +157,7 @@ def FixSpecies(
         attached (or the unchanged copy if *fixed_species* is ``None``).
     """
     import ast
+
     from ase.constraints import FixAtoms
 
     # ------------------------------------------------------------------

@@ -1,8 +1,10 @@
+from typing import Literal
+
+import pandas as pd
+from matplotlib.figure import Figure
+
 from pyiron_core.pyiron_nodes.atomistic.calculator.data import InputCalcMD, OutputCalcMD
 from pyiron_core.pyiron_workflow import as_function_node
-import pandas as pd
-from typing import Literal
-from matplotlib.figure import Figure
 
 ANION = "F"
 
@@ -56,6 +58,7 @@ def Equilibrate(
     parameters = InputCalcMD().run() if parameters is None else parameters
 
     from dataclasses import asdict
+
     from pyiron_atomistics import Project
 
     # Create a job for LAMMPS equilibration
@@ -329,13 +332,13 @@ def element_density(trajectory, initial_structure, initial_step: int = 0):
     slab_bot = np.max(electrolyte.positions[ind_Al, 2])
     slab_top = np.max(electrolyte.positions[ind_Ne, 2])
 
-    from pyiron_atomistics.atomistics.job.atomistic import Trajectory
-
     positions = trajectory.positions[initial_step:]
 
     Data = {}
 
-    for element, ind_el in zip(["Na", "F", "O", "H"], [ind_Na, ind_F, ind_O, ind_H]):
+    for element, ind_el in zip(
+        ["Na", "F", "O", "H"], [ind_Na, ind_F, ind_O, ind_H], strict=False
+    ):
         Data[element] = []
 
         z_el = np.array([snapshot[ind_el, 2] for snapshot in positions])
@@ -375,13 +378,13 @@ def Ion_density(trajectory, initial_structure):
     slab_bot = np.max(electrolyte.positions[ind_Al, 2])
     slab_top = np.max(electrolyte.positions[ind_Ne, 2])
 
-    from pyiron_atomistics.atomistics.job.atomistic import Trajectory
-
     positions = trajectory.positions
 
     Data = {}
 
-    for element, ind_el in zip(["Na", "F", "O", "H"], [ind_Na, ind_F, ind_O, ind_H]):
+    for element, ind_el in zip(
+        ["Na", "F", "O", "H"], [ind_Na, ind_F, ind_O, ind_H], strict=False
+    ):
         Data[element] = []
 
         z_el = np.array([snapshot[ind_el, 2] for snapshot in positions])
@@ -397,9 +400,9 @@ def Ion_density(trajectory, initial_structure):
 @as_function_node("Charge_distribution_Ion")
 def Charge_distribution_Ion(Data: dict, initial_structure):
 
-    from matplotlib import pyplot as plt
     import numpy as np
     from ase.units import Bohr
+    from matplotlib import pyplot as plt
 
     def get_volume(deltares):
         V = (
@@ -409,8 +412,6 @@ def Charge_distribution_Ion(Data: dict, initial_structure):
             * (1 / Bohr) ** 3
         )
         return V
-
-    from matplotlib import pyplot as plt
 
     Sum = np.array(Data["Na"][1]) - np.array(Data["F"][1])
     z = np.array(Data["Na"][0])
@@ -430,9 +431,9 @@ def Charge_distribution_Ion(Data: dict, initial_structure):
 
 @as_function_node("EPD")
 def EPD(Data: dict, initial_structure):
-    from matplotlib import pyplot as plt
     import numpy as np
     from ase.units import Bohr
+    from matplotlib import pyplot as plt
 
     fig, axs = plt.subplots(
         4, 1, figsize=(3.25, 2 * 4)
@@ -491,14 +492,14 @@ def EPD(Data: dict, initial_structure):
 
 @as_function_node("Suplot_ion")
 def Subplot_ion_d(Data: dict, xlabel="x", ylabel="y"):
-    from matplotlib import pyplot as plt
     import numpy as np
+    from matplotlib import pyplot as plt
 
     species = [s for s in ["Na", "F"] if s in Data] or list(Data.keys())
     fig, axes = plt.subplots(1, len(species), figsize=(5 * len(species), 3))
     if not isinstance(axes, np.ndarray):
         axes = np.array([axes])
-    for ax, sp in zip(axes, species):
+    for ax, sp in zip(axes, species, strict=False):
         x, y = Data[sp]
         print(sp, x, y)
         ax.plot(x, y)
@@ -513,7 +514,6 @@ def Subplot_ion_d(Data: dict, xlabel="x", ylabel="y"):
 @as_function_node("Suplot_ion")
 def PlotIonDensity(Data: dict, xlabel="x", ylabel="y"):
     from matplotlib import pyplot as plt
-    import numpy as np
 
     species = [s for s in ["Na", "F"] if s in Data] or list(Data.keys())
     fig, axes = plt.subplots(1, 1, figsize=(5, 3))
@@ -532,7 +532,6 @@ def PlotIonDensity(Data: dict, xlabel="x", ylabel="y"):
 @as_function_node("Suplot_element")
 def Subplot_element(Data: dict, element, xlabel="x", ylabel="y"):
     from matplotlib import pyplot as plt
-    import numpy as np
 
     x, y = Data[element]
     fig, ax = plt.subplots(1, 1, figsize=(3.25, 2))
@@ -574,9 +573,9 @@ def PlotTrajectory(
     # Imports – kept inside the node so that the node can be imported without
     # pulling heavy optional dependencies.
     # ------------------------------------------------------------------
-    from matplotlib import pyplot as plt
+
     import numpy as np
-    import warnings
+    from matplotlib import pyplot as plt
 
     # ------------------------------------------------------------------
     # Parse the ``species`` argument – allow a space separated list.
