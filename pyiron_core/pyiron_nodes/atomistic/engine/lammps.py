@@ -769,7 +769,7 @@ def compute_water_bonds_and_angles(
         h_neighbors = [
             int(idx)
             for idx, d in zip(neighbor_ids, neighbor_dists, strict=False)
-            if d < cutoff
+            if d < cutoff and idx in h_idxs
         ]
 
         for h in h_neighbors:
