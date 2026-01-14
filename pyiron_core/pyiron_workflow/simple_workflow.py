@@ -740,7 +740,13 @@ class Node:
         }
 
     def __getstate__(self):
-        if self.node_type in ("node", "function_node", "inp_dataclass_node"):
+        if self.node_type in (
+            "node",
+            "function_node",
+            "macro_node",
+            "inp_dataclass_node",
+            "out_dataclass_node",
+        ):
             inputs = self._get_non_default_input()
         elif self.node_type == "graph":
             inputs = self.graph.__getstate__()
