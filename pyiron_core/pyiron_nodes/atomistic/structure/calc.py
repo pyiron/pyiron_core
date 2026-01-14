@@ -19,7 +19,7 @@ def Volume(structure: Optional[Atoms] = None, per_atom: bool = False) -> float:
 @as_function_node
 def NumberOfAtoms(structure: Optional[Atoms] = None) -> int:
     number_of_atoms = structure.get_number_of_atoms()
-    return number_of_atoms()
+    return number_of_atoms
 
 
 @as_function_node
@@ -148,6 +148,18 @@ def GetNeighbors(
     )
 
     return neighbors
+
+
+@as_function_node
+def SelectedIndex(structure: Atoms, index: str):
+    indices = structure.select_index(index)
+    return indices
+
+
+@as_function_node
+def GetChemicalSpecies(structure: Atoms):
+    species = structure.get_chemical_symbols()
+    return species
 
 
 @as_macro_node(

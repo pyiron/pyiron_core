@@ -11,6 +11,7 @@ import functools
 import importlib
 import inspect
 import logging
+from pydoc import locate
 from typing import Any, Literal, TypeAlias, Union, get_args, get_origin, get_type_hints
 
 import pandas as pd
@@ -395,14 +396,15 @@ class DataElement:
         return [Connection(upstream_node, upstream_port_label)]
 
     def type_hint(self, v):
-
         if isinstance(self.type, str):
             if self.type == "builtins.NoneType":
                 # let the deserializer handle NoneType
                 return v
             if self.type.endswith(NODE_CLASS_NAME_POSTFIX):
                 my_type = self.type.replace(NODE_CLASS_NAME_POSTFIX, "")
-                return eval(my_type)().dataclass(**v["__getstate__"])
+
+                Cls = locate(my_type)
+                return Cls().dataclass(**v["__getstate__"])
             return eval(self.type)(v)
         return self.type(v)
 
@@ -513,6 +515,7 @@ class Node:
         )
 
         self._func = func
+
         self._workflow = None
         self._graph_node = _graph_node  # link to parent graph node
 
@@ -549,7 +552,9 @@ class Node:
                 f"Node creator: Output labels must be unique: {self.outputs.data[PORT_LABEL]}"
             )
         if None in self.outputs.data[PORT_LABEL]:
-            raise ValueError("Node creator: Output labels must be given")
+            raise ValueError(
+                f"Node creator: Output labels must be given ({self.outputs.data[PORT_LABEL]})"
+            )
 
     @property
     def kwargs(self):
@@ -735,10 +740,16 @@ class Node:
         }
 
     def __getstate__(self):
+        if self.node_type in ("node", "function_node", "inp_dataclass_node"):
+            inputs = self._get_non_default_input()
+        elif self.node_type == "graph":
+            inputs = self.graph.__getstate__()
+        else:
+            assert False, f"Invalid node type {self.node_type} should never be set."
         return {
             "label": self.label,
             "function": self.function["import_path"],
-            "inputs": self._get_non_default_input(),
+            "inputs": inputs,
         }
 
     # @classmethod
@@ -771,7 +782,7 @@ class Node:
             },
             attribute=Port,
         )
-        return Node(
+        return type(self)(
             func=self._func,
             inputs=inp_copy,
             outputs=self.outputs,
@@ -782,6 +793,44 @@ class Node:
             _graph_node=self._graph_node,
         )
 
+
+class SubGraphNode(Node):
+    """Node that contains a subgraph, ie. multiple other nodes that have been grouped in UI."""
+
+    def __init__(self, *args, graph, code, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.graph = graph
+        self._code = code
+
+    def _get_non_default_input(self):
+        return self.graph.__getstate__()
+
+    def copy(self):
+        # make a deep copy of the inputs
+        # only values need to be copied, all other node input attributes are immutable
+        inp_val_copy = list(self.inputs.data[PORT_VALUE])
+        inp_copy = Data(
+            {
+                PORT_LABEL: self.inputs.data[PORT_LABEL],
+                PORT_TYPE: self.inputs.data[PORT_TYPE],
+                PORT_DEFAULT: self.inputs.data[PORT_DEFAULT],
+                PORT_VALUE: inp_val_copy,
+                "ready": self.inputs.data["ready"],
+            },
+            attribute=Port,
+        )
+        return type(self)(
+            func=self._func,
+            inputs=inp_copy,
+            outputs=self.outputs,
+            label=self.label,
+            output_labels=None,
+            node_type=self.node_type,
+            orig_func=self._func,
+            _graph_node=self._graph_node,
+            graph=self.graph,
+            code=self._code,
+        )
 
 def get_node_from_path(import_path):
     # Split the path into module and object part
@@ -903,6 +952,20 @@ def make_node_decorator(inner_wrap_return_func, node_type="function_node"):
                     print("wrapped: ", func.__wrapped__)
 
                 cf_kwargs = copy.copy(f_kwargs)
+                # Define ALL supported keys for the function (update this list as needed)
+                SUPPORTED_KEYS = ["label"]  # Add all valid keys here
+
+                # Check for unsupported keys in f_kwargs (TODO: gives warning for argument free decorators)
+                # for key in list(f_kwargs.keys()):
+                #     if key not in SUPPORTED_KEYS:
+                #         import warnings
+                #         warnings.warn(
+                #             f"Ignoring unsupported keyword argument: '{key}'. "
+                #             f"Supported keys are: {SUPPORTED_KEYS}",
+                #             stacklevel=2
+                #         )
+
+                # Original label handling
                 label = None
                 if "label" in f_kwargs:
                     label = f_kwargs["label"]
@@ -1111,6 +1174,32 @@ class Workflow:
             self.add_node(label=label, node=value)
             super().__setattr__(label, value)
 
+    def _is_node_port(self, node, input_label):
+        """Return ``True`` if the *input_label* of ``node`` expects a ``Node``.
+
+        ``node.inputs`` stores three parallel lists: ``PORT_LABEL``, ``PORT_TYPE``
+        and ``PORT_VALUE``.  The type list describes what kind of object the
+        input expects – for example ``"float"`` or ``"Node"``.  This helper
+        looks up the type for ``input_label`` and returns ``True`` when the type
+        is ``"Node"`` (i.e. the workflow should receive a node object rather
+        than the value of one of its output ports).
+
+        A ``ValueError`` is raised if ``input_label`` is not defined for the
+        node, mirroring the behaviour of other validation helpers in the
+        module.
+        """
+        # Find the index of the requested label in the node's input definition.
+        try:
+            idx = node.inputs.data[PORT_LABEL].index(input_label)
+        except ValueError as exc:
+            raise ValueError(
+                f"Input label '{input_label}' not found for node '{node.label}'."
+            ) from exc
+
+        # Retrieve the corresponding type entry.
+        input_type = node.inputs.data[PORT_TYPE][idx]
+        return input_type == "Node"
+
     def _get_edges(self, node):
         values = node.inputs.data[PORT_VALUE]
         labels = node.inputs.data[PORT_LABEL]
@@ -1121,9 +1210,13 @@ class Workflow:
                 target = node.label
                 targetHandle = label
             elif isinstance(value, Node):
+                # print("_is_node_port: ", node.label, label)
+                # print(self._is_node_port(node, label))
                 source_node = value
                 source = source_node.label
-                if source_node.n_out_labels == 1:
+                if self._is_node_port(node, label):
+                    sourceHandle = "self"
+                elif source_node.n_out_labels == 1:
                     sourceHandle = source_node.outputs.data["label"][0]
                 else:
                     raise ValueError(

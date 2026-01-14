@@ -110,11 +110,11 @@ def DisplayGraphAsJson(graph: Graph):
     return graph_json
 
 
-@as_function_node
-def OptimizeGraphConnections(graph: Graph):
-    raise NotImplementedError(
-        "pyiron_core.pyiron_workflow.graph.base._optimize_graph_connections did not exist at time of refactoring"
-    )
+# @as_function_node
+# def OptimizeGraphConnections(graph: Graph):
+#     raise NotImplementedError(
+#         "pyiron_core.pyiron_workflow.graph.base._optimize_graph_connections did not exist at time of refactoring"
+#     )
 
 
 @as_function_node
@@ -132,11 +132,11 @@ def MarkNodeAsExpanded(graph: Graph, node_label: str, expanded: Optional[bool] =
     return graph
 
 
-@as_function_node
-def GetGraphFromMacro(macro_node):
-    raise NotImplementedError(
-        "pyiron_core.pyiron_workflow.graph.base._get_graph_from_macro did not exist at time of refactoring"
-    )
+# @as_function_node
+# def GetGraphFromMacro(macro_node):
+#     raise NotImplementedError(
+#         "pyiron_core.pyiron_workflow.graph.base._get_graph_from_macro did not exist at time of refactoring"
+#     )
 
 
 @as_function_node

@@ -5,7 +5,7 @@ from pyiron_core.pyiron_workflow import Node, as_function_node
 def SingleNodeExecutor(max_workers: int = 1):
     from executorlib import SingleNodeExecutor as Executor
 
-    return Executor(max_workers=max_workers)
+    return Executor(max_workers=int(max_workers))
 
 
 @as_function_node("Executor")

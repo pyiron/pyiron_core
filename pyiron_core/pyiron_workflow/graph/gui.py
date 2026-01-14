@@ -27,16 +27,47 @@ from pyiron_core.pyiron_workflow.graph import (
     labelling,
     run,
 )
+from dataclasses import dataclass
 
 
+@dataclass
 class GUILayout:
-    flow_widget_width = 1200
-    flow_widget_height = 800
-    output_widget_width = 400
+    flow_widget_width: int = 1200
+    flow_widget_height: int = 800
+    output_widget_width: int = 400
+
+
+def get_current_username() -> str:
+    """
+    Return the name of the user that runs the current Python process.
+
+    Tries, in order:
+      1. getpass.getuser()   – reliable, works on Windows & Unix.
+      2. os.getlogin()       – may raise OSError in headless contexts.
+      3. pathlib.Path.home().name – fallback to the home‑directory name.
+    """
+    import getpass
+    import os
+    from pathlib import Path
+
+    # 1️⃣ Preferred, never raises
+    try:
+        return getpass.getuser()
+    except Exception:
+        pass
+
+    # 2️⃣ May raise on systems without a controlling terminal
+    try:
+        return os.getlogin()
+    except Exception:
+        pass
+
+    # 3️⃣ Last resort – the folder name of the home directory
+    return Path.home().name
 
 
 def create_db(
-    user: str = "joerg",
+    user: str = get_current_username(),
     password: str = "none",
     host: str = "localhost",
     port: int = 5432,
@@ -60,9 +91,9 @@ Connect graph with ReactflowWidget and other GUI elements for interactive graph/
 """
 
 
-### ADDED FOR CUSTOM FEATURES
 def rename_node(graph: base.Graph, old_label: str, new_label: str):
     """Rename node in graph and update edges that reference it"""
+    # print("rename node", old_label, new_label)
     new_graph = base.copy_graph(graph)
     if old_label not in new_graph.nodes:
         return new_graph
@@ -71,8 +102,15 @@ def rename_node(graph: base.Graph, old_label: str, new_label: str):
     node_obj.label = new_label
     node_obj.id = new_label
     node_obj.node.label = new_label
+
+    if node_obj.graph is not None:
+        print(
+            "rename node: ", node_obj.label, node_obj.graph.label, old_label, new_label
+        )
+        new_child_graph = rename_graph(node_obj.graph, old_label, new_label)
+        node_obj.graph = new_child_graph
     new_graph.nodes[new_label] = node_obj
-    # handle macro nodes
+
     for node in new_graph.nodes.values():
         if node.parent_id == old_label:
             node.parent_id = new_label
@@ -85,7 +123,14 @@ def rename_node(graph: base.Graph, old_label: str, new_label: str):
     return new_graph
 
 
-### END ADD
+def rename_graph(graph: base.Graph, old_label: str, new_label: str):
+    print("rename graph", old_label, new_label)
+    new_graph = base.copy_graph(graph)
+    new_graph.label = new_label
+    new_graph.id = new_label
+    for node in new_graph.nodes.values():
+        node.parent_id = new_label
+    return new_graph
 
 
 class PyironFlowWidget:
@@ -245,6 +290,9 @@ class PyironFlowWidget:
                     self.graph = base.remove_node(self.graph, node_name)
                     self.update_gui()
                 elif command == "delete_edge":
+                    # Delete an edge and make sure the UI reflects the change.
+                    # ``base.remove_edge`` resets the target port to its default
+                    # value, but the frontend must be refreshed explicitly.
                     print("delete_edge: ", node_name)
                     edge = self._parse_edge_string(node_name)
                     self.graph = base.remove_edge(self.graph, edge)

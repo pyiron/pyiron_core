@@ -5,13 +5,13 @@ from pyiron_core.pyiron_workflow import as_macro_node
 
 @as_macro_node("chemical_potential")
 def GetChemicalPotential(
-    wf,
     element: str,
     engine=None,
 ):
-
+    from pyiron_core import Workflow
     import pyiron_core.pyiron_nodes.atomistic as atomistic
 
+    wf = Workflow("GetChemicalPotential")
     wf.bulk = atomistic.structure.build.Bulk(name=element)
     wf.minimize = atomistic.calculator.ase.Minimize(
         structure=wf.bulk, engine=engine
