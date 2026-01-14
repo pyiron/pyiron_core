@@ -365,6 +365,8 @@ def Ion_density(trajectory, initial_structure):
     Returns
 
     """
+    import numpy as np
+
     electrolyte = initial_structure.copy()
 
     ind_O = electrolyte.select_index("O")
