@@ -400,7 +400,6 @@ def Ion_density(trajectory, initial_structure):
 def Charge_distribution_Ion(Data: dict, initial_structure):
 
     import numpy as np
-    from ase.units import Bohr
     from matplotlib import pyplot as plt
 
     Sum = np.array(Data["Na"][1]) - np.array(Data["F"][1])
