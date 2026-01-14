@@ -433,9 +433,7 @@ def EPD(Data: dict, initial_structure):
     from ase.units import Bohr
     from matplotlib import pyplot as plt
 
-    fig, axs = plt.subplots(
-        4, 1, figsize=(3.25, 2 * 4)
-    )  # , sharex=True)#, sharex=True, sharey=True)
+    fig, axs = plt.subplots(4, 1, figsize=(3.25, 2 * 4))
     fig.subplots_adjust(hspace=0.15)  # , wspace=0.5)
     fig.subplots_adjust(hspace=0.3 / (2 / 3.25), wspace=0.3)
 
