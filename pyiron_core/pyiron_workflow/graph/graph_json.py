@@ -57,6 +57,11 @@ def _uncompact_graph_from_state(state: dict):
     for k, node_state in state["nodes"].items():
         if isinstance(node_state, dict):
             graph_node = base.GraphNode().__setstate__(node_state)
+            # remove unconnected virtual nodes (which do not have parent_id)
+            # this is only a fix, address it in save json
+            if "va_" in graph_node.label and graph_node.parent_id is None:
+                continue
+
             if (graph_node.node is None) and (graph_node.import_path is not None):
                 node = simple_workflow.Node().__setstate__(node_state["node"])
                 graph = base.add_node(graph, node, label=node.label)

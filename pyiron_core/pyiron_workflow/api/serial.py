@@ -14,6 +14,8 @@ from pyiron_core.pyiron_workflow.graph.base import (
 from pyiron_core.pyiron_workflow.graph.base import (
     GraphNode as _GraphNode,
 )
+from pyiron_core.pyiron_workflow.graph.base import graph_to_node
+from pyiron_core.pyiron_workflow.graph.graph_json import _uncompact_graph_from_state
 from pyiron_core.pyiron_workflow.simple_workflow import identity as _identity
 
 
@@ -43,14 +45,6 @@ def func_dataclass():
     )
 
 
-def subgraph():
-    raise NotImplementedError(
-        "Prior to leveraging this API, the reference JSON workflows used to test the "
-        "project contained references to "
-        '`"function": "pyiron_core.pyiron_workflow.graph.base.subgraph"`, or whatever '
-        "the subgraph label was whenever the node being serialzed was a created group. "
-        "These are dynamically defined functions and not actually importable. Now, we "
-        "replace those with references to this static object. It never actually gets "
-        "imported, and exists merely to provide clarity for what the serialization "
-        "means when it puts a function path for a subgraph node."
-    )
+def subgraph(**graph_state):
+    """Reinstantiates a grouped node from its graph state."""
+    return graph_to_node(_uncompact_graph_from_state(graph_state))

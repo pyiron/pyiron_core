@@ -40,6 +40,7 @@ from pyiron_core.pyiron_workflow.simple_workflow import (
     Data,
     Node,
     Port,
+    SubGraphNode,
     Workflow,
     identity,
 )
@@ -264,7 +265,11 @@ def remove_node(graph: Graph, label: str) -> Graph:
         edge for edge in graph.edges if edge.source == label or edge.target == label
     ]
     for edge in edges_to_remove:
-        new_graph.edges.remove(edge)
+        if edge.source == label and edge.target != label:
+            new_graph = _disconnect_target_port(new_graph, edge)
+
+        if edge in new_graph.edges:
+            new_graph.edges.remove(edge)
 
     print(f"Removed node {label} and its edges", new_graph.nodes.keys())
     # TODO: remove node from connected ports?
@@ -284,18 +289,15 @@ def remove_edge(graph: Graph, edge: GraphEdge) -> Graph:
 
 
 def _disconnect_target_port(graph: Graph, edge: GraphEdge) -> Graph:
-    if edge.sourceHandle == "self":
-        raise NotImplementedError()
-    else:
-        default = graph.nodes[edge.target].node.inputs[edge.targetHandle].default
-        update_input_value(graph, edge.target, edge.targetHandle, default)
-        if is_virtual_input(edge.target):
-            update_input_value(
-                graph,
-                handle_to_parent_label(edge.target),
-                handle_to_port_label(edge.target),
-                default,
-            )
+    default = graph.nodes[edge.target].node.inputs[edge.targetHandle].default
+    update_input_value(graph, edge.target, edge.targetHandle, default)
+    if is_virtual_input(edge.target):
+        update_input_value(
+            graph,
+            handle_to_parent_label(edge.target),
+            handle_to_port_label(edge.target),
+            default,
+        )
     return graph
 
 
@@ -368,7 +370,9 @@ def _rewire_edge(graph: Graph, input_edge: GraphEdge) -> GraphEdge:
             edge.target = virtual_input_label(edge.target, edge.targetHandle)
             edge.targetHandle = "x"
     if source_node.node_type == "graph":
-        if source_node.parent_id == target_node.parent_id:
+        if input_edge.sourceHandle == "self":
+            print("source node self: ", input_edge.source)
+        elif source_node.parent_id == target_node.parent_id:
             edge.source = virtual_output_label(edge.source, edge.sourceHandle)
             edge.sourceHandle = "x"
     return edge
@@ -1023,16 +1027,15 @@ def graph_to_node(graph: Graph, exclude_unconnected_default_ports=True) -> Node:
     # Retrieve the function from the local namespace
     func = virtual_namespace[graph.label]
 
-    node = Node(
+    node = SubGraphNode(
         func=func,
         label=graph.label,
         node_type="graph",
         inputs=get_inputs_of_graph(graph, exclude_unconnected_default_ports=True),
         outputs=get_outputs_of_graph(graph),
+        graph=graph,
+        code=function_string,
     )
-    node.label = graph.label  # should not be necessary
-    node._code = function_string  # TODO: add macro decorator with output labels
-    node.graph = graph
 
     return node
 

@@ -190,7 +190,15 @@ def CubicBulkCell(
 @as_function_node("structure")
 def Surface(
     element: str,
-    surface_type: str,
+    surface_type: Literal[
+        "fcc111",
+        "fcc110",
+        "fcc100",
+        "bcc110",
+        "bcc100",
+        "hcp0001",
+        "rocksalt111",
+    ] = "fcc111",
     size: str = "1 1 1",
     vacuum: float = 1.0,
     center: bool = False,
