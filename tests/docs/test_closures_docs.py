@@ -85,7 +85,7 @@ def loop_until(recursive_function: Node, max_steps: int = 10) -> float:
     # Get the initial value from the recursive function's inputs
     x = recursive_function.inputs.x.value
 
-    for i in range(max_steps):
+    for _ in range(max_steps):
         # Execute the recursive function with current value
         x, break_condition = recursive_function(x)
 
@@ -103,7 +103,7 @@ def optimize(
     x = initial_guess
     learning_rate = 0.1
 
-    for i in range(max_iterations):
+    for _ in range(max_iterations):
         # Compute gradient using finite differences
         f_x = objective_function(x)
         f_x_plus = objective_function(x + 1e-5)
@@ -147,7 +147,7 @@ def convergence_checker(
     # Get initial value from inputs
     x = iterative_function.inputs.x.value
 
-    for i in range(max_iterations):
+    for _ in range(max_iterations):
         # Execute the function
         x, delta = iterative_function(x)
 
@@ -168,7 +168,7 @@ def optimize_parameters(
     """Optimizes parameters using gradient descent"""
     params = initial_parameters
 
-    for i in range(max_iterations):
+    for _ in range(max_iterations):
         # Compute gradient by finite differences
         loss = objective_function(params)
         loss_plus = objective_function(params + 1e-5)
@@ -196,7 +196,7 @@ def adaptive_mesh_refinement(
     """Refines mesh until solution converges"""
     mesh = initial_mesh_size
 
-    for i in range(max_refinements):
+    for _ in range(max_refinements):
         # Run simulation on current mesh
         solution = simulation_node(mesh=mesh)
 

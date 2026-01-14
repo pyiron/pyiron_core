@@ -111,13 +111,13 @@ def test_multiple_output_ports():
 
     # Option 1: Return multiple named variables
     split_data = SplitData(array=test_array)
-    out = split_data.run()
+    split_data.run()
     assert np.array_equal(split_data.outputs.even_elements.value, np.array([1, 3, 5]))
     assert np.array_equal(split_data.outputs.odd_elements.value, np.array([2, 4, 6]))
 
     # Option 2: Specify output labels in decorator
     split_data_labels = SplitDataWithLabels(array=test_array)
-    out = split_data_labels.run()
+    split_data_labels.run()
     assert np.array_equal(split_data_labels.outputs.even.value, np.array([1, 3, 5]))
     assert np.array_equal(split_data_labels.outputs.odd.value, np.array([2, 4, 6]))
 

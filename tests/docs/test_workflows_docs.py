@@ -246,7 +246,7 @@ def test_single_vs_multi_output_connections():
     # Verify numeric indexing fails as documented
     try:
         _ = wf.split.outputs[0]  # Should not support numeric indexing
-        assert False, "Numeric indexing should not be supported"
+        raise AssertionError("Numeric indexing should not be supported")
     except ValueError:
         pass  # Expected behavior
 
@@ -327,7 +327,7 @@ def test_dataclass_integrity():
     try:
         # This would fail because wf.grid is a node, not the actual dataclass
         _ = wf.grid.X
-        assert False, "Direct field access on node should fail"
+        raise AssertionError("Direct field access on node should fail")
     except AttributeError:
         pass  # Expected behavior
 
@@ -365,7 +365,6 @@ def test_error_cases():
     """Test cases that should raise errors as documented"""
 
     wf = Workflow("error_test")
-    # wf.array = np.arange(10)
     wf.split = SplitArray(array=np.arange(10))
 
     # Verify named access works
@@ -375,7 +374,7 @@ def test_error_cases():
     # Verify numeric indexing fails
     try:
         _ = wf.split.outputs[0]
-        assert False, "Numeric indexing should not be supported"
+        raise AssertionError("Numeric indexing should not be supported")
     except ValueError:
         pass  # Expected behavior
 
@@ -386,7 +385,7 @@ def test_error_cases():
     try:
         # This would fail because wf.grid is a node, not the actual dataclass
         _ = wf.grid.X
-        assert False, "Direct field access on node should fail"
+        raise AssertionError("Direct field access on node should fail")
     except AttributeError:
         pass  # Expected behavior
 
