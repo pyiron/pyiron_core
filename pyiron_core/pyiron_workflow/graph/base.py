@@ -1197,10 +1197,10 @@ def get_code_from_graph(
 
     code = textwrap.dedent(
         f"""
-    def {graph.label}({kwargs}):
+        def {graph.label}({kwargs}):
 
-        from pyiron_core.pyiron_workflow import Workflow
-    """
+            from pyiron_core.pyiron_workflow import Workflow
+        """
     )
 
     code += imports + "\n"
