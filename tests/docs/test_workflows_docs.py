@@ -1,3 +1,4 @@
+import unittest
 from typing import Literal, Tuple
 
 import numpy as np
@@ -151,246 +152,211 @@ def ProcessGrid(grid: Grid2D) -> Grid2D:
 
 
 # =============================================================================
-# TEST FUNCTIONS
+# TEST CASES
 # =============================================================================
 
 
-def test_basic_workflow_structure():
-    """Test the basic workflow structure example from documentation"""
+class TestBasicWorkflow(unittest.TestCase):
+    """Test cases for basic workflow structure"""
 
-    # Create the workflow
-    wf = Workflow("test_workflow")
+    def test_basic_workflow_structure(self):
+        """Test the basic workflow structure example from documentation"""
+        wf = Workflow("test_workflow")
 
-    # Add nodes to the workflow
-    wf.grid_params = GridParams(
-        x_min=0.0, x_max=2 * np.pi, nx=200  # Only specify non-default parameters
-    )
-    wf.grid = CreateGrid(params=wf.grid_params)
-    wf.compute_density = ComputeDensity(grid=wf.grid, amplitude=np.sqrt(2.0))
-    wf.run()
+        wf.grid_params = GridParams(x_min=0.0, x_max=2 * np.pi, nx=200)
+        wf.grid = CreateGrid(params=wf.grid_params)
+        wf.compute_density = ComputeDensity(grid=wf.grid, amplitude=np.sqrt(2.0))
+        wf.run()
 
-    # Verify workflow structure
-    assert hasattr(wf, "grid_params")
-    assert hasattr(wf, "grid")
-    assert hasattr(wf, "compute_density")
+        self.assertTrue(hasattr(wf, "grid_params"))
+        self.assertTrue(hasattr(wf, "grid"))
+        self.assertTrue(hasattr(wf, "compute_density"))
 
-    # Verify partial execution
-    wf.grid.pull()
-    grid_result = wf.grid
-    assert grid_result.outputs.grid.value.X.shape == (200, 100)
+        wf.grid.pull()
+        grid_result = wf.grid
+        self.assertEqual(grid_result.outputs.grid.value.X.shape, (200, 100))
 
-    # Verify full execution
-    density_result = wf.compute_density
-    assert density_result.outputs.results.value.density.shape == (200, 100)
+        density_result = wf.compute_density
+        self.assertEqual(density_result.outputs.results.value.density.shape, (200, 100))
 
+    def test_workflow_syntax_understanding(self):
+        """Test understanding of workflow syntax (labels, connections)"""
+        wf = Workflow("syntax_test")
 
-def test_workflow_syntax_understanding():
-    """Test understanding of workflow syntax (labels, connections)"""
+        wf.grid_params = GridParams()
+        wf.grid_1 = CreateGrid(params=wf.grid_params)
+        wf.grid_2 = CreateGrid(params=wf.grid_params)
 
-    wf = Workflow("syntax_test")
+        self.assertTrue(hasattr(wf, "grid_1"))
+        self.assertTrue(hasattr(wf, "grid_2"))
 
-    # Test multiple instances with different labels
-    wf.grid_params = GridParams()
-    wf.grid_1 = CreateGrid(params=wf.grid_params)
-    wf.grid_2 = CreateGrid(params=wf.grid_params)
+        wf.grid_1.pull()
+        wf.grid_2.pull()
 
-    # Verify both instances exist
-    assert hasattr(wf, "grid_1")
-    assert hasattr(wf, "grid_2")
-
-    # Verify they can be executed independently
-    wf.grid_1.pull()
-    wf.grid_2.pull()
-
-    # Verify they produce the same result (same inputs)
-    grid_1_value = wf.grid_1.outputs.grid.value
-    grid_2_value = wf.grid_2.outputs.grid.value
-    assert np.array_equal(grid_1_value.X, grid_2_value.X)
-    assert np.array_equal(grid_1_value.Y, grid_2_value.Y)
+        grid_1_value = wf.grid_1.outputs.grid.value
+        grid_2_value = wf.grid_2.outputs.grid.value
+        np.testing.assert_array_equal(grid_1_value.X, grid_2_value.X)
+        np.testing.assert_array_equal(grid_1_value.Y, grid_2_value.Y)
 
 
-def test_single_vs_multi_output_connections():
-    """Test single-output vs multi-output node connections"""
+class TestWorkflowConnections(unittest.TestCase):
+    """Test cases for workflow connections"""
 
-    wf = Workflow("output_test")
+    def test_single_vs_multi_output_connections(self):
+        """Test single-output vs multi-output node connections"""
+        wf = Workflow("output_test")
 
-    # Single-output connection
-    wf.array_params = ArrayParams(size=10)
-    wf.array = CreateArray(params=wf.array_params)
+        wf.array_params = ArrayParams(size=10)
+        wf.array = CreateArray(params=wf.array_params)
 
-    # Multi-output connection
-    wf.split = SplitArray(array=wf.array)
-    wf.process_even = ProcessArray(data=wf.split.outputs.even_elements)
-    wf.process_odd = ProcessArray(data=wf.split.outputs.odd_elements)
+        wf.split = SplitArray(array=wf.array)
+        wf.process_even = ProcessArray(data=wf.split.outputs.even_elements)
+        wf.process_odd = ProcessArray(data=wf.split.outputs.odd_elements)
 
-    # Verify single-output execution
-    wf.array.pull()
-    array_result = wf.array.outputs.result.value
-    assert len(array_result) == 10
+        wf.array.pull()
+        array_result = wf.array.outputs.result.value
+        self.assertEqual(len(array_result), 10)
 
-    # Verify multi-output execution
-    wf.process_even.pull()
-    wf.process_odd.pull()
+        wf.process_even.pull()
+        wf.process_odd.pull()
 
-    even_result = wf.process_even.outputs.processed.value
-    odd_result = wf.process_odd.outputs.processed.value
+        even_result = wf.process_even.outputs.processed.value
+        odd_result = wf.process_odd.outputs.processed.value
 
-    # Check even elements were processed correctly
-    expected_even = np.array([0, 2, 4, 6, 8]) * 2
-    assert np.array_equal(even_result, expected_even)
+        expected_even = np.array([0, 2, 4, 6, 8]) * 2
+        np.testing.assert_array_equal(even_result, expected_even)
 
-    # Check odd elements were processed correctly
-    expected_odd = np.array([1, 3, 5, 7, 9]) * 2
-    assert np.array_equal(odd_result, expected_odd)
+        expected_odd = np.array([1, 3, 5, 7, 9]) * 2
+        np.testing.assert_array_equal(odd_result, expected_odd)
 
-    # Verify numeric indexing fails as documented
-    try:
-        _ = wf.split.outputs[0]  # Should not support numeric indexing
-        raise AssertionError("Numeric indexing should not be supported")
-    except ValueError:
-        pass  # Expected behavior
+        with self.assertRaises(ValueError):
+            _ = wf.split.outputs[0]
 
 
-def test_input_dataclass_defaults():
-    """Test input dataclass with only non-default parameters"""
+class TestInputDataclass(unittest.TestCase):
+    """Test cases for input dataclass handling"""
 
-    wf = Workflow("input_test")
+    def test_input_dataclass_defaults(self):
+        """Test input dataclass with only non-default parameters"""
+        wf = Workflow("input_test")
 
-    # Only specify non-default parameters
-    wf.params = SimulationParams(temperature=350.0, steps=5000)
+        wf.params = SimulationParams(temperature=350.0, steps=5000)
 
-    # Verify default values are preserved
-    params = wf.params.pull()
-    assert params.temperature == 350.0
-    assert params.pressure == 1.0  # Default value
-    assert params.steps == 5000
-    assert params.ensemble == "NVT"  # Default value
-
-
-def test_workflow_execution_methods():
-    """Test workflow execution methods (run, pull, on-demand)"""
-
-    wf = Workflow("execution_test")
-
-    wf.grid_params = GridParams(nx=5, ny=5)
-    wf.grid = CreateGrid(params=wf.grid_params)
-    wf.processed = ProcessGrid(grid=wf.grid)
-
-    # Test partial execution with pull()
-    wf.grid.pull()
-    assert hasattr(wf.grid.outputs, "grid")
-    assert hasattr(wf.grid.outputs.grid, "value")
-
-    # Verify grid data is accessible
-    grid_value = wf.grid.outputs.grid.value
-    assert grid_value.X.shape == (5, 5)
-
-    # Test on-demand execution
-    wf.processed.pull()
-    processed_result = wf.processed
-    processed_value = processed_result.outputs.result.value
-    assert processed_value.X.shape == (5, 5)
-
-    # Test full execution with run()
-    wf2 = Workflow("execution_test2")
-    wf2.grid_params = GridParams(nx=5, ny=5)
-    wf2.grid = CreateGrid(params=wf2.grid_params)
-    wf2.processed = ProcessGrid(grid=wf2.grid)
-
-    wf2.run()
-    assert hasattr(wf2.processed.outputs, "result")
-    assert hasattr(wf2.processed.outputs.result, "value")
-
-    # Verify results
-    processed_value2 = wf2.processed.outputs.result.value
-    assert processed_value2.X.shape == (5, 5)
+        params = wf.params.pull()
+        self.assertEqual(params.temperature, 350.0)
+        self.assertEqual(params.pressure, 1.0)
+        self.assertEqual(params.steps, 5000)
+        self.assertEqual(params.ensemble, "NVT")
 
 
-def test_dataclass_integrity():
-    """Test proper dataclass handling in workflows"""
+class TestWorkflowExecution(unittest.TestCase):
+    """Test cases for workflow execution methods"""
 
-    wf = Workflow("dataclass_test")
+    def test_workflow_execution_methods(self):
+        """Test workflow execution methods (run, pull, on-demand)"""
+        wf = Workflow("execution_test")
 
-    wf.grid_input = GridParams(nx=5, ny=5)
-    wf.grid = CreateGrid(params=wf.grid_input)
-    wf.density = ComputeDensity(grid=wf.grid, amplitude=0.5)
+        wf.grid_params = GridParams(nx=5, ny=5)
+        wf.grid = CreateGrid(params=wf.grid_params)
+        wf.processed = ProcessGrid(grid=wf.grid)
 
-    # Correct usage - passing entire dataclass
-    wf.analysis = AnalyzeGrid(grid=wf.grid)
+        wf.grid.pull()
+        self.assertTrue(hasattr(wf.grid.outputs, "grid"))
+        self.assertTrue(hasattr(wf.grid.outputs.grid, "value"))
 
-    # Verify execution works
-    wf.analysis.pull()
-    analysis_result = wf.analysis.outputs.result.value
-    assert isinstance(analysis_result, float)
+        grid_value = wf.grid.outputs.grid.value
+        self.assertEqual(grid_value.X.shape, (5, 5))
 
-    # Verify breaking dataclass integrity would fail
-    try:
-        # This would fail because wf.grid is a node, not the actual dataclass
-        _ = wf.grid.X
-        raise AssertionError("Direct field access on node should fail")
-    except AttributeError:
-        pass  # Expected behavior
+        wf.processed.pull()
+        processed_result = wf.processed
+        processed_value = processed_result.outputs.result.value
+        self.assertEqual(processed_value.X.shape, (5, 5))
 
-    # Proper way to access data after execution
-    wf.grid.pull()
-    grid_value = wf.grid.outputs.grid.value
-    assert hasattr(grid_value, "X")
-    assert grid_value.X.shape == (5, 5)
+        wf2 = Workflow("execution_test2")
+        wf2.grid_params = GridParams(nx=5, ny=5)
+        wf2.grid = CreateGrid(params=wf2.grid_params)
+        wf2.processed = ProcessGrid(grid=wf2.grid)
 
+        wf2.run()
+        self.assertTrue(hasattr(wf2.processed.outputs, "result"))
+        self.assertTrue(hasattr(wf2.processed.outputs.result, "value"))
 
-def test_inline_computations():
-    """Test inline computations in workflow assembly"""
-
-    wf = Workflow("computation_test")
-
-    # Test acceptable computation (evaluates to basic type)
-    wf.result_sqrt = ProcessValue(value=np.sqrt(2.0))
-
-    # Verify result
-    wf.result_sqrt.pull()
-    result = wf.result_sqrt.outputs.results.value
-    assert np.isclose(result.value, np.sqrt(2.0))
-
-    # Test node for tracking computation recipe
-    wf.amplitude = CalculateAmplitude(base=2.0)
-    wf.result_amplitude = ProcessValue(value=wf.amplitude)
-
-    # Verify result
-    wf.result_amplitude.pull()
-    result_amp = wf.result_amplitude.outputs.results.value
-    assert np.isclose(result_amp.value, np.sqrt(2.0))
+        processed_value2 = wf2.processed.outputs.result.value
+        self.assertEqual(processed_value2.X.shape, (5, 5))
 
 
-def test_error_cases():
-    """Test cases that should raise errors as documented"""
+class TestDataclassIntegrity(unittest.TestCase):
+    """Test cases for dataclass handling"""
 
-    wf = Workflow("error_test")
-    wf.split = SplitArray(array=np.arange(10))
+    def test_dataclass_integrity(self):
+        """Test proper dataclass handling in workflows"""
+        wf = Workflow("dataclass_test")
 
-    # Verify named access works
-    wf.split.pull()
-    assert hasattr(wf.split.outputs, "even_elements")
+        wf.grid_input = GridParams(nx=5, ny=5)
+        wf.grid = CreateGrid(params=wf.grid_input)
+        wf.density = ComputeDensity(grid=wf.grid, amplitude=0.5)
 
-    # Verify numeric indexing fails
-    try:
-        _ = wf.split.outputs[0]
-        raise AssertionError("Numeric indexing should not be supported")
-    except ValueError:
-        pass  # Expected behavior
+        wf.analysis = AnalyzeGrid(grid=wf.grid)
 
-    # Test breaking dataclass integrity
-    wf.grid_input = GridParams(nx=5, ny=5)
-    wf.grid = CreateGrid(params=wf.grid_input)
+        wf.analysis.pull()
+        analysis_result = wf.analysis.outputs.result.value
+        self.assertIsInstance(analysis_result, float)
 
-    try:
-        # This would fail because wf.grid is a node, not the actual dataclass
-        _ = wf.grid.X
-        raise AssertionError("Direct field access on node should fail")
-    except AttributeError:
-        pass  # Expected behavior
+        with self.assertRaises(AttributeError):
+            _ = wf.grid.X
 
-    # Proper way to access data after execution
-    wf.grid.pull()
-    grid_value = wf.grid.outputs.grid.value
-    assert hasattr(grid_value, "X")
-    assert grid_value.X.shape == (5, 5)
+        wf.grid.pull()
+        grid_value = wf.grid.outputs.grid.value
+        self.assertTrue(hasattr(grid_value, "X"))
+        self.assertEqual(grid_value.X.shape, (5, 5))
+
+
+class TestInlineComputations(unittest.TestCase):
+    """Test cases for inline computations"""
+
+    def test_inline_computations(self):
+        """Test inline computations in workflow assembly"""
+        wf = Workflow("computation_test")
+
+        wf.result_sqrt = ProcessValue(value=np.sqrt(2.0))
+
+        wf.result_sqrt.pull()
+        result = wf.result_sqrt.outputs.results.value
+        self.assertTrue(np.isclose(result.value, np.sqrt(2.0)))
+
+        wf.amplitude = CalculateAmplitude(base=2.0)
+        wf.result_amplitude = ProcessValue(value=wf.amplitude)
+
+        wf.result_amplitude.pull()
+        result_amp = wf.result_amplitude.outputs.results.value
+        self.assertTrue(np.isclose(result_amp.value, np.sqrt(2.0)))
+
+
+class TestErrorCases(unittest.TestCase):
+    """Test cases for documented error conditions"""
+
+    def test_error_cases(self):
+        """Test cases that should raise errors as documented"""
+        wf = Workflow("error_test")
+        wf.split = SplitArray(array=np.arange(10))
+
+        wf.split.pull()
+        self.assertTrue(hasattr(wf.split.outputs, "even_elements"))
+
+        with self.assertRaises(ValueError):
+            _ = wf.split.outputs[0]
+
+        wf.grid_input = GridParams(nx=5, ny=5)
+        wf.grid = CreateGrid(params=wf.grid_input)
+
+        with self.assertRaises(AttributeError):
+            _ = wf.grid.X
+
+        wf.grid.pull()
+        grid_value = wf.grid.outputs.grid.value
+        self.assertTrue(hasattr(grid_value, "X"))
+        self.assertEqual(grid_value.X.shape, (5, 5))
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -1,3 +1,4 @@
+import unittest
 from typing import Tuple
 
 import numpy as np
@@ -70,66 +71,74 @@ class Point2D:
 
 
 # =============================================================================
-# TEST FUNCTIONS
+# TEST CASES
 # =============================================================================
 
 
-def test_function_node_output_naming():
-    """Verify function node output naming examples work correctly"""
+class TestFunctionNodes(unittest.TestCase):
+    """Test cases for function node examples"""
 
-    # Option 1: Return named variables
-    square = SquareNumber(x=2.0)
-    out = square.run()
-    assert square.outputs.result.value == 4.0
-    assert out == 4.0
+    def test_function_node_output_naming(self):
+        """Verify function node output naming examples work correctly"""
+        square = SquareNumber(x=2.0)
+        out = square.run()
+        self.assertEqual(square.outputs.result.value, 4.0)
+        self.assertEqual(out, 4.0)
 
-    # Option 2: Specify output name in decorator
-    square_decorated = SquareNumberDecorated(x=3.0)
-    out = square_decorated.run()
-    assert square_decorated.outputs.square.value == 9.0
-    assert out == 9.0
+        square_decorated = SquareNumberDecorated(x=3.0)
+        out = square_decorated.run()
+        self.assertEqual(square_decorated.outputs.square.value, 9.0)
+        self.assertEqual(out, 9.0)
+
+    def test_single_return_statement(self):
+        """Verify single return statement requirement"""
+        process_value = ProcessValue(x=4.0)
+        out = process_value.run()
+        self.assertEqual(process_value.outputs.result.value, 8.0)
+        self.assertEqual(out, 8.0)
+
+        process_value = ProcessValue(x=-4.0)
+        out = process_value.run()
+        self.assertEqual(process_value.outputs.result.value, -2.0)
+        self.assertEqual(out, -2.0)
+
+    def test_multiple_output_ports(self):
+        """Verify multiple output ports examples"""
+        test_array = np.array([1, 2, 3, 4, 5, 6])
+
+        split_data = SplitData(array=test_array)
+        split_data.run()
+        np.testing.assert_array_equal(
+            split_data.outputs.even_elements.value, np.array([1, 3, 5])
+        )
+        np.testing.assert_array_equal(
+            split_data.outputs.odd_elements.value, np.array([2, 4, 6])
+        )
+
+        split_data_labels = SplitDataWithLabels(array=test_array)
+        split_data_labels.run()
+        np.testing.assert_array_equal(
+            split_data_labels.outputs.even.value, np.array([1, 3, 5])
+        )
+        np.testing.assert_array_equal(
+            split_data_labels.outputs.odd.value, np.array([2, 4, 6])
+        )
 
 
-def test_single_return_statement():
-    """Verify single return statement requirement"""
+class TestDataclassNodes(unittest.TestCase):
+    """Test cases for dataclass node examples"""
 
-    process_value = ProcessValue(x=4.0)
-    out = process_value.run()
-    assert process_value.outputs.result.value == 8.0
-    assert out == 8.0
+    def test_dataclass_definitions(self):
+        """Verify dataclass node definitions work correctly"""
+        params = CircleParams().run()
+        self.assertEqual(params.radius, 1.0)
+        self.assertEqual(params.center_x, 0.0)
+        self.assertEqual(params.center_y, 0.0)
 
-    process_value = ProcessValue(x=-4.0)
-    out = process_value.run()
-    assert process_value.outputs.result.value == -2.0
-    assert out == -2.0
-
-
-def test_multiple_output_ports():
-    """Verify multiple output ports examples"""
-
-    test_array = np.array([1, 2, 3, 4, 5, 6])
-
-    # Option 1: Return multiple named variables
-    split_data = SplitData(array=test_array)
-    split_data.run()
-    assert np.array_equal(split_data.outputs.even_elements.value, np.array([1, 3, 5]))
-    assert np.array_equal(split_data.outputs.odd_elements.value, np.array([2, 4, 6]))
-
-    # Option 2: Specify output labels in decorator
-    split_data_labels = SplitDataWithLabels(array=test_array)
-    split_data_labels.run()
-    assert np.array_equal(split_data_labels.outputs.even.value, np.array([1, 3, 5]))
-    assert np.array_equal(split_data_labels.outputs.odd.value, np.array([2, 4, 6]))
+        point = Point2D().dataclass()
+        self.assertEqual(point.x, 0.0)
+        self.assertEqual(point.y, 0.0)
 
 
-def test_dataclass_definitions():
-    """Verify dataclass node definitions work correctly"""
-
-    params = CircleParams().run()
-    assert params.radius == 1.0
-    assert params.center_x == 0.0
-    assert params.center_y == 0.0
-
-    point = Point2D().dataclass()
-    assert point.x == 0.0
-    assert point.y == 0.0
+if __name__ == "__main__":
+    unittest.main()
