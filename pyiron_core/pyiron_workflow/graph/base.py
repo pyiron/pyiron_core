@@ -1195,13 +1195,11 @@ def get_code_from_graph(
     )
     returns = returns if len(returns) > 0 else _get_default_return_args(graph)
 
-    code = textwrap.dedent(
-        f"""
+    code = textwrap.dedent(f"""
         def {graph.label}({kwargs}):
 
             from pyiron_core.pyiron_workflow import Workflow
-        """
-    )
+        """)
 
     code += imports + "\n"
     code += f"    wf = Workflow('{graph.label}')\n"
