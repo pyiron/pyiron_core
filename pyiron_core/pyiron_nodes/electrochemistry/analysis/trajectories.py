@@ -324,3 +324,48 @@ def PlotTrajectory(
     ax.grid(True, linestyle=":")
 
     return fig
+
+
+from pyiron_workflow import as_function_node
+
+
+@as_function_node("water_density_analysis")
+def WaterDensCalc(initial_structure, trajectory, frm_st=0, binsnum=500):
+
+    import numpy as np
+
+    import ase.units as units
+
+    o_ind = initial_structure.select_index("O")
+
+    z_lower = min(initial_structure.positions[i][2] for i in o_ind) - 1
+    z_upper = max(initial_structure.positions[i][2] for i in o_ind) + 1
+
+    # Extract the positions of the oxygen atoms along the z-axis
+    z_pos = trajectory.positions[frm_st:, o_ind, 2].flatten()
+
+    # Define the simulation box dimensions (for example)
+    cell = initial_structure.cell
+    Lx, Ly, Lz = (
+        np.linalg.norm(cell[0]),
+        np.linalg.norm(cell[1]),
+        np.linalg.norm(cell[2]),
+    )
+    area_xy = Lx * Ly
+
+    # Calculate histogram with density=False to get the number of atoms in each bin
+    hist, bin_edges = np.histogram(z_pos, binsnum, range=[0, Lz], density=False)
+    z_axis = np.linspace(0, Lz, binsnum)
+    bin_width = bin_edges[1] - bin_edges[0]
+
+    # Spatial density along z (number of atoms per unit volume along z)
+    mol_mass_water = 18.015  # g/mol
+    spatial_density_z = (
+        mol_mass_water
+        * hist
+        / units.mol
+        / (bin_width * area_xy)
+        * 1.0e24
+        / len(trajectory.positions[frm_st:])
+    )
+    return z_axis, spatial_density_z
