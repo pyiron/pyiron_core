@@ -350,6 +350,61 @@ class Port(Attribute):
     def value_changed(self, value):
         self.ready = True
         logging.debug("value changed: value", value)
+        if isinstance(value, Port):
+            self.validate_port_directionality(self, value)
+
+    @staticmethod
+    def raise_directionality_error(
+        target_reference: str,
+        source: "Port",
+        problem: "Port",
+        panel: Literal["inputs", "outputs"],
+    ):
+        raise ValueError(
+            f"Assigning a port as the value of another port indicates a data edge. "
+            f"This was invalidated trying to assign "
+            f"'{target_reference}={source.node.label}.{source.label}' "
+            f"because '{problem.label}' could not be found on "
+            f"'{problem.node.label}.{panel}'. (Note: we are check actual port instances "
+            f"here not just the label, which may or may not be present.)"
+        )
+
+    @staticmethod
+    def validate_port_directionality(target: "Port", source: "Port") -> None:
+        """Ensure ports with port values are inputs with output values."""
+        if not Port.port_in_panel(target, target.node.inputs):
+            Port.raise_directionality_error(
+                target_reference=f"{target.node.label}.{target.label}",
+                source=source,
+                problem=target,
+                panel="inputs",
+            )
+        if not Port.port_in_panel(source, source.node.outputs):
+            Port.raise_directionality_error(
+                target_reference=f"{target.node.label}.{target.label}",
+                source=source,
+                problem=source,
+                panel="outputs",
+            )
+
+    @staticmethod
+    def port_in_panel(port: "Port", panel: "Data") -> bool:
+        # IO has no specific type and `Data` is quite generic,
+        # first make sure we're dealing with a
+        if (
+            not hasattr(panel, "data")
+            or not isinstance(panel.data, dict)
+            or PORT_LABEL not in panel.data
+        ):
+            raise TypeError(
+                f"Expected to get something like an IO panel, but got {panel}"
+            )  # This exception should not be user-facing but helps us dev
+
+        if port.label not in panel.data[PORT_LABEL]:
+            return False
+
+        # Port instances share the same dataset dict - check identity
+        return port._Attribute__dataset is panel.data
 
 
 @dataclasses.dataclass
@@ -555,6 +610,23 @@ class Node:
             raise ValueError(
                 f"Node creator: Output labels must be given ({self.outputs.data[PORT_LABEL]})"
             )
+
+        self._validate_port_directionality()
+
+    def _validate_port_directionality(self):
+        """Ensure input ports only connect to output ports."""
+        # Input ports don't actually exist yet though
+        for label, value in zip(
+            self.inputs.data[PORT_LABEL], self.inputs.data[PORT_VALUE], strict=True
+        ):
+            if isinstance(value, Port):
+                if not Port.port_in_panel(value, value.node.outputs):
+                    Port.raise_directionality_error(
+                        target_reference=f"{self.label}.{label}",
+                        source=value,
+                        problem=value,
+                        panel="outputs",
+                    )
 
     @property
     def kwargs(self):
