@@ -2,11 +2,12 @@ import dataclasses
 import inspect
 import json
 import os
-import sys
 import pathlib
+import sys
 import threading
 import time
 import warnings
+from dataclasses import dataclass
 from typing import Optional, Union
 
 import ipywidgets as widgets
@@ -28,7 +29,6 @@ from pyiron_core.pyiron_workflow.graph import (
     labelling,
     run,
 )
-from dataclasses import dataclass
 
 
 @dataclass
@@ -199,9 +199,9 @@ class PyironFlowWidget:
         self.accordion_widget.titles = ["Node Library", "Output", "Logging Info"]
         self._counter = 0
 
-       # Immediately send graph data to the frontend to avoid an empty initial view.
+        # Immediately send graph data to the frontend to avoid an empty initial view.
         self.update_graph_view(sleep_time=0.8)
-        # self.update_gui(export_data=True, sleep_time=0)        
+        # self.update_gui(export_data=True, sleep_time=0)
         self._selected_nodes = None
 
     def _parse_edge_string(self, edge_str):
@@ -433,7 +433,7 @@ class PyironFlow:
             nodes_path_abs = str(pathlib.Path(os.path.abspath(nodes_path_str)).parent)
             if nodes_path_abs not in sys.path:
                 print("added node path: ", nodes_path_abs)
-                sys.path = [nodes_path_abs] + sys.path        
+                sys.path = [nodes_path_abs] + sys.path
 
         self.wf_widgets = []  # list of PyironFlowWidget objects
         for wf in wf_list:
@@ -467,7 +467,7 @@ class PyironFlow:
             readout=False,
         )
         self.h_scroll.layout.width = (
-            f"{gui_layout.flow_widget_width+ gui_layout.output_widget_width+15}px"
+            f"{gui_layout.flow_widget_width + gui_layout.output_widget_width + 15}px"
         )
         self.h_scroll.layout.margin = "0px 0px 0px 0px"
         self.h_scroll.layout.border = "1px solid black"
@@ -491,7 +491,7 @@ class PyironFlow:
         self.h_scroll.value = gui_layout.output_widget_width
 
     def update_width(self, change):
-        new_width = f'{change["new"]}px'
+        new_width = f"{change['new']}px"
         self.accordion_widget.layout.width = new_width
         flow_width = (
             self.gui_layout.flow_widget_width
@@ -752,9 +752,7 @@ def _get_child_dict(graph, node):
     targetPorts = [
         {"id": f"{node['id']}_in_{label}", "properties": {"side": "WEST"}}
         for label in node["data"]["target_labels"]
-    ][
-        ::-1
-    ]  # TODO: provide port positions x, y (this is only a quick fix)
+    ][::-1]  # TODO: provide port positions x, y (this is only a quick fix)
     sourcePorts = [
         {"id": f"{node['id']}_out_{label}", "properties": {"side": "EAST"}}
         for label in node["data"]["source_labels"]
