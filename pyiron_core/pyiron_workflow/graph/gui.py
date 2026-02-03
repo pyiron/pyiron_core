@@ -2,6 +2,7 @@ import dataclasses
 import inspect
 import json
 import os
+import sys
 import pathlib
 import threading
 import time
@@ -197,7 +198,10 @@ class PyironFlowWidget:
         ]
         self.accordion_widget.titles = ["Node Library", "Output", "Logging Info"]
         self._counter = 0
-        self.update_graph_view()
+
+       # Immediately send graph data to the frontend to avoid an empty initial view.
+        self.update_graph_view(sleep_time=0.8)
+        # self.update_gui(export_data=True, sleep_time=0)        
         self._selected_nodes = None
 
     def _parse_edge_string(self, edge_str):
@@ -422,6 +426,14 @@ class PyironFlow:
 
         self.gui_layout = gui_layout
         self.nodes_path = nodes_path
+        # Ensure the nodes_path is in sys.path for dynamic imports
+        if self.nodes_path is not None:
+            # Convert to an absolute path to avoid relative path issues
+            nodes_path_str = str(self.nodes_path)
+            nodes_path_abs = str(pathlib.Path(os.path.abspath(nodes_path_str)).parent)
+            if nodes_path_abs not in sys.path:
+                print("added node path: ", nodes_path_abs)
+                sys.path = [nodes_path_abs] + sys.path        
 
         self.wf_widgets = []  # list of PyironFlowWidget objects
         for wf in wf_list:
