@@ -8,8 +8,8 @@ def GetChemicalPotential(
     element: str,
     engine=None,
 ):
-    from pyiron_core import Workflow
     import pyiron_core.pyiron_nodes.atomistic as atomistic
+    from pyiron_core import Workflow
 
     wf = Workflow("GetChemicalPotential")
     wf.bulk = atomistic.structure.build.Bulk(name=element)

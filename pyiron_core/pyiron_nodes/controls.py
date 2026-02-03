@@ -1,6 +1,6 @@
 from concurrent.futures import as_completed
 from copy import copy
-from typing import Any, List, Tuple, Union
+from typing import Any, List, Union
 
 import numpy as np
 import pandas as pd
@@ -126,7 +126,7 @@ def IterToDataFrame(
         field.  When the node returns a dataclass, each field of the
         dataclass is a separate column.
     """
-    from dataclasses import is_dataclass, fields
+    from dataclasses import fields, is_dataclass
 
     # ------------------------------------------------------------------
     # 1️⃣ Run the node over all values

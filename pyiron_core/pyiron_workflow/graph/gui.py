@@ -94,7 +94,6 @@ Connect graph with ReactflowWidget and other GUI elements for interactive graph/
 
 def rename_node(graph: base.Graph, old_label: str, new_label: str):
     """Rename node in graph and update edges that reference it"""
-    # print("rename node", old_label, new_label)
     new_graph = base.copy_graph(graph)
     if old_label not in new_graph.nodes:
         return new_graph

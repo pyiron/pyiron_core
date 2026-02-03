@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 from dataclasses import asdict
-from typing import Optional, List, Tuple
+from typing import List, Optional, Tuple
 
-# if TYPE_CHECKING:
 from ase import Atoms
 from pandas import DataFrame
 from pyiron_atomistics.lammps.control import LammpsControl
@@ -209,7 +208,6 @@ def InitLammps(
         angles_array = make_angles_array(angles, n_atoms=len(structure))
         structure.set_array("angles", angles_array)
 
-    # print("Potential: ", pot.df)
     pot.write_file(file_name="potential.inp", cwd=working_directory)
     pot.copy_pot_files(working_directory)
 
@@ -273,7 +271,9 @@ def compute_water_bonds_indices(
         neighbor_dists = neigh_obj.distances[o]
 
         h_neighbors = [
-            int(idx) for idx, d in zip(neighbor_ids, neighbor_dists) if (d < cutoff) and (idx in h_idxs)
+            int(idx)
+            for idx, d in zip(neighbor_ids, neighbor_dists, strict=False)
+            if (d < cutoff) and (idx in h_idxs)
         ]
 
         for h in h_neighbors:
@@ -312,8 +312,6 @@ class ShellOutput:
     stdout: str = ""
     stderr: str = ""
     return_code: int = 0
-    dump: FileObject = FileObject()  # TODO: should be done in a specific lammps object
-    log: FileObject = FileObject()
 
 
 @as_function_node("output", "dump", "log")
@@ -429,8 +427,8 @@ def Tip3pData(
     the data file as a ``FileObject``.
     """
     import os
+
     import numpy as np
-    from pyiron_core.pyiron_nodes.dev_tools import FileObject
 
     os.makedirs(working_directory, exist_ok=True)
 
@@ -533,21 +531,18 @@ def Tip3pData(
         f.write("kspace_style pppm 1e-4\n\n")
         f.write("read_data tip3p.data\n\n")
         for t, (eps, sig) in lj_params.items():
-            for t2, (eps2, sig2) in lj_params.items():
+            for t2, (_, _) in lj_params.items():
                 f.write(f"pair_coeff {t} {t2} {eps} {sig}\n")
         f.write("neighbor 2.0 bin\n")
         f.write("neigh_modify delay 0 every 1 check yes\n\n")
         f.write("group water type 1 2\n")
-        # f.write("velocity all create 300.0 12345\n")
         f.write("fix shake_w water shake 1e-6 100 0 b 1 a 1\n")
-        # f.write("thermo 100\n")
         f.write("timestep 1.0\n")
         # Append additional LAMMPS control statements required for the workflow
         f.write("\n")
         f.write("fix ensemble all nvt temp 3000.0 3000.0 0.1\n")
         f.write("variable dumptime  equal 100\n")
         f.write("variable thermotime  equal 100\n")
-        # f.write("timestep 0.001\n")
         f.write("velocity all create 6000.0 10298 dist gaussian\n")
         f.write(
             "dump 1 all custom ${dumptime} dump.out id type xu yu zu fx fy fz vx vy vz\n"
@@ -731,7 +726,6 @@ def ParseOutput(working_directory, structure, potential, units="metal"):
 
 
 # helper functions (move later to separate library)
-from ase import Atoms
 
 
 def compute_water_bonds_and_angles(
@@ -773,7 +767,9 @@ def compute_water_bonds_and_angles(
         neighbor_dists = neigh_obj.distances[o]
 
         h_neighbors = [
-            int(idx) for idx, d in zip(neighbor_ids, neighbor_dists) if d < cutoff
+            int(idx)
+            for idx, d in zip(neighbor_ids, neighbor_dists, strict=False)
+            if d < cutoff and idx in h_idxs
         ]
 
         for h in h_neighbors:
@@ -1031,13 +1027,11 @@ def write_lammps_data_full(
         else:
             charges_array = atoms.get_initial_charges()
         charges_array = convert(charges_array, "charge", "ASE", units)
-        # print("charges array: ", charges_array)
 
         molecules = np.ones(len(atoms), dtype=int)  # default molecule IDs
         pos = convert(pos, "distance", "ASE", units)
-        for i, (m, q, r) in enumerate(zip(molecules, charges_array, pos)):
+        for i, (m, q, r) in enumerate(zip(molecules, charges_array, pos, strict=False)):
             s = species.index(symbols[i]) + 1
-            # print('charge: ', i, s, q, f"{q:>9.6f}")
             fd.write(
                 f"{i+1:>6} {m:>3} {s:>3} {q:>9.6f} {r[0]:23.17g} {r[1]:23.17g} {r[2]:23.17g}\n"
             )
