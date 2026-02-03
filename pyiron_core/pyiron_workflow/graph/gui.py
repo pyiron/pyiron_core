@@ -201,7 +201,6 @@ class PyironFlowWidget:
 
         # Immediately send graph data to the frontend to avoid an empty initial view.
         self.update_graph_view(sleep_time=0.8)
-        # self.update_gui(export_data=True, sleep_time=0)
         self._selected_nodes = None
 
     def _parse_edge_string(self, edge_str):
@@ -752,7 +751,9 @@ def _get_child_dict(graph, node):
     targetPorts = [
         {"id": f"{node['id']}_in_{label}", "properties": {"side": "WEST"}}
         for label in node["data"]["target_labels"]
-    ][::-1]  # TODO: provide port positions x, y (this is only a quick fix)
+    ][
+        ::-1
+    ]  # TODO: provide port positions x, y (this is only a quick fix)
     sourcePorts = [
         {"id": f"{node['id']}_out_{label}", "properties": {"side": "EAST"}}
         for label in node["data"]["source_labels"]
