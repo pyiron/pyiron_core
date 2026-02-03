@@ -272,10 +272,10 @@ def SplitTrainingAndTesting(
         training_frac = np.abs(training_frac)
 
     if training_frac > 1:
-        print(
-            "Can't have the training dataset more than 100 % of the dataset\n\
-            Setting the value to 100%"
-        )
+        print("""
+            Can't have the training dataset more than 100 % of the dataset
+            Setting the value to 100%
+            """)
         training_frac = 1
     elif training_frac == 0:
         print("Can'fit with no training dataset\nSetting the value to 1%")

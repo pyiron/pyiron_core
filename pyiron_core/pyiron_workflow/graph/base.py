@@ -39,8 +39,8 @@ from pyiron_core.pyiron_workflow.graph.labelling import (
 from pyiron_core.pyiron_workflow.simple_workflow import (
     Data,
     Node,
-    SubGraphNode,
     Port,
+    SubGraphNode,
     Workflow,
     identity,
 )
@@ -289,9 +289,6 @@ def remove_edge(graph: Graph, edge: GraphEdge) -> Graph:
 
 
 def _disconnect_target_port(graph: Graph, edge: GraphEdge) -> Graph:
-    # if edge.sourceHandle == "self":
-    #     raise NotImplementedError()
-    # else:
     default = graph.nodes[edge.target].node.inputs[edge.targetHandle].default
     update_input_value(graph, edge.target, edge.targetHandle, default)
     if is_virtual_input(edge.target):
@@ -1198,13 +1195,11 @@ def get_code_from_graph(
     )
     returns = returns if len(returns) > 0 else _get_default_return_args(graph)
 
-    code = textwrap.dedent(
-        f"""
-    def {graph.label}({kwargs}):
+    code = textwrap.dedent(f"""
+        def {graph.label}({kwargs}):
 
-        from pyiron_core.pyiron_workflow import Workflow
-    """
-    )
+            from pyiron_core.pyiron_workflow import Workflow
+        """)
 
     code += imports + "\n"
     code += f"    wf = Workflow('{graph.label}')\n"

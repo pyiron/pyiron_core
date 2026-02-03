@@ -2,6 +2,7 @@ import ast
 import importlib
 from dataclasses import dataclass
 from pathlib import Path
+
 from ipytree import Node, Tree
 
 __author__ = "Joerg Neugebauer"
@@ -25,9 +26,10 @@ class DataClassNode:
 @dataclass
 class ErrorNode:
     """Represents a Python module that could not be parsed."""
-    name: str         # display name without .py
+
+    name: str  # display name without .py
     path: str | Path  # original Path to the file
-    error: str        # error message
+    error: str  # error message
 
 
 def get_rel_path_for_last_occurrence(path: Path, relpath_start: str) -> int:
@@ -43,14 +45,17 @@ def get_rel_path_for_last_occurrence(path: Path, relpath_start: str) -> int:
 class TreeView:
     def __init__(self, root_path=None, flow_widget=None, log=None, layout=None):
         import copy
+
         if root_path is None:
             try:
                 import pyiron_core.pyiron_nodes as pyiron_nodes
+
                 pyiron_nodes = importlib.reload(pyiron_nodes)
             except Exception as e:
                 if log:
                     log.append_stdout(f"Failed to import pyiron_nodes: {e}\n")
                 raise
+
             root_path = Path(pyiron_nodes.__path__[0])
             self.node_path = "pyiron_core"
         elif isinstance(root_path, (str, Path)):
@@ -98,7 +103,10 @@ class TreeView:
         if isinstance(node.path, ErrorNode):
             return
         if isinstance(node.path, (FunctionNode, DataClassNode)):
-            path = get_rel_path_for_last_occurrence(node.path.path, self.node_path) / node.path.name
+            path = (
+                get_rel_path_for_last_occurrence(node.path.path, self.node_path)
+                / node.path.name
+            )
             path_str = str(path).replace("/", ".")
             if self.flow_widget is not None:
                 self.flow_widget.add_node(path_str, node.path.name)
@@ -107,7 +115,11 @@ class TreeView:
         """Add folders and module files to the tree view."""
         for child in self.list_nodes(parent_node):
             # Display without .py extension for modules
-            display_name = child.stem if (child.is_file() and child.suffix == ".py") else child.name
+            display_name = (
+                child.stem
+                if (child.is_file() and child.suffix == ".py")
+                else child.name
+            )
             node_tree = Node(display_name)
 
             if child.is_dir():
@@ -116,7 +128,9 @@ class TreeView:
                 node_tree.path = child
             elif child.is_file() and child.suffix == ".py":
                 module_children = self.list_pyiron_nodes(child)
-                if len(module_children) == 1 and isinstance(module_children[0], ErrorNode):
+                if len(module_children) == 1 and isinstance(
+                    module_children[0], ErrorNode
+                ):
                     node_tree.icon = "exclamation-triangle"
                     node_tree.icon_style = "warning"
                     node_tree.tooltip = f"Error: {module_children[0].error}"
@@ -166,7 +180,11 @@ class TreeView:
         files = []
         if node.is_dir():
             for child in node.iterdir():
-                if child.is_dir() and not child.name.startswith(".") and not child.name.startswith("_"):
+                if (
+                    child.is_dir()
+                    and not child.name.startswith(".")
+                    and not child.name.startswith("_")
+                ):
                     dirs.append(child)
             for child in node.glob("*.py"):
                 if not child.name.startswith(".") and not child.name.startswith("_"):
@@ -176,21 +194,28 @@ class TreeView:
         return dirs + files
 
     @staticmethod
-    def list_pyiron_nodes(file_name, decorators=(
+    def list_pyiron_nodes(
+        file_name,
+        decorators=(
             "as_function_node",
             "as_macro_node",
             "as_inp_dataclass_node",
             "as_out_dataclass_node",
-        )):
+        ),
+    ):
         """Parse Python file and return FunctionNode/DataClassNode objects or ErrorNode if parsing fails."""
         try:
             with open(file_name, "r") as file:
                 source = file.read()
             tree = ast.parse(source)
         except SyntaxError as e:
-            return [ErrorNode(name=Path(file_name).stem, path=Path(file_name), error=str(e))]
+            return [
+                ErrorNode(name=Path(file_name).stem, path=Path(file_name), error=str(e))
+            ]
         except Exception as e:
-            return [ErrorNode(name=Path(file_name).stem, path=Path(file_name), error=str(e))]
+            return [
+                ErrorNode(name=Path(file_name).stem, path=Path(file_name), error=str(e))
+            ]
 
         nodes = []
         for node in ast.walk(tree):
