@@ -12,7 +12,16 @@ import importlib
 import inspect
 import logging
 from pydoc import locate
-from typing import Any, Literal, Optional, TypeAlias, Union, get_args, get_origin, get_type_hints
+from typing import (
+    Any,
+    Literal,
+    Optional,
+    TypeAlias,
+    Union,
+    get_args,
+    get_origin,
+    get_type_hints,
+)
 
 import pandas as pd
 
