@@ -12,7 +12,7 @@ import importlib
 import inspect
 import logging
 from pydoc import locate
-from typing import Any, Literal, TypeAlias, Union, get_args, get_origin, get_type_hints
+from typing import Any, Literal, Optional, TypeAlias, Union, get_args, get_origin, get_type_hints
 
 import pandas as pd
 
@@ -87,29 +87,31 @@ def get_type_from_path(import_path, log=None):
 # extract information from function
 
 
-def extract_output_parameters_from_function(func):
-    # Get AST of the function's source
-    func_ast = ast.parse(inspect.getsource(func))
+def extract_output_parameters_from_function(func, return_names: Optional[list] = None):
+    if return_names is None:
+        # Get AST of the function's source
+        func_ast = ast.parse(inspect.getsource(func))
 
-    # Find the return node in function body
-    # Returns leftmost return statement or None
-    return_node = next(
-        (node for node in func_ast.body[0].body if isinstance(node, ast.Return)), None
-    )
+        # Find the return node in function body
+        # Returns leftmost return statement or None
+        return_node = next(
+            (node for node in func_ast.body[0].body if isinstance(node, ast.Return)),
+            None,
+        )
 
-    if return_node is None:
-        return [], []
+        if return_node is None:
+            return [], []
 
-    # Get list of return values/expressions
-    if isinstance(return_node.value, ast.Tuple):
-        values = return_node.value.elts
-    else:
-        values = [return_node.value]
+        # Get list of return values/expressions
+        if isinstance(return_node.value, ast.Tuple):
+            values = return_node.value.elts
+        else:
+            values = [return_node.value]
 
-    # Generate names for all returned values
-    return_names = [
-        value.id if isinstance(value, ast.Name) else None for value in values
-    ]
+        # Generate names for all returned values
+        return_names = [
+            value.id if isinstance(value, ast.Name) else None for value in values
+        ]
 
     # Get list of return type hints from the function signature
     return_annotation = inspect.signature(func).return_annotation
@@ -975,9 +977,11 @@ def get_inputs_data(func, extract_input_parameters, *args, **kwargs):
     return inputs
 
 
-def get_outputs_data(func, extract_output_parameters):
+def get_outputs_data(
+    func, extract_output_parameters, return_names: Optional[list] = None
+):
     data = add_field(
-        data=extract_output_parameters(func),
+        data=extract_output_parameters(func=func, return_names=return_names),
         ready=False,
         value=None,  # PORT_VALUE
     )
@@ -1008,7 +1012,6 @@ def make_node_decorator(inner_wrap_return_func, node_type="function_node"):
     """
 
     def _node_decorator(*args, **kwargs):
-
         def wrapper(func=None):
             if kwargs and "labels" in kwargs:
                 output_labels = kwargs["labels"]
@@ -1065,7 +1068,11 @@ def _return_as_function_node(
         inputs=get_inputs_data(
             func, extract_input_parameters_from_function, *f_args, **f_kwargs
         ),
-        outputs=get_outputs_data(func, extract_output_parameters_from_function),
+        outputs=get_outputs_data(
+            func=func,
+            extract_output_parameters=extract_output_parameters_from_function,
+            return_names=output_labels,
+        ),
         label=label,
         output_labels=output_labels,
         node_type=node_type,

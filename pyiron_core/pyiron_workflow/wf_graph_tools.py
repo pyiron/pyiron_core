@@ -276,13 +276,22 @@ def get_graph_from_wf(wf: "Workflow") -> WorkflowGraph:
             "data/import_path",
             "data/target_values",
             "data/target_labels",
+            "data/source_labels",
         ],
     )
     nodes_non_default_inp_param = []
     for node in nodes:
         label = node["label"]
         import_path = node["import_path"]
-        node_obj = pyironflow.get_node_from_path(import_path)()
+        try:
+            node_obj = pyironflow.get_node_from_path(import_path)()
+        except TypeError:
+            from pyiron_core.pyiron_workflow.simple_workflow import as_function_node
+
+            node_obj = as_function_node(
+                pyironflow.get_node_from_path(import_path),
+                labels=node["data__source_labels"],
+            )()
         changed_args = _different_indices(
             node_obj.inputs.data["default"], node["data__target_values"]
         )
