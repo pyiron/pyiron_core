@@ -2,7 +2,7 @@ name: Deploy MkDocs to GitHub Pages
 
 on:
   push:
-    branches: ["main", "IPAM_hackathon"]
+    branches: ["main"]
   workflow_dispatch:
 
 permissions:
@@ -35,13 +35,10 @@ jobs:
       - name: Build MkDocs site
         run: mkdocs build --strict
 
-      # Deploy the generated site folder using the official Pages action
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@3.7.1
         with:
-          # MkDocs outputs to the `site` directory by default
-          path: ./site
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: gh-pages # The branch the action should deploy to.
+          FOLDER: site # The folder the action should deploy.
+          CLEAN: true
