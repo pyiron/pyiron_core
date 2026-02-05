@@ -8,6 +8,7 @@ dependencies:
 - hatch-vcs =0.5.0
 - hatch-jupyter-builder >=0.5.0
 - papermill  # For testing notebooks generally
+- coverage
 # Platform (pyiron_core/pyiron_workflow, pyironflow, pyiron_database)
 - anywidget =0.9.18
 - black =26.1.0

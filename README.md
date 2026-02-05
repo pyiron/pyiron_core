@@ -1,5 +1,8 @@
 # Overview
 
+[![codecov](https://codecov.io/gh/pyiron/pyiron_core/graph/badge.svg?token=vJ7abeKoQk)](https://codecov.io/gh/pyiron/pyiron_core)
+[![Test suite](https://github.com/pyiron/pyiron_core/actions/workflows/tests.yml/badge.svg)](https://github.com/pyiron/pyiron_core/actions/workflows/tests.yml)
+
 `pyiron_core` is a workflow management system for Python that leverages a graph-based system -- including a visual scripting GUI -- to develop and execute workflows.
 
 Key features:
