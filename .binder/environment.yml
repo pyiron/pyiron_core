@@ -6,6 +6,7 @@ dependencies:
 - hatch-vcs =0.5.0
 - hatch-jupyter-builder >=0.5.0
 - papermill
+- coverage
 - anywidget =0.9.18
 - black =26.1.0
 - cloudpickle =3.1.1
