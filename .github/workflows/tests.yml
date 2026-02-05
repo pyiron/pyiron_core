@@ -119,7 +119,7 @@ jobs:
         shell: bash -l {0}
         timeout-minutes: 5
         run: |
-          coverage -m unittest discover -s tests -v
+          coverage run -m unittest discover -s tests -v
           coverage report
           coverage xml
       - name: Upload coverage reports to Codecov
