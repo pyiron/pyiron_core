@@ -98,8 +98,8 @@ def Animate(
     camera : {{'orthographic', 'perspective'}}, default='orthographic'
         Camera perspective to be used for the animation.
     """
-    from pyiron_atomistics.atomistics.job.atomistic import Trajectory
     from pyiron.atomistics.structure.atoms import ase_to_pyiron
+    from pyiron_atomistics.atomistics.job.atomistic import Trajectory
 
     species = np.array(trajectory.species)[trajectory.indices[0]]
 
