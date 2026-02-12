@@ -14,7 +14,7 @@ def Equilibrate(
     solvated_electrode,
     water_potential,
     parameters=None,
-    server=None, 
+    server=None,
     store: bool = True,
 ) -> OutputCalcMD:
     """
@@ -80,14 +80,14 @@ def Equilibrate(
     j.calc_md(**asdict(parameters))
 
     if server is not None:
-        print(f'Server = {server.queue}, {server}, {server.cores}')
+        print(f"Server = {server.queue}, {server}, {server.cores}")
         j.server.queue = server.queue
         j.server.cores = server.cores
 
     j.run(delete_existing_job=True)
 
     if server is not None:
-        pr.wait_for_job(j, interval_in_s = 5, max_iterations = 1000)
+        pr.wait_for_job(j, interval_in_s=5, max_iterations=1000)
 
     job_out = j["output/generic"]
 

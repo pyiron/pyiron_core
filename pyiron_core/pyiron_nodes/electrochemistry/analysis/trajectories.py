@@ -1,9 +1,8 @@
 from typing import Literal
 
-import pandas as pd
 from matplotlib.figure import Figure
 
-from pyiron_core.pyiron_nodes.atomistic.calculator.data import InputCalcMD, OutputCalcMD
+from pyiron_core.pyiron_nodes.atomistic.calculator.data import OutputCalcMD
 from pyiron_core.pyiron_workflow import as_function_node
 
 
@@ -326,20 +325,13 @@ def PlotTrajectory(
     return fig
 
 
-from pyiron_workflow import as_function_node
-
-
 @as_function_node("water_density_analysis")
 def WaterDensCalc(initial_structure, trajectory, frm_st=0, binsnum=500):
 
+    import ase.units as units
     import numpy as np
 
-    import ase.units as units
-
     o_ind = initial_structure.select_index("O")
-
-    z_lower = min(initial_structure.positions[i][2] for i in o_ind) - 1
-    z_upper = max(initial_structure.positions[i][2] for i in o_ind) + 1
 
     # Extract the positions of the oxygen atoms along the z-axis
     z_pos = trajectory.positions[frm_st:, o_ind, 2].flatten()

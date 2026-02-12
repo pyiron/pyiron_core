@@ -16,17 +16,20 @@ def structure_to_calc_md(structure: Atoms) -> OutputCalcMD:
 
     return calc_md
 
+
 @as_function_node
 def get_structure(trajectory: OutputCalcMD, index: int = -1) -> Atoms:
     import numpy as np
     from pyiron_atomistics.atomistics.job.atomistic import Trajectory
     from pyiron.atomistics.structure.atoms import ase_to_pyiron
-    
+
     species = np.array(trajectory.species)[trajectory.indices[index]]
-    
-    structure = Atoms(species,
-                        positions = trajectory.positions[index], 
-                        cell = trajectory.cells[index],
-                        pbc=[True, True, True])
-    structure = ase_to_pyiron(structure) 
-    return structure 
+
+    structure = Atoms(
+        species,
+        positions=trajectory.positions[index],
+        cell=trajectory.cells[index],
+        pbc=[True, True, True],
+    )
+    structure = ase_to_pyiron(structure)
+    return structure

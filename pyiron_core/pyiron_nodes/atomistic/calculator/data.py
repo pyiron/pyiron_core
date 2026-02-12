@@ -1,5 +1,5 @@
 from dataclasses import field
-from typing import Optional, Literal
+from typing import Literal, Optional
 
 from pyiron_core.pyiron_workflow import as_inp_dataclass_node, as_out_dataclass_node
 from pyiron_core.pyiron_workflow.data_fields import DataArray, EmptyArrayField
@@ -148,8 +148,5 @@ class InputCalcStatic:
 
 @as_inp_dataclass_node
 class InputServer:
-    queue: Optional[
-        Literal["cmti", "s_cmmg", "p_cmmg"]
-    ] = "cmti",
+    queue: Optional[Literal["cmti", "s_cmmg", "p_cmmg"]] = ("cmti",)
     cores: int = 1
-

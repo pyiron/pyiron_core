@@ -100,17 +100,21 @@ def Animate(
     """
     from pyiron_atomistics.atomistics.job.atomistic import Trajectory
     from pyiron.atomistics.structure.atoms import ase_to_pyiron
-    
+
     species = np.array(trajectory.species)[trajectory.indices[0]]
-    
-    initial_structure = _Atoms(species,
-                               positions = trajectory.positions[0], 
-                               cell = trajectory.cells[0],
-                               pbc=[True, True, True])
+
+    initial_structure = _Atoms(
+        species,
+        positions=trajectory.positions[0],
+        cell=trajectory.cells[0],
+        pbc=[True, True, True],
+    )
     # ------------------------------------------------------------------
     # Build a pyiron Trajectory object from the supplied data
     # ------------------------------------------------------------------
-    traj = Trajectory(positions=trajectory.positions, structure=ase_to_pyiron(initial_structure))
+    traj = Trajectory(
+        positions=trajectory.positions, structure=ase_to_pyiron(initial_structure)
+    )
 
     # ------------------------------------------------------------------
     # Forward the animation options to the underlying pyiron method
