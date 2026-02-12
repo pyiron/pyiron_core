@@ -6,7 +6,7 @@ from pyiron_core.pyiron_nodes.atomistic.calculator.data import OutputCalcMD
 from pyiron_core.pyiron_workflow import as_function_node
 
 
-@as_function_node("Ion_density")
+@as_function_node("element_density")
 def element_density(trajectory, initial_structure, initial_step: int = 0):
     """
     Animate a series of atomic structures.
@@ -38,12 +38,12 @@ def element_density(trajectory, initial_structure, initial_step: int = 0):
 
     positions = trajectory.positions[initial_step:]
 
-    Data = {}
+    data = {}
 
     for element, ind_el in zip(
         ["Na", "F", "O", "H"], [ind_Na, ind_F, ind_O, ind_H], strict=False
     ):
-        Data[element] = []
+        data[element] = []
 
         z_el = np.array([snapshot[ind_el, 2] for snapshot in positions])
         z_d = z_el - slab_bot
@@ -51,69 +51,21 @@ def element_density(trajectory, initial_structure, initial_step: int = 0):
         binedges = np.arange(0, (slab_top - slab_bot), deltares)  #
         hist, bin_edges = np.histogram(z_d, bins=binedges)
 
-        Data[element] = bin_edges[:-1], hist / np.shape(positions)[0]
-    return Data
+        data[element] = bin_edges[:-1], hist / np.shape(positions)[0]
+    return data
 
 
-def Ion_density(trajectory, initial_structure):
-    """
-    Animate a series of atomic structures.
-
-    Parameters
-    ----------
-    trajectory : Trajectory‑like object
-        An object that provides ``positions`` (e.g. a pyiron
-        ``Trajectory`` or any object with a ``positions`` attribute).
-    initial_structure : Structure‑like object
-        The reference structure that defines the atomic species,
-        lattice vectors, etc.
-    Returns
-
-    """
-    import numpy as np
-
-    electrolyte = initial_structure.copy()
-
-    ind_O = electrolyte.select_index("O")
-    ind_H = electrolyte.select_index("H")
-    ind_Ne = electrolyte.select_index("Ne")
-    ind_Al = electrolyte.select_index("Al")
-    ind_Na = electrolyte.select_index("Na")
-    ind_F = electrolyte.select_index("F")
-
-    slab_bot = np.max(electrolyte.positions[ind_Al, 2])
-    slab_top = np.max(electrolyte.positions[ind_Ne, 2])
-
-    positions = trajectory.positions
-
-    Data = {}
-
-    for element, ind_el in zip(
-        ["Na", "F", "O", "H"], [ind_Na, ind_F, ind_O, ind_H], strict=False
-    ):
-        Data[element] = []
-
-        z_el = np.array([snapshot[ind_el, 2] for snapshot in positions])
-        z_d = z_el - slab_bot
-        deltares = 0.2
-        binedges = np.arange(0, (slab_top - slab_bot), deltares)  #
-        hist, bin_edges = np.histogram(z_d, bins=binedges)
-
-        Data[element] = bin_edges[:-1], hist / np.shape(positions)[0]
-    return Data
-
-
-@as_function_node("Charge_distribution_Ion")
-def Charge_distribution_Ion(Data: dict, initial_structure):
+@as_function_node("charge_distribution_ion")
+def charge_distribution_ion(data: dict):
 
     import numpy as np
     from matplotlib import pyplot as plt
 
-    Sum = np.array(Data["Na"][1]) - np.array(Data["F"][1])
-    z = np.array(Data["Na"][0])
+    charge_sum = np.array(data["Na"][1]) - np.array(data["F"][1])
+    z = np.array(data["Na"][0])
 
     fig, ax = plt.subplots(1, 1, figsize=(3.25, 2))
-    ax.plot(z, Sum)
+    ax.plot(z, charge_sum)
     ax.set_title("Charge Distribution of Ion")
 
     ax.set_xlabel(r"z - coordinate ($\mathrm{\AA}$)")
@@ -123,8 +75,8 @@ def Charge_distribution_Ion(Data: dict, initial_structure):
     return fig
 
 
-@as_function_node("EPD")
-def EPD(Data: dict, initial_structure):
+@as_function_node("epd")
+def epd(data: dict, initial_structure):
     import numpy as np
     from ase.units import Bohr
     from matplotlib import pyplot as plt
@@ -134,21 +86,21 @@ def EPD(Data: dict, initial_structure):
     fig.subplots_adjust(hspace=0.3 / (2 / 3.25), wspace=0.3)
 
     y = (
-        np.array(Data["Na"][1])
-        - np.array(Data["F"][1])
-        - 0.83 * np.array(Data["O"][1])
-        + 0.415 * np.array(Data["H"][1])
+        np.array(data["Na"][1])
+        - np.array(data["F"][1])
+        - 0.83 * np.array(data["O"][1])
+        + 0.415 * np.array(data["H"][1])
     )
-    z = np.array(Data["Na"][0])
+    z = np.array(data["Na"][0])
 
     def get_volume(deltares):
-        V = (
+        v = (
             initial_structure.cell[0, 0]
             * initial_structure.cell[1, 1]
             * deltares
             * (1 / Bohr) ** 3
         )
-        return V
+        return v
 
     electron = -y / get_volume(np.gradient(z)[0])
 
@@ -162,11 +114,11 @@ def EPD(Data: dict, initial_structure):
         rho_c = -rho_e * e * (1 / Bohr * 1 / angstrom_to_meter) ** 3
         axs[1].plot(x, rho_c, color=color)
 
-        E = 1 / epsilon_0 * np.cumsum(rho_c * np.gradient(x * angstrom_to_meter))
-        axs[2].plot(x, E, color=color)
+        e_field = 1 / epsilon_0 * np.cumsum(rho_c * np.gradient(x * angstrom_to_meter))
+        axs[2].plot(x, e_field, color=color)
 
-        V = np.cumsum(E * np.gradient(x * angstrom_to_meter))
-        axs[3].plot(x, V, color=color)
+        v = np.cumsum(e_field * np.gradient(x * angstrom_to_meter))
+        axs[3].plot(x, v, color=color)
 
         for ax in axs.flatten():
             ax.set(xlim=[x[0], x[-1]])
@@ -182,17 +134,17 @@ def EPD(Data: dict, initial_structure):
     return fig
 
 
-@as_function_node("Subplot_ion")
-def Subplot_ion_d(Data: dict, xlabel="x", ylabel="y"):
+@as_function_node("subplot_ion")
+def subplot_ion_d(data: dict, xlabel="x", ylabel="y"):
     import numpy as np
     from matplotlib import pyplot as plt
 
-    species = [s for s in ["Na", "F"] if s in Data] or list(Data.keys())
+    species = [s for s in ["Na", "F"] if s in data] or list(data.keys())
     fig, axes = plt.subplots(1, len(species), figsize=(5 * len(species), 3))
     if not isinstance(axes, np.ndarray):
         axes = np.array([axes])
     for ax, sp in zip(axes, species, strict=False):
-        x, y = Data[sp]
+        x, y = data[sp]
         print(sp, x, y)
         ax.plot(x, y)
         ax.set_title(sp)
@@ -202,14 +154,14 @@ def Subplot_ion_d(Data: dict, xlabel="x", ylabel="y"):
     return fig
 
 
-@as_function_node("Suplot_ion")
-def PlotIonDensity(Data: dict, xlabel="x", ylabel="y"):
+@as_function_node("plot_ion_density")
+def plot_ion_density(data: dict, xlabel="x", ylabel="y"):
     from matplotlib import pyplot as plt
 
-    species = [s for s in ["Na", "F"] if s in Data] or list(Data.keys())
+    species = [s for s in ["Na", "F"] if s in data] or list(data.keys())
     fig, axes = plt.subplots(1, 1, figsize=(5, 3))
     for sp in species:
-        x, y = Data[sp]
+        x, y = data[sp]
         print(sp, x, y)
         axes.plot(x, y)
     axes.set_title(sp)
@@ -219,11 +171,11 @@ def PlotIonDensity(Data: dict, xlabel="x", ylabel="y"):
     return fig
 
 
-@as_function_node("Suplot_element")
-def Subplot_element(Data: dict, element, xlabel="x", ylabel="y"):
+@as_function_node("subplot_element")
+def subplot_element(data: dict, element, xlabel="x", ylabel="y"):
     from matplotlib import pyplot as plt
 
-    x, y = Data[element]
+    x, y = data[element]
     fig, ax = plt.subplots(1, 1, figsize=(3.25, 2))
     ax.plot(x, y)
     ax.set_title(f"Density of {element}")
@@ -233,7 +185,7 @@ def Subplot_element(Data: dict, element, xlabel="x", ylabel="y"):
 
 
 @as_function_node
-def PlotTrajectory(
+def plot_trajectory(
     md_data: OutputCalcMD,
     species: str,
     index: Literal["x", "y", "z"] = "z",
@@ -326,7 +278,7 @@ def PlotTrajectory(
 
 
 @as_function_node("water_density_analysis")
-def WaterDensCalc(initial_structure, trajectory, frm_st=0, binsnum=500):
+def water_dens_calc(initial_structure, trajectory, frm_st=0, binsnum=500):
 
     import ase.units as units
     import numpy as np
