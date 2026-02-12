@@ -15,6 +15,7 @@ def element_density(
     reference_electrode: str = "Ne",
     solvent: Literal["water"] = "water",
     solvated_ions: str = "Na,F",
+    deltares: float = 0.2,
 ):
     """
     Compute 1D number-density profiles along the z direction for selected species.
@@ -33,6 +34,8 @@ def element_density(
         Solvent type. Currently only ``"water"`` is supported.
     solvated_ions
         Comma-separated list of element symbols to include (e.g. ``"Na,F"``).
+    deltares
+        Histogram bin width along z in Å.
 
     Returns
     -------
@@ -64,7 +67,6 @@ def element_density(
         ind_el = electrolyte.select_index(element)
         z_el = np.array([snapshot[ind_el, 2] for snapshot in positions])
         z_d = z_el - slab_bot
-        deltares = 0.2
         binedges = np.arange(0, (slab_top - slab_bot), deltares)  #
         hist, bin_edges = np.histogram(z_d, bins=binedges)
         data[element] = bin_edges[:-1], hist / np.shape(positions)[0]
