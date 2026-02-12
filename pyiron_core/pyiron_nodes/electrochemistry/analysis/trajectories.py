@@ -7,50 +7,66 @@ from pyiron_core.pyiron_workflow import as_function_node
 
 
 @as_function_node("element_density")
-def element_density(trajectory, initial_structure, initial_step: int = 0):
+def element_density(
+    trajectory,
+    initial_structure,
+    initial_step: int = 0,
+    working_electrode: str = "Al",
+    reference_electrode: str = "Ne",
+    solvent: Literal["water"] = "water",
+    solvated_ions: str = "Na,F",
+):
     """
-    Animate a series of atomic structures.
+    Compute 1D number-density profiles along the z direction for selected species.
 
     Parameters
     ----------
-    trajectory : Trajectory‑like object
-        An object that provides ``positions`` (e.g. a pyiron
-        ``Trajectory`` or any object with a ``positions`` attribute).
-    initial_structure : Structure‑like object
-        The reference structure that defines the atomic species,
-        lattice vectors, etc.
-    Returns
+    trajectory
+        Object with a ``positions`` array of shape (n_steps, n_atoms, 3).
+    initial_structure
+        Reference structure used to identify atom indices by element.
+    initial_step
+        First MD step to include in the analysis.
+    working_electrode, reference_electrode
+        Element symbols used to define the z-range (bottom/top) of the histogram.
+    solvent
+        Solvent type. Currently only ``"water"`` is supported.
+    solvated_ions
+        Comma-separated list of element symbols to include (e.g. ``"Na,F"``).
 
+    Returns
+    -------
+    dict
+        Mapping element symbol -> (z_bins, density), where ``z_bins`` are the bin
+        left-edges (Å) relative to the working electrode and ``density`` is the
+        per-bin count averaged over frames.
     """
     import numpy as np
 
     electrolyte = initial_structure.copy()
 
-    ind_O = electrolyte.select_index("O")
-    ind_H = electrolyte.select_index("H")
-    ind_Ne = electrolyte.select_index("Ne")
-    ind_Al = electrolyte.select_index("Al")
-    ind_Na = electrolyte.select_index("Na")
-    ind_F = electrolyte.select_index("F")
+    if solvent == "water":
+        solvent_species = ["O", "H"]
+    else:
+        raise ValueError(f"Unknown solvent: {solvent}")
+    solvated_species = [s.strip() for s in solvated_ions.split(",") if s.strip()]
 
-    slab_bot = np.max(electrolyte.positions[ind_Al, 2])
-    slab_top = np.max(electrolyte.positions[ind_Ne, 2])
+    ind_work = electrolyte.select_index(working_electrode)
+    ind_ref = electrolyte.select_index(reference_electrode)
+    slab_bot = np.max(electrolyte.positions[ind_work, 2])
+    slab_top = np.max(electrolyte.positions[ind_ref, 2])
 
     positions = trajectory.positions[initial_step:]
 
     data = {}
 
-    for element, ind_el in zip(
-        ["Na", "F", "O", "H"], [ind_Na, ind_F, ind_O, ind_H], strict=False
-    ):
-        data[element] = []
-
+    for element in solvated_species + solvent_species:
+        ind_el = electrolyte.select_index(element)
         z_el = np.array([snapshot[ind_el, 2] for snapshot in positions])
         z_d = z_el - slab_bot
         deltares = 0.2
         binedges = np.arange(0, (slab_top - slab_bot), deltares)  #
         hist, bin_edges = np.histogram(z_d, bins=binedges)
-
         data[element] = bin_edges[:-1], hist / np.shape(positions)[0]
     return data
 
