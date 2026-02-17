@@ -7,6 +7,7 @@ dependencies:
 - hatchling =1.27.0
 - hatch-vcs =0.5.0
 - hatch-jupyter-builder >=0.5.0
+- setuptools <82 # pyace requires older version 
 - papermill  # For testing notebooks generally
 - coverage
 # Platform (pyiron_core/pyiron_workflow, pyironflow, pyiron_database)
