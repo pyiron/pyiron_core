@@ -10,7 +10,7 @@ dependencies:
 - papermill  # For testing notebooks generally
 # Platform (pyiron_core/pyiron_workflow, pyironflow, pyiron_database)
 - anywidget =0.9.18
-- black =25.1.0
+- black =26.1.0
 - cloudpickle =3.1.1
 - ipykernel =6.31.0
 - ipytree =0.2.2

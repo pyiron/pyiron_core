@@ -350,6 +350,61 @@ class Port(Attribute):
     def value_changed(self, value):
         self.ready = True
         logging.debug("value changed: value", value)
+        if isinstance(value, Port):
+            self.validate_port_directionality(self, value)
+
+    @staticmethod
+    def raise_directionality_error(
+        target_reference: str,
+        source: "Port",
+        problem: "Port",
+        panel: Literal["inputs", "outputs"],
+    ):
+        raise ValueError(
+            f"Assigning a port as the value of another port indicates a data edge. "
+            f"This was invalidated trying to assign "
+            f"'{target_reference}={source.node.label}.{source.label}' "
+            f"because '{problem.label}' could not be found on "
+            f"'{problem.node.label}.{panel}'. (Note: we are check actual port instances "
+            f"here not just the label, which may or may not be present.)"
+        )
+
+    @staticmethod
+    def validate_port_directionality(target: "Port", source: "Port") -> None:
+        """Ensure ports with port values are inputs with output values."""
+        if not Port.port_in_panel(target, target.node.inputs):
+            Port.raise_directionality_error(
+                target_reference=f"{target.node.label}.{target.label}",
+                source=source,
+                problem=target,
+                panel="inputs",
+            )
+        if not Port.port_in_panel(source, source.node.outputs):
+            Port.raise_directionality_error(
+                target_reference=f"{target.node.label}.{target.label}",
+                source=source,
+                problem=source,
+                panel="outputs",
+            )
+
+    @staticmethod
+    def port_in_panel(port: "Port", panel: "Data") -> bool:
+        # IO has no specific type and `Data` is quite generic,
+        # first make sure we're dealing with a
+        if (
+            not hasattr(panel, "data")
+            or not isinstance(panel.data, dict)
+            or PORT_LABEL not in panel.data
+        ):
+            raise TypeError(
+                f"Expected to get something like an IO panel, but got {panel}"
+            )  # This exception should not be user-facing but helps us dev
+
+        if port.label not in panel.data[PORT_LABEL]:
+            return False
+
+        # Port instances share the same dataset dict - check identity
+        return port._Attribute__dataset is panel.data
 
 
 @dataclasses.dataclass
@@ -556,6 +611,23 @@ class Node:
                 f"Node creator: Output labels must be given ({self.outputs.data[PORT_LABEL]})"
             )
 
+        self._validate_port_directionality()
+
+    def _validate_port_directionality(self):
+        """Ensure input ports only connect to output ports."""
+        # Input ports don't actually exist yet though
+        for label, value in zip(
+            self.inputs.data[PORT_LABEL], self.inputs.data[PORT_VALUE], strict=True
+        ):
+            if isinstance(value, Port):
+                if not Port.port_in_panel(value, value.node.outputs):
+                    Port.raise_directionality_error(
+                        target_reference=f"{self.label}.{label}",
+                        source=value,
+                        problem=value,
+                        panel="outputs",
+                    )
+
     @property
     def kwargs(self):
         values = self.inputs.data[PORT_VALUE]
@@ -740,12 +812,20 @@ class Node:
         }
 
     def __getstate__(self):
-        if self.node_type in ("node", "function_node", "inp_dataclass_node"):
+        if self.node_type in (
+            "node",
+            "function_node",
+            "macro_node",
+            "inp_dataclass_node",
+            "out_dataclass_node",
+        ):
             inputs = self._get_non_default_input()
         elif self.node_type == "graph":
             inputs = self.graph.__getstate__()
         else:
-            assert False, f"Invalid node type {self.node_type} should never be set."
+            raise AssertionError(
+                f"Invalid node type {self.node_type} should never be set."
+            )
         return {
             "label": self.label,
             "function": self.function["import_path"],
@@ -758,6 +838,10 @@ class Node:
         new_instance.label = state["label"]
         self.__dict__.update(new_instance.__dict__)
         return new_instance
+
+    @property
+    def __name__(self):
+        return self.label
 
     @classmethod
     def from_dict(cls, node_dict):
@@ -827,6 +911,7 @@ class SubGraphNode(Node):
             graph=self.graph,
             code=self._code,
         )
+
 
 def get_node_from_path(import_path):
     # Split the path into module and object part
@@ -948,18 +1033,6 @@ def make_node_decorator(inner_wrap_return_func, node_type="function_node"):
                     print("wrapped: ", func.__wrapped__)
 
                 cf_kwargs = copy.copy(f_kwargs)
-                # Define ALL supported keys for the function (update this list as needed)
-                SUPPORTED_KEYS = ["label"]  # Add all valid keys here
-
-                # Check for unsupported keys in f_kwargs (TODO: gives warning for argument free decorators)
-                # for key in list(f_kwargs.keys()):
-                #     if key not in SUPPORTED_KEYS:
-                #         import warnings
-                #         warnings.warn(
-                #             f"Ignoring unsupported keyword argument: '{key}'. "
-                #             f"Supported keys are: {SUPPORTED_KEYS}",
-                #             stacklevel=2
-                #         )
 
                 # Original label handling
                 label = None
@@ -1206,8 +1279,6 @@ class Workflow:
                 target = node.label
                 targetHandle = label
             elif isinstance(value, Node):
-                # print("_is_node_port: ", node.label, label)
-                # print(self._is_node_port(node, label))
                 source_node = value
                 source = source_node.label
                 if self._is_node_port(node, label):

@@ -2,11 +2,12 @@ import dataclasses
 import inspect
 import json
 import os
-import sys
 import pathlib
+import sys
 import threading
 import time
 import warnings
+from dataclasses import dataclass
 from typing import Optional, Union
 
 import ipywidgets as widgets
@@ -28,7 +29,6 @@ from pyiron_core.pyiron_workflow.graph import (
     labelling,
     run,
 )
-from dataclasses import dataclass
 
 
 @dataclass
@@ -94,7 +94,6 @@ Connect graph with ReactflowWidget and other GUI elements for interactive graph/
 
 def rename_node(graph: base.Graph, old_label: str, new_label: str):
     """Rename node in graph and update edges that reference it"""
-    # print("rename node", old_label, new_label)
     new_graph = base.copy_graph(graph)
     if old_label not in new_graph.nodes:
         return new_graph
@@ -199,9 +198,8 @@ class PyironFlowWidget:
         self.accordion_widget.titles = ["Node Library", "Output", "Logging Info"]
         self._counter = 0
 
-       # Immediately send graph data to the frontend to avoid an empty initial view.
+        # Immediately send graph data to the frontend to avoid an empty initial view.
         self.update_graph_view(sleep_time=0.8)
-        # self.update_gui(export_data=True, sleep_time=0)        
         self._selected_nodes = None
 
     def _parse_edge_string(self, edge_str):
@@ -433,7 +431,7 @@ class PyironFlow:
             nodes_path_abs = str(pathlib.Path(os.path.abspath(nodes_path_str)).parent)
             if nodes_path_abs not in sys.path:
                 print("added node path: ", nodes_path_abs)
-                sys.path = [nodes_path_abs] + sys.path        
+                sys.path = [nodes_path_abs] + sys.path
 
         self.wf_widgets = []  # list of PyironFlowWidget objects
         for wf in wf_list:
@@ -467,7 +465,7 @@ class PyironFlow:
             readout=False,
         )
         self.h_scroll.layout.width = (
-            f"{gui_layout.flow_widget_width+ gui_layout.output_widget_width+15}px"
+            f"{gui_layout.flow_widget_width + gui_layout.output_widget_width + 15}px"
         )
         self.h_scroll.layout.margin = "0px 0px 0px 0px"
         self.h_scroll.layout.border = "1px solid black"
@@ -491,7 +489,7 @@ class PyironFlow:
         self.h_scroll.value = gui_layout.output_widget_width
 
     def update_width(self, change):
-        new_width = f'{change["new"]}px'
+        new_width = f"{change['new']}px"
         self.accordion_widget.layout.width = new_width
         flow_width = (
             self.gui_layout.flow_widget_width
