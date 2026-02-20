@@ -60,7 +60,6 @@ def Plot3d(
 @as_function_node("animate")
 def Animate(
     trajectory,
-    initial_structure,
     spacefill: bool = True,
     show_cell: bool = True,
     center_of_mass: bool = False,
@@ -83,9 +82,6 @@ def Animate(
     trajectory : Trajectory‑like object
         An object that provides ``positions`` (e.g. a pyiron ``Trajectory``
         or any object with a ``positions`` attribute).
-    initial_structure : Structure‑like object
-        The reference structure that defines the atomic species,
-        lattice vectors, etc.
     spacefill : bool, default=True
         If ``True`` the atoms are visualised in *space‑fill* style
         (large spheres whose radius is proportional to the atomic
@@ -102,12 +98,23 @@ def Animate(
     camera : {{'orthographic', 'perspective'}}, default='orthographic'
         Camera perspective to be used for the animation.
     """
+    from pyiron.atomistics.structure.atoms import ase_to_pyiron
     from pyiron_atomistics.atomistics.job.atomistic import Trajectory
 
+    species = np.array(trajectory.species)[trajectory.indices[0]]
+
+    initial_structure = _Atoms(
+        species,
+        positions=trajectory.positions[0],
+        cell=trajectory.cells[0],
+        pbc=[True, True, True],
+    )
     # ------------------------------------------------------------------
     # Build a pyiron Trajectory object from the supplied data
     # ------------------------------------------------------------------
-    traj = Trajectory(positions=trajectory.positions, structure=initial_structure)
+    traj = Trajectory(
+        positions=trajectory.positions, structure=ase_to_pyiron(initial_structure)
+    )
 
     # ------------------------------------------------------------------
     # Forward the animation options to the underlying pyiron method

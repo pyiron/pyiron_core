@@ -1,5 +1,5 @@
 from dataclasses import field
-from typing import Optional
+from typing import Literal, Optional
 
 from pyiron_core.pyiron_workflow import as_inp_dataclass_node, as_out_dataclass_node
 from pyiron_core.pyiron_workflow.data_fields import DataArray, EmptyArrayField
@@ -144,3 +144,9 @@ class InputCalcMinimize:
 class InputCalcStatic:
     pass  # LammpsControl.calc_static takes exactly zero arguments, and currently we
     # have the input objects matching their respective LammpsControl counterparts
+
+
+@as_inp_dataclass_node
+class InputServer:
+    queue: Optional[Literal["cmti", "s_cmmg", "p_cmmg"]] = ("cmti",)
+    cores: int = 1
