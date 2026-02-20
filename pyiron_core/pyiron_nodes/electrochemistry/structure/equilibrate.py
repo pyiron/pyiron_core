@@ -80,7 +80,6 @@ def Equilibrate(
     j.calc_md(**asdict(parameters))
 
     if server is not None:
-        print(f"Server = {server.queue}, {server}, {server.cores}")
         j.server.queue = server.queue
         j.server.cores = server.cores
 
