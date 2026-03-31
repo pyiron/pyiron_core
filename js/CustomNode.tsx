@@ -16,7 +16,7 @@ import { Checkbox } from "./Checkbox";
 
 import "./CustomNode.css";
 
-const STYLE_VARS = {
+export const STYLE_VARS = {
   inputHeight: OLS_STYLE_VARS.inputHeight,
   inputFontSize: OLS_STYLE_VARS.inputFontSize,
   inputWidth: OLS_STYLE_VARS.inputWidth,
@@ -330,7 +330,7 @@ const InputHandle = ({
                 : "1px solid #ccc",
               boxSizing: "border-box",
               padding: "0 4px",
-              color: isMandatory ? "gray" : "black",
+              data: isMandatory ? "gray" : "black",
               backgroundColor: isMandatory
                 ? "#fffacd"
                 : "white",
@@ -376,6 +376,7 @@ const OutputHandle = ({
 };
 
 const NodeComponent: React.FC<{ data: any }> = memo(({ data }) => {
+  console.log("CustomNode data:", data);
   const updateNodeInternals = useUpdateNodeInternals();
   const model = useModel();
   const context = useContext(UpdateDataContext)!;
@@ -516,18 +517,17 @@ const NodeComponent: React.FC<{ data: any }> = memo(({ data }) => {
         position={data.toolbarPosition}
       >
         <button onClick={() => sendNodeCommand("run")}>Run</button>
-        <button onClick={() => sendNodeCommand("source")}>
-          Source
-        </button>
-        <button
-          onClick={() =>
-            sendNodeCommand(
-              data.expanded ? "collapse" : "expand"
-            )
-          }
-        >
-          {data.expanded ? "Collapse" : "Expand"}
-        </button>
+        <button onClick={() => sendNodeCommand("source")}>Source</button>
+        {data.is_group && (
+          <>
+            <button
+              onClick={() => sendNodeCommand(data.expanded ? "collapse" : "expand")}
+            >
+              {data.expanded ? "Collapse" : "Expand"}
+            </button>
+            <button onClick={() => sendNodeCommand("ungroup")}>Ungroup</button>
+          </>
+        )}
       </NodeToolbar>
     </div>
   );

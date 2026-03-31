@@ -3,6 +3,7 @@ import inspect
 import json
 import os
 import pathlib
+import sys
 import threading
 import time
 import warnings
@@ -196,7 +197,9 @@ class PyironFlowWidget:
         ]
         self.accordion_widget.titles = ["Node Library", "Output", "Logging Info"]
         self._counter = 0
-        self.update_graph_view()
+
+        # Immediately send graph data to the frontend to avoid an empty initial view.
+        self.update_graph_view(sleep_time=0.8)
         self._selected_nodes = None
 
     def _parse_edge_string(self, edge_str):
@@ -421,6 +424,14 @@ class PyironFlow:
 
         self.gui_layout = gui_layout
         self.nodes_path = nodes_path
+        # Ensure the nodes_path is in sys.path for dynamic imports
+        if self.nodes_path is not None:
+            # Convert to an absolute path to avoid relative path issues
+            nodes_path_str = str(self.nodes_path)
+            nodes_path_abs = str(pathlib.Path(os.path.abspath(nodes_path_str)).parent)
+            if nodes_path_abs not in sys.path:
+                print("added node path: ", nodes_path_abs)
+                sys.path = [nodes_path_abs] + sys.path
 
         self.wf_widgets = []  # list of PyironFlowWidget objects
         for wf in wf_list:
@@ -454,7 +465,7 @@ class PyironFlow:
             readout=False,
         )
         self.h_scroll.layout.width = (
-            f"{gui_layout.flow_widget_width+ gui_layout.output_widget_width+15}px"
+            f"{gui_layout.flow_widget_width + gui_layout.output_widget_width + 15}px"
         )
         self.h_scroll.layout.margin = "0px 0px 0px 0px"
         self.h_scroll.layout.border = "1px solid black"
@@ -478,7 +489,7 @@ class PyironFlow:
         self.h_scroll.value = gui_layout.output_widget_width
 
     def update_width(self, change):
-        new_width = f'{change["new"]}px'
+        new_width = f"{change['new']}px"
         self.accordion_widget.layout.width = new_width
         flow_width = (
             self.gui_layout.flow_widget_width

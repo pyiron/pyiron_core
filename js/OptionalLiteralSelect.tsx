@@ -129,11 +129,14 @@ export const OptionalLiteralSelect: React.FC<OptionalLiteralSelectProps> = ({
                 default
               </option>
             )}
-            {options.map((opt) => (
-              <option key={opt} value={opt}>
-                {opt}
-              </option>
-            ))}
+            {options.map((opt) => {
+              const display = opt.replace(/^'(.*)'$/, "$1");
+              return (
+                <option key={display} value={display}>
+                  {display}
+                </option>
+              );
+            })}
           </select>
         </div>
       ) : (
